@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\CentroCosto;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -24,8 +26,8 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
-            ProjectSeeder::class,
-            // CentroCompraSeeder::class,
+            CentroCostoSeeder::class,
+            ReporteSeeder::class,
         ]);
     }
 }

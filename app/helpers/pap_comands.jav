@@ -28,6 +28,13 @@
         composer global require laravel/installer
         composer require laravel/jetstream
 
+        php artisan migrate:fresh --seed
+        composer dump-autoload
+        php artisan key:generate
+
+        composer global require laravel/installer
+        composer require laravel/jetstream
+        composer install && npm install
         
     //? heramientas
         composer require laraveles/spanish

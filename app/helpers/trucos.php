@@ -1,3 +1,15 @@
+<!-- templates -->
+php.json{
+    aa
+    var
+    before
+    migra
+    lwv (livewire-views)
+    lwc (livewire-controller)
+    nunca (nunca sale)
+}
+
+
 # se retiro (de azasegu) del archivo resource/views/layout/app.blade
 <script src="{{ mix('/js/livewire.js') }}" defer></script>
 

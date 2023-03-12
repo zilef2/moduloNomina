@@ -41,6 +41,7 @@ watchEffect(() => {
     if (props.show) {
         form.errors = {}
     }
+
 })
 
 const roles = props.roles?.map(role => ({ label: role.name, value: role.name }))

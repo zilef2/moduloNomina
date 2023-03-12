@@ -55,4 +55,9 @@ class User extends Authenticatable
             return [$pr['name'] => true];
         });
     }
+
+    public function reportes()
+	{
+		return $this->hasMany('App\Models\Reporte');
+	}
 }

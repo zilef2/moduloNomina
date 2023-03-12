@@ -2,9 +2,8 @@
 
 return [
     'label' => [
-        'Projects' => 'Proyectos',
-        'projects' => 'Proyectos',
-        'Project' => 'Proyecto',
+        'CentroCostos' => 'Centro Costos',
+        'CentroCosto' => 'Centro Costo',
 
         'cliente' => 'Cliente',
         'valor_tentativo' => 'Valor tentativo',
@@ -52,7 +51,7 @@ return [
         'search' => 'Buscar',
         'of' => 'de',
         'logout_confirm' => 'Seguro que va a salir?',
-        'delete_confirm' => 'Seguro de borrar?',
+        'delete_confirm' => 'Desea borrar ',
         'created_successfully' => '<b>:name</b> creado satisfactoriamente.',
         'created_error' => 'Error creando :name.',
         'updated_successfully' => '<b>:name</b> actualizado satisfactoriamente.',
