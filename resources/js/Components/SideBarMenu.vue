@@ -7,6 +7,7 @@ import {
     ShieldCheckIcon,
     ClockIcon,
     PresentationChartLineIcon,
+    BanknotesIcon,
 } from "@heroicons/vue/24/solid";
 import { Link } from '@inertiajs/vue3';
 
@@ -16,6 +17,7 @@ import { Link } from '@inertiajs/vue3';
         <div class="flex justify-center">
             <div
                 class="rounded-full flex items-center justify-center bg-primary text-gray-300 w-24 h-24 text-4xl uppercase">
+                <!-- imagen del nombre -->
                 {{ $page.props.auth.user.name.match(/(^\S\S?|\b\S)?/g).join("").match(/(^\S|\S$)?/g).join("") }}
             </div>
         </div>
@@ -58,7 +60,7 @@ import { Link } from '@inertiajs/vue3';
                     <span class="ml-3">{{ lang().label.role }}</span>
                 </Link>
             </li>
-            <li v-show="can(['read permission'])"
+            <li v-show="can(['isSuper'])"
                 class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
                 :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('permission.index') }">
                 <Link :href="route('permission.index')" class="flex items-center py-2 px-4">
@@ -66,7 +68,7 @@ import { Link } from '@inertiajs/vue3';
                     <span class="ml-3">{{ lang().label.permission }}</span>
                 </Link>
             </li>
-            <li 
+            <li v-show="can(['read centroCostos'])"
                 class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
                 :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('CentroCostos.index') }">
                 <Link :href="route('CentroCostos.index')" class="flex items-center py-2 px-4">
@@ -74,14 +76,14 @@ import { Link } from '@inertiajs/vue3';
                     <span class="ml-3">{{ lang().label.CentroCostos }}</span>
                 </Link>
             </li>
-            <!-- <li v-show="can(['read permission'])"
+            <li v-show="can(['read reporte'])"
                 class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
-                :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('permission.index') }">
-                <Link :href="route('centrocompra.index')" class="flex items-center py-2 px-4">
+                :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('Reportes.index') }">
+                <Link :href="route('Reportes.index')" class="flex items-center py-2 px-4">
                     <BanknotesIcon class="w-6 h-5" />
-                    <span class="ml-3">{{ lang().label.CentroCompra }}</span>
+                    <span class="ml-3">{{ lang().label.Reportes }}</span>
                 </Link>
-            </li> -->
+            </li>
         </ul>
     </div>
 </template>

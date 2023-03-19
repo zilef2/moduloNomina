@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CentroCosto;
 use App\Http\Requests\CentroCostoRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -28,10 +29,18 @@ class CentroCostosController extends Controller
         }
         $perPage = $request->has('perPage') ? $request->perPage : 10;
 
-        $nombresTabla =[//0: como se ven //1 como es la BD
-            ["Acciones","#","nombre"],
-            ["nombre"]
-        ];
+        $permissions = Auth::user()->getRoleNames()->first();
+        if($permissions === "operator") { //admin | validador
+            $nombresTabla =[//[0]: como se ven //[1] como es la BD
+                ["#","nombre"],
+                [null,"nombre"]
+            ];
+        }else{
+            $nombresTabla =[//[0]: como se ven //[1] como es la BD
+                ["#","nombre","Acciones"],
+                [null,"nombre",null]
+            ];
+        }
         return Inertia::render('CentroCostos/Index', [ //carpeta
             'title'          =>  __('app.label.CentroCostos'),
             'filters'        =>  $request->all(['search', 'field', 'order']),
@@ -117,9 +126,17 @@ class CentroCostosController extends Controller
      */
     public function destroy($id)
     {
-        $centroCostos = CentroCosto::findOrFail($id);
-        $centroCostos->delete();
+        DB::beginTransaction();
 
-        return redirect()->route('centroCostos.index');
+        try {
+            $centroCostos = CentroCosto::findOrFail($id);
+            $centroCostos->delete();
+
+            DB::commit();
+            return back()->with('success', __('app.label.deleted_successfully', ['name' => $centroCostos->nombre]));
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return back()->with('error', __('app.label.deleted_error', ['name' => __('app.label.centroCostos')]) . $th->getMessage());
+        }
     }
 }

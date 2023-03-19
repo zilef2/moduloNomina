@@ -28,7 +28,7 @@ defineProps({
                 <UpdatePasswordForm class="max-w-xl" />
             </div>
 
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+            <div v-show="can(['isSuper'])" class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <DeleteUserForm class="max-w-xl" />
             </div>
         </div>

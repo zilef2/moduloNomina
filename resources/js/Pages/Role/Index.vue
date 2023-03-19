@@ -90,7 +90,7 @@ const select = () => {
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">
                     <PrimaryButton v-show="can(['create role'])" class="rounded-none" @click="data.createOpen = true">
-                        {{ lang().button.add }}
+                        {{ lang().button.add }} 
                     </PrimaryButton>
                     <Create :show="data.createOpen" @close="data.createOpen = false" :permissions="props.permissions"
                         :title="props.title" />
@@ -139,12 +139,12 @@ const select = () => {
                                     </div>
                                 </th>
                                 <th class="px-2 py-4">{{ lang().label.permission }}</th>
-                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('created_at')">
+                                <!-- <th class="px-2 py-4 cursor-pointer" v-on:click="order('created_at')">
                                     <div class="flex justify-between items-center">
                                         <span>{{ lang().label.created }}</span>
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
-                                </th>
+                                </th> -->
                                 <th class="px-2 py-4 cursor-pointer" v-on:click="order('updated_at')">
                                     <div class="flex justify-between items-center">
                                         <span>{{ lang().label.updated }}</span>
@@ -176,7 +176,7 @@ const select = () => {
                                     {{ role.permissions.length }} {{ lang().label.permission }}</td>
                                 <td v-else class="whitespace-nowrap py-4 px-2 sm:py-3">{{ lang().label.no_permission }}
                                 </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ role.created_at }}</td>
+                                <!-- <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ role.created_at }}</td> -->
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ role.updated_at }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     <div class="flex justify-center items-center">

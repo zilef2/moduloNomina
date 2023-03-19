@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Permission;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class PermissionSeeder extends Seeder
@@ -15,6 +14,10 @@ class PermissionSeeder extends Seeder
      */
     public function run()
     {
+        Permission::create(['name' => 'isSuper']);
+        Permission::create(['name' => 'isAdmin']);
+
+        
         Permission::create(['name' => 'delete user']);
         Permission::create(['name' => 'update user']);
         Permission::create(['name' => 'read user']);
@@ -29,5 +32,16 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'update permission']);
         Permission::create(['name' => 'read permission']);
         Permission::create(['name' => 'create permission']);
+
+        //reporte
+        $vectorModelo = ['reporte','centroCostos'];
+        $vectorCRUD = ['create', 'update','read','delete'];
+        foreach ($vectorCRUD as $value) {
+            foreach ($vectorModelo as $model) {
+                Permission::create(['name' => $value.' '.$model]);
+            }
+        }
+        Permission::create(['name' => 'updateCorregido reporte']);
+
     }
 }

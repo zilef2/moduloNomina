@@ -22,7 +22,7 @@ const form = useForm({
     email: '',
     password: '',
     password_confirmation: '',
-    role: 'admin',
+    role: 'operator',
 })
 
 const create = () => {
@@ -43,7 +43,7 @@ watchEffect(() => {
     }
 
 })
-
+//TOREVISE
 const roles = props.roles?.map(role => ({ label: role.name, value: role.name }))
 
 </script>

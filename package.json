@@ -3,16 +3,19 @@
   "scripts": {
     "build": "vite build && vite build --ssr",
     "test:unit": "vue-cli-service test:unit",
-    "dev": "vite"
+    "dev": "vite",
+    "watch": "vite build --watch"
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.9",
     "@heroicons/vue": "^2.0.15",
+    "@vuepic/vue-datepicker": "^4.2.2",
     "@vueuse/core": "^9.12.0",
-    "floating-vue": "^2.0.0-beta.20"
+    "chart.js": "^4.2.1",
+    "floating-vue": "^2.0.0-beta.20",
+    "vue-chartjs": "^5.2.0"
   },
   "devDependencies": {
-    "@defstudio/vite-livewire-plugin": "^1.0.7",
     "@inertiajs/vue3": "^1.0.0",
     "@tailwindcss/forms": "^0.5.3",
     "@vitejs/plugin-vue": "^4.0.0",

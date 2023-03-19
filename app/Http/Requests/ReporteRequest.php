@@ -25,11 +25,12 @@ class ReporteRequest extends FormRequest
     {
         return
         [
-			'fecha_ini' => 'required',
-			'fecha_fin' => 'required',
-			'horas_trabajadas' => 'required',
-			'valido' => 'required',
-			'observaciones' => 'required',
+			// 'fecha_ini' => 'required',
+			// 'fecha_fin' => 'required',
+			// 'horas_trabajadas' => 'required',
+			// 'centro_costo_id' => 'required',
+			// 'valido' => 'required',
+			// 'observaciones' => 'required',
         ];
     }
 }

@@ -16,7 +16,7 @@ defineProps({
 
     <Head :title="lang().label.welcome" />
     <div class="relative flex justify-center min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 items-center sm:pt-0">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 xl:px-20">
             <div class="flex items-center pt-8 px-4 sm:px-0 justify-between sm:pt-0">
                 <div class="flex items-center">
                     <ApplicationLogo class="h-10 w-auto text-primary fill-current sm:h-16" />
@@ -68,10 +68,9 @@ defineProps({
             <div class="sm:flex justify-between mt-4 text-sm text-gray-500">
                 <div class="flex mx-4 sm:mx-0 flex-row justify-center text-center">
                     <p>
-                        <a href="https://brive.erikwibowo.com" target="_blank">{{ $page.props.app.name }}</a> ©️
-                        {{ new Date().getFullYear() }}
-                        <a href="https://github.com/erikwibowo" target="_blank" class="text-primary">Erik
-                            Wibowo</a>
+                        <a href="" target="_blank">{{ $page.props.app.name }}</a> ©️2023
+                        <!-- <a href="" target="_blank" class="text-primary">Erik
+                            Wibowo</a> -->
                     </p>
                 </div>
                 <div class="flex mx-4 sm:mx-0 justify-center text-center">

@@ -11,13 +11,13 @@ import DangerButton from '@/Components/DangerButton.vue';
 import pkg from 'lodash';
 import { router } from '@inertiajs/vue3';
 import Pagination from '@/Components/Pagination.vue';
-import { CheckBadgeIcon, ChevronUpDownIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/solid';
+import { ShieldCheckIcon, CheckBadgeIcon, ChevronUpDownIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/solid';
 import Create from '@/Pages/User/Create.vue';
 import Edit from '@/Pages/User/Edit.vue';
 import Delete from '@/Pages/User/Delete.vue';
 import DeleteBulk from '@/Pages/User/DeleteBulk.vue';
 import Checkbox from '@/Components/Checkbox.vue';
-import { usePage } from '@inertiajs/vue3';
+import { usePage,Link } from '@inertiajs/vue3';
 
 const { _, debounce, pickBy } = pkg
 const props = defineProps({
@@ -89,6 +89,14 @@ const select = () => {
                 <div class="rounded-lg overflow-hidden w-fit">
                     <PrimaryButton v-show="can(['create user'])" class="rounded-none" @click="data.createOpen = true">
                         {{ lang().button.add }}
+                    </PrimaryButton>
+                    <PrimaryButton v-show="can(['isSuper'])"
+                        class=" mx-3 bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
+                        :class="  { 'bg-sky-600 dark:bg-sky-600': route().current('user.uploadexcel') }">
+                        <Link v-show="can(['isSuper'])" :href="route('user.uploadexcel')" class="flex items-center py-1 px-4">
+                            <ShieldCheckIcon class="w-3 h-3" />
+                            <span class="ml-3">{{ lang().button.importUser }}</span>
+                        </Link>
                     </PrimaryButton>
                     <Create :show="data.createOpen" @close="data.createOpen = false" :roles="props.roles"
                         :title="props.title" />

@@ -24,13 +24,3 @@ npm install -g n
 
 Install a new version of Node
 n lts
-
-<!-- linux -->
-    <!-- borrar -->
-        rm -r "direccion"
-    <!-- permisos recursivamente -->
-        chmod a+rwx folder_name -R
-        chmod -R 775 /home/aplicativoswebco/public_html/azasegu/storage
-        chmod -R 775 /home/aplicativoswebco/public_html/azasegu/config
-        chmod -R 775 /home/aplicativoswebco/public_html/registron/config
-        chmod -R 775 /home/aplicativoswebco/public_html/registron/storage

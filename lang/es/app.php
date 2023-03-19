@@ -2,8 +2,15 @@
 
 return [
     'label' => [
+        //upload user excel
+        'upload_complete' => 'Archivo subido correctamente',
+        'importUser' => 'importar usuarios',
+
+        //centro y reportes
         'CentroCostos' => 'Centro Costos',
         'CentroCosto' => 'Centro Costo',
+        'Reportes' => 'Reporte',
+        'Reporte' => 'Reporte',
 
         'cliente' => 'Cliente',
         'valor_tentativo' => 'Valor tentativo',
@@ -14,12 +21,18 @@ return [
         'fecha_entrega' => 'fecha tentativa entrega',
         'observaciones' => 'observaciones',
 
+        'Reports' => 'Reportes',
         'Report' => 'Reporte',
         'reporte' => 'Reporte',
-        'CentroCompra' => 'Centros de Compra',
-        'centrocompra' => 'Centros de Compra',
+        'sessions' => 'sesiones',
 
+        // form - reportes
+        'fecha_ini' => 'fecha inicio',
+        'fecha_fin' => 'fecha fin',
+        'horas_trabajadas' => 'Horas trabajadas',
+        'centro_costo_id' => 'Centro de costo',
 
+        //otros
         'welcome' => 'Bienvenido',
         'login' => 'Login',
         'register' => 'Registrar',
@@ -62,13 +75,14 @@ return [
         'no_permission' => 'No hay Permisos',
         'edit' => 'Editar',
         'delete' => 'Borrar',
+        'not_deleted' => 'No se puede borrar el registro',
         'add' => 'Nuevo',
 
 
         'verify_email_notification' => 'A new verification link has been sent to the email address you provided during registration.',
         'no_data' => 'No data',
-        'documentation' => 'Documentation',
-        'documentation_detail' => 'Laravel Brive is a starter project made with Laravel Breeze Inertia Vue and add more additional feature like User, Role & Permission management, Responsive design, Light/Dark Mode, Rich Table with many features. Check the documentation for more installation.',
+        'documentation' => 'Introduccion',
+        'documentation_detail' => 'Desarrollo a la medida realizado para la empresa _',
         'more' => 'Más',
         'check_all' => 'Check all',
         'email_verification' => 'Email Verification',
@@ -76,6 +90,12 @@ return [
         'of' => 'de',
     ],
     'button' => [
+        //edit reportes
+        'corect' => 'corregir',
+
+        //subirusuarios
+        'subir' => 'Subir',
+
         'login' => 'Ingresar',
         'loading' => 'Cargando...',
         'register' => 'Registrar',
@@ -92,7 +112,8 @@ return [
         'delete' => 'borrar',
         'prev' => 'Anterior',
         'next' => 'Siguiente',
-        'delete_account' => 'Borar cuenta'
+        'delete_account' => 'Borar cuenta',
+        'reject' => 'Rechazar'
     ],
     'placeholder' => [
         'search' => 'Buscar...',
@@ -132,5 +153,27 @@ return [
         'delete_account_caption' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.',
         'delete_account_modal_title' => 'Are you sure you want to delete your account?',
         'delete_account_modal_caption' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
+    ],
+    'permissions' => [
+        'delete user'=> 'Borrar usuarios',
+        'update user'=> 'Actualizar usuarios',
+        'read user'=> 'Leer usuarios',
+        'create user'=> 'Crear usuarios',
+        'delete role'=> 'Borrar roles',
+        'update role'=> 'Actualizar roles',
+        'read role'=> 'Leer roles',
+        'create role'=> 'Crear roles',
+        'delete permission'=> 'Borrar permisos',
+        'update permission'=> 'Actualizar permisos',
+        'read permission'=> 'Leer permisos',
+        'create permission'=> 'Crear permisos',
+        'create reporte'=> 'Borrar reportes',
+        'delete reporte'=> 'Actualizar reportes',
+        'update reporte'=> 'Leer reportes',
+        'read reporte'=> 'Crear reportes',
+        'create centroCostos'=> 'Borrar centro de costos',
+        'delete centroCostos'=> 'Actualizar centro de costos',
+        'update centroCostos'=> 'Leer centro de costos',
+        'read centroCostos'=> 'Crear centro de costos',
     ],
 ];

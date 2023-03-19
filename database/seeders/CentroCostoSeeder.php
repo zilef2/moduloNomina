@@ -15,12 +15,8 @@ class CentroCostoSeeder extends Seeder
      */
     public function run()
     {
-        CentroCosto::create([
+        CentroCosto::create([ 'nombre' => 'centro'.rand(10,10000), ]);
+        CentroCosto::create([ 'nombre' => 'centro'.rand(10001,20000), ]);
 
-            'nombre' => 'centro'.rand(10,10000),
-        ]);
-
-        // $operator = Project::create([ 'password'          => bcrypt('operator'), ]);
-        // $operator->assignRole('operator');
     }
 }

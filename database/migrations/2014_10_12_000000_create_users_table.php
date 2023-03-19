@@ -21,6 +21,12 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+
+            // $table->string('apellido'); //toask
+            $table->string('cedula')->nullable();
+            $table->string('telefono')->nullable();
+            $table->string('celular')->nullable();
+
         });
     }
 

@@ -19,6 +19,9 @@ class RoleSeeder extends Seeder
             'name'          => 'superadmin'
         ]);
         $superadmin->givePermissionTo([
+            'isSuper',
+            'isAdmin',
+
             'delete user',
             'update user',
             'read user',
@@ -30,28 +33,81 @@ class RoleSeeder extends Seeder
             'delete permission',
             'update permission',
             'read permission',
-            'create permission'
+            'create permission',
+            //reporte
+            'create reporte',
+            'delete reporte',
+            'update reporte',
+            'read reporte',
+            'updateCorregido reporte',
+
+            //centroCostos
+            'create centroCostos',
+            'delete centroCostos',
+            'update centroCostos',
+            'read centroCostos',
         ]);
         $admin = Role::create([
             'name'          => 'admin'
         ]);
         $admin->givePermissionTo([
+            'isAdmin',
+
             'delete user',
             'update user',
             'read user',
             'create user',
             'read role',
             'read permission',
+
+            //reporte
+            'read reporte',
+            // 'create reporte',
+            'update reporte',
+            // 'delete reporte',
+
+            //centroCostos
+            'read centroCostos',
+            'create centroCostos',
+            'update centroCostos',
+            'delete centroCostos',
         ]);
-        $operator = Role::create([
-            'name'          => 'operator'
-        ]);
-        
+
+        $operator = Role::create([ 'name'          => 'operator' ]);
         $operator->givePermissionTo([
+            // 'read user',
+            // 'create user',
+            // 'read role',
+            // 'read permission',
+
+             //reporte
+            'read reporte',
+            'create reporte',
+            'delete reporte',
+
+            //centroCostos
+            'read centroCostos',
+        ]);
+
+        $validador = Role::create(['name' => 'validador']);
+
+        $validador->givePermissionTo([
             'read user',
             'create user',
             'read role',
-            'read permission',
+
+             //reporte
+             'read reporte',
+             'update reporte',
+             'updateCorregido reporte',
+ 
+             //centroCostos
+             'read centroCostos',
+             'create centroCostos',
+             'update centroCostos',
+             'delete centroCostos',
         ]);
+        // $role->revokePermissionTo($permission);
+        // $permission->removeRole($role);
     }
 }

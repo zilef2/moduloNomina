@@ -11,7 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
+
+use App\Imports\UsersImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -156,6 +158,7 @@ class UserController extends Controller
             return back()->with('error', __('app.label.deleted_error', ['name' => $user->name]) . $th->getMessage());
         }
     }
+   
 
     public function destroyBulk(Request $request)
     {
@@ -165,6 +168,41 @@ class UserController extends Controller
             return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
         } catch (\Throwable $th) {
             return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.user')]) . $th->getMessage());
+        }
+    }
+
+    public function FunctionUploadFromEx()
+    {
+        
+        return Inertia::render('User/uploadFromExcel', [
+            'title'         => __('app.label.user'),
+            'breadcrumbs'   => [['label' => __('app.label.user'), 'href' => route('user.index')]],
+        ]);
+    }
+
+    public function FunctionUploadFromExPost(Request $request)
+    {
+
+        $exten = $request->archivo1->getClientOriginalExtension();
+        // // Validar que el archivo es de Excel
+        if ($exten != 'xlsx' && $exten != 'xls') {
+            return back()->with('warning', 'El archivo debe ser de Excel');
+        }
+        $pesoKilobyte = ((int)($request->archivo1->getSize()))/(1024);
+        if ($pesoKilobyte > 256) { //debe pesar menos de 256KB
+            return back()->with('warning', 'El archivo debe pesar menos de 256KB');
+        }
+
+        try{
+            $import = new UsersImport();
+            $import->import($request->archivo1);
+
+            $nuevosUsuarios = session('CountFilas');
+            return back()->with('success', 'upload_complete'. $nuevosUsuarios);
+            // return back()->with('success', __('upload_complete'). $nuevosUsuarios);
+
+        } catch (\Throwable $th) {
+            return back()->with('error', 'Error en el proceso de Excel' . $th->getMessage());
         }
     }
 }
