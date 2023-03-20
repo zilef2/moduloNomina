@@ -39,7 +39,7 @@ defineProps({
                                 </path>
                             </svg>
                             <div class="ml-4 text-lg leading-7 font-semibold">
-                                <a href="https://github.com/erikwibowo/Laravel-Brive/blob/master/README.md"
+                                <a href=""
                                     class="underline text-gray-900 dark:text-white">{{ lang().label.documentation }}</a>
                             </div>
                         </div>

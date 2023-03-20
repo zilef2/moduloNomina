@@ -13,6 +13,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
 
 use App\Imports\UsersImport;
+use App\Exports\UsersExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
@@ -204,5 +205,10 @@ class UserController extends Controller
         } catch (\Throwable $th) {
             return back()->with('error', 'Error en el proceso de Excel' . $th->getMessage());
         }
+    }
+
+    public function export() 
+    {
+        return Excel::download(new UsersExport, 'users.xlsx');
     }
 }

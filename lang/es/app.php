@@ -2,9 +2,11 @@
 
 return [
     'label' => [
-        //upload user excel
+        //upload and download user excel
         'upload_complete' => 'Archivo subido correctamente',
         'importUser' => 'importar usuarios',
+        'downloadUsers' => 'Exportar usuarios',
+        'downUsers' => 'Exportar us',
 
         //centro y reportes
         'CentroCostos' => 'Centro Costos',

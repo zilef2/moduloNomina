@@ -3,7 +3,6 @@
 use App\Http\Controllers\CentroCostosController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -12,7 +11,8 @@ use App\Models\Permission;
 use App\Models\Reporte;
 use App\Models\Role; use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Foundation\Application; use Illuminate\Support\Facades\Artisan;
+use Illuminate\Foundation\Application; 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route; use Illuminate\Support\Facades\Session; use Inertia\Inertia;
@@ -49,13 +49,28 @@ Route::get('/dashboard', function () {
                 ->diffForHumans(Carbon::now());
         }
 
-
         $ultimos5dias = [
-            Reporte::whereDay('created_at', Carbon::today()->addDays(-2))->get()->count(),
-            Reporte::whereDay('created_at', Carbon::yesterday())->get()->count(),
-            Reporte::whereDay('created_at', Carbon::today())->get()->count(),
+            'Mes pasado' => Reporte::whereValido(1)->where('fecha_ini','<', Carbon::today()->addMonth(-1)) ->get()->count(),
+
+            'Semana pasada' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->addDays(-7)->startOfWeek() ,
+                Carbon::now()->addDays(-7)->endOfWeek()])
+                ->get()->count(),
+
+            'Semana actual' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->startOfWeek() ,
+                Carbon::now()->endOfWeek()])
+                ->get()->count(),
         ];
-        // dd($ultimos5dias);
+        $diasNovalidos = [
+            'Mes pasado' => Reporte::whereIn('valido',[0,2])->where('fecha_ini','<', Carbon::today()->startOfMonth())->get()->count(),
+            'Mes actual' => Reporte::whereIn('valido',[0,2])->where('fecha_ini','>', Carbon::today()->startOfMonth())->get()->count(),
+        ];
+
+        $ultimasHoras = [
+            'Horas Semana Pasada' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->addDays(-7)->startOfWeek(),Carbon::now()->addDays(-7)->endOfWeek()])
+                ->sum('horas_trabajadas'),
+            'Horas Semana' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
+                ->sum('horas_trabajadas'),
+        ];
     }
 
     return Inertia::render('Dashboard', 
@@ -67,15 +82,12 @@ Route::get('/dashboard', function () {
         'countSessiones'   => $countSessiones,
         'ultimaSesion'   => $ultimaSesion,
         'ultimos5dias' => $ultimos5dias,
+        'ultimasHoras' => $ultimasHoras,
+        'diasNovalidos' => $diasNovalidos,
     ]);
-
-
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/setLang/{locale}', function ($locale) {
-    Session::put('locale', $locale); 
-    return back();
-})->name('setlang');
+Route::get('/setLang/{locale}', function ($locale) { Session::put('locale', $locale); return back(); })->name('setlang');
 
 Route::middleware('auth', 'verified')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -96,10 +108,14 @@ Route::middleware('auth', 'verified')->group(function () {
     
     Route::resource('/CentroCostos', CentroCostosController::class);
     Route::resource('/Reportes', ReportesController::class);
+
+
+    //# excel
+    Route::get('users/export/', [UserController::class, 'export']);
+    
 });
 
 require __DIR__.'/auth.php';
-
 
 
 // <editor-fold desc="Artisan">
@@ -117,13 +133,13 @@ require __DIR__.'/auth.php';
     });
 
     Route::get('/clear-c', function () {
-        Artisan::call('optimize');
+        // Artisan::call('optimize');
         Artisan::call('optimize:clear');
         return "Optimizacion finalizada";
         // throw new Exception('Optimizacion finalizada!');
     });
 
-    Route::get('/tmantenimiento', function () {
+    Route::get('/tmantenimientot-ñ', function () {
         echo Artisan::call('down --secret="token-it"');
         return "Aplicación abajo: token-it";
     });

@@ -6,8 +6,19 @@ import { Link } from '@inertiajs/vue3'
 import { Bars3CenterLeftIcon, CheckBadgeIcon, ChevronDownIcon, UserIcon } from "@heroicons/vue/24/solid"
 import SwitchDarkModeNavbar from '@/Components/SwitchDarkModeNavbar.vue'
 import SwitchLangNavbar from '@/Components/SwitchLangNavbar.vue'
+import { ref } from 'vue'
 
 const emit = defineEmits(["open"])
+
+
+// function downloadFile() {
+//     Inertia.visit('/users/export', { method: 'get', download: true });
+// }
+
+
+const downloadExcel = async () => {
+    window.open('/users/export', '_blank')
+}
 
 </script>
 
@@ -36,6 +47,10 @@ const emit = defineEmits(["open"])
                 <div class="flex items-center space-x-2">
                     <SwitchLangNavbar />
                     <SwitchDarkModeNavbar />
+
+                    <DropdownLink v-if="can(['isAdmin'])" class="text-gray-500 dark:text-white" @click="downloadExcel"> {{ lang().label.downloadUsers }} </DropdownLink>
+
+
                     <div class="">
                         <!-- Settings Dropdown -->
                         <div class="relative">
@@ -73,11 +88,8 @@ const emit = defineEmits(["open"])
                                             {{ $page.props.auth.user.id }}
                                         </span> -->
                                     </div>
-                                    <DropdownLink :href="route('profile.edit')"> {{ lang().label.profile }}
-                                    </DropdownLink>
-                                    <DropdownLink :href="route('logout')" method="post" as="button">
-                                        {{ lang().label.logout }}
-                                    </DropdownLink>
+                                    <DropdownLink :href="route('profile.edit')"> {{ lang().label.profile }} </DropdownLink>
+                                    <DropdownLink :href="route('logout')" method="post" as="button"> {{ lang().label.logout }} </DropdownLink>
                                 </template>
                             </Dropdown>
                         </div>

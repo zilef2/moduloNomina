@@ -6,6 +6,8 @@ import { Head, Link } from '@inertiajs/vue3';
 
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
+import { watchEffect, onMounted } from "vue";
+
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
@@ -14,20 +16,54 @@ const props = defineProps({
     // roles: Number,
     permissions: Number,
     reportes: Number,
-    conutSessiones: Number,
+    countSessiones: Number,
     ultimaSesion: Number,
     ultimos5dias: Array,
+    ultimasHoras: Array,
+    diasNovalidos: Array,
 })
+let width;
+
+onMounted(() => {
+  width = window.innerWidth;
+});
+
+watchEffect(() => {
+  window.addEventListener('resize', () => {
+    width = window.innerWidth;
+    chartOptions.height = width
+  });
+});
+const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false
+}
 
 
 const chartData = {
     name: 'Numero de reportes',
-    labels: [ 'Antier', 'Ayer', 'Hoy' ],
-    datasets: [ { data: props.ultimos5dias } ]
+    datasets: [{
+        label: 'Numero de Reportes',
+        data: props.ultimos5dias,
+        backgroundColor: '#f87979',
+    }]
 };
-const chartOptions = {
-    responsive: true
-}
+const chartData2 = {
+    name: 'Total Horas',
+    datasets: [{
+        label: 'Horas',
+        data: props.ultimasHoras,
+        backgroundColor: '#187979',
+    }]
+};
+const chartData3 = {
+    name: 'Reportes invalidos',
+    datasets: [{
+        label: 'Reportes no validos',
+        data: props.diasNovalidos,
+        backgroundColor: '#1ff979',
+    }]
+};
 
 </script>
 
@@ -73,7 +109,7 @@ const chartOptions = {
                 <div v-show="can(['isSuper'])" >
                     <div class="rounded-t-none sm:rounded-t-lg px-4 py-6 flex justify-between bg-blue-700/70 dark:bg-blue-500/80 items-center overflow-hidden">
                         <div class="flex flex-col">
-                            <p class="text-4xl font-bold">{{ props.conutSessiones }}</p>
+                            <p class="text-4xl font-bold">{{ props.countSessiones }}</p>
                             <p class="text-md md:text-lg uppercase">{{ lang().label.sessions }}</p>
                         </div>
                         <div> <UserIcon class="w-16 h-auto" /> </div>
@@ -104,12 +140,22 @@ const chartOptions = {
                 </div>
             </div>
 
-            <div class="">
-                <Bar
-                    id="my-chart-id"
+            <div class="grid xs:grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                <div class="">
+                    <Bar id="my-chart-id"
                     :options="chartOptions"
-                    :data="chartData"
-                />
+                    :data="chartData" />
+                </div>
+                <div class="">
+                    <Bar id="my-chart-id2"
+                    :options="chartOptions"
+                    :data="chartData2" />
+                </div>
+                <div class="">
+                    <Bar id="my-chart-id3"
+                    :options="chartOptions"
+                    :data="chartData3" />
+                </div>
             </div>
         </div>
     </AuthenticatedLayout>
