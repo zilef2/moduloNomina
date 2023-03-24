@@ -14,6 +14,7 @@ class CentroCosto extends Model
     
     public function reportes()
 	{
-		return $this->hasMany('App\Models\Reporte');
+		return $this->hasMany(Reporte::class);
+		// return $this->hasMany('App\Models\Reporte');
 	}
 }

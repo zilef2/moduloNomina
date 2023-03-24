@@ -11,7 +11,8 @@ import DangerButton from '@/Components/DangerButton.vue';
 import pkg from 'lodash';
 import { router } from '@inertiajs/vue3';
 import Pagination from '@/Components/Pagination.vue';
-import { ShieldCheckIcon, CheckBadgeIcon, ChevronUpDownIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/solid';
+import { ShieldCheckIcon, CheckBadgeIcon,EyeIcon, ChevronUpDownIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/solid';
+
 import Create from '@/Pages/User/Create.vue';
 import Edit from '@/Pages/User/Edit.vue';
 import Delete from '@/Pages/User/Delete.vue';
@@ -155,7 +156,7 @@ const select = () => {
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
                                 </th>
-                                <th class="px-2 py-4 sr-only">Action</th>
+                                <th class="px-2 py-4 cursor-not-allowed">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -180,8 +181,14 @@ const select = () => {
                                 }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.created_at }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.updated_at }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    <div class="flex justify-center items-center">
+                                <td class="whitespace-nowrap p-4 sm:p-3">
+                                    <div class="flex justify-center">
+                                        <Link :href="route('user.showReporte',user.id)" v-show="can(['update centroCostos'])"
+                                            type="button"
+                                            class="inline-flex  items-center p-1.5 bg-gray-600 border border-transparent rounded-sm font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"
+                                                v-tooltip="lang().tooltip.seeReport">
+                                            <EyeIcon class="w-4 h-4" />
+                                        </Link>
                                         <div class="rounded-md overflow-hidden">
                                             <InfoButton v-show="can(['update user'])" type="button"
                                                 @click="(data.editOpen = true), (data.user = user)"

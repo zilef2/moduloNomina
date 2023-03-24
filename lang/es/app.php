@@ -33,6 +33,9 @@ return [
         'fecha_fin' => 'fecha fin',
         'horas_trabajadas' => 'Horas trabajadas',
         'centro_costo_id' => 'Centro de costo',
+        'diurnas' => 'diurnas',
+        'nocturnas' => 'nocturnas',
+        'almuerzo' => 'almuerzo',
 
         //otros
         'welcome' => 'Bienvenido',
@@ -98,6 +101,8 @@ return [
         //subirusuarios
         'subir' => 'Subir',
 
+        'see' => 'Ver',
+        
         'login' => 'Ingresar',
         'loading' => 'Cargando...',
         'register' => 'Registrar',
@@ -119,6 +124,7 @@ return [
     ],
     'placeholder' => [
         'search' => 'Buscar...',
+        'searchDates' => 'Buscar por dia o mes...',
         'email' => 'email@email.com',
         'password' => 'contraseña',
         'password_confirmation' => 'Confirmacion de la contraseña',
@@ -133,6 +139,8 @@ return [
         'observaciones' => 'observaciones',
     ],
     'tooltip' => [
+        'see' => 'Ver',
+        'seeReport' => 'Ver reporte',
         'edit' => 'Edit',
         'delete' => 'borrar',
         'delete_selected' => 'borrar todo lo seleccionado',

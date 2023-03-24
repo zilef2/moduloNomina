@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Hash;
 
 use App\Imports\UsersImport;
 use App\Exports\UsersExport;
+use App\Models\CentroCosto;
+use App\Models\Reporte;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
@@ -210,5 +213,96 @@ class UserController extends Controller
     public function export() 
     {
         return Excel::download(new UsersExport, 'users.xlsx');
+    }
+
+    public function showReporte(Request $request, $id) {
+        // $centroCostos = centroCosto::findOrFail($id);
+        $Reportes = Reporte::query();
+        
+        $titulo = __('app.label.Reportes');
+        $Authuser = Auth::user();
+        $permissions = $Authuser->getRoleNames()->first();
+        $Reportes->Where('user_id',$id);
+        $valoresSelectConsulta = CentroCosto::orderBy('nombre')->get();
+        $IntegerDefectoSelect = $valoresSelectConsulta->first()->id;
+        foreach ($valoresSelectConsulta as $value) {
+            $valoresSelect[] = [
+                'label' => $value->nombre, //centro de costos
+                'value' => intval($value->id),
+            ];
+            $showSelect[intval($value->id)] = $value->nombre;
+        }
+        $usuariosSelectConsulta = User::orderBy('name')->get();
+        foreach ($usuariosSelectConsulta as $value) {
+            $showUsers[intval($value->id)] = $value->name;
+        }
+        
+        if($permissions === "operator") { //admin | validador
+            $Reportes->whereUser_id($Authuser->id);
+
+            if ($request->has(['field', 'order'])) {
+                $Reportes->orderBy($request->field, $request->order);
+            }else{
+                $Reportes->orderBy('fecha_ini');
+            }
+            $perPage = $request->has('perPage') ? $request->perPage : 10;
+
+            $nombresTabla =[//0: como se ven //1 como es la BD //2??
+                ["Acciones","#","Centro costo","Trabajador","inicio", "fin", "horas trabajadas", "valido", "observaciones"],
+                ["t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
+                [null,null,null,null,"t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"] //campos ordenables
+            ];
+            
+        }else{ // not operator
+            // $ReportesEsteMes = Reporte::WhereMonth('fecha_ini',$esteMes)->get()->count();
+            $titulo = $this->CalcularTituloQuincena();
+            
+            if ($request->has('search')) {
+                $Reportes->whereMonth('fecha_ini', $request->search);
+                $Reportes->OrwhereMonth('fecha_fin', $request->search);
+                $Reportes->OrwhereYear('fecha_ini', $request->search);
+                $Reportes->OrwhereYear('fecha_fin', $request->search);
+                $Reportes->OrwhereDay('fecha_ini', $request->search);
+                $Reportes->OrwhereDay('fecha_fin', $request->search);
+                // $Reportes->orWhere('fecha_fin', 'LIKE', "%" . $request->search . "%");
+            }
+            if ($request->has(['field', 'order'])) {
+                $Reportes->orderBy($request->field, $request->order);
+            }else{
+                $Reportes->orderBy('fecha_ini');
+            }
+            $perPage = $request->has('perPage') ? $request->perPage : 10;
+
+            $nombresTabla =[//0: como se ven //1 como es la BD
+                ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio",       "fin",        "horas trabajadas",   "observaciones"],
+                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
+                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean 
+            ];
+        }
+
+        return Inertia::render('Reportes/Index', [ //carpeta
+            'title'          =>  $titulo,
+            'filters'        =>  $request->all(['search', 'field', 'order']),
+            'perPage'        =>  (int) $perPage,
+            'fromController' =>  $Reportes->paginate($perPage),
+            'breadcrumbs'    =>  [['label' => __('app.label.Reportes'), 'href' => route('Reportes.index')]],
+            'nombresTabla'   =>  $nombresTabla,
+
+            'valoresSelect'   =>  $valoresSelect,
+            'showSelect'   =>  $showSelect,
+            'IntegerDefectoSelect'   =>  $IntegerDefectoSelect,
+            'showUsers'   =>  $showUsers,
+        ]);
+    }
+
+    public function CalcularTituloQuincena() {
+        $esteMes = date("m");
+        $diaquincena = date("d");
+        if($diaquincena >= 15){ //toask: el dia 15 se toma en cuenta para la quincena ? 
+            $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','<=',15)->sum('horas_trabajadas');
+        }else{
+            $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','>',15)->sum('horas_trabajadas');
+        }
+        return 'Horas trabajadas quincena: '.$horasTrabajadas;
     }
 }

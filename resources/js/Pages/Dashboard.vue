@@ -16,11 +16,11 @@ const props = defineProps({
     // roles: Number,
     permissions: Number,
     reportes: Number,
-    countSessiones: Number,
-    ultimaSesion: Number,
     ultimos5dias: Array,
     ultimasHoras: Array,
     diasNovalidos: Array,
+    trabajadoresHoy: Array,
+    centrosHoy: Array,
 })
 let width;
 
@@ -36,7 +36,11 @@ watchEffect(() => {
 });
 const chartOptions = {
     responsive: true,
-    maintainAspectRatio: false
+    maintainAspectRatio: false,
+    color: "#00fffd",
+    // todo
+    darkcolor: "#fff",
+    
 }
 
 
@@ -62,6 +66,20 @@ const chartData3 = {
         label: 'Reportes no validos',
         data: props.diasNovalidos,
         backgroundColor: '#1ff979',
+    }]
+};
+const chartTrabajadoresHoy = {
+    datasets: [{
+        label: 'Horas por trabajador',
+        data: props.trabajadoresHoy,
+        backgroundColor: '#ffd979',
+    }]
+};
+const centrosHoy = {
+    datasets: [{
+        label: 'Horas por centro',
+        data: props.centrosHoy,
+        backgroundColor: '#df1f79',
     }]
 };
 
@@ -106,22 +124,6 @@ const chartData3 = {
                         </Link>
                     </div>
                 </div>
-                <div v-show="can(['isSuper'])" >
-                    <div class="rounded-t-none sm:rounded-t-lg px-4 py-6 flex justify-between bg-blue-700/70 dark:bg-blue-500/80 items-center overflow-hidden">
-                        <div class="flex flex-col">
-                            <p class="text-4xl font-bold">{{ props.countSessiones }}</p>
-                            <p class="text-md md:text-lg uppercase">{{ lang().label.sessions }}</p>
-                        </div>
-                        <div> <UserIcon class="w-16 h-auto" /> </div>
-                    </div>
-                    <div
-                        class="bg-blue-600 dark:bg-blue-600/80 rounded-b-none sm:rounded-b-lg p-2 overflow-hidden hover:bg-blue-800/90 dark:hover:bg-blue-800/70">
-                        <Link :href="route('user.index')" class="flex justify-between items-center">
-                        <p>{{ lang().label.more }}</p>
-                        <ChevronRightIcon class="w-5 h-5" />
-                        </Link>
-                    </div>
-                </div>
                 <div v-show="can(['isSuper'])">
                     <div class="rounded-t-none sm:rounded-t-lg px-4 py-6 flex justify-between bg-amber-600/70 dark:bg-amber-500/80 items-center overflow-hidden">
                         <div class="flex flex-col">
@@ -140,21 +142,31 @@ const chartData3 = {
                 </div>
             </div>
 
-            <div class="grid xs:grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-                <div class="">
+            <div v-show="can(['updateCorregido reporte']) || can(['isAdmin'])" class="grid xs:grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 my-5">
+                <div class="my-2 mx-5 p-1">
                     <Bar id="my-chart-id"
                     :options="chartOptions"
                     :data="chartData" />
                 </div>
-                <div class="">
+                <div class="my-2 mx-5 p-1">
                     <Bar id="my-chart-id2"
                     :options="chartOptions"
                     :data="chartData2" />
                 </div>
-                <div class="">
+                <div class="my-2 mx-5 p-1">
                     <Bar id="my-chart-id3"
                     :options="chartOptions"
                     :data="chartData3" />
+                </div>
+                <div class="my-2 mx-5 p-1">
+                    <Bar id="my-chart-id3"
+                    :options="chartOptions"
+                    :data="chartTrabajadoresHoy" />
+                </div>
+                <div class="my-2 mx-5 p-1">
+                    <Bar id="my-chart-id3"
+                    :options="chartOptions"
+                    :data="centrosHoy" />
                 </div>
             </div>
         </div>

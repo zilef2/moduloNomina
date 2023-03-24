@@ -22,8 +22,6 @@ const props = defineProps({
     showUsers: Object,
     correccionUsuario: Boolean,
 })
-
-const data = reactive({ multipleSelect: false, })
 const emit = defineEmits([ "close", ]);
 const form = useForm({
     fecha_ini: '',
@@ -40,18 +38,22 @@ const update = () => {
     }else{
         form.valido = 2;
     }
-    console.log("🚀 ~ file: Edit.vue:43 ~ update ~ form.valido:", form.valido)
-    form.put(route('Reportes.update', props.Reporte?.id), {
-        preserveScroll: true,
-        onSuccess: () => {
-            emit("close")
-            form.reset()
-            data.multipleSelect = false
-        },
-        onError: () => null,
-        onFinish: () => null,
-    })
+    //! toask 
+    if(form.horas_trabajadas <= 48){
+        form.put(route('Reportes.update', props.Reporte?.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                emit("close")
+                form.reset()
+            },
+            onError: () => null,
+            onFinish: () => null,
+        })
+    }else{
+        alert('Demasiadas horas')
+    }
 }
+
 
 function TransformTdate (dateString){
     const date = new Date(dateString);
@@ -82,17 +84,15 @@ watchEffect(() => {
             form.horas_trabajadas = (parseInt((Date.parse(form.fecha_fin) - Date.parse(form.fecha_ini))/(3600*1000) ));
         }
 })
-
-
-
 </script>
 
 <template>
+    
     <section class="space-y-6">
         <Modal :show="props.show" @close="emit('close')">
             <form class="p-6" @submit.prevent="update">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    {{ lang().label.edit }} {{ props.title }} <b>{{ props.showUsers[props.Reporte.user_id] }}</b>
+                    {{ lang().label.edit }} {{ props.title }} <b>{{ props.showUsers[props.Reporte.user_id] }}</b> asda sdasdas
                 </h2>
                 <div class="my-6 grid grid-cols-2 gap-6">
                     <div>

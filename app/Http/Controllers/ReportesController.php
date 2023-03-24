@@ -51,14 +51,13 @@ class ReportesController extends Controller
             }
             $perPage = $request->has('perPage') ? $request->perPage : 10;
 
-            $nombresTabla =[//0: como se ven //1 como es la BD
+            $nombresTabla =[//0: como se ven //1 como es la BD //2??
                 ["Acciones","#","Centro costo","Trabajador","inicio", "fin", "horas trabajadas", "valido", "observaciones"],
                 ["t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
-                [null,null,null,null,"t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"] 
+                [null,null,null,null,"t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"] //campos ordenables
             ];
             
         }else{ // not operator
-            
             // $ReportesEsteMes = Reporte::WhereMonth('fecha_ini',$esteMes)->get()->count();
             $titulo = $this->CalcularTituloQuincena();
             
@@ -110,7 +109,8 @@ class ReportesController extends Controller
             $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','>',15)->sum('horas_trabajadas');
         }
         return 'Horas trabajadas quincena: '.$horasTrabajadas;
-     }
+    }
+
 
     public function create() { }
 
@@ -170,6 +170,7 @@ class ReportesController extends Controller
                 $Reportes->horas_trabajadas = $request->horas_trabajadas;
                 $Reportes->valido = $request->valido;//0 creado //1 aceptado //2 rechazado
                 $Reportes->observaciones = $request->observaciones;
+                $Reportes->centro_costo_id = $request->centro_costo_id;
             }
             $Reportes->save();
             DB::commit();
@@ -186,8 +187,7 @@ class ReportesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
+    public function destroy($id) {
         DB::beginTransaction();
 
         try {//TOASK: se pueden borrar mientras no se hayan calificado.

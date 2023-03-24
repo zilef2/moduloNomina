@@ -65,6 +65,7 @@ class RoleSeeder extends Seeder
             // 'create reporte',
             'update reporte',
             // 'delete reporte',
+            'updateCorregido reporte',
 
             //centroCostos
             'read centroCostos',
@@ -73,7 +74,7 @@ class RoleSeeder extends Seeder
             'delete centroCostos',
         ]);
 
-        $operator = Role::create([ 'name'          => 'operator' ]);
+        $operator = Role::create([ 'name' => 'operator' ]);
         $operator->givePermissionTo([
             // 'read user',
             // 'create user',

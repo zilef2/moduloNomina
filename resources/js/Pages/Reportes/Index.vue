@@ -1,29 +1,29 @@
 <script setup>
     import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-    import { Head } from '@inertiajs/vue3';
-    import Breadcrumb from '@/Components/Breadcrumb.vue';
-    import TextInput from '@/Components/TextInput.vue';
-    import PrimaryButton from '@/Components/PrimaryButton.vue';
-    import SelectInput from '@/Components/SelectInput.vue';
-    import { reactive, watch } from 'vue';
-    import DangerButton from '@/Components/DangerButton.vue';
-    import pkg from 'lodash';
-    import { router,usePage,useForm } from '@inertiajs/vue3';
+        import { Head } from '@inertiajs/vue3';
+        import Breadcrumb from '@/Components/Breadcrumb.vue';
+        import TextInput from '@/Components/TextInput.vue';
+        import PrimaryButton from '@/Components/PrimaryButton.vue';
+        import SelectInput from '@/Components/SelectInput.vue';
+        import { reactive, watch } from 'vue';
+        import DangerButton from '@/Components/DangerButton.vue';
+        import pkg from 'lodash';
+        import { router,usePage,useForm } from '@inertiajs/vue3';
 
-    import Pagination from '@/Components/Pagination.vue';
-    import { DocumentCheckIcon, ChevronUpDownIcon, PencilIcon, TrashIcon,XCircleIcon,CheckIcon } from '@heroicons/vue/24/solid';
+        import Pagination from '@/Components/Pagination.vue';
+        import { DocumentCheckIcon, ChevronUpDownIcon, PencilIcon, TrashIcon,XCircleIcon,CheckIcon } from '@heroicons/vue/24/solid';
 
-    import Checkbox from '@/Components/Checkbox.vue';
-    import InfoButton from '@/Components/InfoButton.vue';
-    import SuccessButton from '@/Components/SuccessButton.vue';
+        import Checkbox from '@/Components/Checkbox.vue';
+        import InfoButton from '@/Components/InfoButton.vue';
+        import SuccessButton from '@/Components/SuccessButton.vue';
 
 
     import Create from '@/Pages/reportes/Create.vue';
     import Edit from '@/Pages/reportes/Edit.vue'; 
     import Delete from '@/Pages/reportes/Delete.vue';
 
-
     const { _, debounce, pickBy } = pkg
+
     const props = defineProps({
         title: String,
         filters: Object,
@@ -36,7 +36,7 @@
         showUsers: Object,
         IntegerDefectoSelect: Number,
     })
-    
+   
     const data = reactive({
         params: {
             search: props.filters.search,
@@ -55,7 +55,6 @@
         nope: null,
         dataSet: usePage().props.app.perpage,
     })
-        
 
     const order = (field) => {
         if(field != undefined && field != null){
@@ -205,7 +204,7 @@
                         </DangerButton>
                     </div>
                     <TextInput v-show="can(['update reporte'])" v-model="data.params.search" type="text" class="block w-3/6 md:w-2/6 lg:w-1/6 rounded-lg"
-                        :placeholder="lang().placeholder.search" />
+                        :placeholder="lang().placeholder.searchDates" />
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table class="w-full">
@@ -279,8 +278,6 @@
                                     <div v-else-if="titulo_slug.substr(0,1) == 'i'">{{ number_format(clasegenerica[titulo_slug.substr(2)]) }}</div>
                                     <div v-else-if="titulo_slug.substr(0,1) == 'm'">{{ number_format(clasegenerica[titulo_slug.substr(2)],0,1) }}</div>
                                 </td>
-
-                                
                             </tr>
                         </tbody>
                     </table>

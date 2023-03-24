@@ -22,10 +22,10 @@ class Reporte extends Model
 
 	public function centrocostos()
 	{
-		return $this->belongsToMany('App\Models\CentroCosto');
+		return $this->hasOne('App\Models\CentroCosto');
 	}
 	public function users()
 	{
-		return $this->belongsToMany('App\Models\User');
+		return $this->hasOne('App\Models\User');
 	}
 }

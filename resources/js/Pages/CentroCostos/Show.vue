@@ -10,11 +10,8 @@
     import { Head,router,usePage,Link } from '@inertiajs/vue3';
 
     import Pagination from '@/Components/Pagination.vue';
-    import { ChevronUpDownIcon, PencilIcon,EyeIcon, TrashIcon } from '@heroicons/vue/24/solid';
+    import { DocumentCheckIcon, ChevronUpDownIcon, PencilIcon, TrashIcon,XCircleIcon,CheckIcon } from '@heroicons/vue/24/solid';
 
-    import Create from '@/Pages/centroCostos/Create.vue';
-    import Edit from '@/Pages/centroCostos/Edit.vue'; 
-    import Delete from '@/Pages/centroCostos/Delete.vue';
 
     import Checkbox from '@/Components/Checkbox.vue';
     import InfoButton from '@/Components/InfoButton.vue';
@@ -25,43 +22,41 @@ import Dashboard from '../Dashboard.vue';
         title: String,
         filters: Object,
         fromController: Object,
-        breadcrumbs: Object,
+        // breadcrumbs: Object,
         perPage: Number,
         nombresTabla: Array,
+
+        valoresSelect: Object,
+        showSelect: Object,
+        showUsers: Object,
+        IntegerDefectoSelect: Number,
     })
     
     const data = reactive({
         params: {
-            search: props.filters.search,
-            field: props.filters.field,
-            order: props.filters.order,
+            // search: props.filters.search,
+            // field: props.filters.field,
+            // order: props.filters.order,
             perPage: props.perPage,
         },
-        selectedId: [],
-        multipleSelect: false,
-        createOpen: false,
-        editOpen: false,
-        deleteOpen: false,
-        deleteBulkOpen: false,
+        // createOpen: false,
+        // editOpen: false,
+        // deleteOpen: false,
         generico: null,
         dataSet: usePage().props.app.perpage,
     })
         
+
     const order = (field) => {
         if(field != undefined){
-
-            // console.log("🚀 ~ file: Index.vue:54 ~ order ~ field:", field)
-            // field = field.substr(2)
-            // console.log("🚀 field:", field)
             data.params.field = field.replace(/ /g, "_")
-            
             data.params.order = data.params.order === "asc" ? "desc" : "asc"
         }
     }
 
     watch(() => _.cloneDeep(data.params), debounce(() => {
         let params = pickBy(data.params)
-        router.get(route("CentroCostos.index"), params, {
+        router.get(route("CentroCostos.show"), params, {
             replace: true,
             preserveState: true,
             preserveScroll: true,
@@ -134,30 +129,22 @@ import Dashboard from '../Dashboard.vue';
 
     <AuthenticatedLayout>
 
-        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />
+        <!-- <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" /> -->
         <div class="space-y-4">
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">
                     <PrimaryButton v-if="can(['create centroCostos'])" class="rounded-none" @click="data.createOpen = true">
                         {{ lang().button.add }}
                     </PrimaryButton>
-                    <Create :show="data.createOpen" @close="data.createOpen = false" :title="props.title" />
-                    <Edit :show="data.editOpen" @close="data.editOpen = false" :CentroCosto="data.generico" :title="props.title" />
-                    <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :CentroCosto="data.generico" :title="props.title" />
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="flex justify-between p-2">
                     <div class="flex space-x-2">
                         <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet" />
-                        <DangerButton @click="data.deleteBulkOpen = true"
-                            v-show="data.selectedId.length != 0" class="px-3 py-1.5"
-                            v-tooltip="lang().tooltip.delete_selected">
-                            <TrashIcon class="w-5 h-5" />
-                        </DangerButton>
                     </div>
-                    <TextInput v-model="data.params.search" type="text" class="block w-3/6 md:w-2/6 lg:w-1/6 rounded-lg"
-                        :placeholder="lang().placeholder.search" />
+                    <!-- <TextInput v-model="data.params.search" type="text" class="block w-3/6 md:w-2/6 lg:w-1/6 rounded-lg"
+                        :placeholder="lang().placeholder.search" /> -->
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table class="w-full">
@@ -175,19 +162,11 @@ import Dashboard from '../Dashboard.vue';
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(clasegenerica, index) in fromController.data" :key="index"
+                            <tr v-for="(clasegenerica, indeFor) in fromController.data" :key="indeFor"
                                 class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (index+1) }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.nombre) }} </td>
                                 <td v-if="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
                                     <div class="flex justify-start items-center">
                                         <div class="rounded-md overflow-hidden">
-                                            <Link :href="route('CentroCostos.show',clasegenerica)" v-show="can(['update centroCostos'])"
-                                                type="button"
-                                                class="inline-flex  items-center px-2 py-1.5 bg-gray-600 border border-transparent rounded-none font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"
-                                                 v-tooltip="lang().tooltip.see">
-                                                <EyeIcon class="w-4 h-4" />
-                                            </Link>
                                             <InfoButton v-show="can(['update centroCostos'])" type="button"
                                                 @click="(data.editOpen = true), (data.generico = clasegenerica)"
                                                 class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
@@ -195,14 +174,34 @@ import Dashboard from '../Dashboard.vue';
                                             </InfoButton>
                                             <DangerButton v-show="can(['delete centroCostos'])" type="button"
                                                 @click="(data.deleteOpen = true), (data.generico = clasegenerica)"
-                                                class="px-2 py-1.5 rounded-sm" v-tooltip="lang().tooltip.delete">
+                                                class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.delete">
                                                 <TrashIcon class="w-4 h-4" />
                                             </DangerButton>
                                         </div>
                                     </div>
                                 </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (indeFor+1) }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ showSelect[clasegenerica.centro_costo_id] }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ showUsers[clasegenerica.user_id] }}</td>
+
+                                <td v-for="(titulo_slug, indi) in nombresTabla[1]" :key="indi" class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                    <div v-if="titulo_slug != null" class="">
+                                        <div v-if="titulo_slug.substr(0,1) == 's'">{{ (clasegenerica[titulo_slug.substr(2)]) }}</div>
+                                        <div v-else-if="titulo_slug.substr(0,1) == 'd'">{{ formatDate(clasegenerica[titulo_slug.substr(2)]) }}</div>
+                                        <div v-else-if="titulo_slug.substr(0,1) == 't'">{{ formatDate(clasegenerica[titulo_slug.substr(2)],'conLaHora') }}</div>
+                                        
+                                        <div v-else-if="titulo_slug.substr(0,1) == 'b'">
+                                            <div v-if="clasegenerica[titulo_slug.substr(2)] === 0"> Aun no validada</div>
+                                            <div v-else-if="clasegenerica[titulo_slug.substr(2)] === 1"> <CheckIcon class="w-8 h-8 text-green-600" /></div>
+                                            <div v-else-if="clasegenerica[titulo_slug.substr(2)] === 2"> <XCircleIcon class="w-8 h-8 text-red-600" /></div>
+                                        </div>
+
+                                        <div v-else-if="titulo_slug.substr(0,1) == 'i'">{{ number_format(clasegenerica[titulo_slug.substr(2)]) }}</div>
+                                        <div v-else-if="titulo_slug.substr(0,1) == 'm'">{{ number_format(clasegenerica[titulo_slug.substr(2)],0,1) }}</div>
+                                    </div>
+                                </td>
                             </tr>
-                        </tbody>
+                        </tbody>    
                     </table>
                 </div>
                 <div class="flex justify-betwween items-center p-2 border-t border-gray-200 dark:border-gray-700">

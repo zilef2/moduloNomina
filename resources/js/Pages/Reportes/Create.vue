@@ -26,33 +26,38 @@ const props = defineProps({
 
 const emit = defineEmits(["close"]);
 
-const data = reactive({
-    multipleSelect: false,
-})
-
 const form = useForm({
-    // fecha_ini: '2018-06-07T01:00',
-    fecha_ini: '',
-    fecha_fin: '',
+    // fecha_ini: '',
+    // fecha_fin: '',
+    fecha_ini: '2023-03-22T13:00',
+    fecha_fin: '2023-03-23T06:00',
+
+
     horas_trabajadas: '',
     centro_costo_id: props.IntegerDefectoSelect,
     observaciones: '',
+    diurnas: '',
+    nocturnas: '',
+    almuerzo: '0',
 })
 
 const create = () => {
-    form.post(route('Reportes.store'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            emit("close")
-            form.reset()
-            data.multipleSelect = false
-        },
-        onError: () =>{
-            // alert(JSON.stringify(form.errors, null, 4));
-            null
-        },
-        onFinish: () => null,
-    })
+    if(form.horas_trabajadas <= 24){
+        form.post(route('Reportes.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                emit("close")
+                form.reset()
+            },
+            onError: () =>{
+                // alert(JSON.stringify(form.errors, null, 4));
+                null
+            },
+            onFinish: () => emit("close"),
+        })
+    }else{
+        alert('Demasiadas horas') //toask
+    }
 }
 
 watchEffect(() => {
@@ -60,15 +65,121 @@ watchEffect(() => {
         form.errors = {}
     }
     if( Date.parse(form.fecha_ini) && Date.parse(form.fecha_fin) ){
-        if( Date.parse(form.fecha_ini) > Date.parse(form.fecha_fin) ){
-            form.horas = "0"
-            // form.horas_trabajadas = form.fecha_fin.substr(1,3);
+        let ini = Date.parse(form.fecha_ini);
+        let fin = Date.parse(form.fecha_fin);
+        form.horas_trabajadas = ''+parseInt((fin - ini)/(3600*1000));
+
+        if( Date.parse(form.fecha_ini) > Date.parse(form.fecha_fin)){
+            form.errors.horas_trabajadas = 'La fecha inicial es mayor a la final'
+            form.horas_trabajadas = "0"
+            form.diurnas = "0"
+            form.nocturnas = "0"
+            form.almuerzo = "0"
         }else{
-            form.horas_trabajadas = ''+parseInt((Date.parse(form.fecha_fin) - Date.parse(form.fecha_ini))/(3600*1000) );
+            if(form.horas_trabajadas >= 24){
+                form.errors.horas_trabajadas = 'Las horas trabajadas son demasiadas'
+                form.horas_trabajadas = "0"
+                form.diurnas = "0"
+                form.nocturnas = "0"
+                form.almuerzo = "0"
+            }else{// la ini < fin y las horas trabajadas son < 24
+                form.almuerzo = 0;
+                if(form.horas_trabajadas >= 8){//toask
+                    form.horas_trabajadas -= 1
+                    form.almuerzo = 1;
+                }
+                
+                form.diurnas = calcularDiurnas(form.fecha_ini,form.fecha_fin);
+                form.nocturnas = calcularNocturnas(form.fecha_ini,form.fecha_fin);
+
+                if(form.diurnas > 0){
+                    form.diurnas -= form.almuerzo
+                }else{
+                    if(form.nocturnas > 0)
+                    form.nocturnas -= form.almuerzo
+                }
+            }
         }
     }
-    //#TOASK: can be hours superior than 24?
 })
+
+function calcularDiurnas(Inicio, Fin){
+    const horasInicio = new Date(Inicio).getHours();
+    const horasFin = new Date(Fin).getHours();
+
+    const DiaInicio = new Date(Inicio).getDate();
+    const DiaFin = new Date(Fin).getDate();
+
+    const BaseInicial = horasInicio >= 6 ? horasInicio : 6 
+    if(DiaInicio == DiaFin){
+        const BaseFinal = horasFin >= 21 ? 21 : horasFin
+        return BaseFinal - BaseInicial;
+    }else{
+        const BaseFinal = horasFin < 6 ? 21 : horasFin // se asume que 24 es lo maximo que se puede trabajar
+        return BaseFinal - BaseInicial;
+    }
+}
+
+
+
+function calcularNocturnas(Inicio, Fin){
+    const horasInicio = new Date(Inicio).getHours();
+    const horasFin = new Date(Fin).getHours();
+
+    const DiaInicio = new Date(Inicio).getDate();
+    const DiaFin = new Date(Fin).getDate();
+
+    let Madrugada = 0
+    let Tarde = 0
+    if(DiaInicio == DiaFin){
+        if(horasInicio < 6 && horasFin < 6){//solo de noche
+            Madrugada = horasFin - horasInicio;
+        }else{
+            if(horasInicio < 6){
+                Madrugada = (6 - horasInicio);
+            }
+        }
+
+        if(horasInicio >= 21 && horasFin >= 21){//solo de noche
+            Tarde = horasFin - horasInicio;
+        }else{
+            if(horasFin > 21){//si existan horas nocturnas, si no son 0
+                Tarde = (horasFin - 21);
+            }
+        }
+    }else{ //dias diferentes
+        if(horasInicio < 6 && horasFin < 6){//solo de noche
+            Madrugada = horasFin - horasInicio;
+            // if(Madrugada < 0) //mucho voleo
+        }else{
+            if(horasInicio < 6){
+                Madrugada = (6 - horasInicio);
+            }
+            if(horasFin < 6){
+                Madrugada += horasFin;
+            }
+        }
+
+        if(horasInicio >= 21 && horasFin >= 21){//solo de noche
+            Tarde = horasFin - horasInicio;
+            //if(Tarde < 0) !mucho voleo
+        }else{
+            if(horasFin > 21){//si existan horas nocturnas, si no son 0
+                Tarde += (horasFin - 21);
+            }
+
+            if(horasInicio > 21){
+                Tarde += (24 - horasInicio);
+            }else{
+                Tarde += (24 - 21);
+            }
+        }
+    }
+
+    console.log("🚀🧈 debu calcularNocturnas debu Madrugada:", Madrugada); console.log("🚀🧈 debu calcularNocturnas debu tarde:", Tarde);
+
+    return (Madrugada + Tarde);
+}
 
 const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
 
@@ -102,6 +213,23 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                         <TextInput id="horas_trabajadas" type="number" class="mt-1 block w-full" v-model="form.horas_trabajadas" disabled
                             :placeholder="lang().placeholder.horas_trabajadas" :error="form.errors.horas_trabajadas" />
                         <InputError class="mt-2" :message="form.errors.horas_trabajadas" />
+                    </div>
+                    <div class="grid grid-cols-3 gap-1">
+                        <div>
+                            <InputLabel for="diurnas" :value="lang().label.diurnas" />
+                            <TextInput id="diurnas" type="number" class="mt-1 w-full" v-model="form.diurnas" disabled
+                                :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas" />
+                        </div>
+                        <div>
+                            <InputLabel for="nocturnas" :value="lang().label.nocturnas" />
+                            <TextInput id="nocturnas" type="number" class="mt-1 w-full" v-model="form.nocturnas" disabled
+                                :placeholder="lang().placeholder.nocturnas" :error="form.errors.nocturnas" />
+                        </div>
+                        <div>
+                            <InputLabel for="almuerzo" :value="lang().label.almuerzo" />
+                            <TextInput id="almuerzo" type="number" class="mt-1 w-full" v-model="form.almuerzo" disabled
+                                :placeholder="lang().placeholder.almuerzo" :error="form.errors.almuerzo" />
+                        </div>
                     </div>
                     <div>
                         <InputLabel for="centro_costo_id" :value="lang().label.centro_costo_id" />

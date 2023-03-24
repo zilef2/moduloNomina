@@ -6,7 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
-
+use App\Models\CentroCosto;
 use App\Models\Permission;
 use App\Models\Reporte;
 use App\Models\Role; use App\Models\User;
@@ -14,7 +14,6 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Application; 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route; use Illuminate\Support\Facades\Session; use Inertia\Inertia;
 
 
@@ -30,8 +29,6 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     $Authuser = Auth::user();
     $permissions = $Authuser->getRoleNames()->first();
-    $countSessiones = 0;
-    $ultimaSesion ='';
     $ultimos5dias = null;
     if($permissions === "operator") { //admin | validador
         $reportes = (int) Reporte::Where('user_id', $Authuser->id)->count();
@@ -39,18 +36,8 @@ Route::get('/dashboard', function () {
     }else{
         $reportes = (int) Reporte::count();
         
-        $this->sesiones = DB::table('sessions')->get();
-        foreach ($this->sesiones as $sesio) {
-            if($sesio->user_id !== null){
-                $sesio->elUser = User::find($sesio->user_id);
-                $countSessiones ++;
-            }
-            $ultimaSesion = Carbon::parse($sesio->last_activity)
-                ->diffForHumans(Carbon::now());
-        }
-
         $ultimos5dias = [
-            'Mes pasado' => Reporte::whereValido(1)->where('fecha_ini','<', Carbon::today()->addMonth(-1)) ->get()->count(),
+            'Mes pasado' => Reporte::whereValido(1)->where('fecha_ini','<', Carbon::today()->addMonth(-1))->get()->count(),
 
             'Semana pasada' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->addDays(-7)->startOfWeek() ,
                 Carbon::now()->addDays(-7)->endOfWeek()])
@@ -71,6 +58,27 @@ Route::get('/dashboard', function () {
             'Horas Semana' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
                 ->sum('horas_trabajadas'),
         ];
+        //!toremember
+        $usuariosConRol = User::whereHas("roles", function($q){ $q->where("name", "operator"); })->get();
+
+        foreach ($usuariosConRol as $value) {
+            $BooleanreportoHoy = Reporte::where('user_id',$value->id)->whereDate('fecha_fin',Carbon::today())->first();
+            if($BooleanreportoHoy !== null)
+                $trabajadoresHoy[$value->name] = $BooleanreportoHoy->horas_trabajadas;
+            else
+                $trabajadoresHoy[$value->name] = 0;
+        }
+
+        $centros = CentroCosto::all();
+        foreach ($centros as $value) {
+            $BooleanReporteCentro = Reporte::where('centro_costo_id',$value->id)->whereDate('fecha_fin',Carbon::today())->sum('horas_trabajadas');
+            if($BooleanReporteCentro !== null){
+                $centrosHoy[$value->nombre] = $BooleanReporteCentro;
+            }
+            else
+                $centrosHoy[$value->nombre] = 0;
+
+        }
     }
 
     return Inertia::render('Dashboard', 
@@ -79,11 +87,11 @@ Route::get('/dashboard', function () {
         'roles'         => (int) Role::count(),
         'permissions'   => (int) Permission::count(),
         'reportes'   => $reportes,
-        'countSessiones'   => $countSessiones,
-        'ultimaSesion'   => $ultimaSesion,
         'ultimos5dias' => $ultimos5dias,
-        'ultimasHoras' => $ultimasHoras,
-        'diasNovalidos' => $diasNovalidos,
+        'ultimasHoras' => $ultimasHoras ?? [],
+        'diasNovalidos' => $diasNovalidos ?? [],
+        'trabajadoresHoy' => $trabajadoresHoy ?? [],
+        'centrosHoy' => $centrosHoy ?? [],
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -106,8 +114,11 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::resource('/permission', PermissionController::class)->except('create', 'show', 'edit');
     Route::post('/permission/destroy-bulk', [PermissionController::class, 'destroyBulk'])->name('permission.destroy-bulk');
     
-    Route::resource('/CentroCostos', CentroCostosController::class);
+    Route::resource('/CentroCostos', CentroCostosController::class);//show -> reportes del centro
     Route::resource('/Reportes', ReportesController::class);
+
+    Route::get('/userReportes/{id}', [UserController::class,'showReporte'])->name('user.showReporte');
+
 
 
     //# excel
@@ -123,29 +134,10 @@ require __DIR__.'/auth.php';
         throw new Exception('Probando excepciones y enrutamiento. La prueba ha concluido exitosamente.');
     });
 
-    Route::get('/foo', function () {
-        if (file_exists(public_path('storage'))){
-            return 'Ya existe';
-        }
-        App('files')->link(
-            storage_path('App/public'), public_path('storage')
-        );return 'Listo';
-    });
-
     Route::get('/clear-c', function () {
         // Artisan::call('optimize');
         Artisan::call('optimize:clear');
         return "Optimizacion finalizada";
         // throw new Exception('Optimizacion finalizada!');
     });
-
-    Route::get('/tmantenimientot-ñ', function () {
-        echo Artisan::call('down --secret="token-it"');
-        return "Aplicación abajo: token-it";
-    });
-    Route::get('/Arriba', function () {
-        echo Artisan::call('up');
-        return "Aplicación funcionando";
-    });
-
 //</editor-fold>
