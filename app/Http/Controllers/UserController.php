@@ -16,6 +16,7 @@ use App\Imports\UsersImport;
 use App\Exports\UsersExport;
 use App\Models\CentroCosto;
 use App\Models\Reporte;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -252,6 +253,8 @@ class UserController extends Controller
                 ["t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
                 [null,null,null,null,"t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"] //campos ordenables
             ];
+
+        $quincena = [];
             
         }else{ // not operator
             // $ReportesEsteMes = Reporte::WhereMonth('fecha_ini',$esteMes)->get()->count();
@@ -278,7 +281,22 @@ class UserController extends Controller
                 ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
                 [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean 
             ];
+
+            $quincena = Reporte::Where('user_id',$id)
+                ->WhereBetween('fecha_ini',[Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
+                ->Orderby('fecha_ini')->get();
+
+                //touse //myhelp
+            $diasSemana = ['Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Domingo'];
+            foreach ($quincena as $key => $value) {
+                // dd($value->fecha_ini);
+                $laKey = $diasSemana[$key] . Carbon::createFromFormat('Y-m-d H:i:s', $value->fecha_ini)->format('d');
+                // dd($laKey);
+                $quincena[$laKey ] = $value->horas_trabajadas;
+                unset($quincena[$key]);
+            }
         }
+// dd($quincena);
 
         return Inertia::render('Reportes/Index', [ //carpeta
             'title'          =>  $titulo,
@@ -292,6 +310,7 @@ class UserController extends Controller
             'showSelect'   =>  $showSelect,
             'IntegerDefectoSelect'   =>  $IntegerDefectoSelect,
             'showUsers'   =>  $showUsers,
+            'quincena'   =>  $quincena,
         ]);
     }
 

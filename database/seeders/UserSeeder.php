@@ -19,7 +19,8 @@ class UserSeeder extends Seeder
             'name'              => 'Superadmin',
             'email'             => 'superadmin@superadmin.com',
             'password'          => bcrypt('superadmin0+-*/'),
-            'email_verified_at' => date('Y-m-d H:i')
+            'email_verified_at' => date('Y-m-d H:i'),
+            'cargo_id' => 2
         ]);
         $superadmin->assignRole('superadmin');
 
@@ -27,7 +28,7 @@ class UserSeeder extends Seeder
             'name'              => 'Admin',
             'email'             => 'admin@admin.com',
             'password'          => bcrypt('admin00+*'),
-            'email_verified_at' => date('Y-m-d H:i')
+            'email_verified_at' => date('Y-m-d H:i'),
         ]);
         $admin->assignRole('admin');
 

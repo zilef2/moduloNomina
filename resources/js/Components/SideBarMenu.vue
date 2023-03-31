@@ -9,6 +9,8 @@ import {
     PresentationChartLineIcon,
     BanknotesIcon,
 } from "@heroicons/vue/24/solid";
+
+
 import { Link } from '@inertiajs/vue3';
 
 </script>
@@ -41,12 +43,21 @@ import { Link } from '@inertiajs/vue3';
             <li v-show="can(['read user'])" class="py-2">
                 <p>{{ lang().label.data }}</p>
             </li>
+
             <li v-show="can(['read user'])"
                 class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
                 :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('user.index') }">
                 <Link :href="route('user.index')" class="flex items-center py-2 px-4">
                     <UserIcon class="w-6 h-5" />
                     <span class="ml-3">{{ lang().label.user }}</span>
+                </Link>
+            </li>
+            <li v-show="can(['read parametros'])"
+                class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
+                :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('Reportes.index') }">
+                <Link :href="route('Reportes.index')" class="flex items-center py-2 px-4">
+                    <BanknotesIcon class="w-6 h-5" />
+                    <span class="ml-3">{{ lang().label.Reportes }}</span>
                 </Link>
             </li>
             <li v-show="can(['read role', 'read permission'])" class="py-2">
@@ -84,6 +95,7 @@ import { Link } from '@inertiajs/vue3';
                     <span class="ml-3">{{ lang().label.Reportes }}</span>
                 </Link>
             </li>
+            
         </ul>
     </div>
 </template>

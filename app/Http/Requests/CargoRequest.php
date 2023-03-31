@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ReporteRequest extends FormRequest
+class CargoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,12 +25,7 @@ class ReporteRequest extends FormRequest
     {
         return
         [
-			'fecha_ini' => 'required',
-			'fecha_fin' => 'required',
-			'horas_trabajadas' => 'required|min:1',
-			'centro_costo_id' => 'required',
-			// 'valido' => 'required',
-			// 'observaciones' => 'required',
+			'nombre' => 'required',
         ];
     }
 }

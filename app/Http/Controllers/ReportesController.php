@@ -97,8 +97,9 @@ class ReportesController extends Controller
             'showSelect'   =>  $showSelect,
             'IntegerDefectoSelect'   =>  $IntegerDefectoSelect,
             'showUsers'   =>  $showUsers,
+            'quincena'   =>  [],
         ]);
-    }
+    }//fin index
 
     public function CalcularTituloQuincena() {
         $esteMes = date("m");
@@ -120,27 +121,44 @@ class ReportesController extends Controller
         }
         return date("Y-m-d H:i:s",strtotime($date));
     }
+
     public function store(ReporteRequest $request)
     {
         DB::beginTransaction();
         try {
-            $Reportes = new Reporte;
-            $Reportes->fecha_ini = $this->updatingDate($request->fecha_ini);
-            $Reportes->fecha_fin = $this->updatingDate($request->fecha_fin);
-            $Reportes->horas_trabajadas = $request->horas_trabajadas;
-            $Reportes->valido = 0;
-            $Reportes->observaciones = $request->observaciones;
-            $Reportes->centro_costo_id = $request->centro_costo_id;
-            $Reportes->user_id = Auth::user()->id;
+            $traslapa = false;
+            $traslapa2 = false;
 
-            $Reportes->save();
-            DB::commit();
-            return back()->with('success', __('app.label.created_successfully', ['name' => $Reportes->nombre]));
+            $fecha_ini = $this->updatingDate($request->fecha_ini);
+            $fecha_fin = $this->updatingDate($request->fecha_fin);
+
+            $traslapa = Reporte::WhereBetween('fecha_ini',[$fecha_ini,$fecha_fin])->count();
+            $traslapa2 = Reporte::WhereBetween('fecha_fin',[$fecha_ini,$fecha_fin])->count();
+            if ($traslapa > 0 || $traslapa2 > 0) {
+
+                return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Reportes')]) . ' Las fechas se solapan');
+                
+            } else {
+                
+                $Reportes = new Reporte;
+                $Reportes->fecha_ini = $fecha_ini;
+                $Reportes->fecha_fin = $fecha_fin;
+                $Reportes->horas_trabajadas = $request->horas_trabajadas;
+                $Reportes->valido = 0;
+                $Reportes->observaciones = $request->observaciones;
+                $Reportes->centro_costo_id = $request->centro_costo_id;
+                $Reportes->user_id = Auth::user()->id;
+
+                $Reportes->save();
+                DB::commit();
+                return back()->with('success', __('app.label.created_successfully', ['name' => $Reportes->nombre]));
+            }
+
         } catch (\Throwable $th) {
             DB::rollback();
             return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Reportes')]) . $th->getMessage());
         }
-    }
+    }//fin store
 
     public function show($id) { }
     public function edit($id)

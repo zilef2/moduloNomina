@@ -28,13 +28,8 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'read role']);
         Permission::create(['name' => 'create role']);
 
-        Permission::create(['name' => 'delete permission']);
-        Permission::create(['name' => 'update permission']);
-        Permission::create(['name' => 'read permission']);
-        Permission::create(['name' => 'create permission']);
-
         //reporte
-        $vectorModelo = ['reporte','centroCostos'];
+        $vectorModelo = ['permission','reporte','centroCostos','parametros'];
         $vectorCRUD = ['create', 'update','read','delete'];
         foreach ($vectorCRUD as $value) {
             foreach ($vectorModelo as $model) {
