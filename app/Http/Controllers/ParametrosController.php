@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Parametro;
 use App\Http\Requests\ParametroRequest;
+use Inertia\Inertia;
 
 class ParametrosController extends Controller
 {
@@ -17,7 +18,40 @@ class ParametrosController extends Controller
     public function index()
     {
         $parametros= Parametro::all();
-        return view('parametros.index', ['parametros'=>$parametros]);
+        $titulo = __('app.label.Params');
+
+        $nombresTabla =[//0: como se ven //1 como es la BD
+            [
+                'subsidio de transporte',
+                'salario minimo',
+                'porcentaje diurno',
+                'porcentaje nocturno',
+                'porcentaje extra diurno',
+                'porcentaje extra nocturno',
+                'porcentaje dominical diurno',
+                'porcentaje dominical nocturno',
+                'porcentaje dominical extra diurno',
+                'porcentaje dominical extra nocturno'
+            ],
+            [
+                'o_subsidio_de_transporte',
+                'o_salario_minimo',
+                'p_porcentaje_diurno',
+                'p_porcentaje_nocturno',
+                'p_porcentaje_extra_diurno',
+                'p_porcentaje_extra_nocturno',
+                'p_porcentaje_dominical_diurno',
+                'p_porcentaje_dominical_nocturno',
+                'p_porcentaje_dominical_extra_diurno',
+                'p_porcentaje_dominical_extra_nocturno'
+            ],
+        ];
+        return Inertia::render('Parametros/Index', [ //carpetaP
+            'title'          =>  $titulo,
+            'fromController' =>  $parametros,
+            'breadcrumbs'    =>  [['label' => __('app.label.Reportes'), 'href' => route('Reportes.index')]],
+            'nombresTabla'   =>  $nombresTabla,
+        ]);
     }
 
     /**

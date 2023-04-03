@@ -14,6 +14,9 @@ const props = defineProps({
     title: String,
     user: Object,
     roles: Object,
+    cargos: Object,
+
+    
 })
 
 const emit = defineEmits(["close"]);
@@ -24,6 +27,8 @@ const form = useForm({
     password: '',
     password_confirmation: '',
     role: '',
+    cargo: 0,
+
 });
 
 const update = () => {
@@ -44,11 +49,17 @@ watchEffect(() => {
         form.name = props.user?.name
         form.email = props.user?.email
         form.role = props.user?.roles == 0 ? '' : props.user?.roles[0].name
+        form.cargo = props.user?.cargo_id == 0 ? '' : props.user?.cargo.id
         form.errors = {}
     }
+    
+console.log("🚀🧈 -------------------🚀🧈");
+console.log("🚀🧈 debu asd:", props.user);
+console.log("🚀🧈 -------------------🚀🧈");
 })
 
 const roles = props.roles?.map(role => ({ label: role.name, value: role.name }))
+const cargos = props.cargos?.map(cargo => ({ label: cargo.nombre, value: cargo.id }))
 
 </script>
 
@@ -90,6 +101,12 @@ const roles = props.roles?.map(role => ({ label: role.name, value: role.name }))
                         <SelectInput id="role" class="mt-1 block w-full" v-model="form.role" required :dataSet="roles">
                         </SelectInput>
                         <InputError class="mt-2" :message="form.errors.role" />
+                    </div>
+                    <div>
+                        <InputLabel for="cargo" :value="lang().label.cargo" />
+                        <SelectInput id="cargo" class="mt-1 block w-full" v-model="form.cargo" required :dataSet="cargos">
+                        </SelectInput>
+                        <InputError class="mt-2" :message="form.errors.cargo" />
                     </div>
                 </div>
                 <div class="flex justify-end">

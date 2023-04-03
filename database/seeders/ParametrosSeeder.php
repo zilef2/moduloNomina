@@ -21,10 +21,13 @@ class ParametrosSeeder extends Seeder
             'salario_minimo' => 1300606,
             'porcentaje_diurno' => 1,
             'porcentaje_nocturno' => 1.35,
+
             'porcentaje_extra_diurno' => 1.25,
             'porcentaje_extra_nocturno' => 1.75,
+
             'porcentaje_dominical_diurno' => 1.75,
             'porcentaje_dominical_nocturno' => 2.1,
+            
             'porcentaje_dominical_extra_diurno' => 2,
             'porcentaje_dominical_extra_nocturno' => 2.5,
 

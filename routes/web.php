@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CentroCostosController;
+use App\Http\Controllers\ParametrosController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportesController;
@@ -59,7 +60,7 @@ Route::get('/dashboard', function () {
                 ->sum('horas_trabajadas'),
         ];
         //!toremember
-        $usuariosConRol = User::whereHas("roles", function($q){ $q->where("name", "operator"); })->get();
+        $usuariosConRol = User::whereHas("roles", function($q){ $q->where("name", "operator"); })->take(6)->get();
 
         foreach ($usuariosConRol as $value) {
             $BooleanreportoHoy = Reporte::where('user_id',$value->id)->whereDate('fecha_fin',Carbon::today())->first();
@@ -116,9 +117,10 @@ Route::middleware('auth', 'verified')->group(function () {
     
     Route::resource('/CentroCostos', CentroCostosController::class);//show -> reportes del centro
     Route::resource('/Reportes', ReportesController::class);
-
+    
     Route::get('/userReportes/{id}', [UserController::class,'showReporte'])->name('user.showReporte');
-
+    
+    Route::resource('/Parametros', ParametrosController::class);
 
 
     //# excel

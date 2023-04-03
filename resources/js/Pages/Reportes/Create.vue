@@ -26,20 +26,50 @@ const props = defineProps({
 
 const emit = defineEmits(["close"]);
 
+function getHoursColombianRandom(otraVez) {
+
+    let hora_inicial = '09'
+    // let vec_inicial = ['00','06','09']
+    // let vec_final = ['01','04','10','11']
+    let vec_final = ['15','21','23','24']
+    let num = Math.floor(Math.random() * (vec_final.length-1));
+    
+    if(otraVez) return vec_final[num]
+
+    // let hora_inicial = vec_inicial[num]
+    let hora_final = vec_final[num]
+
+    // while(hora_final < hora_inicial)
+    //     hora_final = getHoursColombianRandom(true);
+
+    return [hora_inicial,hora_final];
+}
+
+const horas = getHoursColombianRandom()
+
 const form = useForm({
     // fecha_ini: '',
     // fecha_fin: '',
-    fecha_ini: '2023-03-22T13:00',
-    fecha_fin: '2023-03-23T06:00',
+
+    fecha_ini: '2023-04-03T'+horas[0]+':00',
+    fecha_fin: '2023-04-03T'+horas[1]+':00',
 
 
     horas_trabajadas: '',
     centro_costo_id: props.IntegerDefectoSelect,
     observaciones: '',
-    diurnas: '',
-    nocturnas: '',
     almuerzo: '0',
-})
+
+    diurnas: '0',
+    nocturnas: '0',
+    dominicales: '0',
+    extra_diurnas: '0',
+    extra_nocturnas: '0',
+    extra_dominicales: '0',
+});
+//TODO: extras por semana
+//TODO: dominicales y extra dom
+
 
 const create = () => {
     if(form.horas_trabajadas <= 24){
@@ -67,14 +97,15 @@ watchEffect(() => {
     if( Date.parse(form.fecha_ini) && Date.parse(form.fecha_fin) ){
         let ini = Date.parse(form.fecha_ini);
         let fin = Date.parse(form.fecha_fin);
+        form.horas_trabajadas = "0"
+        form.diurnas = "0"
+        form.nocturnas = "0"
+        form.extra_nocturnas = "0"
+        form.almuerzo = "0"
         form.horas_trabajadas = ''+parseInt((fin - ini)/(3600*1000));
 
         if( Date.parse(form.fecha_ini) > Date.parse(form.fecha_fin)){
             form.errors.horas_trabajadas = 'La fecha inicial es mayor a la final'
-            form.horas_trabajadas = "0"
-            form.diurnas = "0"
-            form.nocturnas = "0"
-            form.almuerzo = "0"
         }else{
             if(form.horas_trabajadas >= 24){
                 form.errors.horas_trabajadas = 'Las horas trabajadas son demasiadas'
@@ -83,27 +114,41 @@ watchEffect(() => {
                 form.nocturnas = "0"
                 form.almuerzo = "0"
             }else{// la ini < fin y las horas trabajadas son < 24
-                form.almuerzo = 0;
-                if(form.horas_trabajadas >= 8){//toask
-                    form.horas_trabajadas -= 1
-                    form.almuerzo = 1;
-                }
-                
-                form.diurnas = Math.abs(calcularDiurnas(form.fecha_ini,form.fecha_fin));
-                form.nocturnas = Math.abs(calcularNocturnas(form.fecha_ini,form.fecha_fin));
+                if(form.horas_trabajadas < 8){
+                    form.almuerzo = 'No';
+                    
+                    form.diurnas = Math.abs(calcularDiurnas(form.fecha_ini,form.fecha_fin));
+                    form.nocturnas = Math.abs(calcularNocturnas(form.fecha_ini,form.fecha_fin));
+                    
+                }else{ //extras
+                    form.almuerzo = 'Si';
+                   
+                    if(form.horas_trabajadas > 8){
 
-                if(form.diurnas > 0){
-                    form.diurnas -= form.almuerzo
-                }else{
-                    if(form.nocturnas > 0)
-                    form.nocturnas -= form.almuerzo
+                        let horasExtrasDiurnas = (calcularDiurnas(form.fecha_ini,form.fecha_fin,'extra'));
+                        form.extra_diurnas = horasExtrasDiurnas[0];
+                        form.diurnas = horasExtrasDiurnas[1];
+
+                        const CuandoEmpiezaExtra = parseInt(new Date(form.fecha_ini).getHours())+8;
+                        
+                        let horasExtrasNocturnas = (calcularNocturnas(form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra));
+                        form.extra_nocturnas = horasExtrasNocturnas[0];
+                        form.nocturnas = horasExtrasNocturnas[1];
+                    }
+                    form.horas_trabajadas -= 1;
+                    if(form.diurnas > 0){
+                        form.diurnas -= 1
+                    }else{
+                        if(form.nocturnas > 0)
+                        form.nocturnas -= 1
+                    }
                 }
             }
         }
     }
 })
 
-function calcularDiurnas(Inicio, Fin){
+function calcularDiurnas(Inicio, Fin,extra){
     const horasInicio = new Date(Inicio).getHours();
     const horasFin = new Date(Fin).getHours();
 
@@ -113,16 +158,25 @@ function calcularDiurnas(Inicio, Fin){
     const BaseInicial = horasInicio >= 6 ? horasInicio : 6 
     if(DiaInicio == DiaFin){
         const BaseFinal = horasFin >= 21 ? 21 : horasFin
-        return BaseFinal - BaseInicial;
+        let HorasDiurnas = BaseFinal - BaseInicial;
+        if(extra === 'extra' && HorasDiurnas > 8){
+            return [HorasDiurnas-8,8]
+        }
+        return HorasDiurnas;
+
+
     }else{
         const BaseFinal = horasFin <= 6 ? 21 : horasFin // se asume que 24 es lo maximo que se puede trabajar
-        return BaseFinal - BaseInicial;
+        let HorasDiurnas = BaseFinal - BaseInicial;
+
+        if(extra === 'extra' && HorasDiurnas > 8){
+            return [HorasDiurnas-8,8]
+        }
+        return HorasDiurnas;
     }
 }
 
-
-
-function calcularNocturnas(Inicio, Fin){
+function calcularNocturnas(Inicio, Fin,CuandoEmpiezaExtra){
     const horasInicio = new Date(Inicio).getHours();
     const horasFin = new Date(Fin).getHours();
 
@@ -178,7 +232,13 @@ function calcularNocturnas(Inicio, Fin){
 
     console.log("🚀🧈 debu calcularNocturnas debu Madrugada:", Madrugada); console.log("🚀🧈 debu calcularNocturnas debu tarde:", Tarde);
 
-    return (Madrugada + Tarde);
+    let HorasNoc = Madrugada + Tarde;
+    if(CuandoEmpiezaExtra <= 21){ //tiene diurnas extra
+        return [HorasNoc,0]
+    }else{ //no tiene diurnas extra
+        const ordinarias = CuandoEmpiezaExtra - 21
+        return [HorasNoc-ordinarias,ordinarias];
+    }
 }
 
 const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
@@ -210,27 +270,42 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
 
                     <div>
                         <InputLabel for="horas_trabajadas" :value="lang().label.horas_trabajadas" />
-                        <TextInput id="horas_trabajadas" type="number" class="mt-1 block w-full" v-model="form.horas_trabajadas" disabled
+                        <TextInput id="horas_trabajadas" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 block w-full" v-model="form.horas_trabajadas" disabled
                             :placeholder="lang().placeholder.horas_trabajadas" :error="form.errors.horas_trabajadas" />
-                        <InputError class="mt-2" :message="form.errors.horas_trabajadas" />
+                        <InputError class="bg-gray-100 dark:bg-gray-700 mt-2" :message="form.errors.horas_trabajadas" />
                     </div>
-                    <div class="grid grid-cols-3 gap-1">
+
+                    <div>
+                        <InputLabel for="almuerzo" :value="lang().label.almuerzo" />
+                        <TextInput id="almuerzo" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.almuerzo" disabled
+                            :placeholder="lang().placeholder.almuerzo" :error="form.errors.almuerzo" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-6">
                         <div>
                             <InputLabel for="diurnas" :value="lang().label.diurnas" />
-                            <TextInput id="diurnas" type="number" class="mt-1 w-full" v-model="form.diurnas" disabled
+                            <TextInput id="diurnas" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.diurnas" disabled
                                 :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas" />
                         </div>
                         <div>
                             <InputLabel for="nocturnas" :value="lang().label.nocturnas" />
-                            <TextInput id="nocturnas" type="number" class="mt-1 w-full" v-model="form.nocturnas" disabled
+                            <TextInput id="nocturnas" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.nocturnas" disabled
                                 :placeholder="lang().placeholder.nocturnas" :error="form.errors.nocturnas" />
                         </div>
+                    </div>
+                    <div v-if="form.extra_diurnas || form.extra_nocturnas" class="grid grid-cols-2 gap-6">
                         <div>
-                            <InputLabel for="almuerzo" :value="lang().label.almuerzo" />
-                            <TextInput id="almuerzo" type="number" class="mt-1 w-full" v-model="form.almuerzo" disabled
-                                :placeholder="lang().placeholder.almuerzo" :error="form.errors.almuerzo" />
+                            <InputLabel for="extra_diurnas" :value="lang().label.extra_diurnas" />
+                            <TextInput id="extra_diurnas" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.extra_diurnas" disabled
+                                :placeholder="lang().placeholder.extra_diurnas" :error="form.errors.extra_diurnas" />
+                        </div>
+                        <div>
+                            <InputLabel for="extra_nocturnas" :value="lang().label.extra_nocturnas" />
+                            <TextInput id="extra_nocturnas" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.extra_nocturnas" disabled
+                                :placeholder="lang().placeholder.extra_nocturnas" :error="form.errors.extra_nocturnas" />
                         </div>
                     </div>
+
+
                     <div>
                         <InputLabel for="centro_costo_id" :value="lang().label.centro_costo_id" />
                         <SelectInput v-model="form.centro_costo_id" :dataSet="props.valoresSelect" class="mt-1 block w-full" />

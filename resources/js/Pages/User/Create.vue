@@ -13,6 +13,7 @@ const props = defineProps({
     show: Boolean,
     title: String,
     roles: Object,
+    cargos: Object,
 })
 
 const emit = defineEmits(["close"]);
@@ -23,6 +24,7 @@ const form = useForm({
     password: '',
     password_confirmation: '',
     role: 'operator',
+    cargo: 1,
 })
 
 const create = () => {
@@ -45,6 +47,11 @@ watchEffect(() => {
 })
 //TOREVISE
 const roles = props.roles?.map(role => ({ label: role.name, value: role.name }))
+const cargos = props.cargos?.map(cargo => ({ label: cargo.nombre, value: cargo.id }))
+
+console.log("🚀🧈 -------------------------🚀🧈");
+console.log("🚀🧈 debu cargos:", cargos);
+console.log("🚀🧈 -------------------------🚀🧈");
 
 </script>
 
@@ -86,6 +93,12 @@ const roles = props.roles?.map(role => ({ label: role.name, value: role.name }))
                         <SelectInput id="role" class="mt-1 block w-full" v-model="form.role" required :dataSet="roles">
                         </SelectInput>
                         <InputError class="mt-2" :message="form.errors.role" />
+                    </div>
+                    <div>
+                        <InputLabel for="cargo" :value="lang().label.cargo" />
+                        <SelectInput id="cargo" class="mt-1 block w-full" v-model="form.cargo" required :dataSet="cargos">
+                        </SelectInput>
+                        <InputError class="mt-2" :message="form.errors.cargo" />
                     </div>
                 </div>
                 <div class="flex justify-end">

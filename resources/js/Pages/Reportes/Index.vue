@@ -18,9 +18,9 @@
         import SuccessButton from '@/Components/SuccessButton.vue';
 
 
-    import Create from '@/Pages/reportes/Create.vue';
-    import Edit from '@/Pages/reportes/Edit.vue'; 
-    import Delete from '@/Pages/reportes/Delete.vue';
+    import Create from '@/Pages/Reportes/Create.vue';
+    import Edit from '@/Pages/Reportes/Edit.vue'; 
+    import Delete from '@/Pages/Reportes/Delete.vue';
 
     import { Bar } from 'vue-chartjs'
     import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
@@ -60,9 +60,9 @@
    
     const data = reactive({
         params: {
-            search: props.filters.search,
-            field: props.filters.field,
-            order: props.filters.order,
+            search: props.filters?.search,
+            field: props.filters?.field,
+            order: props.filters?.order,
             perPage: props.perPage,
         },
         selectedId: [],
@@ -209,22 +209,25 @@
                     <Edit :show="data.editOpen" @close="data.editOpen = false" 
                         :Reporte="data.generico" :title="props.title" :valoresSelect="props.valoresSelect" :showUsers="props.showUsers" :correccionUsuario="false"/>
                     
-                        <Edit :show="data.editCorregirOpen" @close="data.editCorregirOpen = false" 
-                            :Reporte="data.generico" :title="props.title" :valoresSelect="props.valoresSelect" :showUsers="props.showUsers" :correccionUsuario="true"/>
+                    <Edit :show="data.editCorregirOpen" @close="data.editCorregirOpen = false" 
+                        :Reporte="data.generico" :title="props.title" :valoresSelect="props.valoresSelect" :showUsers="props.showUsers" :correccionUsuario="true"/>
+                        
                     <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :Reporte="data.generico" :title="props.title" />
                 </div>
             </div>
+
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <!-- paginacion, borrado y buscado -->
                 <div class="flex justify-between p-2">
                     <div class="flex space-x-2">
-                        <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet" />
+                        <SelectInput v-if="filters !== null" v-model="data.params.perPage" :dataSet="data.dataSet" />
                         <DangerButton @click="data.deleteBulkOpen = true"
                             v-show="data.selectedId.length != 0" class="px-3 py-1.5"
                             v-tooltip="lang().tooltip.delete_selected">
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton>
                     </div>
-                    <TextInput v-show="can(['update reporte'])" v-model="data.params.search" type="text" class="block w-3/6 md:w-2/6 lg:w-1/6 rounded-lg"
+                    <TextInput v-if="filters !== null" v-show="can(['update reporte'])" v-model="data.params.search" type="text" class="block w-3/6 md:w-2/6 lg:w-1/6 rounded-lg"
                         :placeholder="lang().placeholder.searchDates" />
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
@@ -239,7 +242,7 @@
                                     class="px-2 py-4 cursor-pointer hover:bg-sky-50 dark:hover:bg-sky-800">
                                     <div class="flex justify-between items-center">
                                         <span>{{ titulos }}</span>
-                                        <ChevronUpDownIcon v-if="nombresTabla[2][indiceN] != null" class="w-4 h-4" />
+                                        <ChevronUpDownIcon v-if="nombresTabla[2][indiceN] !== null" class="w-4 h-4" />
                                     </div>
                                 </th>
                             </tr>
@@ -303,26 +306,37 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="flex justify-betwween items-center p-2 border-t border-gray-200 dark:border-gray-700">
+                <div  class="flex justify-betwween items-center p-2 border-t border-gray-200 dark:border-gray-700">
                     <Pagination :links="props.fromController" :filters="data.params" />
                 </div>
             </div>
 
-            <div v-if="props.quincena != null" v-show="can(['updateCorregido reporte']) || can(['isAdmin'])" 
-            class="grid xs:grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-2 my-5">
-                <div class="my-2 mx-5 p-1">
-                    <Bar id="my-chart-id"
-                    :options="chartOptions"
-                    :data="chartData" />
+            <section v-if="props.quincena != null" v-show="can(['updateCorregido reporte']) || can(['isAdmin'])" class="text-gray-600 body-font overflow-hidden">
+                <div class="container px-5 py-4 mx-auto">
+                    <div class="flex flex-wrap m-2">
+                        <div class="p-1 md:w-1/2 flex flex-col items-start">
+                            <span class="inline-block py-1 px-2 rounded bg-indigo-50 text-indigo-500 text-xs font-medium tracking-widest">Este mes</span>
+                            <h2 class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">Numero de reportes</h2>
+                            <div class="m-1 p-1 w-full">
+                                <Bar id="my-chart-id"
+                                :options="chartOptions"
+                                :data="chartData" />
+                            </div>
+                        </div>
+                        <!-- <div class="p-1 md:w-1/2 flex flex-col items-start">
+                            <span class="inline-block py-1 px-2 rounded bg-indigo-50 text-indigo-500 text-xs font-medium tracking-widest">Segunda quincena</span>
+                            <h2 class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">Numero de reportes</h2>
+                            <div class="m-1 p-1 w-full">
+                                <Bar id="my-chart-id"
+                                :options="chartOptions"
+                                :data="chartData" />
+                            </div>
+                        </div> -->
+                    </div>
                 </div>
-                <div class="my-2 mx-5 p-1">
-                    <Bar id="my-chart-id"
-                    :options="chartOptions"
-                    :data="chartData" />
-                </div>
-            </div>
+            </section>
 
-            
+
         </div>
     </AuthenticatedLayout>
 </template>

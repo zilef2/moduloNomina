@@ -26,6 +26,7 @@ const props = defineProps({
     filters: Object,
     users: Object,
     roles: Object,
+    cargos: Object,
     breadcrumbs: Object,
     perPage: Number,
 })
@@ -99,9 +100,10 @@ const select = () => {
                             <span class="ml-3">{{ lang().button.importUser }}</span>
                         </Link>
                     </PrimaryButton>
-                    <Create :show="data.createOpen" @close="data.createOpen = false" :roles="props.roles"
+
+                    <Create :show="data.createOpen" @close="data.createOpen = false" :roles="props.roles" :cargos="props.cargos"
                         :title="props.title" />
-                    <Edit :show="data.editOpen" @close="data.editOpen = false" :user="data.user" :roles="props.roles"
+                    <Edit :show="data.editOpen" @close="data.editOpen = false" :user="data.user" :roles="props.roles" :cargos="props.cargos"
                         :title="props.title" />
                     <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :user="data.user"
                         :title="props.title" />
@@ -143,20 +145,26 @@ const select = () => {
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
                                 </th>
-                                <th class="px-2 py-4">{{ lang().label.role }}</th>
-                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('created_at')">
+                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('cargo_id')">
                                     <div class="flex justify-between items-center">
-                                        <span>{{ lang().label.created }}</span>
+                                        <span>{{ lang().label.cargo }}</span>
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
                                 </th>
+                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('cargo_id')">
+                                    <div class="flex justify-between items-center">
+                                        <span>{{ lang().label.salario_hora }}</span>
+                                        <ChevronUpDownIcon class="w-4 h-4" />
+                                    </div>
+                                </th>
+                                <th class="px-2 py-4">{{ lang().label.role }}</th>
                                 <th class="px-2 py-4 cursor-pointer" v-on:click="order('updated_at')">
                                     <div class="flex justify-between items-center">
                                         <span>{{ lang().label.updated }}</span>
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
                                 </th>
-                                <th class="px-2 py-4 cursor-not-allowed">Action</th>
+                                <th class="px-2 py-4 cursor-not-allowed">{{ lang().label.Action }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -176,10 +184,10 @@ const select = () => {
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.email }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{
-                                    user.roles.length == 0 ? 'not selected' : user.roles[0].name
-                                }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.created_at }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cargo.length == 0 ? 'No tiene cargo' : user.cargo.nombre }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cargo.length == 0 ? 'No tiene cargo' : user.cargo.salario_hora }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.roles.length == 0 ? 'No tiene rol' : user.roles[0].name }}</td>
+                                <!-- <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.created_at }}</td> -->
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.updated_at }}</td>
                                 <td class="whitespace-nowrap p-4 sm:p-3">
                                     <div class="flex justify-center">

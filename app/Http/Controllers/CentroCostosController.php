@@ -74,7 +74,7 @@ class CentroCostosController extends Controller
         }
     }
 
-    public function show(Request $request, $id) {
+    public function show( $id) {
         // $centroCostos = centroCosto::findOrFail($id);
         $Reportes = Reporte::query();
         
@@ -97,52 +97,22 @@ class CentroCostosController extends Controller
         }
         
         if($permissions === "operator") { //admin | validador
-            $Reportes->whereUser_id($Authuser->id);
-
-            if ($request->has(['field', 'order'])) {
-                $Reportes->orderBy($request->field, $request->order);
-            }else{
-                $Reportes->orderBy('fecha_ini');
-            }
-            $perPage = $request->has('perPage') ? $request->perPage : 10;
-
-            $nombresTabla =[//0: como se ven //1 como es la BD //2??
-                ["Acciones","#","Centro costo","Trabajador","inicio", "fin", "horas trabajadas", "valido", "observaciones"],
-                ["t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
-                [null,null,null,null,"t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"] //campos ordenables
-            ];
-            
         }else{ // not operator
             // $ReportesEsteMes = Reporte::WhereMonth('fecha_ini',$esteMes)->get()->count();
             $titulo = $this->CalcularTituloQuincena();
             
-            if ($request->has('search')) {
-                $Reportes->whereMonth('fecha_ini', $request->search);
-                $Reportes->OrwhereMonth('fecha_fin', $request->search);
-                $Reportes->OrwhereYear('fecha_ini', $request->search);
-                $Reportes->OrwhereYear('fecha_fin', $request->search);
-                $Reportes->OrwhereDay('fecha_ini', $request->search);
-                $Reportes->OrwhereDay('fecha_fin', $request->search);
-                // $Reportes->orWhere('fecha_fin', 'LIKE', "%" . $request->search . "%");
-            }
-            if ($request->has(['field', 'order'])) {
-                $Reportes->orderBy($request->field, $request->order);
-            }else{
-                $Reportes->orderBy('fecha_ini');
-            }
-            $perPage = $request->has('perPage') ? $request->perPage : 10;
+            $Reportes->orderBy('fecha_ini'); $perPage = 15;
 
             $nombresTabla =[//0: como se ven //1 como es la BD
                 ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio",       "fin",        "horas trabajadas",   "observaciones"],
                 ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
-                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean 
+                [null,null,null,null,null,null,null,null,null,null,null,null,null,null] //campos ordenables
             ];
         }
 
-
         return Inertia::render('Reportes/Index', [ //carpeta
             'title'          =>  $titulo,
-            'filters'        =>  $request->all(['search', 'field', 'order']),
+            'filters'        =>  null,
             'perPage'        =>  (int) $perPage,
             'fromController' =>  $Reportes->paginate($perPage),
             'breadcrumbs'    =>  [['label' => __('app.label.Reportes'), 'href' => route('Reportes.index')]],
@@ -172,13 +142,6 @@ class CentroCostosController extends Controller
         return Inertia::render('centroCostos.edit',['centroCostos'=>$centroCostos]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  centroCostosRequest  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(CentroCostoRequest $request, $id) {
          DB::beginTransaction();
 
@@ -200,8 +163,7 @@ class CentroCostosController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
+    public function destroy($id) {
         DB::beginTransaction();
 
         try {

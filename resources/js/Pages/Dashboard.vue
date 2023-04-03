@@ -37,12 +37,11 @@ watchEffect(() => {
 const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    color: "#00fffd",
+    color: "#0000f0",
     // todo
     darkcolor: "#fff",
     
 }
-
 
 const chartData = {
     name: 'Numero de reportes',

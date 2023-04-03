@@ -2,6 +2,9 @@
 
 return [
     'label' => [
+        //parametros
+        'Params' => 'Parametros',
+        'Parametros' => 'Parametros',
         //upload and download user excel
         'upload_complete' => 'Archivo subido correctamente',
         'importUser' => 'importar usuarios',
@@ -9,6 +12,8 @@ return [
         'downUsers' => 'Exportar us',
 
         //centro y reportes
+        'extra_diurnas' => 'Extra diurnas',
+        'extra_nocturnas' => 'Extra nocturnas',
         'CentroCostos' => 'Centro Costos',
         'CentroCosto' => 'Centro Costo',
         'Reportes' => 'Reporte',
@@ -37,7 +42,13 @@ return [
         'nocturnas' => 'nocturnas',
         'almuerzo' => 'almuerzo',
 
+        //users
+        'cargo' => 'Cargo',
+        'salario_hora' => 'Salario hora',
+
+
         //otros
+        'Action' => 'Acción',
         'welcome' => 'Bienvenido',
         'login' => 'Login',
         'register' => 'Registrar',

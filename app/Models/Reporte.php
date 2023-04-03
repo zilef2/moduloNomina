@@ -13,6 +13,12 @@ class Reporte extends Model
         'fecha_ini',
         'fecha_fin',
         'horas_trabajadas',//admit null
+		'diurnas',
+		'nocturnas',
+		'dominicales',
+		'extra_diurnas',
+		'extra_nocturnas',
+		'extra_dominicales',
         'valido',//admit null
         'observaciones',//admit null
 

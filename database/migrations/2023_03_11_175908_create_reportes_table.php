@@ -18,6 +18,15 @@ class CreateReportesTable extends Migration
 			$table->datetime('fecha_ini');
 			$table->datetime('fecha_fin');
 			$table->integer('horas_trabajadas')->nullable();
+			$table->integer('almuerzo')->nullable();
+
+			$table->integer('diurnas')->nullable();
+			$table->integer('nocturnas')->nullable();
+			$table->integer('dominicales')->nullable();
+			$table->integer('extra_diurnas')->nullable();
+			$table->integer('extra_nocturnas')->nullable();
+			$table->integer('extra_dominicales')->nullable();
+
 			$table->boolean('valido')->default(0);
 			$table->text('observaciones')->nullable();
             $table->timestamps();

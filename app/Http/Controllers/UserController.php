@@ -14,18 +14,18 @@ use Illuminate\Support\Facades\Hash;
 
 use App\Imports\UsersImport;
 use App\Exports\UsersExport;
+use App\Models\Cargo;
 use App\Models\CentroCosto;
 use App\Models\Reporte;
 use Carbon\Carbon;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
 
-    public function __construct()
-    {
-
+    public function __construct() {
         $this->middleware('permission:create user', ['only' => ['create', 'store']]);
         $this->middleware('permission:read user', ['only' => ['index', 'show']]);
         $this->middleware('permission:update user', ['only' => ['edit', 'update']]);
@@ -37,8 +37,7 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(UserIndexRequest $request)
-    {
+    public function index(UserIndexRequest $request){
         $users = User::query();
         if ($request->has('search')) {
             $users->where('name', 'LIKE', "%" . $request->search . "%");
@@ -56,12 +55,14 @@ class UserController extends Controller
             });
             $roles = Role::where('name', '<>', 'superadmin')->get();
         }
+        $cargos = Cargo::all();
         return Inertia::render('User/Index', [
             'title'         => __('app.label.user'),
             'filters'       => $request->all(['search', 'field', 'order']),
             'perPage'       => (int) $perPage,
-            'users'         => $users->with('roles')->paginate($perPage),
+            'users'         => $users->with('roles','cargo')->paginate($perPage),
             'roles'         => $roles,
+            'cargos'         => $cargos,
             'breadcrumbs'   => [['label' => __('app.label.user'), 'href' => route('user.index')]],
         ]);
     }
@@ -71,17 +72,8 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
-        //
-    }
+    public function create() { }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(UserStoreRequest $request)
     {
         DB::beginTransaction();
@@ -90,6 +82,7 @@ class UserController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
+                'cargo_id' => $request->cargo
             ]);
             $user->assignRole($request->role);
             DB::commit();
@@ -138,6 +131,8 @@ class UserController extends Controller
                 'name'      => $request->name,
                 'email'     => $request->email,
                 'password'  => $request->password ? Hash::make($request->password) : $user->password,
+                'cargo_id' => $request->cargo
+
             ]);
             $user->syncRoles($request->role);
             DB::commit();
@@ -211,12 +206,13 @@ class UserController extends Controller
         }
     }
 
-    public function export() 
-    {
-        return Excel::download(new UsersExport, 'users.xlsx');
+    public function export() {
+        $anio = date("Y");
+        $quincena = 1;
+        return Excel::download(new UsersExport, "$anio".'_Quincena_'.$quincena.".xlsx");
     }
 
-    public function showReporte(Request $request, $id) {
+    public function showReporte($id) {
         // $centroCostos = centroCosto::findOrFail($id);
         $Reportes = Reporte::query();
         
@@ -239,49 +235,19 @@ class UserController extends Controller
         }
         
         if($permissions === "operator") { //admin | validador
-            $Reportes->whereUser_id($Authuser->id);
-
-            if ($request->has(['field', 'order'])) {
-                $Reportes->orderBy($request->field, $request->order);
-            }else{
-                $Reportes->orderBy('fecha_ini');
-            }
-            $perPage = $request->has('perPage') ? $request->perPage : 10;
-
-            $nombresTabla =[//0: como se ven //1 como es la BD //2??
-                ["Acciones","#","Centro costo","Trabajador","inicio", "fin", "horas trabajadas", "valido", "observaciones"],
-                ["t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
-                [null,null,null,null,"t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"] //campos ordenables
-            ];
-
-        $quincena = [];
-            
         }else{ // not operator
             // $ReportesEsteMes = Reporte::WhereMonth('fecha_ini',$esteMes)->get()->count();
             $titulo = $this->CalcularTituloQuincena();
             
-            if ($request->has('search')) {
-                $Reportes->whereMonth('fecha_ini', $request->search);
-                $Reportes->OrwhereMonth('fecha_fin', $request->search);
-                $Reportes->OrwhereYear('fecha_ini', $request->search);
-                $Reportes->OrwhereYear('fecha_fin', $request->search);
-                $Reportes->OrwhereDay('fecha_ini', $request->search);
-                $Reportes->OrwhereDay('fecha_fin', $request->search);
-                // $Reportes->orWhere('fecha_fin', 'LIKE', "%" . $request->search . "%");
-            }
-            if ($request->has(['field', 'order'])) {
-                $Reportes->orderBy($request->field, $request->order);
-            }else{
-                $Reportes->orderBy('fecha_ini');
-            }
-            $perPage = $request->has('perPage') ? $request->perPage : 10;
+            $Reportes->orderBy('fecha_ini'); $perPage = 15;
 
             $nombresTabla =[//0: como se ven //1 como es la BD
                 ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio",       "fin",        "horas trabajadas",   "observaciones"],
                 ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
-                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean 
+                [null,null,null,null,null,null,null,null,null,null,null,null,null,null] //campos ordenables
             ];
 
+            //sin uso1
             $quincena = Reporte::Where('user_id',$id)
                 ->WhereBetween('fecha_ini',[Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
                 ->Orderby('fecha_ini')->get();
@@ -295,12 +261,16 @@ class UserController extends Controller
                 $quincena[$laKey ] = $value->horas_trabajadas;
                 unset($quincena[$key]);
             }
-        }
-// dd($quincena);
+            //fin sin uso1
 
+            $quincena = [
+                'Primera quincena' => Reporte::whereBetween('fecha_ini',[Carbon::now()->startOfMonth(),Carbon::now()->startOfMonth()->addDays(15)])->count(),
+                'Segunda quincena' => Reporte::whereBetween('fecha_ini',[Carbon::now()->startOfMonth()->addDays(15),Carbon::now()->LastOfMonth()])->count(),
+            ];
+        }
         return Inertia::render('Reportes/Index', [ //carpeta
             'title'          =>  $titulo,
-            'filters'        =>  $request->all(['search', 'field', 'order']),
+            'filters'        =>  null,
             'perPage'        =>  (int) $perPage,
             'fromController' =>  $Reportes->paginate($perPage),
             'breadcrumbs'    =>  [['label' => __('app.label.Reportes'), 'href' => route('Reportes.index')]],

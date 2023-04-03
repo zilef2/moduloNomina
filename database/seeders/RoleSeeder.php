@@ -68,22 +68,8 @@ class RoleSeeder extends Seeder
             //centroCostos
         ]);
 
-        $vectorCRUDAdmin = ['create', 'update','read'];
-        $vectorModelo = ['centroCostos','parametros'];
-
-        foreach ($vectorCRUDAdmin as $value) {
-            foreach ($vectorModelo as $model) {
-                $admin->givePermissionTo([ $value.' '.$model ]);
-            }
-        }
-
         $operator = Role::create([ 'name' => 'operator' ]);
         $operator->givePermissionTo([
-            // 'read user',
-            // 'create user',
-            // 'read role',
-            // 'read permission',
-
              //reporte
             'read reporte',
             'create reporte',
@@ -94,8 +80,9 @@ class RoleSeeder extends Seeder
         ]);
 
         $validador = Role::create(['name' => 'validador']);
-
         $validador->givePermissionTo([
+            'isValidador',
+            
             'read user',
             'create user',
             'read role',
@@ -106,11 +93,17 @@ class RoleSeeder extends Seeder
              'updateCorregido reporte',
  
              //centroCostos
-             'read centroCostos',
-             'create centroCostos',
-             'update centroCostos',
              'delete centroCostos',
         ]);
+
+        $vectorCRUDAdmin = ['create', 'update','read'];
+        $vectorModelo = ['centroCostos','parametros'];
+        foreach ($vectorCRUDAdmin as $value) {
+            foreach ($vectorModelo as $model) {
+                $admin->givePermissionTo([ $value.' '.$model ]);
+                $validador->givePermissionTo([ $value.' '.$model ]);
+            }
+        }
         // $role->revokePermissionTo($permission);
         // $permission->removeRole($role);
     }

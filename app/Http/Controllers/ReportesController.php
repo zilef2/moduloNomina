@@ -10,6 +10,7 @@ use App\Models\Reporte;
 use App\Http\Requests\ReporteRequest;
 use App\Models\CentroCosto;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class ReportesController extends Controller
@@ -40,6 +41,8 @@ class ReportesController extends Controller
         foreach ($usuariosSelectConsulta as $value) {
             $showUsers[intval($value->id)] = $value->name;
         }
+
+        $quincena = [];
         
         if($permissions === "operator") { //admin | validador
             $Reportes->whereUser_id($Authuser->id);
@@ -56,8 +59,14 @@ class ReportesController extends Controller
                 ["t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
                 [null,null,null,null,"t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"] //campos ordenables
             ];
-            
+
         }else{ // not operator
+            $quincena = [
+
+                'Primera quincena' => Reporte::whereBetween('fecha_ini',[Carbon::now()->startOfMonth(),Carbon::now()->startOfMonth()->addDays(15)])->count(),
+                'Segunda quincena' => Reporte::whereBetween('fecha_ini',[Carbon::now()->startOfMonth()->addDays(15),Carbon::now()->LastOfMonth()])->count(),
+            ];
+            // dd($quincena);
             // $ReportesEsteMes = Reporte::WhereMonth('fecha_ini',$esteMes)->get()->count();
             $titulo = $this->CalcularTituloQuincena();
             
@@ -97,7 +106,7 @@ class ReportesController extends Controller
             'showSelect'   =>  $showSelect,
             'IntegerDefectoSelect'   =>  $IntegerDefectoSelect,
             'showUsers'   =>  $showUsers,
-            'quincena'   =>  [],
+            'quincena'   =>  $quincena,
         ]);
     }//fin index
 
@@ -126,16 +135,17 @@ class ReportesController extends Controller
     {
         DB::beginTransaction();
         try {
+            $thisUserId = Auth::User()->id;
             $traslapa = false;
             $traslapa2 = false;
 
             $fecha_ini = $this->updatingDate($request->fecha_ini);
             $fecha_fin = $this->updatingDate($request->fecha_fin);
 
-            $traslapa = Reporte::WhereBetween('fecha_ini',[$fecha_ini,$fecha_fin])->count();
-            $traslapa2 = Reporte::WhereBetween('fecha_fin',[$fecha_ini,$fecha_fin])->count();
-            if ($traslapa > 0 || $traslapa2 > 0) {
+            $traslapa =  Reporte::WhereBetween('fecha_ini',[$fecha_ini,$fecha_fin])->Where('user_id',$thisUserId)->count();
+            $traslapa2 = Reporte::WhereBetween('fecha_fin',[$fecha_ini,$fecha_fin])->Where('user_id',$thisUserId)->count();
 
+            if ($traslapa > 0 || $traslapa2 > 0) {
                 return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Reportes')]) . ' Las fechas se solapan');
                 
             } else {

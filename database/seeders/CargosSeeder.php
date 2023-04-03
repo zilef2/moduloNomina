@@ -16,18 +16,18 @@ class CargosSeeder extends Seeder
      */
     public function run()
     {
-        Cargo::create([ 'nombre' => 'Servicios generales' ]);//1
-        Cargo::create([ 'nombre' => 'Gerente General' ]);
-        Cargo::create([ 'nombre' => 'Ingeniero de proyectos' ]);//3
-        Cargo::create([ 'nombre' => 'Auxiliar de ingeniería' ]);
-        Cargo::create([ 'nombre' => 'Supervisor de obra' ]);//5
-        Cargo::create([ 'nombre' => 'Encargado de obra' ]);
-        Cargo::create([ 'nombre' => 'Oficial electricista' ]);//7
-        Cargo::create([ 'nombre' => 'Ayudante electricista' ]);
-        Cargo::create([ 'nombre' => 'Jefe de compras' ]);//9
-        Cargo::create([ 'nombre' => 'Jefe almacén y logística' ]);
-        Cargo::create([ 'nombre' => 'Coordinadora SGI' ]);//11
-        Cargo::create([ 'nombre' => 'Analista SST' ]);
-        Cargo::create([ 'nombre' => 'Analista HSEQ' ]);//12
+        Cargo::create([ 'nombre' => 'Servicios generales' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);//1
+        Cargo::create([ 'nombre' => 'Gerente General' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);
+        Cargo::create([ 'nombre' => 'Ingeniero de proyectos' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);//3
+        Cargo::create([ 'nombre' => 'Auxiliar de ingeniería' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);
+        Cargo::create([ 'nombre' => 'Supervisor de obra' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);//5
+        Cargo::create([ 'nombre' => 'Encargado de obra' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);
+        Cargo::create([ 'nombre' => 'Oficial electricista' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);//7
+        Cargo::create([ 'nombre' => 'Ayudante electricista' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);
+        Cargo::create([ 'nombre' => 'Jefe de compras' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);//9
+        Cargo::create([ 'nombre' => 'Jefe almacén y logística' , 'salario_hora' => 8000, 'salario_total'=> 0]);
+        Cargo::create([ 'nombre' => 'Coordinadora SGI' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);//11
+        Cargo::create([ 'nombre' => 'Analista SST' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);
+        Cargo::create([ 'nombre' => 'Analista HSEQ' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);//12
     }
 }
