@@ -18,6 +18,7 @@ use App\Models\Cargo;
 use App\Models\CentroCosto;
 use App\Models\Reporte;
 use Carbon\Carbon;
+use DateTime;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -180,9 +181,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function FunctionUploadFromExPost(Request $request)
-    {
-
+    public function FunctionUploadFromExPost(Request $request) {
         $exten = $request->archivo1->getClientOriginalExtension();
         // // Validar que el archivo es de Excel
         if ($exten != 'xlsx' && $exten != 'xls') {
@@ -206,10 +205,25 @@ class UserController extends Controller
         }
     }
 
-    public function export() {
-        $anio = date("Y");
-        $quincena = 1;
-        return Excel::download(new UsersExport, "$anio".'_Quincena_'.$quincena.".xlsx");
+    public function export(Request $request) {
+        // $fechaIni = new DateTime($request->ini);
+        // $anio = $fechaIni->format('Y');
+        // $diaInicial = $fechaIni->format('d');
+        // $quincena = $diaInicial < 14 ? '1':'2';
+        $quincena = intval($request->quincena);
+        $year = intval($request->year);
+        $month = intval($request->month+1);
+        $ini = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year);
+        $fin = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year);
+        if($quincena == 1){
+            $ini->addDays(-3);//toask 29dic - 13ene | 14ene - 28ene
+            $fin->addDays(12);
+        }else{
+            $ini->addDays(13);//
+            $fin->addMonths(1)->addDays(-4);
+        }
+
+        return Excel::download(new UsersExport($ini,$fin), "".$year.'Quincena'.$quincena.".xlsx");
     }
 
     public function showReporte($id) {
@@ -217,8 +231,7 @@ class UserController extends Controller
         $Reportes = Reporte::query();
         
         $titulo = __('app.label.Reportes');
-        $Authuser = Auth::user();
-        $permissions = $Authuser->getRoleNames()->first();
+        $permissions = auth()->user()->roles->pluck('name')[0];
         $Reportes->Where('user_id',$id);
         $valoresSelectConsulta = CentroCosto::orderBy('nombre')->get();
         $IntegerDefectoSelect = $valoresSelectConsulta->first()->id;
@@ -280,7 +293,7 @@ class UserController extends Controller
             'showSelect'   =>  $showSelect,
             'IntegerDefectoSelect'   =>  $IntegerDefectoSelect,
             'showUsers'   =>  $showUsers,
-            'quincena'   =>  $quincena,
+            'quincena'   =>  $quincena
         ]);
     }
 

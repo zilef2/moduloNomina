@@ -30,7 +30,7 @@ class CentroCostosController extends Controller
         }
         $perPage = $request->has('perPage') ? $request->perPage : 10;
 
-        $permissions = Auth::user()->getRoleNames()->first();
+        $permissions = auth()->user()->roles->pluck('name')[0];
         if($permissions === "operator") { //admin | validador
             $nombresTabla =[//[0]: como se ven //[1] como es la BD
                 ["#","nombre"],
@@ -79,8 +79,7 @@ class CentroCostosController extends Controller
         $Reportes = Reporte::query();
         
         $titulo = __('app.label.Reportes');
-        $Authuser = Auth::user();
-        $permissions = $Authuser->getRoleNames()->first();
+        $permissions = auth()->user()->roles->pluck('name')[0];
         $Reportes->Where('centro_costo_id',$id);
         $valoresSelectConsulta = CentroCosto::orderBy('nombre')->get();
         $IntegerDefectoSelect = $valoresSelectConsulta->first()->id;

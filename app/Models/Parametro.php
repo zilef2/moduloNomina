@@ -10,15 +10,21 @@ class Parametro extends Model
     use HasFactory;
 
     protected $fillable = [
-        'subsidio_de_transporte',
+        
+        'subsidio_de_transporte_hora',
         'salario_minimo',
+            'valor_maximo_subsidio_de_transporte',
+
         'porcentaje_diurno',
         'porcentaje_nocturno',
         'porcentaje_extra_diurno',
         'porcentaje_extra_nocturno',
+
         'porcentaje_dominical_diurno',
         'porcentaje_dominical_nocturno',
         'porcentaje_dominical_extra_diurno',
         'porcentaje_dominical_extra_nocturno',
+
+        // 'porcentaje_salud_pension', actualmente = 0.04
     ];
 }

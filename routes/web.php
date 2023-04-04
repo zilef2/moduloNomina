@@ -29,7 +29,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     $Authuser = Auth::user();
-    $permissions = $Authuser->getRoleNames()->first();
+    $permissions = auth()->user()->roles->pluck('name')[0];
     $ultimos5dias = null;
     if($permissions === "operator") { //admin | validador
         $reportes = (int) Reporte::Where('user_id', $Authuser->id)->count();
@@ -124,7 +124,8 @@ Route::middleware('auth', 'verified')->group(function () {
 
 
     //# excel
-    Route::get('users/export/', [UserController::class, 'export']);
+    Route::get('users/export/{quincena}/{month}/{year}', [UserController::class, 'export'])->name('reporte1');
+    // Route::get('users/export', [UserController::class, 'export'])->name('reporte1');
     
 });
 

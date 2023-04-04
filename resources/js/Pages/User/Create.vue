@@ -25,6 +25,13 @@ const form = useForm({
     password_confirmation: '',
     role: 'operator',
     cargo: 1,
+    /*
+    falta: 
+    cedula:'',
+    telefono:'',
+    celular:'',
+    fecha_ingreso:'',
+    */
 })
 
 const create = () => {

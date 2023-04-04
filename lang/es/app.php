@@ -45,6 +45,7 @@ return [
         //users
         'cargo' => 'Cargo',
         'salario_hora' => 'Salario hora',
+        'quincena' => 'quincena',
 
 
         //otros

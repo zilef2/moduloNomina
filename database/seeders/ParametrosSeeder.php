@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Parametro;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class ParametrosSeeder extends Seeder
@@ -17,8 +16,9 @@ class ParametrosSeeder extends Seeder
     {
         Parametro::create([
 
-            'subsidio_de_transporte' => 140606,
+            'subsidio_de_transporte_hora' => 585.85,//140606,
             'salario_minimo' => 1300606,
+                'valor_maximo_subsidio_de_transporte' => 2601212,
             'porcentaje_diurno' => 1,
             'porcentaje_nocturno' => 1.35,
 
@@ -33,7 +33,6 @@ class ParametrosSeeder extends Seeder
 
             //horario inicia diurno
             //horario finaliza diurno
-
         ]);
     }
 }

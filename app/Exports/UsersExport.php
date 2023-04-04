@@ -13,67 +13,81 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class UsersExport implements FromCollection,ShouldAutoSize,WithHeadings
 {
+    public $ini,$fin;
+    public function __construct($ini,$fin)
+    {
+        $this->ini = $ini;
+        $this->fin = $fin;
+    }
     /**
     * @return \Illuminate\Support\Collection
     */
     public function collection() {
-        $users = User::WhereHas("roles", function($q){
-             $q->Where("name", "operator");
-        })->get();
+        $users = User::Select('id','name','cedula','cargo_id')
+            ->WhereHas("roles", function($q){
+                $q->Where("name", "operator");
+            })->get();
 
         $param = Parametro::find(1);
-        $maxSalarioParametros = 2000* 1000;
-        $S_Transporte = $param->subsidio_de_transporte;
+        $sub_traporte_hora = $param->subsidio_de_transporte_hora;
 
         foreach ($users as $key => $value) {
-            $users[$key]->cedula = $value->cedula;
-            $users[$key]->Empleado = $value->nombre;
-
             $reportes = Reporte::where('user_id',$value->id)
-                ->whereBetween('fecha_ini',[Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()]);
+            ->whereBetween('fecha_ini',[$this->ini,$this->fin]); //toerase
+            
+            $users[$key]->Empleado = $value->name;
             $cargo = Cargo::find($value->cargo_id);
-            // dd($cargo,$value);
+            unset($users[$key]->id);
+            unset($users[$key]->name);
+            unset($users[$key]->cargo_id);
+            // $salario = intval($reportes->sum('horas_trabajadas')) * doubleval($cargo->salario_hora);
 
-            $salario = intval($reportes->sum('horas_trabajadas')) * doubleval($cargo->salario_hora);
-
-            $users[$key]->salario = $salario;
             $salario_hora = $cargo->salario_hora;
-            $horasExtras = intval($reportes->sum('diurnas')) * doubleval($salario_hora);
-            $Ex_nocturnas = intval($reportes->sum('nocturnas')) * doubleval($salario_hora);
-            $Ex_dominicales = intval($reportes->sum('dominicales')) * doubleval($salario_hora);
-            $Ex_extra_diurnas = intval($reportes->sum('extra_diurnas')) * doubleval($salario_hora);
-            $Ex_extra_nocturnas = intval($reportes->sum('extra_nocturnas')) * doubleval($salario_hora);
-            $Ex_extra_dominicales = intval($reportes->sum('extra_dominicales')) * doubleval($salario_hora);
+            $horasNormales = intval($reportes->sum('diurnas'));
+            $diurno =  $horasNormales * doubleval($salario_hora);
+            $users[$key]->salario = $diurno;
+            $nocturnas = intval($reportes->sum('nocturnas')) * doubleval($salario_hora) * $param->porcentaje_nocturno;
+            $extra_diurnas = intval($reportes->sum('extra_diurnas')) * doubleval($salario_hora) * $param->porcentaje_extra_diurno;
+            $extra_nocturnas = intval($reportes->sum('extra_nocturnas')) * doubleval($salario_hora) * $param->porcentaje_extra_nocturno;
+
+            $dominical_diurno = intval($reportes->sum('dominical_diurno')) * doubleval($salario_hora) * $param->porcentaje_dominical_diurno;
+            $dominical_nocturno = intval($reportes->sum('dominical_nocturno')) * doubleval($salario_hora) * $param->porcentaje_dominical_nocturno;
+            $dominical_extra_diurno = intval($reportes->sum('dominical_extra_diurno')) * doubleval($salario_hora) * $param->porcentaje_dominical_extra_diurno;
+            $dominical_extra_nocturno = intval($reportes->sum('dominical_extra_nocturno')) * doubleval($salario_hora) * $param->porcentaje_dominical_extra_nocturno;
             
-            $ExtraTotal = $horasExtras + $Ex_nocturnas
-            + $Ex_dominicales + $Ex_extra_diurnas
-            + $Ex_extra_nocturnas + $Ex_extra_dominicales;
+            $ExtraTotal = $nocturnas + $extra_diurnas + $extra_nocturnas + $dominical_diurno 
+                + $dominical_nocturno + $dominical_extra_diurno + $dominical_extra_nocturno;
             $users[$key]->Horas_Extras = $ExtraTotal;
+            $salYextras = $diurno + $ExtraTotal;
 
-            $users[$key]->Salud = 10;
-            $users[$key]->Pension = 10;
+            $saludPension = round($salYextras*0.04, 0, PHP_ROUND_HALF_UP);
+            $users[$key]->Salud = $saludPension;
+            $users[$key]->Pension = $saludPension;
 
-            if ($salario >= $maxSalarioParametros) {
-                
-                $users[$key]->S_Transporte = 0;
+            if ($diurno >= ($param->valor_maximo_subsidio_de_transporte)) {
+                $S_Transporte = 0;
             } else {
-                $users[$key]->S_Transporte = $S_Transporte;
-                
+                $S_Transporte = $sub_traporte_hora * $horasNormales; //toask
             }
+            $users[$key]->S_Transporte = $S_Transporte;
             
-            $users[$key]->Prima = 10;
-            $users[$key]->Vacaciones = 1;
-            $users[$key]->Cesantias = 2;
-            $users[$key]->Intereses = 3;
-            $users[$key]->Prestamo = 4;
-            $users[$key]->Anticipo = 5;
-            $users[$key]->Auxilio = 6;
-            $users[$key]->Bonificacion = 7;
-            $users[$key]->Reintegro = 8;
-            $users[$key]->Abono_Prestamo = 9;
-            $users[$key]->Otras_Deducciones = 10;
-            $users[$key]->Total_pagado = $salario + $S_Transporte + $ExtraTotal;
+            $users[$key]->Prima = 0;
+            $users[$key]->Vacaciones = 0;
+            $users[$key]->Cesantias = 0;
+            $users[$key]->Intereses = 0;
+            $users[$key]->Prestamo = 0;
+            $users[$key]->Anticipo = 0;
+            $users[$key]->Auxilio = 0;
+            $users[$key]->Bonificacion = 0;
+            $users[$key]->Reintegro = 0;
+            $users[$key]->Abono_Prestamo = 0;
+            $users[$key]->Otras_Deducciones = 0;
+            $users[$key]->Total_pagado = $salYextras + $S_Transporte + (2*$saludPension);
         }
+        // dd($users[0],
+        //     $this->ini,
+        //     $this->fin,
+        // );
         return $users;
     }
 

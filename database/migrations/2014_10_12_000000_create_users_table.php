@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('cedula')->nullable();
             $table->string('telefono')->nullable();
             $table->string('celular')->nullable();
+            $table->date('fecha_ingreso')->nullable();
 
         });
     }

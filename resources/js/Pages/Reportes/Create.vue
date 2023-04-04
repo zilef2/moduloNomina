@@ -51,8 +51,8 @@ const form = useForm({
     // fecha_ini: '',
     // fecha_fin: '',
 
-    fecha_ini: '2023-04-03T'+horas[0]+':00',
-    fecha_fin: '2023-04-03T'+horas[1]+':00',
+    fecha_ini: '2023-04-03T'+horas[0]+':00', //toerase
+    fecha_fin: '2023-04-03T'+horas[1]+':00', //toerase
 
 
     horas_trabajadas: '',
@@ -104,8 +104,8 @@ watchEffect(() => {
         form.almuerzo = "0"
         form.horas_trabajadas = ''+parseInt((fin - ini)/(3600*1000));
 
-        if( Date.parse(form.fecha_ini) > Date.parse(form.fecha_fin)){
-            form.errors.horas_trabajadas = 'La fecha inicial es mayor a la final'
+        if( ini > fin){
+            form.errors.horas_trabajadas = 'La fecha inicial no debe ser posterior a la final'
         }else{
             if(form.horas_trabajadas >= 24){
                 form.errors.horas_trabajadas = 'Las horas trabajadas son demasiadas'

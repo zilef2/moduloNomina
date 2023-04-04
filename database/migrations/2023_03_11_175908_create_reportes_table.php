@@ -22,10 +22,13 @@ class CreateReportesTable extends Migration
 
 			$table->integer('diurnas')->nullable();
 			$table->integer('nocturnas')->nullable();
-			$table->integer('dominicales')->nullable();
 			$table->integer('extra_diurnas')->nullable();
 			$table->integer('extra_nocturnas')->nullable();
-			$table->integer('extra_dominicales')->nullable();
+
+			$table->integer('dominical_diurno')->nullable();
+			$table->integer('dominical_nocturno')->nullable();
+			$table->integer('dominical_extra_diurno')->nullable();
+			$table->integer('dominical_extra_nocturno')->nullable();
 
 			$table->boolean('valido')->default(0);
 			$table->text('observaciones')->nullable();

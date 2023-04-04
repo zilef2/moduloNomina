@@ -25,18 +25,16 @@ class User extends Authenticatable
         'cedula',
         'telefono',
         'celular',
+        'fecha_ingreso',
         'cargo_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    /** * The attributes that should be hidden for serialization. * * @var array<int, string> */
+    protected $hidden = [ 'password', 'remember_token', ];
+
+    public function getFechaIngreso() {
+        return date('d-m-Y', strtotime($this->attributes['fecha_ingreso']));
+    }
 
     public function getCreatedAtAttribute() {
         return date('d-m-Y H:i', strtotime($this->attributes['created_at']));
