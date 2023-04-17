@@ -96,13 +96,18 @@ class RoleSeeder extends Seeder
              'delete centroCostos',
         ]);
 
-        $vectorCRUDAdmin = ['create', 'update','read'];
-        $vectorModelo = ['centroCostos','parametros'];
-        foreach ($vectorCRUDAdmin as $value) {
-            foreach ($vectorModelo as $model) {
-                $admin->givePermissionTo([ $value.' '.$model ]);
-                $validador->givePermissionTo([ $value.' '.$model ]);
-            }
+        $modelo = 'centroCostos';
+        $acciones = ['create','update','read'];
+        foreach ($acciones as $accion) {
+            $admin->givePermissionTo([ $accion.' '.$modelo]);
+            $validador->givePermissionTo([ $accion.' '.$modelo]);
+        }
+
+        $modelo = 'parametros';
+        $acciones = ['update','read'];
+        foreach ($acciones as $accion) {
+            $admin->givePermissionTo([ $accion.' '.$modelo]);
+            $validador->givePermissionTo([ $accion.' '.$modelo]);
         }
         // $role->revokePermissionTo($permission);
         // $permission->removeRole($role);

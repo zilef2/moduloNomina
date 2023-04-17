@@ -11,7 +11,7 @@ class Parametro extends Model
 
     protected $fillable = [
         
-        'subsidio_de_transporte_hora',
+        'subsidio_de_transporte_dia',
         'salario_minimo',
             'valor_maximo_subsidio_de_transporte',
 

@@ -14,7 +14,7 @@ class CreateParametrosTable extends Migration
     public function up() {
         Schema::create('parametros', function (Blueprint $table) {
             $table->id();
-			$table->double('subsidio_de_transporte_hora');
+			$table->double('subsidio_de_transporte_dia');
 			$table->double('salario_minimo');
 			    $table->double('valor_maximo_subsidio_de_transporte');//toask se calcula apartir del salario minimo
 

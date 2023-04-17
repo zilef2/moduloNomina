@@ -56,7 +56,7 @@ const create = () => {
             onFinish: () => emit("close"),
         })
     }else{
-        alert('Demasiadas horas') //toask
+        alert('Demasiadas horas')
     }
 }
 
@@ -84,7 +84,7 @@ watchEffect(() => {
                 form.almuerzo = "0"
             }else{// la ini < fin y las horas trabajadas son < 24
                 form.almuerzo = 0;
-                if(form.horas_trabajadas >= 8){//toask
+                if(form.horas_trabajadas >= 9){//toask  ()
                     form.horas_trabajadas -= 1
                     form.almuerzo = 1;
                 }
@@ -176,7 +176,7 @@ function calcularNocturnas(Inicio, Fin){
         }
     }
 
-    console.log("🚀🧈 debu calcularNocturnas debu Madrugada:", Madrugada); console.log("🚀🧈 debu calcularNocturnas debu tarde:", Tarde);
+    console.log("🚀 Madrugada:", Madrugada); console.log("🧈 Tarde:", Tarde);
 
     return (Madrugada + Tarde);
 }

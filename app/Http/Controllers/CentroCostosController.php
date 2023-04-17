@@ -127,7 +127,7 @@ class CentroCostosController extends Controller
     public function CalcularTituloQuincena() {
         $esteMes = date("m");
         $diaquincena = date("d");
-        if($diaquincena >= 15){ //toask: el dia 15 se toma en cuenta para la quincena ? 
+        if($diaquincena >= 15){ //todo: no es el num 15
             $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','<=',15)->sum('horas_trabajadas');
         }else{
             $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','>',15)->sum('horas_trabajadas');

@@ -18,7 +18,6 @@ class Reporte extends Model
 		'nocturnas',
 		'extra_diurnas',
 		'extra_nocturnas',
-
 		'dominical_diurno',
 		'dominical_nocturno',
 		'dominical_extra_diurno',

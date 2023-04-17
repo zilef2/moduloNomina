@@ -8,8 +8,13 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy/dist/vue.m';
 import FloatingVue from 'floating-vue'
 import { usePage } from '@inertiajs/vue3';
+// import { formatDate ,number_format ,monthName } from './global.js'
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
+
+// window.formatDate = formatDate;
+// window.number_format = number_format;
+// window.monthName = monthName;
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

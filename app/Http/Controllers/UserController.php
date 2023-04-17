@@ -218,12 +218,26 @@ class UserController extends Controller
         if($quincena == 1){
             $ini->addDays(-3);//toask 29dic - 13ene | 14ene - 28ene
             $fin->addDays(12);
+            
         }else{
             $ini->addDays(13);//
             $fin->addMonths(1)->addDays(-4);
         }
-
-        return Excel::download(new UsersExport($ini,$fin), "".$year.'Quincena'.$quincena.".xlsx");
+        $users = User::Select('id','name','cedula','cargo_id')->WhereHas("roles", function($q){
+            $q->Where("name", "operator");
+        })->get();
+        $NumReportes = 0;
+        foreach ($users as $key => $value) {
+            $NumReportes += Reporte::where('user_id', $value->id)
+                ->where('valido',1)
+                ->whereBetween('fecha_ini', [$ini,$fin])->count();
+        }
+        if($NumReportes > 0){
+            return Excel::download(new UsersExport($ini,$fin), "".$year.'Quincena'.$quincena.'DelMes'.$month.".xlsx");
+        }else{
+            return back()->with('error', __('app.label.created_error', ['name' => 'No hay reportes']) . 'En el rango de fechas seleccionadas');
+        }
+        // return view('reporte1temp',$ini,$fin);
     }
 
     public function showReporte($id) {
@@ -300,7 +314,7 @@ class UserController extends Controller
     public function CalcularTituloQuincena() {
         $esteMes = date("m");
         $diaquincena = date("d");
-        if($diaquincena >= 15){ //toask: el dia 15 se toma en cuenta para la quincena ? 
+        if($diaquincena >= 15){ //todo: 
             $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','<=',15)->sum('horas_trabajadas');
         }else{
             $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','>',15)->sum('horas_trabajadas');

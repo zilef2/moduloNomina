@@ -141,12 +141,13 @@ class ReportesController extends Controller
             $fecha_ini = $this->updatingDate($request->fecha_ini);
             $fecha_fin = $this->updatingDate($request->fecha_fin);
 
+            
+
             $traslapa =  Reporte::WhereBetween('fecha_ini',[$fecha_ini,$fecha_fin])->Where('user_id',$thisUserId)->count();
             $traslapa2 = Reporte::WhereBetween('fecha_fin',[$fecha_ini,$fecha_fin])->Where('user_id',$thisUserId)->count();
 
             if ($traslapa > 0 || $traslapa2 > 0) {
                 return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Reportes')]) . ' Las fechas se solapan');
-                
             } else {
                 
                 $Reportes = new Reporte;

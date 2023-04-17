@@ -12,8 +12,7 @@ return [
         'downUsers' => 'Exportar us',
 
         //centro y reportes
-        'extra_diurnas' => 'Extra diurnas',
-        'extra_nocturnas' => 'Extra nocturnas',
+       
         'CentroCostos' => 'Centro Costos',
         'CentroCosto' => 'Centro Costo',
         'Reportes' => 'Reporte',
@@ -34,6 +33,12 @@ return [
         'sessions' => 'sesiones',
 
         // form - reportes
+        'extra_diurnas' => 'Extra diurnas',
+        'extra_nocturnas' => 'Extra nocturnas',
+        'dominical_diurnas' => 'dominical diurnas',
+        'dominical_nocturnas' => 'dominical nocturnas',
+        'dominical_extra_diurnas' => 'dominical extra',
+        'dominical_extra_nocturnas' => 'dominical extra noc',
         'fecha_ini' => 'fecha inicio',
         'fecha_fin' => 'fecha fin',
         'horas_trabajadas' => 'Horas trabajadas',

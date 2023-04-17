@@ -116,7 +116,6 @@
     }
 
 
-
     // let downloadExcel = async() => {
     //     window.open('/users/export?ini=${form.fecha_ini}/fin=${form.fecha_fin}', '_blank')
     //     // window.open('/users/export?ini=${form.fecha_ini}/fin=${form.fecha_fin}', '_blank')
