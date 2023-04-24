@@ -70,19 +70,7 @@ function estaFechaEsFestivo(fecha){
 function getHoursColombianRandom(otraVez) { //temp
     let vec_inicial,vec_final
 
-    vec_inicial = ['23']; vec_final = ['20']
-
-    vec_inicial = ['22']; vec_final = ['19']
-    
-    vec_inicial = ['20']; vec_final = ['17']
-
-    vec_inicial = ['16']; vec_final = ['13']
-    
-    vec_inicial = ['12']; vec_final = ['09']
-    
-    vec_inicial = ['07']; vec_final = ['04']
-
-    vec_inicial = ['16']; vec_final = ['01']
+    vec_inicial = ['06']; vec_final = ['20']
     
 
     // 16 - 01 (dia dif) //toask
@@ -106,7 +94,7 @@ const form = useForm({
     // fecha_ini: '', fecha_fin: '',
 
     fecha_ini: '2023-04-0'+diaoDominicla+'T'+horas[0]+':00', //temp
-    fecha_fin: '2023-04-0'+(diaoDominicla+1)+'T'+horas[1]+':00', //temp
+    fecha_fin: '2023-04-0'+(diaoDominicla)+'T'+horas[1]+':00', //temp
     // fecha_ini: '2023-04-0'+diaoDominicla+'T'+horas[0]+':00', //temp
     // fecha_fin: '2023-04-0'+(diaoDominicla+1)+'T'+horas[1]+':00', //temp
     // fecha_fin: '2023-04-09T05:00', //temp
@@ -197,8 +185,23 @@ watchEffect(() => {
                 form.diurnas = "0"
                 form.nocturnas = "0"
                 form.almuerzo = "0"
-            }else{// la ini < fin y las horas trabajadas < LimiteHorasTrabajadas ES DECIR todo correcto
-                calcularHoras(ini,fin);
+            }else{
+                const DiaInicio = new Date(ini).getDate();
+                const DiaFin = new Date(fin).getDate();
+                if(DiaInicio != DiaFin){
+                    form.errors.horas_trabajadas = 'Debe realizar dos reportes'
+                    form.horas_trabajadas = "0"
+                    form.diurnas = "0"
+                    form.nocturnas = "0"
+                    form.almuerzo = "0"
+                }else{
+                    /*
+                        la ini < fin
+                        horas < LimiteHorasTrabajadas
+                        Diainicio == dia final
+                    */
+                    calcularHoras(ini,fin);
+                }
             }
         }
     }
@@ -237,8 +240,6 @@ function calcularTerminaLunes(fin,CuandoEmpiezaExtra,ExtrasManana){
         }
     }
 }
-
-
 function calcularTerminaDomingo(ini,fin,CuandoEmpiezaExtra,ExtrasManana){
     const HoraIni = parseInt(ini.getHours())
     const HoraTermino = parseInt(fin.getHours())
@@ -302,12 +303,11 @@ function calcularDominicales(ini,fin,CuandoEmpiezaExtra,ExtrasManana){//date,dat
     let esFestivo2 = estaFechaEsFestivo(new Date(fin));
     console.log("ini festivo - fin festivo :", esFestivo,esFestivo2);
 
-    if(ini.getDay() == 0 || fin.getDay() == 0){ //todo: falta preguntar si es festivo
+    if(ini.getDay() == 0 || fin.getDay() == 0){
         form.dominicales = 'si'
         TextFestivo = 'Dominical'
 
-        if(esFestivo || esFestivo2)
-            TextFestivo = ' y festivo'
+        if(esFestivo || esFestivo2) TextFestivo = ' y festivo';
     }else{
         if(esFestivo || esFestivo2){
             form.dominicales = 'si'

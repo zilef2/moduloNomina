@@ -20,8 +20,10 @@ class ParametrosSeeder extends Seeder
             'subsidio_de_transporte_dia' => 4686.86667,//140606, => divide por 30  ->  dia
 
             
-            'salario_minimo' => 1300606,
-                'valor_maximo_subsidio_de_transporte' => 2601212,
+            'salario_minimo' => 1160000,
+                'valor_maximo_subsidio_de_transporte' => 2320000,
+            // 'salario_minimo' => 1300606,
+                // 'valor_maximo_subsidio_de_transporte' => 2601212,
             'porcentaje_diurno' => 1,
             'porcentaje_nocturno' => 1.35,
 

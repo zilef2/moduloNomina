@@ -23,10 +23,11 @@ class User extends Authenticatable
         'email',
         'password',
         'cedula',
-        'telefono',
-        'celular',
-        'fecha_ingreso',
+        'telefono', 
+        'celular', 
+        'fecha_ingreso', 
         'cargo_id',
+        //salario
     ];
 
     /** * The attributes that should be hidden for serialization. * * @var array<int, string> */
