@@ -135,8 +135,8 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
 
         $paramBD = Parametro::find(1);
 
-        define('DIAS_NECESARIAS_QUINCENA', 13);
-        define('HORAS_NECESARIAS_QUINCENA', 96);
+        // define('DIAS_NECESARIAS_QUINCENA', 13);
+        // define('HORAS_NECESARIAS_QUINCENA', 96);
 
         //traer todos los empleado
         $users = User::Select('id', 'name', 'cedula', 'cargo_id', 'salario')->WhereHas("roles", function ($q) {
@@ -146,22 +146,6 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
 
         $pruebasCon = 0; //debug
         foreach ($users as $key => $value) {
-            // $reportes = Reporte::where('user_id', $value->id)
-            //     ->where('valido', 1)
-            //     ->whereBetween('fecha_ini', [$this->ini, $this->fin]);
-
-
-            // $NumReportes = $reportes->count();
-            // $users[$key]->Completa = $NumReportes >= 13 ? 'Si, ' . $NumReportes . ' dias' : 'No, ' . $NumReportes . ' dias';
-            // $users[$key]->Empleado = $value->name;
-
-            // $elSalario = intval($value->salario);
-
-
-            // // $salario_dia = round($elSalario/30, 0, PHP_ROUND_HALF_UP);
-            // $salario_hora = $elSalario / (30 * 8);
-            // $salario_quincena = round($elSalario / (2), 0, PHP_ROUND_HALF_UP);
-            // $cumplioQuicena = $NumReportes >= DIAS_NECESARIAS_QUINCENA;
             $NumReportes = HelpExcel::cumplioQuincena($users,$key,$this->ini,$this->fin,$value,$reportes, $salario_hora, $salario_quincena, $cumplioQuicena );
 
             

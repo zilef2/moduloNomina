@@ -305,10 +305,10 @@ data.tiposSiigo = [
                                             type="date" class="mt-1 block w-full" v-model="form2.fecha_ini_sigo"
                                             required :placeholder="lang().placeholder.fecha_ini_sigo"
                                             :error="form2.errors.fecha_ini_sigo" />
-                                        <PrimaryButton v-show="can(['create user'])"
+                                        <!-- <PrimaryButton v-show="can(['create user'])"
                                             :disabled="form2.fecha_ini_sigo == null" class="rounded-none my-4">
                                             Descargar formato siigo
-                                        </PrimaryButton>
+                                        </PrimaryButton> -->
                                     </form>
                                 </div>
                                 

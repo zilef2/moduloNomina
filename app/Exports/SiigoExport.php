@@ -71,36 +71,59 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
         $paramBD = Parametro::find(1);
 
         $contadorKey = 0;
+        $mensajeSigo = [
+            '', //0
+            '10- Horas extras diurnas 125%- Ingreso', //1
+            '11- Horas extras nocturnas 175%- Ingreso', //2
+            '25- Recargo dominical o festivo- Ingreso', //3
+            'dom noc', //4
+            '07- Hora extra diurna dominical o festiva- Ingreso', //5
+            'dom extra noc', //6
+            '26- Recargo nocturno- Ingreso', //7
+            
+            
+            '08- Hora extra recargo dominical o festivo- Ingreso', //8
+        ];
+
+        $users->map(function($user) {
+            $unecesary = ['id','name','cargo_id','salario'];
+            foreach ($unecesary as $atribute) {
+                unset($user->{$atribute});
+            }
+            return $user;
+        });
+
         foreach ($users as $key => $empleado) {
-
-            $users[$contadorKey]->Empleado = $empleado->cedula;
-            $users[$contadorKey]->Empleado = $empleado->cedula;
-
-            $SinNovedad = true;
-            $tieneExtrasDiurnas = true;
+            $Novedad = 0;
             $NumReportes = HelpExcel::cumplioQuincena($users,$key,$this->ini,$this->fin,$empleado,$reportes, $salario_hora, $salario_quincena, $cumplioQuicena );
 
             $ArrayExtrasyDominicales = $this->CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, $H_diurno, $nocturnas, $extra_diurnas, $extra_nocturnas, $dominical_diurno, $dominical_nocturno, $dominical_extra_diurno, $dominical_extra_nocturno);
             
-            $Num_nocturnas = intval($reportes->sum('nocturnas'));
-            $Num_extra_diurnas = $ArrayExtrasyDominicales[1];
-            $Num_extra_nocturnas = $ArrayExtrasyDominicales[2];
-            $Num_dominical_diurno = $ArrayExtrasyDominicales[3];
-            $Num_dominical_nocturno = $ArrayExtrasyDominicales[4];
-            $Num_dominical_extra_diurno = $ArrayExtrasyDominicales[5];
-            $Num_dominical_extra_nocturno = $ArrayExtrasyDominicales[6];
+            // $Num_extra_diurnas = $ArrayExtrasyDominicales[1];
+            // $Num_extra_nocturnas = $ArrayExtrasyDominicales[2];
+            // $Num_dominical_diurno = $ArrayExtrasyDominicales[3];
+            // $Num_dominical_nocturno = $ArrayExtrasyDominicales[4];
+            // $Num_dominical_extra_diurno = $ArrayExtrasyDominicales[5];
+            // $Num_dominical_extra_nocturno = $ArrayExtrasyDominicales[6];
+            $ArrayExtrasyDominicales[7] = intval($reportes->sum('nocturnas'));
+            // $ArrayExtrasyDominicales[8] = intval($ArrayExtrasyDominicales[0]);
+            // $this->unsetAllunnesesary($users,$key);
 
-            $Total_ExtrasyDominicales = intval($ArrayExtrasyDominicales[0]);
-dd($Num_extra_diurnas);
-            if($Num_extra_diurnas > 0){
-                $SinNovedad = false;
-                $users[$contadorKey]->Quenov = '10- Horas extras diurnas 125%- Ingreso';
-                $users[$contadorKey]->tiponov = 'Horas';
-                $users[$contadorKey]->diasValornovedad = '';
+            for ($i=1; $i < 8; $i++) { 
+                if($ArrayExtrasyDominicales[$i] > 0){
+                    $users[$contadorKey]->Empleado = $empleado->cedula;
+                    $users[$contadorKey]->Empleado = $empleado->cedula;
 
+                    $users[$contadorKey]->Quenov = $mensajeSigo[$i];
+                    $users[$contadorKey]->tiponov = 'Horas';
+                    $users[$contadorKey]->diasValornovedad = $ArrayExtrasyDominicales[$i];
+
+                    $Novedad++;//novedades de un usuarios
+                    $contadorKey++;//contador de usuarios
+                }
             }
-
-            if($SinNovedad){
+            
+            if($Novedad === 0){
                 //si no se cumple ninguna condicion
                 $users[$contadorKey]->Quenov = '';
                 $users[$contadorKey]->tiponov = '';
@@ -110,10 +133,14 @@ dd($Num_extra_diurnas);
                 $users[$contadorKey]->diasnohabiles = '';
             }
             
-            $this->unsetAllunnesesary($users,$contadorKey);
 
             $contadorKey++;
+            dd(
+                $users,
+                $users[$contadorKey]->getAttributes()
+            );
         }
+        // dd($users);
         return $users;
     }
 

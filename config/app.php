@@ -16,6 +16,10 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+    'DIAS_NECESARIAS_QUINCENA' => 13,
+    'HORAS_NECESARIAS_QUINCENA' => 96,
+    //todo: HORAS_NECESARIAS_QUINCENA no se usa
+    //todo: domingosGanados
 
     /*
     |--------------------------------------------------------------------------
