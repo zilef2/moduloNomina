@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SiigoExport;
 use App\Http\Requests\User\UserIndexRequest;
 use App\Http\Requests\User\UserStoreRequest;
 use App\Http\Requests\User\UserUpdateRequest;
@@ -21,7 +22,9 @@ use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Validators\ValidationException;
 
 class UserController extends Controller
 {
@@ -39,24 +42,35 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(UserIndexRequest $request){
+        // $ListaControladoresYnombreClase = (explode('\\',get_class($this))); $nombreC = end($ListaControladoresYnombreClase);
+        // Log::info(' U -> '.Auth::user()->name. ' Accedio a la vista ' .$nombreC);
+
         $users = User::query();
         if ($request->has('search')) {
             $users->where('name', 'LIKE', "%" . $request->search . "%");
             $users->orWhere('email', 'LIKE', "%" . $request->search . "%");
         }
+
         if ($request->has(['field', 'order'])) {
             $users->orderBy($request->field, $request->order);
         }
+
         $perPage = $request->has('perPage') ? $request->perPage : 10;
-        $role = auth()->user()->roles->pluck('name')[0];
+        $role = Auth()->user()->roles->pluck('name')[0];
         $roles = Role::get();
         if ($role != 'superadmin') {
             $users->whereHas('roles', function ($query) {
                 return $query->where('name', '<>', 'superadmin');
             });
-            $roles = Role::where('name', '<>', 'superadmin')->get();
+            $roles = Role::where('name', '<>', 'superadmin')
+                ->where('name', '<>', 'admin')
+                ->get();
         }
         $cargos = Cargo::all();
+
+        $sexoSelect[] = [ 'label' => 'Masculino', 'value' => 0 ];
+        $sexoSelect[] = [ 'label' => 'Femenino', 'value' => 1 ];
+
         return Inertia::render('User/Index', [
             'title'         => __('app.label.user'),
             'filters'       => $request->all(['search', 'field', 'order']),
@@ -64,6 +78,7 @@ class UserController extends Controller
             'users'         => $users->with('roles','cargo')->paginate($perPage),
             'roles'         => $roles,
             'cargos'         => $cargos,
+            'sexoSelect'         => $sexoSelect,
             'breadcrumbs'   => [['label' => __('app.label.user'), 'href' => route('user.index')]],
         ]);
     }
@@ -75,15 +90,21 @@ class UserController extends Controller
      */
     public function create() { }
 
-    public function store(UserStoreRequest $request)
-    {
+    public function store(UserStoreRequest $request) {
         DB::beginTransaction();
         try {
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'cargo_id' => $request->cargo
+                'password' => Hash::make($request->cedula.'*'),
+                // 'password' => Hash::make($request->password),
+                'cargo_id' => $request->cargo,
+                'cedula'=> $request->cedula,
+                'telefono' => $request->telefono,
+                'celular' => $request->celular,
+                'fecha_de_ingreso' => $request->fecha_de_ingreso,
+                'sexo' => $request->sexo,
+                'salario' => $request->salario,
             ]);
             $user->assignRole($request->role);
             DB::commit();
@@ -94,45 +115,25 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
+    public function show($id) { } public function edit($id) { }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(UserUpdateRequest $request, $id)
-    {
+
+    public function update(UserUpdateRequest $request, $id) {
         DB::beginTransaction();
         try {
             $user = User::findOrFail($id);
             $user->update([
                 'name'      => $request->name,
                 'email'     => $request->email,
-                'password'  => $request->password ? Hash::make($request->password) : $user->password,
-                'cargo_id' => $request->cargo
+                // 'password'  => $request->password ? Hash::make($request->password) : $user->password,
+                'cargo_id' => $request->cargo,
+                'cedula'=> $request->cedula,
+                'telefono' => $request->telefono,
+                'celular' => $request->celular,
+                'fecha_de_ingreso' => $request->fecha_de_ingreso,
+                'sexo' => $request->sexo,
+                'salario' => $request->salario,
 
             ]);
             $user->syncRoles($request->role);
@@ -172,18 +173,35 @@ class UserController extends Controller
         }
     }
 
-    public function FunctionUploadFromEx()
-    {
+    public function FunctionUploadFromEx(Request $request) {
+        $users = User::Select('id','name','cedula','cargo_id')->WhereHas("roles", function($q){
+            $q->Where("name", "empleado");
+        })->count();
+        $iniFormat = '';
+        $finFormat = '';
+        if($request->quincena && $request->fecha_ini){
+            $quincena = intval($request->quincena);
         
+            $year = intval($request->fecha_ini['year']);
+            $month = intval($request->fecha_ini['month']+1);
+            $NumReportesIniFin = $this->CalcularIniFinQuincena($quincena,$month,$year);
+            $iniFormat = Carbon::parse($NumReportesIniFin['ini'])->format('d-m-Y');
+            $finFormat = Carbon::parse($NumReportesIniFin['fin'])->format('d-m-Y');
+        }
+
         return Inertia::render('User/uploadFromExcel', [
-            'title'         => __('app.label.user'),
-            'breadcrumbs'   => [['label' => __('app.label.user'), 'href' => route('user.index')]],
+            'title'       => __('app.label.user'),
+            'breadcrumbs' => [['label' => __('app.label.user'), 'href' => route('user.index')]],
+            'NumUsers'    => $users,
+            'NumReportes' => $NumReportesIniFin['NumReportes']?? 0,
+            'ini'         => $iniFormat,
+            'fin'         => $finFormat,
         ]);
     }
 
-    public function FunctionUploadFromExPost(Request $request) {
+    public function FunctionUploadFromExPost(Request $request) { //import
         $exten = $request->archivo1->getClientOriginalExtension();
-        // // Validar que el archivo es de Excel
+        // Validar que el archivo es de Excel
         if ($exten != 'xlsx' && $exten != 'xls') {
             return back()->with('warning', 'El archivo debe ser de Excel');
         }
@@ -196,14 +214,48 @@ class UserController extends Controller
             $import = new UsersImport();
             $import->import($request->archivo1);
 
-            $nuevosUsuarios = session('CountFilas');
-            return back()->with('success', 'upload_complete'. $nuevosUsuarios);
-            // return back()->with('success', __('upload_complete'). $nuevosUsuarios);
+            $CountFilas = session('CountFilas');
+            $usuariosActualizados = session('usuariosActualizados',[]);
+            $countNoleidos = session('countNoleidos',0); $countNoCargo = session('countNoCargo',0); $countSex = session('countSex',0); $countCedulaRepetida = session('countCedulaRepetida',0);
 
-        } catch (\Throwable $th) {
-            return back()->with('error', 'Error en el proceso de Excel' . $th->getMessage());
+            session(['CountFilas' => 0]);
+            session(['countNoleidos' => 0]);
+            session(['countNoCargo' => 0]);
+            session(['countSex' => 0]);
+            session(['usuariosActualizados' => []]);
+            $messageSuccess1 = 'Usuarios nuevos: '.$CountFilas .($countNoleidos).' no leidas, '.$countNoCargo. ' con cargo erroneo, '. $countSex.' sexo mal escrito '.$countCedulaRepetida. ' cedula repetida.';
+            if(count($usuariosActualizados) > 0){
+                $StringUsuariosRep = implode(", ",$usuariosActualizados);
+                session(['countCedulaRepetida' => 0]);
+                return back()->with('success', $messageSuccess1)
+                    ->with('warning', 'Usuarios actualizados: '.$StringUsuariosRep);
+            }else{
+                return back()->with('success', $messageSuccess1);
+            }
+            // return back()->with('success', __('upload_complete'). $CountFilas);
+
+        } catch (ValidationException $e) {
+            $failures = $e->failures();
+            $lasRowMalas = [];
+            foreach ($failures as $failure) {
+                $lasRowMalas[] = $failure->row(); // row that went wrong
+                // $failure->attribute(); // either heading key (if using heading row concern) or column index
+                // $failure->errors(); // Actual error messages from Laravel validator
+                // $failure->values(); // The values of the row that has failed.
+            }
+            $StringlasRowMalas = implode(", ",$lasRowMalas);
+            session(['CountFilas' => 0]);
+            session(['countNoleidos' => 0]);
+            session(['usuariosActualizados' => []]);
+            // if (config('app.env') === 'production') {
+                return back()->with('warning', 'Error Excel. ' . $e->getMessage(). '. filas con errores: '.$StringlasRowMalas);
+            // }else{
+            //     return back()
+            //     ->with('error', 'Error en el proceso de Excel. ' . $lasRowMalas)
+            // }
         }
     }
+
 
     public function export(Request $request) {
         // $fechaIni = new DateTime($request->ini);
@@ -211,31 +263,91 @@ class UserController extends Controller
         // $diaInicial = $fechaIni->format('d');
         // $quincena = $diaInicial < 14 ? '1':'2';
         $quincena = intval($request->quincena);
+        
         $year = intval($request->year);
         $month = intval($request->month+1);
-        $ini = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year);
-        $fin = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year);
-        if($quincena == 1){
-            $ini->addDays(-3);//toask 29dic - 13ene | 14ene - 28ene
-            $fin->addDays(12);
-            
+        $NumReportesIniFin = $this->CalcularIniFinQuincena($quincena,$month,$year);
+
+        if($NumReportesIniFin['NumReportes'] > 0){
+            return Excel::download(new UsersExport($NumReportesIniFin['ini'],$NumReportesIniFin['fin']), "".$year.'Quincena'.$quincena.'DelMes'.$month.".xlsx");
         }else{
-            $ini->addDays(13);//
-            $fin->addMonths(1)->addDays(-4);
+            // dd('El numero de reportes en esa quincena es 0');
+
+            // return back()->with('error', 'No hay reportes, en el rango de fechas seleccionadas');
+            return redirect()->route('user.uploadexcel')->with('warning', 'No hay reportes, en el rango de fechas seleccionadas');
         }
+        // return view('reporte1temp',$ini,$fin);
+    }
+
+    public function CalcularIniFinQuincena($quincena,$month,$year){
+        $ini = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(0)->setminutes(0);
+        // dd($ini);
+        $fin = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(23)->setminutes(0);
+        if($quincena == 1){
+            // $ini->addDays(-3);
+            $fin->addDays(14);//antes era 12
+        }else{
+            $ini->addDays(15);//
+            $fin->addMonths(1)->addDays(-1); //antes era -4
+        }
+        // dd($ini,$fin);
         $users = User::Select('id','name','cedula','cargo_id')->WhereHas("roles", function($q){
-            $q->Where("name", "operator");
+            $q->Where("name", "empleado");
         })->get();
         $NumReportes = 0;
-        foreach ($users as $key => $value) {
+        foreach ($users as $value) {
             $NumReportes += Reporte::where('user_id', $value->id)
                 ->where('valido',1)
                 ->whereBetween('fecha_ini', [$ini,$fin])->count();
         }
-        if($NumReportes > 0){
-            return Excel::download(new UsersExport($ini,$fin), "".$year.'Quincena'.$quincena.'DelMes'.$month.".xlsx");
+
+        return [
+            'NumReportes' => $NumReportes,
+            'ini' => $ini,
+            'fin' => $fin,
+        ];
+    }
+
+    public function downloadsigo(Request $request) {
+        // $fechaIni = new DateTime($request->ini);
+        // $anio = $fechaIni->format('Y');
+        // $diaInicial = $fechaIni->format('d');
+        // $quincena = $diaInicial < 14 ? '1':'2';
+        
+        $quincena = intval($request->quincena);
+        $year = intval($request->year);
+        $month = intval($request->month+1);
+        $ini = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(0);
+        $fin = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(23);
+        if($quincena == 1){
+            // $ini->addDays(-3);
+            $fin->addDays(14);//antes era 12            
         }else{
-            return back()->with('error', __('app.label.created_error', ['name' => 'No hay reportes']) . 'En el rango de fechas seleccionadas');
+            $ini->addDays(15);//
+            $fin->addMonths(1)->addDays(-1); //antes era -4
+        }
+        // dd($ini,$fin);
+        $users = User::Select('id','name','cedula','cargo_id')->WhereHas("roles", function($q){
+            $q->Where("name", "empleado");
+        })->get();
+        $NumReportes = 0;
+        foreach ($users as $value) {
+            $NumReportes += Reporte::where('user_id', $value->id)
+                ->where('valido',1)
+                ->whereBetween('fecha_ini', [$ini,$fin])->count();
+        }
+
+        if($NumReportes > 0){
+            return Excel::download(new SiigoExport($ini,$fin), "Siigo ".$year.'Quincena'.$quincena.'DelMes'.$month.".xlsx");
+        }else{
+            return redirect()->route('user.uploadexcel')->with('warning', 
+                'El numero de reportes en esa quincena es 0. '.
+                'formato de la fecha: Año - Mes - dia. '.
+                'fecha inicial: '.$ini->format('Y-m-d').' - '.
+                'fecha final: '.$fin->format('Y-m-d')
+            );
+
+            // return back()->with('error', __('app.label.created_error', ['name' => 'No hay reportes']) . 'En el rango de fechas seleccionadas');
         }
         // return view('reporte1temp',$ini,$fin);
     }
@@ -243,9 +355,9 @@ class UserController extends Controller
     public function showReporte($id) {
         // $centroCostos = centroCosto::findOrFail($id);
         $Reportes = Reporte::query();
-        
+        $nombrePersona = User::find($id)->name;
         $titulo = __('app.label.Reportes');
-        $permissions = auth()->user()->roles->pluck('name')[0];
+        $permissions = Auth()->user()->roles->pluck('name')[0];
         $Reportes->Where('user_id',$id);
         $valoresSelectConsulta = CentroCosto::orderBy('nombre')->get();
         $IntegerDefectoSelect = $valoresSelectConsulta->first()->id;
@@ -261,10 +373,10 @@ class UserController extends Controller
             $showUsers[intval($value->id)] = $value->name;
         }
         
-        if($permissions === "operator") { //admin | validador
-        }else{ // not operator
+        if($permissions === "empleado") { //NO admin | administrativo
+        }else{ // not empleado
             // $ReportesEsteMes = Reporte::WhereMonth('fecha_ini',$esteMes)->get()->count();
-            $titulo = $this->CalcularTituloQuincena();
+            $titulo = $this->CalcularTituloQuincena($permissions);
             
             $Reportes->orderBy('fecha_ini'); $perPage = 15;
 
@@ -291,10 +403,11 @@ class UserController extends Controller
             //fin sin uso1
 
             $quincena = [
-                'Primera quincena' => Reporte::whereBetween('fecha_ini',[Carbon::now()->startOfMonth(),Carbon::now()->startOfMonth()->addDays(15)])->count(),
-                'Segunda quincena' => Reporte::whereBetween('fecha_ini',[Carbon::now()->startOfMonth()->addDays(15),Carbon::now()->LastOfMonth()])->count(),
+                'Primera quincena' => Reporte::Where('user_id',$id)->WhereBetween('fecha_ini',[Carbon::now()->startOfMonth(),Carbon::now()->startOfMonth()->addDays(14)])->count(),
+                'Segunda quincena' => Reporte::Where('user_id',$id)->WhereBetween('fecha_ini',[Carbon::now()->startOfMonth()->addDays(15),Carbon::now()->LastOfMonth()])->count(),
             ];
         }
+        $sumhoras_trabajadas = $Reportes->sum('horas_trabajadas');
         return Inertia::render('Reportes/Index', [ //carpeta
             'title'          =>  $titulo,
             'filters'        =>  null,
@@ -307,18 +420,36 @@ class UserController extends Controller
             'showSelect'   =>  $showSelect,
             'IntegerDefectoSelect'   =>  $IntegerDefectoSelect,
             'showUsers'   =>  $showUsers,
-            'quincena'   =>  $quincena
+            'quincena'   =>  $quincena,
+            'nombrePersona'   =>  $nombrePersona,
+            'sumhoras_trabajadas'   =>  $sumhoras_trabajadas,
         ]);
     }
 
-    public function CalcularTituloQuincena() {
+    public function CalcularTituloQuincena($permissions) {
         $esteMes = date("m");
         $diaquincena = date("d");
-        if($diaquincena >= 15){ //todo: 
-            $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','<=',15)->sum('horas_trabajadas');
+        if($permissions === "empleado") { //NO admin | administrativo
+            $userid = Auth::user()->id;
+            if($diaquincena <= 15){
+                $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','<=',15)
+                    ->where('user_id',$userid)
+                    ->sum('horas_trabajadas');
+            }else{
+                $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','>',15)
+                    ->where('user_id',$userid)
+                    ->sum('horas_trabajadas');
+            }
         }else{
-            $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','>',15)->sum('horas_trabajadas');
+            if($diaquincena <= 15){
+                $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','<=',15)
+                    ->sum('horas_trabajadas');
+            }else{
+                $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','>',15)
+                    ->sum('horas_trabajadas');
+            }
         }
+
         return 'Horas trabajadas quincena: '.$horasTrabajadas;
     }
 }

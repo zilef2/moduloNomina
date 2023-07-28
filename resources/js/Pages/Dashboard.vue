@@ -17,7 +17,6 @@ const props = defineProps({
     permissions: Number,
     reportes: Number,
     ultimos5dias: Array,
-    ultimasHoras: Array,
     diasNovalidos: Array,
     trabajadoresHoy: Array,
     centrosHoy: Array,
@@ -46,14 +45,6 @@ const chartData = {
         label: 'Numero de Reportes',
         data: props.ultimos5dias,
         backgroundColor: '#f87979',
-    }]
-};
-const chartData2 = {
-    name: 'Total Horas',
-    datasets: [{
-        label: 'Horas',
-        data: props.ultimasHoras,
-        backgroundColor: '#187979',
     }]
 };
 const chartData3 = {
@@ -87,7 +78,7 @@ const centrosHoy = {
         <Breadcrumb :title="'Dashboard'" :breadcrumbs="[]" />
         <div class="space-y-4">
             <div
-                class="text-white dark:text-gray-100 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-4 overflow-hidden shadow-sm">
+                class="text-white dark:text-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-hidden shadow-sm">
                 <div>
                     <div class="rounded-t-none sm:rounded-t-lg px-4 py-6 flex justify-between bg-sky-600/70 dark:bg-sky-500/80 items-center overflow-hidden">
                         <div class="flex flex-col">
@@ -138,31 +129,34 @@ const centrosHoy = {
                 </div>
             </div>
 
-            <div v-show="can(['updateCorregido reporte']) || can(['isAdmin'])" class="grid xs:grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 my-5">
-                <div class="my-2 mx-5 p-1">
-                    <Bar id="my-chart-id"
-                    :options="chartOptions"
-                    :data="chartData" />
+            <div v-show="can(['updateCorregido reporte']) || can(['isAdmin'])" 
+                class="grid xs:grid-cols-1 sm:grid-cols-1 md:grid-cols-2 mt-26 gap-8">
+                <div class="shadowCard">
+                    <h2 class="my-3">Numero de reportes</h2>
+                    <div class="my-2 mx-5 p-1">
+                        <Bar id="my-chart-id"
+                        :options="chartOptions"
+                        :data="chartData" />
+                    </div>
+                    <div class="my-2 mx-5 p-1">
+                        <Bar id="my-chart-id3"
+                        :options="chartOptions"
+                        :data="chartData3" />
+                    </div>
                 </div>
-                <div class="my-2 mx-5 p-1">
-                    <Bar id="my-chart-id2"
-                    :options="chartOptions"
-                    :data="chartData2" />
-                </div>
-                <div class="my-2 mx-5 p-1">
-                    <Bar id="my-chart-id3"
-                    :options="chartOptions"
-                    :data="chartData3" />
-                </div>
-                <div class="my-2 mx-5 p-1">
-                    <Bar id="my-chart-id3"
-                    :options="chartOptions"
-                    :data="chartTrabajadoresHoy" />
-                </div>
-                <div class="my-2 mx-5 p-1">
-                    <Bar id="my-chart-id3"
-                    :options="chartOptions"
-                    :data="centrosHoy" />
+                
+                <div class="shadowCard">
+                    <h2 class="my-3">Horas</h2>
+                    <div class="my-2 mx-5 p-1">
+                        <Bar id="my-chart-id3"
+                        :options="chartOptions"
+                        :data="chartTrabajadoresHoy" />
+                    </div>
+                    <div class="my-2 mx-5 p-1">
+                        <Bar id="my-chart-id3"
+                        :options="chartOptions"
+                        :data="centrosHoy" />
+                    </div>
                 </div>
             </div>
         </div>

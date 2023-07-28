@@ -13,6 +13,7 @@ class Reporte extends Model
         'fecha_ini',
         'fecha_fin',
         'horas_trabajadas',//admit null
+        'almuerzo',
 
 		'diurnas',
 		'nocturnas',
@@ -29,12 +30,10 @@ class Reporte extends Model
         'user_id',
 	];
 
-	public function centrocostos()
-	{
+	public function centrocostos() {
 		return $this->hasOne('App\Models\CentroCosto');
 	}
-	public function users()
-	{
+	public function users() {
 		return $this->hasOne('App\Models\User');
 	}
 }

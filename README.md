@@ -55,10 +55,10 @@ password : superadmin
 email : admin@admin.com
 password : admin
 ```
-### Operator
+### empleado
 ``` bash
-email : operator@operator.com
-password : operator
+email : empleado@empleado.com
+password : empleado
 ```
 # Packages
 - [Vue](https://vuejs.org/)

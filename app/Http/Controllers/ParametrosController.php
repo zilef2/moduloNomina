@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Parametro;
 use App\Http\Requests\ParametroRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ParametrosController extends Controller
@@ -15,14 +18,14 @@ class ParametrosController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
+    public function index() {
         $parametros= Parametro::all();
         $titulo = __('app.label.Params');
 
         $nombresTabla =[//0: como se ven //1 como es la BD
             [
-                'subsidio de transporte',
+                'subsidio de transporte dia/quincena', 
+                // 'subsidio de transporte',
                 'salario minimo',
                 'porcentaje diurno',
                 'porcentaje nocturno',
@@ -34,7 +37,8 @@ class ParametrosController extends Controller
                 'porcentaje dominical extra nocturno'
             ],
             [
-                'o_subsidio_de_transporte',
+                'o_subsidio_de_transporte_dia',
+                // 'o_subsidio_de_transporte',
                 'o_salario_minimo',
                 'p_porcentaje_diurno',
                 'p_porcentaje_nocturno',
@@ -54,24 +58,13 @@ class ParametrosController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    
     public function create()
     {
-        return view('parametros.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  ParametroRequest  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(ParametroRequest $request)
-    {
+    
+    public function store(ParametroRequest $request) {
         $parametro = new Parametro;
 		$parametro->subsidio_de_transporte = $request->input('subsidio_de_transporte');
 		$parametro->salario_minimo = $request->input('salario_minimo');
@@ -84,57 +77,37 @@ class ParametrosController extends Controller
 		$parametro->porcentaje_dominical_extra_diurno = $request->input('porcentaje_dominical_extra_diurno');
 		$parametro->porcentaje_dominical_extra_nocturno = $request->input('porcentaje_dominical_extra_nocturno');
         $parametro->save();
-
         return redirect()->route('parametros.index');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        $parametro = Parametro::findOrFail($id);
-        return view('parametros.show',['parametro'=>$parametro]);
-    }
+    public function update(ParametroRequest $request, $id) {
+        DB::beginTransaction();
+        $ListaControladoresYnombreClase = (explode('\\',get_class($this))); $nombreC = end($ListaControladoresYnombreClase);
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        $parametro = Parametro::findOrFail($id);
-        return view('parametros.edit',['parametro'=>$parametro]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  ParametroRequest  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(ParametroRequest $request, $id)
-    {
-        $parametro = Parametro::findOrFail($id);
-		$parametro->subsidio_de_transporte = $request->input('subsidio_de_transporte');
-		$parametro->salario_minimo = $request->input('salario_minimo');
-		$parametro->porcentaje_diurno = $request->input('porcentaje_diurno');
-		$parametro->porcentaje_nocturno = $request->input('porcentaje_nocturno');
-		$parametro->porcentaje_extra_diurno = $request->input('porcentaje_extra_diurno');
-		$parametro->porcentaje_extra_nocturno = $request->input('porcentaje_extra_nocturno');
-		$parametro->porcentaje_dominical_diurno = $request->input('porcentaje_dominical_diurno');
-		$parametro->porcentaje_dominical_nocturno = $request->input('porcentaje_dominical_nocturno');
-		$parametro->porcentaje_dominical_extra_diurno = $request->input('porcentaje_dominical_extra_diurno');
-		$parametro->porcentaje_dominical_extra_nocturno = $request->input('porcentaje_dominical_extra_nocturno');
-        $parametro->save();
-
-        return redirect()->route('parametros.index');
+        try {
+            $parametro = Parametro::findOrFail($id);
+            $parametro->subsidio_de_transporte_dia = $request->input('subsidio_de_transporte_dia');
+            $parametro->salario_minimo = $request->input('salario_minimo');
+            // $parametro->porcentaje_diurno = $request->input('porcentaje_diurno');
+            // $parametro->porcentaje_nocturno = $request->input('porcentaje_nocturno');
+            // $parametro->porcentaje_extra_diurno = $request->input('porcentaje_extra_diurno');
+            // $parametro->porcentaje_extra_nocturno = $request->input('porcentaje_extra_nocturno');
+            // $parametro->porcentaje_dominical_diurno = $request->input('porcentaje_dominical_diurno');
+            // $parametro->porcentaje_dominical_nocturno = $request->input('porcentaje_dominical_nocturno');
+            // $parametro->porcentaje_dominical_extra_diurno = $request->input('porcentaje_dominical_extra_diurno');
+            // $parametro->porcentaje_dominical_extra_nocturno = $request->input('porcentaje_dominical_extra_nocturno');
+            $parametro->save();
+            DB::commit();
+            Log::info(' U -> '.Auth::user()->name. ' Accedio a la vista ' .$nombreC . ' y actualizo los paramaetros:
+                subsidio_de_transporte_dia = '.$parametro->subsidio_de_transporte_dia.
+                'salario_minimo ='.$parametro->salario_minimo 
+            );
+            return back()->with('success', __('app.label.updated_successfully', ['name' => 'Parametros']));
+        } catch (\Throwable $th) {
+            DB::rollback();
+            Log::critical(' U -> '.Auth::user()->name. ' Accedio a la vista ' .$nombreC. ' Fallo la operacion: '.$th->getMessage());
+            return back()->with('error', __('app.label.updated_error', ['name' => __('app.label.Parametross')]) . $th->getMessage());
+        }
     }
 
     /**
@@ -145,9 +118,9 @@ class ParametrosController extends Controller
      */
     public function destroy($id)
     {
-        $parametro = Parametro::findOrFail($id);
-        $parametro->delete();
+        // $parametro = Parametro::findOrFail($id);
+        // $parametro->delete();
 
-        return redirect()->route('parametros.index');
+        // return redirect()->route('parametros.index');
     }
 }

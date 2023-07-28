@@ -45,7 +45,7 @@ const downloadExcel = async () => {
                     </div>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <SwitchLangNavbar />
+                    <!-- <SwitchLangNavbar /> -->
                     <SwitchDarkModeNavbar />
 
                     <!-- <DropdownLink v-if="can(['isAdmin'])" class="text-gray-500 dark:text-white" @click="downloadExcel"> {{ lang().label.downloadUsers }} </DropdownLink> -->

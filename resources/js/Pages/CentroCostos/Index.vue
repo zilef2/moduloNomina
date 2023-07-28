@@ -1,5 +1,5 @@
 <script setup>
-    import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
     import Breadcrumb from '@/Components/Breadcrumb.vue';
     import TextInput from '@/Components/TextInput.vue';
     import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -9,12 +9,14 @@
     import pkg from 'lodash';
     import { Head,router,usePage,Link } from '@inertiajs/vue3';
 
+    import Create from '@/Pages/CentroCostos/Create.vue';
+    import Edit from '@/Pages/CentroCostos/Edit.vue'; 
+    import Delete from '@/Pages/CentroCostos/Delete.vue';
+
     import Pagination from '@/Components/Pagination.vue';
     import { ChevronUpDownIcon, PencilIcon,EyeIcon, TrashIcon } from '@heroicons/vue/24/solid';
+    import {number_format} from '@/global.js';
 
-    import Create from '@/Pages/centroCostos/Create.vue';
-    import Edit from '@/Pages/centroCostos/Edit.vue'; 
-    import Delete from '@/Pages/centroCostos/Delete.vue';
 
     import Checkbox from '@/Components/Checkbox.vue';
     import InfoButton from '@/Components/InfoButton.vue';
@@ -32,9 +34,9 @@ import Dashboard from '../Dashboard.vue';
     
     const data = reactive({
         params: {
-            search: props.filters.search,
-            field: props.filters.field,
-            order: props.filters.order,
+            search: props.filters?.search,
+            field: props.filters?.field,
+            order: props.filters?.order,
             perPage: props.perPage,
         },
         selectedId: [],
@@ -49,7 +51,6 @@ import Dashboard from '../Dashboard.vue';
         
     const order = (field) => {
         if(field != undefined){
-
             // console.log("🚀 ~ file: Index.vue:54 ~ order ~ field:", field)
             // field = field.substr(2)
             // console.log("🚀 field:", field)
@@ -92,25 +93,6 @@ import Dashboard from '../Dashboard.vue';
         }
     }
 
-    function number_format(amount, decimals, isPesos) {
-        amount += '';
-        amount = parseFloat(amount.replace(/[^0-9\.]/g, ''));
-        decimals = decimals || 0;
-
-        if (isNaN(amount) || amount === 0)
-            return parseFloat(0).toFixed(decimals);
-        amount = '' + amount.toFixed(decimals);
-
-        var amount_parts = amount.split(' '),
-            regexp = /(\d+)(\d{3})/;
-
-        while (regexp.test(amount_parts[0]))
-            amount_parts[0] = amount_parts[0].replace(regexp, '$1' + '.' + '$2');
-
-        if(isPesos)
-            return '$'+amount_parts.join(' ');
-        return amount_parts.join(' ');
-    }
 
     function monthName(monthNumber){
         if(monthNumber == 1) return 'Enero';
@@ -156,8 +138,8 @@ import Dashboard from '../Dashboard.vue';
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton>
                     </div>
-                    <TextInput v-model="data.params.search" type="text" class="block w-3/6 md:w-2/6 lg:w-1/6 rounded-lg"
-                        :placeholder="lang().placeholder.search" />
+                    <!-- <TextInput v-model="data.params.search" type="text" class="block w-3/6 md:w-2/6 lg:w-1/6 rounded-lg"
+                        :placeholder="lang().placeholder.search" /> -->
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table class="w-full">

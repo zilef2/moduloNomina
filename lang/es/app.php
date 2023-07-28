@@ -2,9 +2,12 @@
 
 return [
     'label' => [
+        'quincena' => 'quincena',
         //parametros
         'Params' => 'Parametros',
         'Parametros' => 'Parametros',
+        'subsidio_de_transporte_dia' => 'subsidio de transporte por dia',
+        'salario_minimo' => 'salario minimo',
         //upload and download user excel
         'upload_complete' => 'Archivo subido correctamente',
         'importUser' => 'importar usuarios',
@@ -13,45 +16,52 @@ return [
 
         //centro y reportes
        
-        'CentroCostos' => 'Centro Costos',
-        'CentroCosto' => 'Centro Costo',
-        'Reportes' => 'Reporte',
-        'Reporte' => 'Reporte',
+            'CentroCostos' => 'Centro Costos',
+            'CentroCosto' => 'Centro Costo',
+            'Reportes' => 'Reporte',
+            'Reporte' => 'Reporte',
 
-        'cliente' => 'Cliente',
-        'valor_tentativo' => 'Valor tentativo',
-        'valor_acordado' => 'Valor acordado',
-        'valor_primer_pago' => 'Valor primer pago',
-        'fecha_primera_reunion' => 'fecha primera reunion',
-        'fecha_primer_pago' => 'primer pago',
-        'fecha_entrega' => 'fecha tentativa entrega',
-        'observaciones' => 'observaciones',
+            'cliente' => 'Cliente',
+            'valor_tentativo' => 'Valor tentativo',
+            'valor_acordado' => 'Valor acordado',
+            'valor_primer_pago' => 'Valor primer pago',
+            'fecha_primera_reunion' => 'fecha primera reunion',
+            'fecha_primer_pago' => 'primer pago',
+            'fecha_entrega' => 'fecha tentativa entrega',
+            'observaciones' => 'observaciones',
 
-        'Reports' => 'Reportes',
-        'Report' => 'Reporte',
-        'reporte' => 'Reporte',
-        'sessions' => 'sesiones',
+            'Reports' => 'Reportes',
+            'Report' => 'Reporte',
+            'reporte' => 'Reporte',
+            'sessions' => 'sesiones',
 
         // form - reportes
-        'extra_diurnas' => 'Extra diurnas',
-        'extra_nocturnas' => 'Extra nocturnas',
-        'dominical_diurnas' => 'dominical diurnas',
-        'dominical_nocturnas' => 'dominical nocturnas',
-        'dominical_extra_diurnas' => 'dominical extra',
-        'dominical_extra_nocturnas' => 'dominical extra noc',
-        'fecha_ini' => 'fecha inicio',
-        'fecha_fin' => 'fecha fin',
-        'horas_trabajadas' => 'Horas trabajadas',
-        'centro_costo_id' => 'Centro de costo',
-        'diurnas' => 'diurnas',
-        'nocturnas' => 'nocturnas',
-        'almuerzo' => 'almuerzo',
+            'extra_diurnas' => 'Extra diurnas',
+            'extra_nocturnas' => 'Extra nocturnas',
+            'dominical_diurnas' => 'dominical diurnas',
+            'dominical_nocturnas' => 'dominical nocturnas',
+            'dominical_extra_diurnas' => 'dominical extra',
+            'dominical_extra_nocturnas' => 'dominical extra noc',
+            'fecha_ini' => 'fecha inicio',
+            'fecha_fin' => 'fecha fin',
+            'horas_trabajadas' => 'Horas trabajadas',
+            'centro_costo_id' => 'Centro de costo',
+            'diurnas' => 'diurnas',
+            'nocturnas' => 'nocturnas',
+            'horacomida' => 'hora de comida',
 
         //users
         'cargo' => 'Cargo',
+        'cedula' => 'cedula',
         'salario_hora' => 'Salario hora',
         'quincena' => 'quincena',
-
+        'celular' => 'celular',
+        'fecha_de_ingreso' => 'fecha de ingreso',
+        'salario' => 'salario',
+        'telefono' => 'telefono',
+        'celular' => 'celular',
+        'sexo' => 'sexo',
+        'salario' => 'salario',
 
         //otros
         'Action' => 'Acción',
@@ -102,9 +112,9 @@ return [
 
 
         'verify_email_notification' => 'A new verification link has been sent to the email address you provided during registration.',
-        'no_data' => 'No data',
+        'no_data' => 'No hay registros',
         'documentation' => 'Introduccion',
-        'documentation_detail' => 'Desarrollo a la medida realizado para la empresa _',
+        'documentation_detail' => 'Desarrollo a la medida realizado para la empresa EC Ingeniería Eléctrica S.A.S.',
         'more' => 'Más',
         'check_all' => 'Check all',
         'email_verification' => 'Email Verification',
@@ -140,6 +150,9 @@ return [
         'reject' => 'Rechazar'
     ],
     'placeholder' => [
+        'subsidio_de_transporte_dia' => 'subsidio de transporte por dia',
+        'salario_minimo' => 'salario minimo',
+        
         'search' => 'Buscar...',
         'searchDates' => 'Buscar por dia o mes...',
         'email' => 'email@email.com',

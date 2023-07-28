@@ -31,6 +31,14 @@ class ReporteRequest extends FormRequest
 			'centro_costo_id' => 'required',
 			// 'valido' => 'required',
 			// 'observaciones' => 'required',
+            'diurnas' => 'required',
+            'nocturnas' => 'required',
+            'extra_diurnas' => 'required',
+            'extra_nocturnas' => 'required',
+            'dominical_diurnas' => 'required',
+            'dominical_nocturnas' => 'required',
+            'dominical_extra_diurnas' => 'required',
+            'dominical_extra_nocturnas' => 'required',
         ];
     }
 }

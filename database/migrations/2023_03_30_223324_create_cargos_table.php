@@ -28,6 +28,7 @@ class CreateCargosTable extends Migration
                 ->references('id')
                 ->on('cargos')
                 ->onDelete('cascade');
+
         });
     }
 

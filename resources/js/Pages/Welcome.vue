@@ -73,9 +73,9 @@ defineProps({
                             Wibowo</a> -->
                     </p>
                 </div>
-                <div class="flex mx-4 sm:mx-0 justify-center text-center">
+                <!-- <div class="flex mx-4 sm:mx-0 justify-center text-center">
                     Laravel v{{ laravelVersion }} (PHP v{{ phpVersion }})
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

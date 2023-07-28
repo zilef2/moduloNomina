@@ -21,6 +21,7 @@ class RoleSeeder extends Seeder
         $superadmin->givePermissionTo([
             'isSuper',
             'isAdmin',
+            'isadministrativo',
 
             'delete user',
             'update user',
@@ -50,6 +51,7 @@ class RoleSeeder extends Seeder
         $admin = Role::create([ 'name'=> 'admin' ]);
         $admin->givePermissionTo([
             'isAdmin',
+            'isadministrativo',
 
             'delete user',
             'update user',
@@ -68,8 +70,8 @@ class RoleSeeder extends Seeder
             //centroCostos
         ]);
 
-        $operator = Role::create([ 'name' => 'operator' ]);
-        $operator->givePermissionTo([
+        $empleado = Role::create([ 'name' => 'empleado' ]);
+        $empleado->givePermissionTo([
              //reporte
             'read reporte',
             'create reporte',
@@ -79,9 +81,9 @@ class RoleSeeder extends Seeder
             'read centroCostos',
         ]);
 
-        $validador = Role::create(['name' => 'validador']);
-        $validador->givePermissionTo([
-            'isValidador',
+        $administrativo = Role::create(['name' => 'administrativo']);
+        $administrativo->givePermissionTo([
+            'isadministrativo',
             
             'read user',
             'create user',
@@ -100,14 +102,14 @@ class RoleSeeder extends Seeder
         $acciones = ['create','update','read'];
         foreach ($acciones as $accion) {
             $admin->givePermissionTo([ $accion.' '.$modelo]);
-            $validador->givePermissionTo([ $accion.' '.$modelo]);
+            $administrativo->givePermissionTo([ $accion.' '.$modelo]);
         }
 
         $modelo = 'parametros';
         $acciones = ['update','read'];
         foreach ($acciones as $accion) {
             $admin->givePermissionTo([ $accion.' '.$modelo]);
-            $validador->givePermissionTo([ $accion.' '.$modelo]);
+            $administrativo->givePermissionTo([ $accion.' '.$modelo]);
         }
         // $role->revokePermissionTo($permission);
         // $permission->removeRole($role);

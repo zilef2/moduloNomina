@@ -1,12 +1,12 @@
 
-function formatDate(date,isDateTime) {
+export function formatDate(date,isDateTime) {
     const validDate = new Date(date)
     const day = validDate.getDate().toString().padStart(2, "0");
     // getMonthName(1)); // January
     const month = monthName((validDate.getMonth() + 1).toString().padStart(2, "0"));
     let year = validDate.getFullYear();
     let anioActual = new Date().getFullYear();
-    if(isDateTime ='conLaHora'){
+    if(isDateTime == 'conLaHora'){
         let hora = validDate.getHours();
         const AMPM = hora >= 12 ? ' PM' : ' AM';
         hora = hora % 12 || 12;
@@ -29,7 +29,7 @@ function formatDate(date,isDateTime) {
     }
 }
 
-function number_format(amount, decimals, isPesos) {
+export function number_format(amount, decimals, isPesos) {
     amount += '';
     amount = parseFloat(amount.replace(/[^0-9\.]/g, ''));
     decimals = decimals || 0;
@@ -50,7 +50,7 @@ function number_format(amount, decimals, isPesos) {
 }
 
 
-function monthName(monthNumber){
+export function monthName(monthNumber){
     if(monthNumber == 1) return 'Enero';
     if(monthNumber == 2) return 'Febrero';
     if(monthNumber == 3) return 'Marzo';
@@ -63,4 +63,15 @@ function monthName(monthNumber){
     if(monthNumber == 10) return 'Octubre';
     if(monthNumber == 11) return 'Noviembre';
     if(monthNumber == 12) return 'Diciembre';
+}
+
+
+export function TransformTdate (dateString){
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const day = ('0' + date.getDate()).slice(-2);
+    const hours = ('0' + date.getHours()).slice(-2);
+    const minutes = ('0' + date.getMinutes()).slice(-2);
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
 }

@@ -22,6 +22,9 @@
     import Edit from '@/Pages/Reportes/Edit.vue'; 
     import Delete from '@/Pages/Reportes/Delete.vue';
 
+
+    import {formatDate, number_format, monthName} from '@/global.js';
+
     import { Bar } from 'vue-chartjs'
     import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
     ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
@@ -39,7 +42,15 @@
         showSelect: Object,
         showUsers: Object,
         IntegerDefectoSelect: Number,
-        quincena: Array,
+        horasemana: Number,
+        startDateMostrar: String,
+        endDateMostrar: String,
+        sumhoras_trabajadas: Number,
+
+
+        quincena: Object,
+        nombrePersona: String,
+        numberPermissions: Number,
     })
 
     const chartOptions = {
@@ -60,6 +71,7 @@
    
     const data = reactive({
         params: {
+            soloValidos: props.filters?.soloValidos,
             search: props.filters?.search,
             field: props.filters?.field,
             order: props.filters?.order,
@@ -112,71 +124,6 @@
             data.multipleSelect = false
         }
     }
-    function formatDate(date,isDateTime) {
-        const validDate = new Date(date)
-        const day = validDate.getDate().toString().padStart(2, "0");
-        // getMonthName(1)); // January
-        const month = monthName((validDate.getMonth() + 1).toString().padStart(2, "0"));
-        let year = validDate.getFullYear();
-        let anioActual = new Date().getFullYear();
-        if(isDateTime ='conLaHora'){
-            let hora = validDate.getHours();
-            const AMPM = hora >= 12 ? ' PM' : ' AM';
-            hora = hora % 12 || 12;
-            let hourAndtime =  hora + ':'+ (validDate.getMinutes() < 10 ? '0': '') + validDate.getMinutes()  + AMPM;
-            if (anioActual == year){
-                return `${day}-${month} | ${hourAndtime}`;
-            }
-            else{
-                year = year.toString().slice(-2);
-                return `${day}-${month}-${year} | ${hourAndtime}`;
-            }
-        }else{
-            if (anioActual == year){
-                return `${day}-${month}`;
-            }
-            else{
-                year = year.toString().slice(-2);
-                return `${day}-${month}-${year}`;
-            }
-        }
-    }
-
-    function number_format(amount, decimals, isPesos) {
-        amount += '';
-        amount = parseFloat(amount.replace(/[^0-9\.]/g, ''));
-        decimals = decimals || 0;
-
-        if (isNaN(amount) || amount === 0)
-            return parseFloat(0).toFixed(decimals);
-        amount = '' + amount.toFixed(decimals);
-
-        var amount_parts = amount.split(' '),
-            regexp = /(\d+)(\d{3})/;
-
-        while (regexp.test(amount_parts[0]))
-            amount_parts[0] = amount_parts[0].replace(regexp, '$1' + '.' + '$2');
-
-        if(isPesos)
-            return '$'+amount_parts.join(' ');
-        return amount_parts.join(' ');
-    }
-
-
-    function monthName(monthNumber){
-        if(monthNumber == 1) return 'Enero';
-        if(monthNumber == 2) return 'Febrero';
-        if(monthNumber == 3) return 'Marzo';
-        if(monthNumber == 4) return 'Abril';
-        if(monthNumber == 5) return 'Mayo';
-        if(monthNumber == 6) return 'Junio';
-        if(monthNumber == 7) return 'Julio';
-        if(monthNumber == 8) return 'Agosto';
-        if(monthNumber == 9) return 'Septiembre';
-        if(monthNumber == 10) return 'Octubre';
-        if(monthNumber == 11) return 'Noviembre';
-        if(monthNumber == 12) return 'Diciembre';
-    }
 
     //aprobar o no 
     const form = useForm({
@@ -205,10 +152,19 @@
                     <PrimaryButton v-if="can(['create reporte'])" class="rounded-none" @click="data.createOpen = true">
                         {{ lang().button.add }}
                     </PrimaryButton>
-                    <Create :show="data.createOpen" @close="data.createOpen = false" :title="props.title" :valoresSelect="props.valoresSelect" :IntegerDefectoSelect="props.IntegerDefectoSelect" />
+
+                    <Create :show="data.createOpen" @close="data.createOpen = false" 
+                        :title="props.title" :valoresSelect="props.valoresSelect" :IntegerDefectoSelect="props.IntegerDefectoSelect"
+                        :horasemana="props.horasemana"
+                        :startDateMostrar="props.startDateMostrar"
+                        :endDateMostrar="props.endDateMostrar"
+                        :numberPermissions="props.numberPermissions"
+                        />
+
                     <Edit :show="data.editOpen" @close="data.editOpen = false" 
                         :Reporte="data.generico" :title="props.title" :valoresSelect="props.valoresSelect" :showUsers="props.showUsers" :correccionUsuario="false"/>
                     
+                        <!-- solo el usuario puede corregir sus propios reportes -->
                     <Edit :show="data.editCorregirOpen" @close="data.editCorregirOpen = false" 
                         :Reporte="data.generico" :title="props.title" :valoresSelect="props.valoresSelect" :showUsers="props.showUsers" :correccionUsuario="true"/>
                         
@@ -229,6 +185,12 @@
                     </div>
                     <TextInput v-if="filters !== null" v-show="can(['update reporte'])" v-model="data.params.search" type="text" class="block w-3/6 md:w-2/6 lg:w-1/6 rounded-lg"
                         :placeholder="lang().placeholder.searchDates" />
+
+                        <div v-if="props.quincena === null" class="flex space-x-8">
+                            <label for="soloval">Solo validos</label>
+                            <input v-if="filters !== null" v-model="data.params.soloValidos" id="soloval"
+                                 type="checkbox" class="bg-black h-7 w-7"/>
+                        </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table class="w-full">
@@ -302,6 +264,19 @@
                                     <div v-else-if="titulo_slug.substr(0,1) == 'm'">{{ number_format(clasegenerica[titulo_slug.substr(2)],0,1) }}</div>
                                 </td>
                             </tr>
+                            <tr v-show="props.sumhoras_trabajadas != 0" 
+                                class="my-2 py-4 border-t border-gray-200 dark:border-gray-900 hover:bg-sky-200 hover:dark:bg-gray-900/20">
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">  </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> Total horas </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">  </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">  </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">  </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">  </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">  </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">  </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> {{ props.sumhoras_trabajadas }} </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">  </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -310,12 +285,12 @@
                 </div>
             </div>
 
-            <section v-if="props.quincena != null" v-show="can(['updateCorregido reporte']) || can(['isAdmin'])" class="text-gray-600 body-font overflow-hidden">
+            <section v-if="props.quincena != null" v-show="can(['updateCorregido reporte']) || can(['isAdmin']) || can(['isadministrativo'])" class="text-gray-600 body-font overflow-hidden">
                 <div class="container px-5 py-4 mx-auto">
                     <div class="flex flex-wrap m-2">
                         <div class="p-1 md:w-1/2 flex flex-col items-start">
                             <span class="inline-block py-1 px-2 rounded bg-indigo-50 text-indigo-500 text-xs font-medium tracking-widest">Este mes</span>
-                            <h2 class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">Numero de reportes</h2>
+                            <h2 class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">Numero de reportes de {{ props.nombrePersona }}</h2>
                             <div class="m-1 p-1 w-full">
                                 <Bar id="my-chart-id"
                                 :options="chartOptions"

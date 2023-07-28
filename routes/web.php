@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Application; 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route; use Illuminate\Support\Facades\Session; use Inertia\Inertia;
 
 
@@ -28,10 +29,13 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
+    $ListaControladoresYnombreClase = (explode('\\',get_class($this))); $nombreC = end($ListaControladoresYnombreClase);
+    Log::info(' U -> '.Auth::user()->name. ' Accedio a la vista ' .$nombreC);
+
     $Authuser = Auth::user();
     $permissions = auth()->user()->roles->pluck('name')[0];
     $ultimos5dias = null;
-    if($permissions === "operator") { //admin | validador
+    if($permissions === "empleado") { //admin | administrativo
         $reportes = (int) Reporte::Where('user_id', $Authuser->id)->count();
         
     }else{
@@ -53,14 +57,8 @@ Route::get('/dashboard', function () {
             'Mes actual' => Reporte::whereIn('valido',[0,2])->where('fecha_ini','>', Carbon::today()->startOfMonth())->get()->count(),
         ];
 
-        $ultimasHoras = [
-            'Horas Semana Pasada' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->addDays(-7)->startOfWeek(),Carbon::now()->addDays(-7)->endOfWeek()])
-                ->sum('horas_trabajadas'),
-            'Horas Semana' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
-                ->sum('horas_trabajadas'),
-        ];
-        //!toremember
-        $usuariosConRol = User::whereHas("roles", function($q){ $q->where("name", "operator"); })->take(6)->get();
+        $usuariosConRol = User::whereHas("roles", function($q){ $q->where("name", "empleado"); })
+            ->take(6)->get();
 
         foreach ($usuariosConRol as $value) {
             $BooleanreportoHoy = Reporte::where('user_id',$value->id)->whereDate('fecha_fin',Carbon::today())->first();
@@ -89,7 +87,6 @@ Route::get('/dashboard', function () {
         'permissions'   => (int) Permission::count(),
         'reportes'   => $reportes,
         'ultimos5dias' => $ultimos5dias,
-        'ultimasHoras' => $ultimasHoras ?? [],
         'diasNovalidos' => $diasNovalidos ?? [],
         'trabajadoresHoy' => $trabajadoresHoy ?? [],
         'centrosHoy' => $centrosHoy ?? [],
@@ -107,6 +104,7 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::post('/user/destroy-bulk', [UserController::class, 'destroyBulk'])->name('user.destroy-bulk');
     
     Route::get('/userUploadExcel', [UserController::class,'FunctionUploadFromEx'])->name('user.uploadexcel');
+
     Route::post('/userUploadExcelPost', [UserController::class,'FunctionUploadFromExPost'])->name('user.uploadexcelpost');
     
     Route::resource('/role', RoleController::class)->except('create', 'show', 'edit');
@@ -124,9 +122,9 @@ Route::middleware('auth', 'verified')->group(function () {
 
 
     //# excel
-    Route::get('users/export/{quincena}/{month}/{year}', [UserController::class, 'export2'])->name('reporte1temp');
+    // Route::get('users/export/{quincena}/{month}/{year}', [UserController::class, 'export2'])->name('reporte1temp');
     Route::get('users/export/{quincena}/{month}/{year}', [UserController::class, 'export'])->name('reporte1');
-    // Route::get('users/export', [UserController::class, 'export'])->name('reporte1');
+    Route::get('users/downloadsigo/{quincena}/{month}/{year}', [UserController::class, 'downloadsigo']);
     
 });
 

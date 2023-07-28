@@ -11,16 +11,14 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
-class CentroCostosController extends Controller
-{
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+class CentroCostosController extends Controller {
     public function index(Request $request) {
+        $ListaControladoresYnombreClase = (explode('\\',get_class($this))); $nombreC = end($ListaControladoresYnombreClase);
+        Log::info(' U -> '.Auth::user()->name. ' Accedio a la vista ' .$nombreC);
+
         $centroCostos = centroCosto::query();
         if ($request->has('search')) {
             $centroCostos->orWhere('nombre', 'LIKE', "%" . $request->search . "%");
@@ -30,8 +28,8 @@ class CentroCostosController extends Controller
         }
         $perPage = $request->has('perPage') ? $request->perPage : 10;
 
-        $permissions = auth()->user()->roles->pluck('name')[0];
-        if($permissions === "operator") { //admin | validador
+        $permissions = Auth()->user()->roles->pluck('name')[0];
+        if($permissions === "empleado") { //admin | administrativo
             $nombresTabla =[//[0]: como se ven //[1] como es la BD
                 ["#","nombre"],
                 [null,"nombre"]
@@ -54,12 +52,6 @@ class CentroCostosController extends Controller
 
     public function create() { }
 
-    /**
-         * Store a newly created resource in storage.
-         *
-         * @param  centroCostosRequest  $request
-         * @return \Illuminate\Http\Response
-     */
     public function store(CentroCostoRequest $request) {
         DB::beginTransaction();
         try {
@@ -79,7 +71,7 @@ class CentroCostosController extends Controller
         $Reportes = Reporte::query();
         
         $titulo = __('app.label.Reportes');
-        $permissions = auth()->user()->roles->pluck('name')[0];
+        $permissions = Auth()->user()->roles->pluck('name')[0];
         $Reportes->Where('centro_costo_id',$id);
         $valoresSelectConsulta = CentroCosto::orderBy('nombre')->get();
         $IntegerDefectoSelect = $valoresSelectConsulta->first()->id;
@@ -95,10 +87,10 @@ class CentroCostosController extends Controller
             $showUsers[intval($value->id)] = $value->name;
         }
         
-        if($permissions === "operator") { //admin | validador
-        }else{ // not operator
+        if($permissions === "empleado") { //admin | administrativo
+        }else{ // not empleado
             // $ReportesEsteMes = Reporte::WhereMonth('fecha_ini',$esteMes)->get()->count();
-            $titulo = $this->CalcularTituloQuincena();
+            $titulo = $this->CalcularTituloQuincena($permissions);
             
             $Reportes->orderBy('fecha_ini'); $perPage = 15;
 
@@ -108,7 +100,7 @@ class CentroCostosController extends Controller
                 [null,null,null,null,null,null,null,null,null,null,null,null,null,null] //campos ordenables
             ];
         }
-
+        $sumhoras_trabajadas = $Reportes->sum('horas_trabajadas');
         return Inertia::render('Reportes/Index', [ //carpeta
             'title'          =>  $titulo,
             'filters'        =>  null,
@@ -121,17 +113,34 @@ class CentroCostosController extends Controller
             'showSelect'   =>  $showSelect,
             'IntegerDefectoSelect'   =>  $IntegerDefectoSelect,
             'showUsers'   =>  $showUsers,
+            'sumhoras_trabajadas'   =>  $sumhoras_trabajadas,
         ]);
     }
 
-    public function CalcularTituloQuincena() {
+    public function CalcularTituloQuincena($permissions) {
         $esteMes = date("m");
         $diaquincena = date("d");
-        if($diaquincena >= 15){ //todo: no es el num 15
-            $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','<=',15)->sum('horas_trabajadas');
+        if($permissions === "empleado") { //NO admin | administrativo
+            $userid = Auth::user()->id;
+            if($diaquincena <= 15){
+                $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','<=',15)
+                    ->where('user_id',$userid)
+                    ->sum('horas_trabajadas');
+            }else{
+                $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','>',15)
+                    ->where('user_id',$userid)
+                    ->sum('horas_trabajadas');
+            }
         }else{
-            $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','>',15)->sum('horas_trabajadas');
+            if($diaquincena <= 15){
+                $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','<=',15)
+                    ->sum('horas_trabajadas');
+            }else{
+                $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','>',15)
+                    ->sum('horas_trabajadas');
+            }
         }
+
         return 'Horas trabajadas quincena: '.$horasTrabajadas;
     }
 

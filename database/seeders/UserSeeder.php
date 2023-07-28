@@ -31,20 +31,20 @@ class UserSeeder extends Seeder
         ]);
         $admin->assignRole('admin');
 
-        $operator = User::create([
-            'name'              => 'Operator',
-            'email'             => 'operator@operator.com',
-            'password'          => bcrypt('operator00+*'),
+        $empleado = User::create([
+            'name'              => 'empleado',
+            'email'             => 'empleado@empleado.com',
+            'password'          => bcrypt('empleado00+*'),
             'email_verified_at' => date('Y-m-d H:i')
         ]);
-        $operator->assignRole('operator');
+        $empleado->assignRole('empleado');
 
-        $validador = User::create([
-            'name'              => 'validador',
-            'email'             => 'validador@validador.com',
-            'password'          => bcrypt('validador00+*'),
+        $administrativo = User::create([
+            'name'              => 'administrativo',
+            'email'             => 'administrativo@administrativo.com',
+            'password'          => bcrypt('administrativo00+*'),
             'email_verified_at' => date('Y-m-d H:i')
         ]);
-        $validador->assignRole('validador');
+        $administrativo->assignRole('administrativo');
     }
 }

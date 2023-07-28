@@ -25,16 +25,16 @@ class ParametroRequest extends FormRequest
     {
         return
         [
-			'subsidio_de_transporte' => 'required',
+			'subsidio_de_transporte_dia' => 'required',
 			'salario_minimo' => 'required',
-			'porcentaje_diurno' => 'required',
-			'porcentaje_nocturno' => 'required',
-			'porcentaje_extra_diurno' => 'required',
-			'porcentaje_extra_nocturno' => 'required',
-			'porcentaje_dominical_diurno' => 'required',
-			'porcentaje_dominical_nocturno' => 'required',
-			'porcentaje_dominical_extra_diurno' => 'required',
-			'porcentaje_dominical_extra_nocturno' => 'required',
+			// 'porcentaje_diurno' => 'required',
+			// 'porcentaje_nocturno' => 'required',
+			// 'porcentaje_extra_diurno' => 'required',
+			// 'porcentaje_extra_nocturno' => 'required',
+			// 'porcentaje_dominical_diurno' => 'required',
+			// 'porcentaje_dominical_nocturno' => 'required',
+			// 'porcentaje_dominical_extra_diurno' => 'required',
+			// 'porcentaje_dominical_extra_nocturno' => 'required',
         ];
     }
 }

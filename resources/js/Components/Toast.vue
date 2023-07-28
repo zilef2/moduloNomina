@@ -32,7 +32,7 @@
         </div>
     </transition>
     <transition name="slide-fade">
-        <div v-if="flash.warning && isVisible" class="absolute top-4 right-4 w-8/12 md:w-6/12 lg:w-3/12 z-[100]">
+        <div v-if="flash.warning && isVisible" class="absolute top-24 right-4 w-8/12 md:w-6/12 lg:w-3/12 z-[100]">
             <div class="flex p-4 justify-between items-center bg-amber-600 rounded-lg">
                 <div>
                     <ExclamationTriangleIcon class="h-8 w-8 text-white" fill="currentColor" />
@@ -104,7 +104,7 @@ export default {
 
                 this.timeout = setTimeout(() => {
                     this.isVisible = false;
-                }, 3000);
+                }, 7000);
             },
         },
     },
@@ -117,7 +117,7 @@ export default {
     durations and timing functions.
     */
 .slide-fade-enter-active {
-    transition: all 0.3s ease-out;
+    transition: all 0.6s ease-out;
 }
 
 .slide-fade-leave-active {
@@ -126,7 +126,7 @@ export default {
 
 .slide-fade-enter-from,
 .slide-fade-leave-to {
-    transform: translateX(10px);
+    transform: translateX(15px);
     opacity: 0;
 }
 </style>

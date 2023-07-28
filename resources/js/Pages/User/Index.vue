@@ -1,17 +1,19 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
-import Breadcrumb from '@/Components/Breadcrumb.vue';
-import TextInput from '@/Components/TextInput.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import InfoButton from '@/Components/InfoButton.vue';
-import SelectInput from '@/Components/SelectInput.vue';
-import { reactive, watch } from 'vue';
-import DangerButton from '@/Components/DangerButton.vue';
-import pkg from 'lodash';
-import { router } from '@inertiajs/vue3';
-import Pagination from '@/Components/Pagination.vue';
-import { ShieldCheckIcon, CheckBadgeIcon,EyeIcon, ChevronUpDownIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/solid';
+    import { Head } from '@inertiajs/vue3';
+    import Breadcrumb from '@/Components/Breadcrumb.vue';
+    import TextInput from '@/Components/TextInput.vue';
+    import PrimaryButton from '@/Components/PrimaryButton.vue';
+    import InfoButton from '@/Components/InfoButton.vue';
+    import SelectInput from '@/Components/SelectInput.vue';
+    import { reactive, watch } from 'vue';
+    import DangerButton from '@/Components/DangerButton.vue';
+    import pkg from 'lodash';
+    import { router } from '@inertiajs/vue3';
+    import Pagination from '@/Components/Pagination.vue';
+    import { ShieldCheckIcon, CheckBadgeIcon,EyeIcon, ChevronUpDownIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/solid';
+
+    import {number_format} from '@/global.js';
 
 import Create from '@/Pages/User/Create.vue';
 import Edit from '@/Pages/User/Edit.vue';
@@ -29,6 +31,7 @@ const props = defineProps({
     cargos: Object,
     breadcrumbs: Object,
     perPage: Number,
+    sexoSelect: Object,
 })
 const data = reactive({
     params: {
@@ -47,36 +50,40 @@ const data = reactive({
     dataSet: usePage().props.app.perpage
 })
 
-const order = (field) => {
-    data.params.field = field
-    data.params.order = data.params.order === "asc" ? "desc" : "asc"
-}
+    //default functions
+        const order = (field) => {
+            data.params.field = field
+            data.params.order = data.params.order === "asc" ? "desc" : "asc"
+            console.log(data.params.order)
+            console.log(data.params.field)
+        }
 
-watch(() => _.cloneDeep(data.params), debounce(() => {
-    let params = pickBy(data.params)
-    router.get(route("user.index"), params, {
-        replace: true,
-        preserveState: true,
-        preserveScroll: true,
-    })
-}, 150))
+        watch(() => _.cloneDeep(data.params), debounce(() => {
+            let params = pickBy(data.params)
+            router.get(route("user.index"), params, {
+                replace: true,
+                preserveState: true,
+                preserveScroll: true,
+            })
+        }, 15))
 
-const selectAll = (event) => {
-    if (event.target.checked === false) {
-        data.selectedId = []
-    } else {
-        props.users?.data.forEach((user) => {
-            data.selectedId.push(user.id)
-        })
-    }
-}
-const select = () => {
-    if (props.users?.data.length == data.selectedId.length) {
-        data.multipleSelect = true
-    } else {
-        data.multipleSelect = false
-    }
-}
+        const selectAll = (event) => {
+            if (event.target.checked === false) {
+                data.selectedId = []
+            } else {
+                props.users?.data.forEach((user) => {
+                    data.selectedId.push(user.id)
+                })
+            }
+        }
+        const select = () => {
+            if (props.users?.data.length == data.selectedId.length) {
+                data.multipleSelect = true
+            } else {
+                data.multipleSelect = false
+            }
+        }
+    //fin default functions
 
 </script>
 
@@ -88,22 +95,22 @@ const select = () => {
         <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />
         <div class="space-y-4">
             <div class="px-4 sm:px-0">
-                <div class="rounded-lg overflow-hidden w-fit">
-                    <PrimaryButton v-show="can(['create user'])" class="rounded-none" @click="data.createOpen = true">
+                <div class="rounded-lg overflow-hidden w-fit gap-8">
+                    <PrimaryButton v-show="can(['create user'])" class="rounded-md mx-2" @click="data.createOpen = true">
                         {{ lang().button.add }}
                     </PrimaryButton>
-                    <PrimaryButton v-show="can(['isSuper'])"
-                        class=" mx-3 bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
-                        :class="  { 'bg-sky-600 dark:bg-sky-600': route().current('user.uploadexcel') }">
-                        <Link v-show="can(['isSuper'])" :href="route('user.uploadexcel')" class="flex items-center py-1 px-4">
+                    <PrimaryButton v-show="can(['isAdmin'])" class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary">
+
+                        <Link v-show="can(['isAdmin'])" :href="route('user.uploadexcel')" class="flex items-center px-4">
+                            Exportar
                             <ShieldCheckIcon class="w-3 h-3" />
-                            <span class="ml-3">{{ lang().button.importUser }}</span>
+                            <!-- <span class="ml-3">{{ lang().button.importUser }}</span> -->
                         </Link>
                     </PrimaryButton>
 
-                    <Create :show="data.createOpen" @close="data.createOpen = false" :roles="props.roles" :cargos="props.cargos"
+                    <Create :show="data.createOpen" @close="data.createOpen = false" :roles="props.roles" :cargos="props.cargos" :sexoSelect="props.sexoSelect"
                         :title="props.title" />
-                    <Edit :show="data.editOpen" @close="data.editOpen = false" :user="data.user" :roles="props.roles" :cargos="props.cargos"
+                    <Edit :show="data.editOpen" @close="data.editOpen = false" :user="data.user" :roles="props.roles" :cargos="props.cargos" :sexoSelect="props.sexoSelect"
                         :title="props.title" />
                     <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :user="data.user"
                         :title="props.title" />
@@ -123,7 +130,7 @@ const select = () => {
                         </DangerButton>
                     </div>
                     <TextInput v-model="data.params.search" type="text" class="block w-3/6 md:w-2/6 lg:w-1/6 rounded-lg"
-                        :placeholder="lang().placeholder.search" />
+                        placeholder="Buscar por nombre o correo" />
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table class="w-full">
@@ -139,9 +146,11 @@ const select = () => {
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
                                 </th>
-                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('email')">
+                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('cedula')">
                                     <div class="flex justify-between items-center">
-                                        <span>{{ lang().label.email }}</span>
+                                        <span>
+                                            Identificacion
+                                        </span>
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
                                 </th>
@@ -151,13 +160,34 @@ const select = () => {
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
                                 </th>
-                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('cargo_id')">
+
+                                <th class="px-2 py-4">{{ lang().label.role }}</th>
+
+                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('celular')">
                                     <div class="flex justify-between items-center">
-                                        <span>{{ lang().label.salario_hora }}</span>
+                                        <span>{{ lang().label.celular }}</span>
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
                                 </th>
-                                <th class="px-2 py-4">{{ lang().label.role }}</th>
+                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('telefono')">
+                                    <div class="flex justify-between items-center">
+                                        <span>{{ lang().label.telefono }}</span>
+                                        <ChevronUpDownIcon class="w-4 h-4" />
+                                    </div>
+                                </th>
+                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('fecha_de_ingreso')">
+                                    <div class="flex justify-between items-center">
+                                        <span>{{ lang().label.fecha_de_ingreso }}</span>
+                                        <ChevronUpDownIcon class="w-4 h-4" />
+                                    </div>
+                                </th>
+                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('salario')">
+                                    <div class="flex justify-between items-center">
+                                        <span>{{ lang().label.salario }}</span>
+                                        <ChevronUpDownIcon class="w-4 h-4" />
+                                    </div>
+                                </th>
+
                                 <th class="px-2 py-4 cursor-pointer" v-on:click="order('updated_at')">
                                     <div class="flex justify-between items-center">
                                         <span>{{ lang().label.updated }}</span>
@@ -177,17 +207,20 @@ const select = () => {
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++index }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    <span class="flex justify-start items-center">
+                                    <span class="flex justify-start items-center"> 
                                         {{ user.name }}
-                                        <CheckBadgeIcon class="ml-[2px] w-4 h-4 text-primary dark:text-white"
-                                            v-show="user.email_verified_at" />
                                     </span>
+                                    <small>{{ user.email }} </small>
+                                    <!-- <CheckBadgeIcon class="ml-[2px] w-4 h-4 text-primary dark:text-white" v-show="user.email_verified_at" />  -->
                                 </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.email }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cedula }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cargo.length == 0 ? 'No tiene cargo' : user.cargo.nombre }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cargo.length == 0 ? 'No tiene cargo' : user.cargo.salario_hora }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.roles.length == 0 ? 'No tiene rol' : user.roles[0].name }}</td>
                                 <!-- <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.created_at }}</td> -->
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.celular }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.telefono }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.fecha_de_ingreso }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ number_format(user.salario,0,1) }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.updated_at }}</td>
                                 <td class="whitespace-nowrap p-4 sm:p-3">
                                     <div class="flex justify-center">

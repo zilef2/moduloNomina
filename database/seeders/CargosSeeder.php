@@ -3,8 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Cargo;
-use App\Models\Parametro;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class CargosSeeder extends Seeder

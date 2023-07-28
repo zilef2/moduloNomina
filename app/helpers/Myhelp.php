@@ -2,9 +2,48 @@
 
 namespace App\helpers;
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+
 // use Hamcrest\Type\IsInteger;
 
 class Myhelp{
+
+    //************************logs************************\\
+    
+    public static function getPermissionToNumber($permissions)
+    {
+
+        if ($permissions == 'empleado') return 1;
+        if ($permissions == 'administrativo') return 2;
+        if ($permissions == 'admin') return 3;
+        if ($permissions == 'superadmin') return 4;
+        return 0;
+    }
+    public static function EscribirEnLog($thiis, $clase = '', $mensaje = '', $returnPermission = true, $critico = false)
+    {
+        $permissions = $returnPermission ? auth()->user()->roles->pluck('name')[0] : null;
+        $ListaControladoresYnombreClase = (explode('\\', get_class($thiis)));
+        $nombreC = end($ListaControladoresYnombreClase);
+        if (!$critico) {
+
+            $Elpapa = (explode('\\', get_parent_class($thiis)));
+            $nombreP = end($Elpapa);
+
+            if ($permissions == 'admin' || $permissions == 'superadmin') {
+                $ElMensaje = $mensaje != '' ? ' Mensaje: ' . $mensaje : '';
+                Log::channel('soloadmin')->info('Vista:' . $nombreC . ' Padre: ' . $nombreP . '|  U:' . Auth::user()->name . $ElMensaje);
+            } else {
+                Log::info('Vista: ' . $nombreC . ' Padre: ' . $nombreP . 'U:' . Auth::user()->name . ' ||' . $clase . '|| ' . ' Mensaje: ' . $mensaje);
+            }
+            return $permissions;
+        } else {
+            Log::critical('Vista: ' . $nombreC . 'U:' . Auth::user()->name . ' ||' . $clase . '|| ' . ' Mensaje: ' . $mensaje);
+        }
+    }
+
+    //************************laravel************************\\
+
 
     public function redirect($ruta,$seconds = 4)
     {
@@ -12,6 +51,8 @@ class Myhelp{
         return redirect()->to($ruta);
     }
 
+
+    //************************string************************\\
     function cortarFrase($frase, $maxPalabras = 3) {
         $noTerminales = [
             "de","a","para",

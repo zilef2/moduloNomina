@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\helpers\Myhelp;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,23 +13,26 @@ use App\Models\CentroCosto;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ReportesController extends Controller
 {
- /**
-     * Display a listing of the resource.
-     *
+    /**
      * @return \Illuminate\Http\Response
      * valido states = {0 defect | 1 validada | 2 rechazada}
      */
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
+        $permissions = Myhelp::EscribirEnLog($this, 'reportes');
+        $numberPermissions = Myhelp::getPermissionToNumber($permissions); //0:error, 1:estudiante,  2: profesor, 3:++ )
+
         $titulo = __('app.label.Reportes');
         $Authuser = Auth::user();
         $permissions = auth()->user()->roles->pluck('name')[0];
         $Reportes = Reporte::query();
         $valoresSelectConsulta = CentroCosto::orderBy('nombre')->get();
         $IntegerDefectoSelect = $valoresSelectConsulta->first()->id;
+
+
         foreach ($valoresSelectConsulta as $value) {
             $valoresSelect[] = [
                 'label' => $value->nombre, //centro de costos
@@ -42,8 +46,15 @@ class ReportesController extends Controller
         }
 
         $quincena = [];
+        $horasemana = 0;
+
+        Carbon::setLocale('es');
+            $startDate = Carbon::now()->startOfWeek();
+            $endDate = Carbon::now()->endOfWeek();
+            $startDateMostrar = $startDate->isoFormat('dddd D [de] MMMM');
+            $endDateMostrar = $endDate->isoFormat('dddd D [de] MMMM');
         
-        if($permissions === "operator") { //admin | validador
+        if($permissions === "empleado") { //admin | administrativo
             $Reportes->whereUser_id($Authuser->id);
 
             if ($request->has(['field', 'order'])) {
@@ -59,16 +70,30 @@ class ReportesController extends Controller
                 [null,null,null,"t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"] //campos ordenables
             ];
 
-        }else{ // not operator
-            $quincena = [
+            //# horas de la semana
+            $horasemana = Reporte::Where('user_id',Auth::user()->id)
+                                ->WhereBetween('fecha_ini', [$startDate, $endDate])
+                                ->sum('horas_trabajadas');
 
-                'Primera quincena' => Reporte::whereBetween('fecha_ini',[Carbon::now()->startOfMonth(),Carbon::now()->startOfMonth()->addDays(15)])->count(),
+            //# solo validos
+            if ($request->has('soloValidos')) {
+                $Reportes->where('valido', true);
+            }
+            // dd($Reportes);
+
+        }else{ // not empleado
+            $horasemana = Reporte::WhereBetween('fecha_ini', [$startDate, $endDate])->sum('horas_trabajadas');
+
+            $quincena = [
+                'Primera quincena' => Reporte::whereBetween('fecha_ini',[Carbon::now()->startOfMonth(),Carbon::now()->startOfMonth()->addDays(14)])->count(),
                 'Segunda quincena' => Reporte::whereBetween('fecha_ini',[Carbon::now()->startOfMonth()->addDays(15),Carbon::now()->LastOfMonth()])->count(),
             ];
             // dd($quincena);
             // $ReportesEsteMes = Reporte::WhereMonth('fecha_ini',$esteMes)->get()->count();
             $titulo = $this->CalcularTituloQuincena();
             
+           
+
             if ($request->has('search')) {
                 $Reportes->whereMonth('fecha_ini', $request->search);
                 $Reportes->OrwhereMonth('fecha_fin', $request->search);
@@ -79,33 +104,40 @@ class ReportesController extends Controller
                 // $Reportes->orWhere('fecha_fin', 'LIKE', "%" . $request->search . "%");
             }
             if ($request->has(['field', 'order'])) {
-                $Reportes->orderBy($request->field, $request->order);
-            }else{
-                $Reportes->orderBy('fecha_ini');
+                    $Reportes->orderBy($request->field, $request->order);
+                }else{
+                    $Reportes->orderBy('fecha_ini');
             }
             $perPage = $request->has('perPage') ? $request->perPage : 10;
 
             $nombresTabla =[//0: como se ven //1 como es la BD
-                ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio",       "fin",        "horas trabajadas",   "observaciones"],
-                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
-                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean 
+                
+                ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio",       "fin",        "horas trabajadas",  'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', "observaciones"],
+                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
+                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean 
             ];
         }
 
+        $sumhoras_trabajadas = $Reportes->sum('horas_trabajadas');
 
         return Inertia::render('Reportes/Index', [ //carpeta
             'title'          =>  $titulo,
-            'filters'        =>  $request->all(['search', 'field', 'order']),
+            'filters'        =>  $request->all(['search', 'field', 'order','soloValidos']),
             'perPage'        =>  (int) $perPage,
             'fromController' =>  $Reportes->paginate($perPage),
             'breadcrumbs'    =>  [['label' => __('app.label.Reportes'), 'href' => route('Reportes.index')]],
             'nombresTabla'   =>  $nombresTabla,
 
-            'valoresSelect'   =>  $valoresSelect,
-            'showSelect'   =>  $showSelect,
-            'IntegerDefectoSelect'   =>  $IntegerDefectoSelect,
-            'showUsers'   =>  $showUsers,
-            'quincena'   =>  $quincena,
+            'valoresSelect'         =>  $valoresSelect,
+            'showSelect'            =>  $showSelect,
+            'IntegerDefectoSelect'  =>  $IntegerDefectoSelect,
+            'showUsers'             =>  $showUsers,
+            'quincena'              =>  $quincena,
+            'horasemana'            =>  $horasemana,
+            'startDateMostrar'      =>  $startDateMostrar,
+            'endDateMostrar'        =>  $endDateMostrar,
+            'sumhoras_trabajadas'   =>  intval($sumhoras_trabajadas),
+            'numberPermissions'     =>  $numberPermissions,
         ]);
     }//fin index
 
@@ -120,7 +152,6 @@ class ReportesController extends Controller
         return 'Horas trabajadas quincena: '.$horasTrabajadas;
     }
 
-
     public function create() { }
 
     public function updatingDate($date) {
@@ -130,8 +161,7 @@ class ReportesController extends Controller
         return date("Y-m-d H:i:s",strtotime($date));
     }
 
-    public function store(ReporteRequest $request)
-    {
+    public function store(ReporteRequest $request) {
         DB::beginTransaction();
         try {
             $thisUserId = Auth::User()->id;
@@ -155,6 +185,7 @@ class ReportesController extends Controller
                 $Reportes->fecha_fin = $fecha_fin;
                 $Reportes->horas_trabajadas = $request->horas_trabajadas;
 
+                $Reportes->almuerzo = $request->almuerzo;
                 $Reportes->diurnas = $request->diurnas;
                 $Reportes->nocturnas = $request->nocturnas;
                 $Reportes->extra_diurnas = $request->extra_diurnas;
@@ -181,8 +212,7 @@ class ReportesController extends Controller
     }//fin store
 
     public function show($id) { }
-    public function edit($id)
-    {
+    public function edit($id) {
         $Reportes = Reporte::findOrFail($id);
         return Inertia::render('Reportes.edit',['Reportes'=>$Reportes]);
     }
@@ -194,8 +224,7 @@ class ReportesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id) {
         DB::beginTransaction();
         try {
             $Reportes = Reporte::findOrFail($id);
@@ -222,10 +251,10 @@ class ReportesController extends Controller
             }
             $Reportes->save();
             DB::commit();
-            return back()->with('success', __('app.label.created_successfully', ['name' => 'Reporte']));
+            return back()->with('success', __('app.label.updated_successfully', ['name' => 'Reporte']));
         } catch (\Throwable $th) {
             DB::rollback();
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Reportes')]) . $th->getMessage());
+            return back()->with('error', __('app.label.updated_error', ['name' => __('app.label.Reportes')]) . $th->getMessage());
         }
     }
 
@@ -247,7 +276,7 @@ class ReportesController extends Controller
                 return back()->with('success', __('app.label.deleted_successfully'));
             }else{
                 DB::commit();
-                return back()->with('warning', __('app.label.not_deleted', ['name' => $Reportes->observaciones]));
+                return back()->with('warning', __('app.label.not_deleted', ['name' => $Reportes->observaciones]). '. Ya esta aprobado');
             }
             
         } catch (\Throwable $th) {
