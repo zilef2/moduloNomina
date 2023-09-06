@@ -2,6 +2,7 @@
 
 return [
     'label' => [
+        'HORAS_NECESARIAS_QUINCENA' => 'Horas necesarias para la semana',
         'quincena' => 'quincena',
         //parametros
         'Params' => 'Parametros',

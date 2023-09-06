@@ -11,9 +11,13 @@ class Parametro extends Model
 
     protected $fillable = [
         
+        'HORAS_NECESARIAS_QUINCENA',
+        
         'subsidio_de_transporte_dia',
         'salario_minimo',
-            'valor_maximo_subsidio_de_transporte',
+        'valor_maximo_subsidio_de_transporte',
+        
+
 
         'porcentaje_diurno',
         'porcentaje_nocturno',

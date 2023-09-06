@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\helpers\HelpExcel;
+use App\helpers\Myhelp;
 use App\Models\Cargo;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -12,10 +13,9 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Support\Facades\Validator;
 
-class UsersImport implements ToModel,WithChunkReading,ShouldQueue, WithValidation, WithHeadingRow
-{
+class UsersImport implements ToModel,WithChunkReading,ShouldQueue, WithValidation, WithHeadingRow {
+
     use Importable;
 
     // public function rules(): array
@@ -87,6 +87,7 @@ class UsersImport implements ToModel,WithChunkReading,ShouldQueue, WithValidatio
             return null;
         }
         $elCorreo = trim($row['correo']);
+        $elCorreo = Myhelp::quitarTildes($elCorreo);
         //fin validaciones
 
         $fechaIngreso = HelpExcel::getFechaExcel($row['fecha_ingreso']);
@@ -98,7 +99,6 @@ class UsersImport implements ToModel,WithChunkReading,ShouldQueue, WithValidatio
             foreach ($usuariosActualizados as $key => $value) {
                 if($laCedula == $value) {
                     session(['countCedulaRepetida' => $countCedulaRepetida+1]);
-
                     return null;
                 }
             }

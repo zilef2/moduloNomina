@@ -13,7 +13,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
     import Pagination from '@/Components/Pagination.vue';
     import { ShieldCheckIcon, CheckBadgeIcon,EyeIcon, ChevronUpDownIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/solid';
 
-    import {number_format} from '@/global.js';
+    import {number_format} from '@/global.ts';
 
 import Create from '@/Pages/User/Create.vue';
 import Edit from '@/Pages/User/Edit.vue';
@@ -88,7 +88,6 @@ const data = reactive({
 </script>
 
 <template>
-
     <Head :title="props.title" />
 
     <AuthenticatedLayout>
@@ -99,19 +98,21 @@ const data = reactive({
                     <PrimaryButton v-show="can(['create user'])" class="rounded-md mx-2" @click="data.createOpen = true">
                         {{ lang().button.add }}
                     </PrimaryButton>
-                    <PrimaryButton v-show="can(['isAdmin'])" class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary">
+                    <Link v-show="can(['isAdmin'])" :href="route('user.uploadexcel')" 
+                        class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary">
+                        <PrimaryButton v-show="can(['isAdmin'])"
+                            class="flex items-center px-4">
 
-                        <Link v-show="can(['isAdmin'])" :href="route('user.uploadexcel')" class="flex items-center px-4">
                             Exportar
                             <ShieldCheckIcon class="w-3 h-3" />
                             <!-- <span class="ml-3">{{ lang().button.importUser }}</span> -->
-                        </Link>
-                    </PrimaryButton>
+                        </PrimaryButton>
+                    </Link>
 
-                    <Create :show="data.createOpen" @close="data.createOpen = false" :roles="props.roles" :cargos="props.cargos" :sexoSelect="props.sexoSelect"
-                        :title="props.title" />
-                    <Edit :show="data.editOpen" @close="data.editOpen = false" :user="data.user" :roles="props.roles" :cargos="props.cargos" :sexoSelect="props.sexoSelect"
-                        :title="props.title" />
+                    <Create :show="data.createOpen" @close="data.createOpen = false" :roles="props.roles"
+                        :cargos="props.cargos" :sexoSelect="props.sexoSelect" :title="props.title" />
+                    <Edit :show="data.editOpen" @close="data.editOpen = false" :user="data.user" :roles="props.roles"
+                        :cargos="props.cargos" :sexoSelect="props.sexoSelect" :title="props.title" />
                     <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :user="data.user"
                         :title="props.title" />
                     <DeleteBulk :show="data.deleteBulkOpen"
@@ -207,15 +208,17 @@ const data = reactive({
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++index }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    <span class="flex justify-start items-center"> 
+                                    <span class="flex justify-start items-center">
                                         {{ user.name }}
                                     </span>
                                     <small>{{ user.email }} </small>
                                     <!-- <CheckBadgeIcon class="ml-[2px] w-4 h-4 text-primary dark:text-white" v-show="user.email_verified_at" />  -->
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cedula }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cargo.length == 0 ? 'No tiene cargo' : user.cargo.nombre }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.roles.length == 0 ? 'No tiene rol' : user.roles[0].name }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cargo.length == 0 ? 'No tiene cargo'
+                                                                    : user.cargo.nombre }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.roles.length == 0 ? 'No tiene rol' :
+                                                                    user.roles[0].name }}</td>
                                 <!-- <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.created_at }}</td> -->
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.celular }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.telefono }}</td>
@@ -224,11 +227,11 @@ const data = reactive({
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.updated_at }}</td>
                                 <td class="whitespace-nowrap p-4 sm:p-3">
                                     <div class="flex justify-center">
-                                        <Link :href="route('user.showReporte',user.id)" v-show="can(['update centroCostos'])"
-                                            type="button"
+                                        <Link :href="route('user.showReporte',user.id)"
+                                            v-show="can(['update centroCostos'])" type="button"
                                             class="inline-flex  items-center p-1.5 bg-gray-600 border border-transparent rounded-sm font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"
-                                                v-tooltip="lang().tooltip.seeReport">
-                                            <EyeIcon class="w-4 h-4" />
+                                            v-tooltip="lang().tooltip.seeReport">
+                                        <EyeIcon class="w-4 h-4" />
                                         </Link>
                                         <div class="rounded-md overflow-hidden">
                                             <InfoButton v-show="can(['update user'])" type="button"

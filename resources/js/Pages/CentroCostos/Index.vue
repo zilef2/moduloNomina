@@ -15,12 +15,10 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
     import Pagination from '@/Components/Pagination.vue';
     import { ChevronUpDownIcon, PencilIcon,EyeIcon, TrashIcon } from '@heroicons/vue/24/solid';
-    import {number_format} from '@/global.js';
-
+    import {number_format} from '@/global.ts';
 
     import Checkbox from '@/Components/Checkbox.vue';
     import InfoButton from '@/Components/InfoButton.vue';
-import Dashboard from '../Dashboard.vue';
 
     const { _, debounce, pickBy } = pkg
     const props = defineProps({
@@ -69,50 +67,11 @@ import Dashboard from '../Dashboard.vue';
         })
     }, 150))
 
-    const select = () => {
-        if (props.fromController?.data.length == data.selectedId.length) {
-            data.multipleSelect = true
-        } else {
-            data.multipleSelect = false
-        }
-    }
-    function formatDate(date) {
-        const validDate = new Date(date)
-        const day = validDate.getDate().toString().padStart(2, "0");
-        // getMonthName(1)); // January
-        const month = monthName((validDate.getMonth() + 1).toString().padStart(2, "0"));
-        let year = validDate.getFullYear();
-        let anioActual = new Date().getFullYear();
-        
-        if (anioActual == year){
-            return `${day}-${month}`;
-        }
-        else{
-            year = year.toString().slice(-2);
-            return `${day}-${month}-${year}`;
-        }
-    }
-
-
-    function monthName(monthNumber){
-        if(monthNumber == 1) return 'Enero';
-        if(monthNumber == 2) return 'Febrero';
-        if(monthNumber == 3) return 'Marzo';
-        if(monthNumber == 4) return 'Abril';
-        if(monthNumber == 5) return 'Mayo';
-        if(monthNumber == 6) return 'Junio';
-        if(monthNumber == 7) return 'Julio';
-        if(monthNumber == 8) return 'Agosto';
-        if(monthNumber == 9) return 'Septiembre';
-        if(monthNumber == 10) return 'Octubre';
-        if(monthNumber == 11) return 'Noviembre';
-        if(monthNumber == 12) return 'Diciembre';
-    }
 
 </script>
 
 <template>
-    <Head :title="props.title" ></Head>
+    <Head :title="props.title"></Head>
 
     <AuthenticatedLayout>
 
@@ -124,17 +83,18 @@ import Dashboard from '../Dashboard.vue';
                         {{ lang().button.add }}
                     </PrimaryButton>
                     <Create :show="data.createOpen" @close="data.createOpen = false" :title="props.title" />
-                    <Edit :show="data.editOpen" @close="data.editOpen = false" :CentroCosto="data.generico" :title="props.title" />
-                    <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :CentroCosto="data.generico" :title="props.title" />
+                    <Edit :show="data.editOpen" @close="data.editOpen = false" :CentroCosto="data.generico"
+                        :title="props.title" />
+                    <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :CentroCosto="data.generico"
+                        :title="props.title" />
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="flex justify-between p-2">
                     <div class="flex space-x-2">
                         <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet" />
-                        <DangerButton @click="data.deleteBulkOpen = true"
-                            v-show="data.selectedId.length != 0" class="px-3 py-1.5"
-                            v-tooltip="lang().tooltip.delete_selected">
+                        <DangerButton @click="data.deleteBulkOpen = true" v-show="data.selectedId.length != 0"
+                            class="px-3 py-1.5" v-tooltip="lang().tooltip.delete_selected">
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton>
                     </div>
@@ -161,14 +121,15 @@ import Dashboard from '../Dashboard.vue';
                                 class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (index+1) }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.nombre) }} </td>
-                                <td v-if="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
+                                <td v-if="can(['update centroCostos'])"
+                                    class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
                                     <div class="flex justify-start items-center">
                                         <div class="rounded-md overflow-hidden">
-                                            <Link :href="route('CentroCostos.show',clasegenerica)" v-show="can(['update centroCostos'])"
-                                                type="button"
+                                            <Link :href="route('CentroCostos.show',clasegenerica)"
+                                                v-show="can(['update centroCostos'])" type="button"
                                                 class="inline-flex  items-center px-2 py-1.5 bg-gray-600 border border-transparent rounded-none font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"
-                                                 v-tooltip="lang().tooltip.see">
-                                                <EyeIcon class="w-4 h-4" />
+                                                v-tooltip="lang().tooltip.see">
+                                            <EyeIcon class="w-4 h-4" />
                                             </Link>
                                             <InfoButton v-show="can(['update centroCostos'])" type="button"
                                                 @click="(data.editOpen = true), (data.generico = clasegenerica)"

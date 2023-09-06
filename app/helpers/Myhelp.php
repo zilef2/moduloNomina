@@ -4,6 +4,7 @@ namespace App\helpers;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Normalizer;
 
 // use Hamcrest\Type\IsInteger;
 
@@ -74,6 +75,13 @@ class Myhelp{
         }
         return $frase;
     }
+
+    public static function quitarTildes($palabras){
+        $normalizedString = Normalizer::normalize($palabras, Normalizer::FORM_D);
+        $cleanString = preg_replace('/\p{Mn}/u', '', $normalizedString);
+        return $cleanString;
+    }
+
     public function erroresExcel($errorFeo){
         // $fila = session('ultimaPalabra');
         $error1 ="PDOException: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date";

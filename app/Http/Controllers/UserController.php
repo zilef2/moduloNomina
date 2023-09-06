@@ -223,12 +223,15 @@ class UserController extends Controller
             session(['countNoCargo' => 0]);
             session(['countSex' => 0]);
             session(['usuariosActualizados' => []]);
-            $messageSuccess1 = 'Usuarios nuevos: '.$CountFilas .($countNoleidos).' no leidas, '.$countNoCargo. ' con cargo erroneo, '. $countSex.' sexo mal escrito '.$countCedulaRepetida. ' cedula repetida.';
+            if( $countNoleidos == 0 && $countNoCargo == 0 && $countSex == 0 && $countCedulaRepetida == 0)
+                $messageSuccess1 = 'Usuarios nuevos: '.$CountFilas;
+            else
+                $messageSuccess1 = 'Usuarios nuevos: '.$CountFilas. '.  Hubo ' .($countNoleidos).' no leidas, '.$countNoCargo. ' con cargo erroneo, '. $countSex.' sexo mal escrito '.$countCedulaRepetida. ' cedula repetida.';
             if(count($usuariosActualizados) > 0){
                 $StringUsuariosRep = implode(", ",$usuariosActualizados);
                 session(['countCedulaRepetida' => 0]);
                 return back()->with('success', $messageSuccess1)
-                    ->with('warning', 'Usuarios actualizados: '.$StringUsuariosRep);
+                    ->with('warning', count($usuariosActualizados).' Usuarios actualizados: '.$StringUsuariosRep);
             }else{
                 return back()->with('success', $messageSuccess1);
             }
@@ -258,22 +261,17 @@ class UserController extends Controller
 
 
     public function export(Request $request) {
-        // $fechaIni = new DateTime($request->ini);
-        // $anio = $fechaIni->format('Y');
-        // $diaInicial = $fechaIni->format('d');
-        // $quincena = $diaInicial < 14 ? '1':'2';
         $quincena = intval($request->quincena);
         
         $year = intval($request->year);
         $month = intval($request->month+1);
         $NumReportesIniFin = $this->CalcularIniFinQuincena($quincena,$month,$year);
-
+        $NumeroDiasFestivos = intval($request->NumeroDiasFestivos);
         if($NumReportesIniFin['NumReportes'] > 0){
-            return Excel::download(new UsersExport($NumReportesIniFin['ini'],$NumReportesIniFin['fin']), "".$year.'Quincena'.$quincena.'DelMes'.$month.".xlsx");
+            return Excel::download(new UsersExport( $NumReportesIniFin['ini'],$NumReportesIniFin['fin'], $NumeroDiasFestivos),
+                    "".$year.'Quincena'.$quincena.'DelMes'.$month.".xlsx"
+            );
         }else{
-            // dd('El numero de reportes en esa quincena es 0');
-
-            // return back()->with('error', 'No hay reportes, en el rango de fechas seleccionadas');
             return redirect()->route('user.uploadexcel')->with('warning', 'No hay reportes, en el rango de fechas seleccionadas');
         }
         // return view('reporte1temp',$ini,$fin);
@@ -319,6 +317,7 @@ class UserController extends Controller
         $month = intval($request->month+1);
         $ini = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(0);
         $fin = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(23);
+        $NumeroDiasFestivos = intval($request->NumeroDiasFestivos);
         if($quincena == 1){
             // $ini->addDays(-3);
             $fin->addDays(14);//antes era 12            
@@ -338,7 +337,7 @@ class UserController extends Controller
         }
 
         if($NumReportes > 0){
-            return Excel::download(new SiigoExport($ini,$fin), "Siigo ".$year.'Quincena'.$quincena.'DelMes'.$month.".xlsx");
+            return Excel::download(new SiigoExport($ini,$fin, $NumeroDiasFestivos), "Siigo ".$year.'Quincena'.$quincena.'DelMes'.$month.".xlsx");
         }else{
             return redirect()->route('user.uploadexcel')->with('warning', 
                 'El numero de reportes en esa quincena es 0. '.

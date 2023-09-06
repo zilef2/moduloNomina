@@ -122,9 +122,8 @@ Route::middleware('auth', 'verified')->group(function () {
 
 
     //# excel
-    // Route::get('users/export/{quincena}/{month}/{year}', [UserController::class, 'export2'])->name('reporte1temp');
-    Route::get('users/export/{quincena}/{month}/{year}', [UserController::class, 'export'])->name('reporte1');
-    Route::get('users/downloadsigo/{quincena}/{month}/{year}', [UserController::class, 'downloadsigo']);
+    Route::get('users/export/{NumeroDiasFestivos}/{quincena}/{month}/{year}', [UserController::class, 'export'])->name('reporte1');
+    Route::get('users/downloadsigo/{NumeroDiasFestivos}/{quincena}/{month}/{year}', [UserController::class, 'downloadsigo']);
     
 });
 

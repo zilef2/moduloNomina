@@ -16,6 +16,8 @@ class ParametrosSeeder extends Seeder
     {
         Parametro::create([
 
+            'HORAS_NECESARIAS_QUINCENA' => 47,
+            
             //cada que va a la obra (almenos 1 hora)
             'subsidio_de_transporte_dia' => 4686.86667,//140606, => divide por 30  ->  dia
 

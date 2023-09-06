@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Parametro;
 use App\Http\Requests\ParametroRequest;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -24,6 +25,7 @@ class ParametrosController extends Controller
 
         $nombresTabla =[//0: como se ven //1 como es la BD
             [
+                'Horas necesarias para cumplir la semana', 
                 'subsidio de transporte dia/quincena', 
                 // 'subsidio de transporte',
                 'salario minimo',
@@ -37,6 +39,7 @@ class ParametrosController extends Controller
                 'porcentaje dominical extra nocturno'
             ],
             [
+                's_HORAS_NECESARIAS_QUINCENA',
                 'o_subsidio_de_transporte_dia',
                 // 'o_subsidio_de_transporte',
                 'o_salario_minimo',
@@ -59,11 +62,8 @@ class ParametrosController extends Controller
     }
 
     
-    public function create()
-    {
-    }
+    public function create() { }
 
-    
     public function store(ParametroRequest $request) {
         $parametro = new Parametro;
 		$parametro->subsidio_de_transporte = $request->input('subsidio_de_transporte');
@@ -83,7 +83,6 @@ class ParametrosController extends Controller
     public function update(ParametroRequest $request, $id) {
         DB::beginTransaction();
         $ListaControladoresYnombreClase = (explode('\\',get_class($this))); $nombreC = end($ListaControladoresYnombreClase);
-
         try {
             $parametro = Parametro::findOrFail($id);
             $parametro->subsidio_de_transporte_dia = $request->input('subsidio_de_transporte_dia');
@@ -96,13 +95,30 @@ class ParametrosController extends Controller
             // $parametro->porcentaje_dominical_nocturno = $request->input('porcentaje_dominical_nocturno');
             // $parametro->porcentaje_dominical_extra_diurno = $request->input('porcentaje_dominical_extra_diurno');
             // $parametro->porcentaje_dominical_extra_nocturno = $request->input('porcentaje_dominical_extra_nocturno');
-            $parametro->save();
-            DB::commit();
-            Log::info(' U -> '.Auth::user()->name. ' Accedio a la vista ' .$nombreC . ' y actualizo los paramaetros:
-                subsidio_de_transporte_dia = '.$parametro->subsidio_de_transporte_dia.
-                'salario_minimo ='.$parametro->salario_minimo 
-            );
-            return back()->with('success', __('app.label.updated_successfully', ['name' => 'Parametros']));
+            $today = Carbon::now();
+            $last_update = Carbon::parse($parametro->updated_at);
+            $diff = $today->isSameYear($last_update);
+
+                    
+            if($diff){
+                if($parametro->HORAS_NECESARIAS_QUINCENA != intval($request->input('HORAS_NECESARIAS_QUINCENA'))){
+                    return back()->with('warning', 'No se puede actualizar las horas necesarias por semana mas de una vez por año');
+                }
+
+            }else{
+                $parametro->HORAS_NECESARIAS_QUINCENA = $request->input('HORAS_NECESARIAS_QUINCENA');
+                $parametro->save();
+                DB::commit();
+                Log::info(' U -> '.Auth::user()->name. ' Accedio a la vista ' .$nombreC . ' y actualizo los paramaetros:
+                    subsidio_de_transporte_dia = '.$parametro->subsidio_de_transporte_dia.
+                    'salario_minimo ='.$parametro->salario_minimo 
+                );
+                return back()->with('success', __('app.label.updated_successfully', ['name' => 'Parametros']));
+                
+                
+
+            }
+           
         } catch (\Throwable $th) {
             DB::rollback();
             Log::critical(' U -> '.Auth::user()->name. ' Accedio a la vista ' .$nombreC. ' Fallo la operacion: '.$th->getMessage());

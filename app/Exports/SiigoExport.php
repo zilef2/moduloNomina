@@ -4,18 +4,20 @@ namespace App\Exports;
 
 use App\helpers\HelpExcel;
 use App\Models\Parametro;
+use App\Models\Reporte;
 use App\Models\User;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
 {
-    public $ini,$fin;
-    public function __construct($ini,$fin)
-    {
+    public $ini,$fin, $NumeroDiasFestivos;
+    public function __construct($ini,$fin, $NumeroDiasFestivos) {
         $this->ini = $ini;
         $this->fin = $fin;
+        $this->NumeroDiasFestivos = $NumeroDiasFestivos;
     }
 
     public function CalculoHorasExtrasDominicalesTodo($reportes,$cumplioQuicena,$salario_hora,$paramBD, &$H_diurno, &$nocturnas, &$extra_diurnas, &$extra_nocturnas, &$dominical_diurno, &$dominical_nocturno, &$dominical_extra_diurno, &$dominical_extra_nocturno){
@@ -44,21 +46,25 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
             intval($reportes->sum('dominical_extra_diurno')) +
             intval($reportes->sum('dominical_extra_nocturno')),
 
-            intval($reportes->sum('extra_diurnas')) ,
-            intval($reportes->sum('extra_nocturnas')) ,
-            intval($reportes->sum('dominical_diurno')) ,
-            intval($reportes->sum('dominical_nocturno')) ,
-            intval($reportes->sum('dominical_extra_diurno')) ,
-            intval($reportes->sum('dominical_extra_nocturno'))
+            intval($reportes->sum('extra_diurnas')) , //2
+            intval($reportes->sum('extra_nocturnas')) , //3
+            intval($reportes->sum('dominical_diurno')) , //4
+            intval($reportes->sum('dominical_nocturno')) , //5
+            intval($reportes->sum('dominical_extra_diurno')) , //6
+            intval($reportes->sum('dominical_extra_nocturno')) //7
         ];
     }
 
-    public function unsetAllunnesesary(&$users,$contadorKey){
-        $unecesary = ['id','name','cargo_id','salario'];
-        foreach ($unecesary as $empleado) {
-            unset($users[$contadorKey]->{$empleado});
+    public function unsetAllunnesesary(&$users) {
+        $unecesary = ['name','cargo_id','salario'];
+        foreach ($users as $user) {
+            foreach ($unecesary as $empleado) {
+                unset($user->{$empleado});
+            }
         }
     }
+
+
     /**
     * @return \Illuminate\Support\Collection
     */
@@ -69,77 +75,73 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
             $q->orWhere("name", "administrativo");
         })->get();
         $paramBD = Parametro::find(1);
-
-        $contadorKey = 0;
         $mensajeSigo = [
             '', //0
-            '10- Horas extras diurnas 125%- Ingreso', //1
-            '11- Horas extras nocturnas 175%- Ingreso', //2
-            '25- Recargo dominical o festivo- Ingreso', //3
-            'dom noc', //4
-            '07- Hora extra diurna dominical o festiva- Ingreso', //5
-            'dom extra noc', //6
-            '26- Recargo nocturno- Ingreso', //7
-            
-            
-            '08- Hora extra recargo dominical o festivo- Ingreso', //8
+            '10- Horas extras diurnas 125%- Ingreso', //1 extra diurna
+            '11- Horas extras nocturnas 175%- Ingreso', //2 extra noc
+
+            // '25- Recargo dominical o festivo- Ingreso', //3 dom diurna
+            '08- Hora extra recargo dominical o festivo- Ingreso', //3 dom diurna
+            '06- Hora dominical o festiva nocturna- Ingreso', //4 dominical noc
+
+            '07- Hora extra diurna dominical o festiva- Ingreso', //5 dom extra diurna
+            '12- Horas extras nocturnas dominical o festiva- Ingreso', //6 dom extra noc
+
+            '26- Recargo nocturno- Ingreso', //7 noc
         ];
-
-        $users->map(function($user) {
-            $unecesary = ['id','name','cargo_id','salario'];
-            foreach ($unecesary as $atribute) {
-                unset($user->{$atribute});
-            }
-            return $user;
-        });
-
+        
+        $this->unsetAllunnesesary($users);
         foreach ($users as $key => $empleado) {
-            $Novedad = 0;
-            $NumReportes = HelpExcel::cumplioQuincena($users,$key,$this->ini,$this->fin,$empleado,$reportes, $salario_hora, $salario_quincena, $cumplioQuicena );
 
+            $empleado->Contrato = $empleado->cedula;
+
+            $NumReportes = HelpExcel::cumplioQuincena($users,$key,$this->ini,$this->fin,$empleado,$reportes, $salario_hora, $salario_quincena, $cumplioQuicena,$paramBD,$this->NumeroDiasFestivos,'siigo');
             $ArrayExtrasyDominicales = $this->CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, $H_diurno, $nocturnas, $extra_diurnas, $extra_nocturnas, $dominical_diurno, $dominical_nocturno, $dominical_extra_diurno, $dominical_extra_nocturno);
-            
-            // $Num_extra_diurnas = $ArrayExtrasyDominicales[1];
-            // $Num_extra_nocturnas = $ArrayExtrasyDominicales[2];
-            // $Num_dominical_diurno = $ArrayExtrasyDominicales[3];
-            // $Num_dominical_nocturno = $ArrayExtrasyDominicales[4];
-            // $Num_dominical_extra_diurno = $ArrayExtrasyDominicales[5];
-            // $Num_dominical_extra_nocturno = $ArrayExtrasyDominicales[6];
+            // $Num_extra_diurnas = $ArrayExtrasyDominicales[1]; $Num_extra_nocturnas = $ArrayExtrasyDominicales[2]; $Num_dominical_diurno = $ArrayExtrasyDominicales[3]; $Num_dominical_nocturno = $ArrayExtrasyDominicales[4]; $Num_dominical_extra_diurno = $ArrayExtrasyDominicales[5]; $Num_dominical_extra_nocturno = $ArrayExtrasyDominicales[6];
             $ArrayExtrasyDominicales[7] = intval($reportes->sum('nocturnas'));
-            // $ArrayExtrasyDominicales[8] = intval($ArrayExtrasyDominicales[0]);
-            // $this->unsetAllunnesesary($users,$key);
+            $Novedad = 0;
+            unset($empleado->id);
+            $empleado->diasnohabiles = "0";
 
-            for ($i=1; $i < 8; $i++) { 
+            for ($i=1; $i < 8; $i++) {
                 if($ArrayExtrasyDominicales[$i] > 0){
-                    $users[$contadorKey]->Empleado = $empleado->cedula;
-                    $users[$contadorKey]->Empleado = $empleado->cedula;
+                    // if($i === 7){
+                    //     $fechanov = Reporte::where('user_id', $empleado->id)
+                    //     ->where('valido', 1)
+                    //     ->whereBetween('fecha_ini', [$this->ini, $this->fin])
+                    //     ->wherenotnull('nocturnas')->first();
+                    //     $fecha1 = Carbon::parse($fechanov->fecha_ini)->format('d/m/Y');
+                    //     $fecha2 = Carbon::parse($fechanov->fecha_fin)->format('d/m/Y');
+                        // $empleado->fechaininov = $fecha1;
+                        // $empleado->fechafinnov = $fecha2;
+                    // }
+                    if($Novedad != 0){
+                        $nuevoReporte = clone $empleado;
+                        $nuevoReporte->Quenov = $mensajeSigo[$i];
+                        $nuevoReporte->diasValornovedad = $ArrayExtrasyDominicales[$i];
+                        $users->splice(($key+1),0,[$nuevoReporte]);
+                    }else{
+                        $empleado->Quenov = $mensajeSigo[$i];
+                        $empleado->tiponov = 'Horas';
+                        $empleado->diasValornovedad = $ArrayExtrasyDominicales[$i];
+                        $empleado->fechaininov = '';
+                        $empleado->fechafinnov = '';
 
-                    $users[$contadorKey]->Quenov = $mensajeSigo[$i];
-                    $users[$contadorKey]->tiponov = 'Horas';
-                    $users[$contadorKey]->diasValornovedad = $ArrayExtrasyDominicales[$i];
-
+                    }
                     $Novedad++;//novedades de un usuarios
-                    $contadorKey++;//contador de usuarios
                 }
             }
             
             if($Novedad === 0){
-                //si no se cumple ninguna condicion
-                $users[$contadorKey]->Quenov = '';
-                $users[$contadorKey]->tiponov = '';
-                $users[$contadorKey]->diasValornovedad = '';
-                $users[$contadorKey]->fechaininov = '';
-                $users[$contadorKey]->fechafinnov = '';
-                $users[$contadorKey]->diasnohabiles = '';
+                $empleado->Quenov = 'Sin novedades';
+                $empleado->Quenov = '';
+                $empleado->tiponov = '';
+                $empleado->diasValornovedad = '';
+                $empleado->fechaininov = '';
+                $empleado->fechafinnov = '';
             }
-            
-
-            $contadorKey++;
-            dd(
-                $users,
-                $users[$contadorKey]->getAttributes()
-            );
         }
+
         // dd($users);
         return $users;
     }

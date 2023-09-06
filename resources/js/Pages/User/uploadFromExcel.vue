@@ -15,6 +15,7 @@ import { BookOpenIcon, ArrowUpCircleIcon, ArrowDownCircleIcon } from '@heroicons
 
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
+import FestivosColombia from 'festivos-colombia';
 
 
 const { _, debounce, pickBy } = pkg
@@ -28,6 +29,10 @@ const props = defineProps({
     fin: Date,
     flash: String,
 })
+
+const CurrentlyYear = new Date().getFullYear()    
+
+
 const data = reactive({
     respuesta: '',
     params:{
@@ -35,7 +40,8 @@ const data = reactive({
         quincena: ''
     },
     warnn:'',
-    tiposSiigo:[]
+    tiposSiigo:[],
+
 })
 
 onMounted(() => {
@@ -65,30 +71,79 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
             preserveState: true,
             preserveScroll: true,
         })
-    }, 150))
+    }, 150)
+)
 
-const formUp = useForm({
+const formUp = useForm({ //formulario para importar usuarios
     archivo1: null,
 });
-const form = useForm({
+const form = useForm({ //formulario para exportar el imforme quincenal
     // nombre1: null,
     archivo1: null,
     fecha_ini: '',
-    quincena: 1
-    // fecha_ini: '2023-03-03T'+horas[0]+':00', //toerase
-    // fecha_fin: '2023-04-03T'+horas[1]+':00', //toerase
+    quincena: 1,
+    NumeroDiasFestivos: 0
 });
-const form2 = useForm({
+const form2 = useForm({// formulario para sigo
     archivosigo: null,
     quincena_sigo: 1,
-    fecha_ini_sigo: ''
+    fecha_ini_sigo: '',
+    NumeroDiasFestivos: 0
 });
 
 watchEffect(() => {
     data.params.fecha_ini = form.fecha_ini,
     data.params.quincena = form.quincena
+
+    if(form2.fecha_ini_sigo){
+
+        form2.NumeroDiasFestivos = CuantosFestivosEstaQuincena(form2.quincena_sigo,form2.fecha_ini_sigo.month,form2.fecha_ini_sigo.year)
+        // console.log("🧈 debu form2.NumeroDiasFestivos:", form2.NumeroDiasFestivos);
+    }
+
+    if(form.fecha_ini){
+
+        form.NumeroDiasFestivos = CuantosFestivosEstaQuincena(form.quincena,form.fecha_ini.month,form.fecha_ini.year)
+        // console.log("🧈 debu form.NumeroDiasFestivos:", form.NumeroDiasFestivos);
+    }
+    
 })
 
+
+function CuantosFestivosEstaQuincena(numQuicena,elmes,anio){
+    let holidaysSelect = FestivosColombia.getHolidaysByYear(anio)
+
+    let dateFestivos,dateArr,monthFestivo;
+    var BreakException = {};
+    let contadorResult = 0
+    let diaLimite = numQuicena == 1 ? 14 : 31
+    holidaysSelect.forEach(element => {
+        dateArr = element.date.split('/'); //array con la fecha del foreach
+
+        dateFestivos = new Date(dateArr[2], dateArr[1] - 1, dateArr[0]);
+        monthFestivo = (dateFestivos.getMonth());
+
+        if(monthFestivo == elmes){
+            // console.log("🧈 debu dateFestivos.getMonth():", dateFestivos.getMonth());
+            // console.log("🧈 debu dateFestivos.getDate:", dateFestivos.getDate());
+            if(diaLimite == 14){
+                if(diaLimite > dateFestivos.getDate()){
+                    contadorResult++;
+                }
+            }else{
+                if(dateFestivos.getDate() > 14 && diaLimite > dateFestivos.getDate()){
+                    contadorResult++;
+                }
+
+            }
+
+        }
+        else{
+            return
+        }
+    });
+    return contadorResult
+}
 
 
 function uploadFile() {
@@ -103,13 +158,8 @@ function uploadFile() {
         onFinish: () => null,
     });
 }
-const downloadExcel = () => {
-    // alert(Date.parse(form.fecha_ini) + ' ____' + form.quincena+'___'+form.fecha_ini.month+'--'+form.fecha_ini.year)
-    window.open('users/export/' + form.quincena + '/' + (form.fecha_ini.month) + '/' + form.fecha_ini.year, '_blank')
-}
-const downloadsigo = () => {
-    window.open('users/downloadsigo/' + form2.quincena_sigo + '/' + (form2.fecha_ini_sigo.month) + '/' + form2.fecha_ini_sigo.year, '_blank')
-}
+const downloadExcel = () => { window.open('users/export/' + form.NumeroDiasFestivos + '/' + form.quincena + '/' + (form.fecha_ini.month) + '/' + form.fecha_ini.year, '_blank') }
+const downloadsigo = () => { window.open('users/downloadsigo/' + form2.NumeroDiasFestivos + '/' + form2.quincena_sigo + '/' + (form2.fecha_ini_sigo.month) + '/' + form2.fecha_ini_sigo.year, '_blank') }
 
 
 const QuincenaArray = [
@@ -132,8 +182,18 @@ const columnasImportarUser = [
 ];
 
 data.tiposSiigo = [
-    '10- Horas extras diurnas 125%- Ingreso',
-]
+    '10- Horas extras diurnas 125%- Ingreso', //1 extra diurna
+    '11- Horas extras nocturnas 175%- Ingreso', //2 extra noc
+
+    // '25- Recargo dominical o festivo- Ingreso', //3 dom diurna
+    '08- Hora extra recargo dominical o festivo- Ingreso', //3 dom diurna
+    '06- Hora dominical o festiva nocturna- Ingreso', //4 dominical noc
+
+    '07- Hora extra diurna dominical o festiva- Ingreso', //5 dom extra diurna
+    '12- Horas extras nocturnas dominical o festiva- Ingreso', //6 dom extra noc
+
+    '26- Recargo nocturno- Ingreso', //7 noc
+];
 
 </script>
 
@@ -147,12 +207,7 @@ data.tiposSiigo = [
                 <div class="rounded-lg overflow-hidden w-fit">
                     <div class="flex max-w-screen-xl shadow-lg rounded-lg">
                         <div class="bg-yellow-600 py-4 px-6 rounded-l-lg flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="fill-current text-white"
-                                width="20" height="20">
-                                <path fill-rule="evenodd"
-                                    d="M8.22 1.754a.25.25 0 00-.44 0L1.698 13.132a.25.25 0 00.22.368h12.164a.25.25 0 00.22-.368L8.22 1.754zm-1.763-.707c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0114.082 15H1.918a1.75 1.75 0 01-1.543-2.575L6.457 1.047zM9 11a1 1 0 11-2 0 1 1 0 012 0zm-.25-5.25a.75.75 0 00-1.5 0v2.5a.75.75 0 001.5 0v-2.5z">
-                                </path>
-                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="fill-current text-white" width="20" height="20"> <path fill-rule="evenodd" d="M8.22 1.754a.25.25 0 00-.44 0L1.698 13.132a.25.25 0 00.22.368h12.164a.25.25 0 00.22-.368L8.22 1.754zm-1.763-.707c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0114.082 15H1.918a1.75 1.75 0 01-1.543-2.575L6.457 1.047zM9 11a1 1 0 11-2 0 1 1 0 012 0zm-.25-5.25a.75.75 0 00-1.5 0v2.5a.75.75 0 001.5 0v-2.5z"> </path> </svg>
                         </div>
                         <div
                             class="px-8 py-6 bg-white rounded-r-lg flex justify-between items-center w-full border border-l-transparent border-gray-200">
@@ -168,9 +223,9 @@ data.tiposSiigo = [
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <section class="text-gray-600 body-font">
-                    <div class="container px-5 py-24 mx-auto">
+                    <div class="container px-5 py-12 mx-auto">
                         <div v-if="can(['isAdmin'])" class="flex flex-wrap -m-4">
-                            <div class="p-4 md:w-1/2">
+                            <div class="p-4 w-full sm:w-1/2">
                                 <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
                                     <ArrowUpCircleIcon class=" h-24 lg:h-48 md:h-36 w-full object-cover object-center" />
 
@@ -228,7 +283,7 @@ data.tiposSiigo = [
                                 </div>
                             </div>
                             <!-- descargar quincena -->
-                            <div class="p-4 w-full md:w-1/4">
+                            <div class="p-4 w-full md:w-1/2 xl:w-1/4">
                                 <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
                                     <ArrowDownCircleIcon class=" h-24 lg:h-48 md:h-36 w-full object-cover object-center" />
 
@@ -284,7 +339,7 @@ data.tiposSiigo = [
                             </div>
 
                         <!-- sigoo -->
-                        <div class="p-4 w-full md:w-1/4">
+                        <div class="p-4 w-full md:w-1/2 xl:w-1/4">
                             <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
                                 <BookOpenIcon class=" h-24 lg:h-48 md:h-36 w-full object-cover object-center" />
 
@@ -305,32 +360,31 @@ data.tiposSiigo = [
                                             type="date" class="mt-1 block w-full" v-model="form2.fecha_ini_sigo"
                                             required :placeholder="lang().placeholder.fecha_ini_sigo"
                                             :error="form2.errors.fecha_ini_sigo" />
-                                        <!-- <PrimaryButton v-show="can(['create user'])"
+                                        <PrimaryButton v-show="can(['create user'])"
                                             :disabled="form2.fecha_ini_sigo == null" class="rounded-none my-4">
                                             Descargar formato siigo
-                                        </PrimaryButton> -->
+                                        </PrimaryButton>
                                     </form>
                                 </div>
                                 
-                                    <section class="text-gray-600 body-font">
-                                        <div class="container p-5 mx-auto">
-                                            <div class="text-center mb-1">
-                                                <h1 class="text-xl font-medium text-center title-font text-gray-900 mb-4">
-                                                    Este formato incluye
-                                                </h1>
-                                                <p class="text-base leading-relaxed w-full mx-auto">
-                                                    <!-- Solo se descargarán, Los reportes que sean validos. -->
-                                                </p>
-                                                
-                                                <p v-for="tiposigo in data.tiposSiigo" class="text-base leading-relaxed w-full mx-auto">
-                                                    <p>{{ tiposigo }}</p> 
-                                                </p>
-                                            </div>
+                                <section class="text-gray-600 body-font">
+                                    <div class="container p-5 mx-auto">
+                                        <div class="text-center mb-1">
+                                            <h1 class="text-xl font-medium text-center title-font text-gray-900 mb-4">
+                                                Este formato incluye
+                                            </h1>
+                                            <p class="text-base leading-relaxed w-full mx-auto">
+                                                <!-- Solo se descargarán, Los reportes que sean validos. -->
+                                            </p>
+                                            
+                                            <p v-for="tiposigo in data.tiposSiigo" class="text-base leading-relaxed w-full mx-auto">
+                                                <p>{{ tiposigo }}</p> 
+                                            </p>
                                         </div>
-                                    </section>
+                                    </div>
+                                </section>
                             </div>
                         </div>
-
 
 
                     </div>

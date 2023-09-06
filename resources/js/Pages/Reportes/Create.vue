@@ -15,7 +15,9 @@ import Modal from '@/Components/Modal.vue';
     import VueDatePicker from '@vuepic/vue-datepicker';
     import '@vuepic/vue-datepicker/dist/main.css'
     
-    import FestivosColombia from 'festivos-colombia';
+import FestivosColombia from 'festivos-colombia';
+
+
 let CurrentlyYear = new Date().getFullYear()    
 let holidays2022 = FestivosColombia.getHolidaysByYear(CurrentlyYear);
 let label_diurnas = ref(null)

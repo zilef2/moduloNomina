@@ -8,7 +8,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy/dist/vue.m';
 import FloatingVue from 'floating-vue'
 import { usePage } from '@inertiajs/vue3';
-// import { formatDate ,number_format ,monthName } from './global.js'
+// import { formatDate ,number_format ,monthName } from './global.ts'
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 

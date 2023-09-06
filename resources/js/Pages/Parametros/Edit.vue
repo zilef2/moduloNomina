@@ -24,6 +24,7 @@ const emit = defineEmits([ "close" ]);
 const form = useForm({
     subsidio_de_transporte_dia: props.parametros?.subsidio_de_transporte_dia,
     salario_minimo: props.parametros?.salario_minimo,
+    HORAS_NECESARIAS_QUINCENA: props.parametros?.HORAS_NECESARIAS_QUINCENA,
 });
 
 const update = () => {
@@ -66,6 +67,13 @@ watchEffect(() => {
                     {{ lang().label.edit }} {{ props.title }}
                 </h2>
                 <div class="my-6 grid grid-cols-2 gap-6">
+                    <div>
+                        <InputLabel for="HORAS_NECESARIAS_QUINCENA" :value="lang().label.HORAS_NECESARIAS_QUINCENA" />
+                        <TextInput id="HORAS_NECESARIAS_QUINCENA" type="number" class="mt-1 block w-full" v-model="form.HORAS_NECESARIAS_QUINCENA" required
+                            :placeholder="lang().placeholder.HORAS_NECESARIAS_QUINCENA" :error="form.errors.HORAS_NECESARIAS_QUINCENA" />
+                        <InputError class="mt-2" :message="form.errors.HORAS_NECESARIAS_QUINCENA" />
+                    </div>
+
                     <div>
                         <InputLabel for="subsidio_de_transporte_dia" :value="lang().label.subsidio_de_transporte_dia" />
                         <TextInput id="subsidio_de_transporte_dia" type="number" class="mt-1 block w-full" v-model="form.subsidio_de_transporte_dia" required
