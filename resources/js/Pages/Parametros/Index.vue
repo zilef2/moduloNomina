@@ -76,9 +76,7 @@ const form = useForm({
                                 <!-- <th class="px-2 py-4 text-center">
                                     <Checkbox v-model:checked="data.multipleSelect" @change="selectAll" />
                                 </th> -->
-                                <th class="px-2 py-4 text-center">
-                                <td> - </td>
-                                </th>
+                                <!-- <th class="px-2 py-4 text-center"> <td> - </td> </th> -->
                                 <th v-for="(titulos, indiceN) in nombresTabla[0]" :key="indiceN"
                                     class="px-5 py-4 cursor-pointer hover:bg-sky-50 dark:hover:bg-sky-800">
                                     <div class="flex justify-between items-center">
@@ -91,7 +89,8 @@ const form = useForm({
                             <!-- por si hay mas filas en la tabla parametros -->
                             <tr v-for="(clasegenerica, index) in fromController" :key="index"
                                 class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                <td v-if="can(['update parametros'])"
+                                    class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     <div class="flex justify-start items-center">
                                         <div class="flex rounded-md overflow-hidden">
                                             <InfoButton type="button" @click="(data.editOpen = true)"
@@ -159,9 +158,12 @@ const form = useForm({
                                     <span class="font-medium text-lg text-gray-800 title-font leading-none">sept</span>
                                 </div>
                                 <div class="flex-grow pl-6">
-                                    <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
-                                        Salario hora 
-                                    </h2>
+                                    <div class="inline-flex">
+                                        <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
+                                            Salario hora 
+                                        </h2>
+                                        <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">
+                                    </div>
                                     <!-- <h1 class="title-font text-xl font-medium text-gray-900 mb-3">The 400 Blows</h1> -->
                                     <p class="leading-relaxed text-lg mb-5">
                                         SH = salario mensual / (30 * 8)
@@ -179,15 +181,90 @@ const form = useForm({
                                     <span class="font-medium text-lg text-gray-800 title-font leading-none">sept</span>
                                 </div>
                                 <div class="flex-grow pl-6">
-                                    <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
-                                        Recargo Nocturno
-                                    </h2>
-                                    <h1 class="title-font text-xl font-medium text-gray-900 mb-3">¿ Cumplió la quincena ?</h1>
+                                    <div class="inline-flex">
+                                        <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
+                                            Hora de comida
+                                        </h2>
+                                        <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">
+                                    </div>
+
+                                    <!-- <h1 class="title-font text-xl font-medium text-gray-900 mb-3">¿ Cumplió la quincena ?</h1> -->
                                     <p class="leading-relaxed text-lg mb-5">
-                                        SI: RN = porcentaje nocturno - 1
+                                        si las horas trabajadas > 8 entonces Comida = 1
                                     </p>
                                     <p class="leading-relaxed text-lg mb-5">
-                                        NO: RN = porcentaje nocturno
+                                        si las horas trabajadas > 16 entonces Comida = 2
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="py-8 px-4 lg:w-1/3">
+                            <div class="h-full flex items-start">
+                                <div class="w-12 flex-shrink-0 flex flex-col text-center leading-none">
+                                    <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">7</span>
+                                    <span class="font-medium text-lg text-gray-800 title-font leading-none">sept</span>
+                                </div>
+                                <div class="flex-grow pl-6">
+                                    <div class="inline-flex">
+                                    <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
+                                        Subsidio de transporte
+                                    </h2>
+                                    <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">
+                                    </div>
+                                    <!-- <h1 class="title-font text-xl font-medium text-gray-900 mb-3">¿ Cumplió la quincena ?</h1> -->
+                                    <p class="leading-relaxed text-lg mb-5">
+                                        Subsidio Transporte = Salario  >= 2.320.000
+                                    </p>
+                                    <p class="leading-relaxed text-lg mb-5">
+                                        Si el salario es mayor  <b>Subsidio Transporte = 0</b>
+                                    </p>
+                                    <p class="leading-relaxed text-lg mb-5">
+                                        Si no  <b>Subsidio Transporte = dias * subsidio transporte (dia)</b>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="py-8 px-4 lg:w-1/3">
+                            <div class="h-full flex items-start">
+                                <div class="w-12 flex-shrink-0 flex flex-col text-center leading-none">
+                                    <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">7</span>
+                                    <span class="font-medium text-lg text-gray-800 title-font leading-none">sept</span>
+                                </div>
+                                <div class="flex-grow pl-6">
+                                    <div class="inline-flex">
+                                    <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
+                                        Horas de los administrativos
+                                    </h2>
+                                    <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">
+                                    </div>
+                                    <p class="leading-relaxed text-lg mb-5">
+                                        Total Horas = Horas extras (sin recargo)
+                                    </p>
+                                    <p class="leading-relaxed text-lg mb-5">
+                                        Todo cuenta como hora diurna
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="py-8 px-4 lg:w-1/3">
+                            <div class="h-full flex items-start">
+                                <div class="w-12 flex-shrink-0 flex flex-col text-center leading-none">
+                                    <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">7</span>
+                                    <span class="font-medium text-lg text-gray-800 title-font leading-none">sept</span>
+                                </div>
+                                <div class="flex-grow pl-6">
+                                    <div class="inline-flex">
+                                        <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
+                                            Domingos
+                                        </h2>
+                                        <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">
+                                    </div>
+                                    <!-- <h1 class="title-font text-xl font-medium text-gray-900 mb-3">¿ Cumplió la quincena ?</h1> -->
+                                    <p class="leading-relaxed text-lg mb-5">
+                                        Si en la semana supera las horas (47 o menos) se gana 1 domingo
+                                    </p>
+                                    <p class="leading-relaxed text-lg mb-5">
+                                        esos domingo cuentan para el subsidio de transporte?
                                     </p>
                                 </div>
                             </div>

@@ -72,7 +72,8 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
         //traer todos los empleado
         $users = User::Select('id','name','cedula','cargo_id','salario')->WhereHas("roles", function($q){
             $q->Where("name", "empleado");
-            $q->orWhere("name", "administrativo");
+            $q->orWhere("name", "administrativo");//todo: sin extras?
+            //todo: supervisor
         })->get();
         $paramBD = Parametro::find(1);
         $mensajeSigo = [
@@ -95,26 +96,16 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
 
             $empleado->Contrato = $empleado->cedula;
 
-            $NumReportes = HelpExcel::cumplioQuincena($users,$key,$this->ini,$this->fin,$empleado,$reportes, $salario_hora, $salario_quincena, $cumplioQuicena,$paramBD,$this->NumeroDiasFestivos,'siigo');
+            HelpExcel::cumplioQuincena($users,$key,$this->ini,$this->fin,$empleado,$reportes, $salario_hora, $salario_quincena, $cumplioQuicena,$paramBD,$this->NumeroDiasFestivos,'siigo');
             $ArrayExtrasyDominicales = $this->CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, $H_diurno, $nocturnas, $extra_diurnas, $extra_nocturnas, $dominical_diurno, $dominical_nocturno, $dominical_extra_diurno, $dominical_extra_nocturno);
             // $Num_extra_diurnas = $ArrayExtrasyDominicales[1]; $Num_extra_nocturnas = $ArrayExtrasyDominicales[2]; $Num_dominical_diurno = $ArrayExtrasyDominicales[3]; $Num_dominical_nocturno = $ArrayExtrasyDominicales[4]; $Num_dominical_extra_diurno = $ArrayExtrasyDominicales[5]; $Num_dominical_extra_nocturno = $ArrayExtrasyDominicales[6];
             $ArrayExtrasyDominicales[7] = intval($reportes->sum('nocturnas'));
             $Novedad = 0;
             unset($empleado->id);
-            $empleado->diasnohabiles = "0";
+            // $empleado->diasnohabiles = "0";
 
             for ($i=1; $i < 8; $i++) {
                 if($ArrayExtrasyDominicales[$i] > 0){
-                    // if($i === 7){
-                    //     $fechanov = Reporte::where('user_id', $empleado->id)
-                    //     ->where('valido', 1)
-                    //     ->whereBetween('fecha_ini', [$this->ini, $this->fin])
-                    //     ->wherenotnull('nocturnas')->first();
-                    //     $fecha1 = Carbon::parse($fechanov->fecha_ini)->format('d/m/Y');
-                    //     $fecha2 = Carbon::parse($fechanov->fecha_fin)->format('d/m/Y');
-                        // $empleado->fechaininov = $fecha1;
-                        // $empleado->fechafinnov = $fecha2;
-                    // }
                     if($Novedad != 0){
                         $nuevoReporte = clone $empleado;
                         $nuevoReporte->Quenov = $mensajeSigo[$i];
@@ -146,8 +137,7 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
         return $users;
     }
 
-    public function headings() :array
-    {
+    public function headings() :array {
         return [
             '#Contrato del empleado',
             'Identificación del empleado',

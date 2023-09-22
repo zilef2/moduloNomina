@@ -57,11 +57,6 @@ class UsersImport implements ToModel,WithChunkReading,ShouldQueue, WithValidatio
         $countNoCargo = session('countNoCargo',0);
         $countCedulaRepetida = session('countCedulaRepetida',0);
 
-
-        if ($row['nombre'] == 'nombre') {
-            session(['countNoleidos' => $countNoleidos+1]);
-            return null;
-        }
         if (strtolower(trim($row['nombre'])) == 'nombre') {
             session(['countNoleidos' => $countNoleidos+1]);
             return null;
@@ -77,7 +72,7 @@ class UsersImport implements ToModel,WithChunkReading,ShouldQueue, WithValidatio
             return null;
         }
         $elRol = trim(strtolower($row['rol']));
-        if( $elRol != 'empleado' && $elRol != 'administrativo'){
+        if( $elRol != 'empleado' && $elRol != 'administrativo' && $elRol != 'supervisor'){
             session(['countNoleidos' => $countNoleidos+1]);
             return null;
         }
@@ -117,10 +112,15 @@ class UsersImport implements ToModel,WithChunkReading,ShouldQueue, WithValidatio
                 'salario' => $row['salario'],
                 'cargo_id' => $cargo->id,
             ]);
+
             if($elRol == 'empleado'){
                 $user->syncRoles('empleado');
-            }else{
+            }
+            if($elRol == 'administrativo'){
                 $user->syncRoles('administrativo');
+            }
+            if($elRol == 'supervisor'){
+                $user->syncRoles('supervisor');
             }
         }else{
             session(['CountFilas' => $countfilas+1]);
@@ -139,11 +139,14 @@ class UsersImport implements ToModel,WithChunkReading,ShouldQueue, WithValidatio
             ]);
 
             if($elRol == 'empleado'){
-                $user->assignRole('empleado');
-            }else{
-                $user->assignRole('administrativo');
+                $user->syncRoles('empleado');
             }
-
+            if($elRol == 'administrativo'){
+                $user->syncRoles('administrativo');
+            }
+            if($elRol == 'supervisor'){
+                $user->syncRoles('supervisor');
+            }
 
             return $user;
         }

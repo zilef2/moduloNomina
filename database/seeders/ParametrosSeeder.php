@@ -16,25 +16,25 @@ class ParametrosSeeder extends Seeder
     {
         Parametro::create([
 
-            'HORAS_NECESARIAS_QUINCENA' => 47,
-            
-            //cada que va a la obra (almenos 1 hora)
-            'subsidio_de_transporte_dia' => 4686.86667,//140606, => divide por 30  ->  dia
+            'HORAS_NECESARIAS_SEMANA' => 47,
 
-            
+            //cada que va a la obra (almenos 1 hora)
+            'subsidio_de_transporte_dia' => 4686.86667, //140606, => divide por 30  ->  dia
+
+
             'salario_minimo' => 1160000, //1.160.000
-                'valor_maximo_subsidio_de_transporte' => 2320000, // 2.320.000
+            'valor_maximo_subsidio_de_transporte' => 2320000, // 2.320.000
             // 'salario_minimo' => 1300606,
-                // 'valor_maximo_subsidio_de_transporte' => 2601212,
+            // 'valor_maximo_subsidio_de_transporte' => 2601212,
             'porcentaje_diurno' => 1,
-            'porcentaje_nocturno' => 1.35,// cuando completo las horas quincenales => 0.35
+            'porcentaje_nocturno' => 1.35, // cuando completo las horas quincenales => 0.35
 
             'porcentaje_extra_diurno' => 1.25,
             'porcentaje_extra_nocturno' => 1.75,
 
             'porcentaje_dominical_diurno' => 1.75,
             'porcentaje_dominical_nocturno' => 2.1,
-            
+
             'porcentaje_dominical_extra_diurno' => 2,
             'porcentaje_dominical_extra_nocturno' => 2.5,
 

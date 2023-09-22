@@ -64,7 +64,7 @@
     }
     export function formatDate(date,isDateTime: string) :string {
         let validDate = new Date(date)
-        validDate = new Date(validDate.getTime() + (5 * 60 * 60 * 1000)) //correccion con GTM -5
+        // validDate = new Date(validDate.getTime() + (5 * 60 * 60 * 1000)) //correccion con GTM -5
         // console.log("🧈 debu validDate:", validDate);
         const day = validDate.getDate().toString().padStart(2, "0");
         // getMonthName(1)); // January

@@ -42,11 +42,7 @@ class RoleSeeder extends Seeder
         ]);
         $vectorCRUD = ['create', 'update','read','delete'];
         $vectorModelo = ['reporte','centroCostos','parametros'];
-        foreach ($vectorCRUD as $value) {
-            foreach ($vectorModelo as $model) {
-                $superadmin->givePermissionTo([ $value.' '.$model ]);
-            }
-        }
+        foreach ($vectorCRUD as $value) { foreach ($vectorModelo as $model) { $superadmin->givePermissionTo([ $value.' '.$model ]); } }
 
         $admin = Role::create([ 'name'=> 'admin' ]);
         $admin->givePermissionTo([
@@ -60,57 +56,85 @@ class RoleSeeder extends Seeder
             'read role',
             'read permission',
 
-            //reporte
+            //#reporte
             'read reporte',
-            // 'create reporte',
+            'create reporte',
             'update reporte',
-            // 'delete reporte',
+            'delete reporte',
             'updateCorregido reporte',
-
-            //centroCostos
         ]);
+        
+        $modelo = 'centroCostos';
+        $acciones = ['create','update','read','delete'];
+        foreach ($acciones as $accion) {
+            $admin->givePermissionTo([ $accion.' '.$modelo]);
+        }
+        $modelo = 'parametros';
+        $acciones = ['update','read'];
+        foreach ($acciones as $accion) {
+            $admin->givePermissionTo([ $accion.' '.$modelo]);
+        }
+
+        //no more admins
 
         $empleado = Role::create([ 'name' => 'empleado' ]);
         $empleado->givePermissionTo([
-             //reporte
+             //#reporte
             'read reporte',
             'create reporte',
             'delete reporte',
 
-            //centroCostos
+            //#centroCostos
             'read centroCostos',
         ]);
 
         $administrativo = Role::create(['name' => 'administrativo']);
         $administrativo->givePermissionTo([
             'isadministrativo',
-            
+
+             //#user
             'read user',
             'create user',
-            'read role',
+            // 'read role',
 
-             //reporte
+             //#reporte
              'read reporte',
              'update reporte',
              'updateCorregido reporte',
  
-             //centroCostos
-             'delete centroCostos',
+             //#centroCostos
+             'update centroCostos',
+             'read centroCostos',
+
+             //#parametros
+             'read parametros',
+        ]);
+        $supervisor = Role::create(['name' => 'supervisor']);
+        $supervisor->givePermissionTo([
+            'issupervisor',
+
+             //#user
+            'read user',
+            // 'create user',
+            // 'read role',
+
+             //#reporte
+             'read reporte',
+             'create reporte',
+             'update reporte',
+             'updateCorregido reporte',
+ 
+             //#centroCostos
+             'update centroCostos',
+             'read centroCostos',
+
+             //#parametros
+            //  'read parametros',
         ]);
 
-        $modelo = 'centroCostos';
-        $acciones = ['create','update','read'];
-        foreach ($acciones as $accion) {
-            $admin->givePermissionTo([ $accion.' '.$modelo]);
-            $administrativo->givePermissionTo([ $accion.' '.$modelo]);
-        }
 
-        $modelo = 'parametros';
-        $acciones = ['update','read'];
-        foreach ($acciones as $accion) {
-            $admin->givePermissionTo([ $accion.' '.$modelo]);
-            $administrativo->givePermissionTo([ $accion.' '.$modelo]);
-        }
+
+
         // $role->revokePermissionTo($permission);
         // $permission->removeRole($role);
     }

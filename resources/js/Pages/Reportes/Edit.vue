@@ -504,6 +504,8 @@ watchEffect(() => {
         if(form.fecha_ini == '') form.fecha_ini = TransformTdate(props.Reporte?.fecha_ini)
         if(form.fecha_fin == '') form.fecha_fin = TransformTdate(props.Reporte?.fecha_fin)
         form.centro_costo_id = props.Reporte?.centro_costo_id
+        form.fecha_ini = props.Reporte?.fecha_ini
+        form.fecha_fin = props.Reporte?.fecha_fin
         form.observaciones = props.Reporte?.observaciones
         form.horas_trabajadas = props.Reporte?.horas_trabajadas
     

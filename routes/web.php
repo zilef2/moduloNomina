@@ -57,11 +57,16 @@ Route::get('/dashboard', function () {
             'Mes actual' => Reporte::whereIn('valido',[0,2])->where('fecha_ini','>', Carbon::today()->startOfMonth())->get()->count(),
         ];
 
-        $usuariosConRol = User::whereHas("roles", function($q){ $q->where("name", "empleado"); })
-            ->take(6)->get();
+        $usuariosConRol = User::whereHas("roles", function($q){ 
+            $q->where("name", "empleado"); 
+        }) ->take(6)->get();
+        //todo2: organizar por quien ha trabajado mas
 
         foreach ($usuariosConRol as $value) {
-            $BooleanreportoHoy = Reporte::where('user_id',$value->id)->whereDate('fecha_fin',Carbon::today())->first();
+            $BooleanreportoHoy = Reporte::where('user_id',$value->id)
+                ->whereDate('fecha_fin',Carbon::today())
+                ->first();
+
             if($BooleanreportoHoy !== null)
                 $trabajadoresHoy[$value->name] = $BooleanreportoHoy->horas_trabajadas;
             else

@@ -7,13 +7,14 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import SelectInput from '@/Components/SelectInput.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
-import { watchEffect } from 'vue';
+import { watchEffect,reactive } from 'vue';
 
 const props = defineProps({
     show: Boolean,
     title: String,
     roles: Object,
     cargos: Object,
+    centros: Object,
     sexoSelect: Object,
 })
 
@@ -28,36 +29,77 @@ const form = useForm({
     celular: '',
     fecha_de_ingreso: '',
     sexo: 0,
-    salario: '',
+    // salario: '',
 
-    password: '',
-    password_confirmation: '',
+
+    // email: 'ajelosept@gmail.com',
+    // cedula: '225219455',
+
+    // telefono: '',
+    // celular: '3125995566',
+    // fecha_de_ingreso: '',
+    // sexo: 0,
+    salario: '1160000',
+
+    // password: '',
+    // password_confirmation: '',
+
     role: 'empleado',
     cargo: 1,
+    centroid: 0,
 })
+const data = reactive({
+    mostrarCentro:false
+})
+
+const validateFormSupervisor = () => {
+    let valid = true
+
+    if (form.centroid === 0) {
+        errors.centroid = 'El supervisor debe tener un centro asociado'
+        valid = false
+    } else {
+        errors.centroid = ''
+    }
+
+    return valid
+}
 
 
 const create = () => {
-    form.post(route('user.store'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            emit("close")
-            form.reset()
-        },
-        onError: () => null,
-        onFinish: () => null,
-    })
+    if(form.role == 'supervisor' && form.centroid == 0){
+        validateFormSupervisor()
+    }else{
+        form.post(route('user.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                emit("close")
+                form.reset()
+            },
+            onError: () => null,
+            onFinish: () => null,
+        })
+    }
 }
 
 watchEffect(() => {
     if (props.show) {
         form.errors = {}
+        
+        if(form.role == 'supervisor')
+            data.mostrarCentro = true
+        else
+            data.mostrarCentro = false
     }
 
 })
 //TOREVISE
-const roles = props.roles?.map(role => ({ label: role.name, value: role.name }))
+const roles = props.roles?.map(role => ({ 
+    label: role.name.charAt(0).toUpperCase() + role.name.slice(1)  , 
+    value: role.name 
+}))
 const cargos = props.cargos?.map(cargo => ({ label: cargo.nombre, value: cargo.id }))
+const centros = props.centros?.map(centro => ({ label: centro.nombre, value: centro.id }))
 
 
 </script>
@@ -70,10 +112,7 @@ const cargos = props.cargos?.map(cargo => ({ label: cargo.nombre, value: cargo.i
                     {{ lang().label.add }} {{ props.title }}
                 </h2>
                 <h3 class="text-md font-medium text-gray-900 dark:text-gray-100">
-                    Todos los campos son obligatorios
-                </h3>
-                <h3 class="text-md font-medium text-gray-900 dark:text-gray-100">
-                    Recuerde, la contraseña es la cedula de la persona y el simbolo *
+                    Recuerde, la contraseña es la cédula de la persona y el símbolo *
                 </h3>
                 <div class="my-6 space-y-4">
                     <div>
@@ -95,23 +134,29 @@ const cargos = props.cargos?.map(cargo => ({ label: cargo.nombre, value: cargo.i
                         <InputError class="mt-2" :message="form.errors.email" />
                     </div>
 
-                    <div>
-                        <InputLabel for="role" :value="lang().label.role" />
-                        <SelectInput id="role" class="mt-1 block w-full" v-model="form.role" required :dataSet="roles">
-                        </SelectInput>
-                        <InputError class="mt-2" :message="form.errors.role" />
-                    </div>
-                    <div>
-                        <InputLabel for="cargo" :value="lang().label.cargo" />
-                        <SelectInput id="cargo" class="mt-1 block w-full" v-model="form.cargo" required :dataSet="cargos">
-                        </SelectInput>
-                        <InputError class="mt-2" :message="form.errors.cargo" />
-                    </div>
-
-
+                    
                     <div class="grid grid-cols-2 gap-6">
+
+                        <div>
+                            <InputLabel for="role" :value="lang().label.role" />
+                            <SelectInput id="role" class="mt-1 block w-full" v-model="form.role" required :dataSet="roles">
+                            </SelectInput>
+                            <InputError class="mt-2" :message="form.errors.role" />
+                        </div>
+                        <div v-if="data.mostrarCentro">
+                            <InputLabel for="centro" :value="lang().label.centro" />
+                            <SelectInput id="centro" class="mt-1 block w-full" v-model="form.centroid" required :dataSet="centros">
+                            </SelectInput>
+                            <InputError class="mt-2" :message="form.errors.centro" />
+                        </div>
+                        <div>
+                            <InputLabel for="cargo" :value="lang().label.cargo" />
+                            <SelectInput id="cargo" class="mt-1 block w-full" v-model="form.cargo" required :dataSet="cargos">
+                            </SelectInput>
+                            <InputError class="mt-2" :message="form.errors.cargo" />
+                        </div>
                         <div class="">
-                            <InputLabel for="telefono" :value="lang().label.telefono" />
+                            <InputLabel for="telefono" :value="lang().label.telefono + ' (opcional)'" />
                             <TextInput id="telefono" type="text" class="mt-1 block w-full" v-model="form.telefono" required
                                 :placeholder="lang().placeholder.telefono" :error="form.errors.telefono" />
                             <InputError class="mt-2" :message="form.errors.telefono" />
@@ -122,6 +167,18 @@ const cargos = props.cargos?.map(cargo => ({ label: cargo.nombre, value: cargo.i
                                 :placeholder="lang().placeholder.celular" :error="form.errors.celular" />
                             <InputError class="mt-2" :message="form.errors.celular" />
                         </div>
+                    
+                        <div>
+                            <InputLabel for="salario" :value="lang().label.salario" />
+                            <TextInput id="salario" type="number" class="mt-1 block w-full" v-model="form.salario" required
+                                :placeholder="lang().placeholder.salario" :error="form.errors.salario" />
+                            <InputError class="mt-2" :message="form.errors.salario" />
+                        </div>
+                        <div>
+                            <InputLabel for="sexo" :value="lang().label.sexo" />
+                            <SelectInput v-model="form.sexo" :dataSet="props.sexoSelect" class="mt-1 block w-full" />
+                            <InputError class="mt-2" :message="form.errors.sexo" />
+                        </div>
                     </div>
                     <div>
                         <InputLabel for="fecha_de_ingreso" :value="lang().label.fecha_de_ingreso" />
@@ -130,18 +187,6 @@ const cargos = props.cargos?.map(cargo => ({ label: cargo.nombre, value: cargo.i
                             :error="form.errors.fecha_de_ingreso" />
                         <InputError class="mt-2" :message="form.errors.fecha_de_ingreso" />
                     </div>
-                    <div>
-                        <InputLabel for="salario" :value="lang().label.salario" />
-                        <TextInput id="salario" type="number" class="mt-1 block w-full" v-model="form.salario" required
-                            :placeholder="lang().placeholder.salario" :error="form.errors.salario" />
-                        <InputError class="mt-2" :message="form.errors.salario" />
-                    </div>
-                    <div>
-                        <InputLabel for="sexo" :value="lang().label.sexo" />
-                        <SelectInput v-model="form.sexo" :dataSet="props.sexoSelect" class="mt-1 block w-full" />
-                        <InputError class="mt-2" :message="form.errors.sexo" />
-                    </div>
-
                     <!-- password zone -->
                     <!-- <div>
                         <InputLabel for="password" :value="lang().label.password" />

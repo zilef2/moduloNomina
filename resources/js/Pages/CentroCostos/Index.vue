@@ -119,8 +119,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
                         <tbody>
                             <tr v-for="(clasegenerica, index) in fromController.data" :key="index"
                                 class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (index+1) }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.nombre) }} </td>
+
                                 <td v-if="can(['update centroCostos'])"
                                     class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
                                     <div class="flex justify-start items-center">
@@ -144,6 +143,12 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
                                         </div>
                                     </div>
                                 </td>
+
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (index+1) }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.nombre) }} </td>
+                                <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.cuantoshijos) }} </td>
+                                <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.supervi.name) }} </td>
+                                
                             </tr>
                         </tbody>
                     </table>

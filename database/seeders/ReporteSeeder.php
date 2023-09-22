@@ -36,5 +36,27 @@ class ReporteSeeder extends Seeder
         //     'centro_costo_id' => 2,
         //     'user_id' => 3,
         // ]);
+        // $hoy = Carbon::parse( date("Y-m-d H:i:s"));
+        $hoy = Carbon::parse( strtotime('today 2am'));
+        $fechaFin = clone $hoy;
+        $fechaFin->addHours(9);
+        for ($i=0; $i < 20; $i++) {
+            Reporte::create([
+                'fecha_ini' => $hoy,
+                'fecha_fin' => $fechaFin,
+                'observaciones' => 'observacion #'.rand(1000,9000),
+                'centro_costo_id' => 2,
+                'user_id' => 3,
+
+                'horas_trabajadas' => 8,
+                'almuerzo' => 1,
+                'diurnas' => 8,
+
+                'valido' => 1,
+            ]);
+            $hoy->addDays(1);
+            $fechaFin->addDays(1);
+            
+        }
     }
 }

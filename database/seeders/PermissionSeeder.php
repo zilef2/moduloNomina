@@ -17,6 +17,7 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'isSuper']);
         Permission::create(['name' => 'isAdmin']);
         Permission::create(['name' => 'isadministrativo']);
+        Permission::create(['name' => 'issupervisor']);
 
         
         Permission::create(['name' => 'delete user']);

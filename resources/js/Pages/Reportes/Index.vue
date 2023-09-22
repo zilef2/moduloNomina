@@ -51,8 +51,19 @@
         quincena: Object,
         nombrePersona: String,
         numberPermissions: Number,
-    })
+        ultimoReporte: Number,
 
+        sumdiurnas: Number,
+        sumnocturnas: Number,
+        sumextra_diurnas: Number,
+        sumextra_nocturnas: Number,
+        sumdominical_diurno: Number,
+        sumdominical_nocturno: Number,
+        sumdominical_extra_diurno: Number,
+        sumdominical_extra_nocturno: Number,
+
+    })
+    let vieneDeReportes = typeof props.ultimoReporte != 'undefined';
     const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
@@ -156,7 +167,9 @@
                     <Create :show="data.createOpen" @close="data.createOpen = false" :title="props.title"
                         :valoresSelect="props.valoresSelect" :IntegerDefectoSelect="props.IntegerDefectoSelect"
                         :horasemana="props.horasemana" :startDateMostrar="props.startDateMostrar"
-                        :endDateMostrar="props.endDateMostrar" :numberPermissions="props.numberPermissions" />
+                        :endDateMostrar="props.endDateMostrar" :numberPermissions="props.numberPermissions" 
+                        :ultimoReporte="props.ultimoReporte"
+                        />
 
                     <Edit :show="data.editOpen" @close="data.editOpen = false" :Reporte="data.generico" :title="props.title"
                         :valoresSelect="props.valoresSelect" :showUsers="props.showUsers" :correccionUsuario="false" />
@@ -246,19 +259,13 @@
                                     </div>
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (index+1) }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ showSelect[clasegenerica.centro_costo_id]
-                                                                    }}</td>
-                                <td v-show="can(['updateCorregido reporte'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{
-                                                                    showUsers[clasegenerica.user_id] }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ showSelect[clasegenerica.centro_costo_id] }}</td>
+                                <td v-show="can(['updateCorregido reporte'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ showUsers[clasegenerica.user_id] }}</td>
 
-                                <td v-for="(titulo_slug, indi) in nombresTabla[1]" :key="indi"
-                                    class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    <div v-if="titulo_slug.substr(0,1) == 's'">{{ (clasegenerica[titulo_slug.substr(2)]) }}
-                                    </div>
-                                    <div v-else-if="titulo_slug.substr(0,1) == 'd'">{{
-                                                                            formatDate(clasegenerica[titulo_slug.substr(2)]) }}</div>
-                                    <div v-else-if="titulo_slug.substr(0,1) == 't'">{{
-                                                                            formatDate(clasegenerica[titulo_slug.substr(2)],'conLaHora') }}</div>
+                                <td v-for="(titulo_slug, indi) in nombresTabla[1]" :key="indi" class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                    <div v-if="titulo_slug.substr(0,1) == 's'">{{ (clasegenerica[titulo_slug.substr(2)]) }} </div>
+                                    <div v-else-if="titulo_slug.substr(0,1) == 'd'">{{ formatDate(clasegenerica[titulo_slug.substr(2)]) }}</div>
+                                    <div v-else-if="titulo_slug.substr(0,1) == 't'">{{ formatDate(clasegenerica[titulo_slug.substr(2)],'conLaHora') }}</div>
 
                                     <div v-else-if="titulo_slug.substr(0,1) == 'b'">
                                         <div v-if="clasegenerica[titulo_slug.substr(2)] === 0"> Aun no validada</div>
@@ -270,23 +277,29 @@
                                         </div>
                                     </div>
 
-                                    <div v-else-if="titulo_slug.substr(0,1) == 'i'">{{
-                                                                            number_format(clasegenerica[titulo_slug.substr(2)]) }}</div>
-                                    <div v-else-if="titulo_slug.substr(0,1) == 'm'">{{
-                                                                            number_format(clasegenerica[titulo_slug.substr(2)],0,1) }}</div>
+                                    <div v-else-if="titulo_slug.substr(0,1) == 'i'">{{ number_format(clasegenerica[titulo_slug.substr(2)]) }}</div>
+                                    <div v-else-if="titulo_slug.substr(0,1) == 'm'">{{ number_format(clasegenerica[titulo_slug.substr(2)],0,1) }}</div>
                                 </td>
                             </tr>
-                            <tr v-show="props.sumhoras_trabajadas != 0"
-                                class="my-2 py-4 border-t border-gray-200 dark:border-gray-900 hover:bg-sky-200 hover:dark:bg-gray-900/20">
+                            <tr v-show="props.sumhoras_trabajadas != 0" class="my-2 py-4 border-t border-gray-200 dark:border-gray-900 hover:bg-sky-200 hover:dark:bg-gray-900/20">
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> Total horas </td>
+                                <td v-show="can(['updateCorregido reporte'])" class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> Totales </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
+                                <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> {{ props.sumhoras_trabajadas }} </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> Trabajadas: {{ props.sumhoras_trabajadas }} </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> {{ props.sumdiurnas ? 'Diurnas: ' + props.sumdiurnas : ''}} </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> {{ props.sumnocturnas ? 'Nocturnas: ' + props.sumnocturnas : ''}} </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> {{ props.sumextra_diurnas ? 'Extra diurnas: ' + props.sumextra_diurnas : ''}} </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> {{ props.sumextra_nocturnas ? 'Extra nocturnas: ' + props.sumextra_nocturnas : ''}} </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> {{ props.sumdominical_diurno ? 'Dominical diurno: ' + props.sumdominical_diurno : ''}} </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> {{ props.sumdominical_nocturno ? 'Dominical nocturno: ' + props.sumdominical_nocturno : ''}} </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> {{ props.sumdominical_extra_diurno ? 'Dominical extra diurno: ' + props.sumdominical_extra_diurno : ''}} </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> {{ props.sumdominical_extra_nocturno ? 'Dominical extra nocturno: ' + props.sumdominical_extra_nocturno : ''}} </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
                             </tr>
                         </tbody>

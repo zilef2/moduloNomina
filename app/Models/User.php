@@ -30,6 +30,7 @@ class User extends Authenticatable
         'fecha_de_ingreso',
         'sexo',
         'salario',
+        'centro_costo_id',
     ];
 
     /** * The attributes that should be hidden for serialization. * * @var array<int, string> */
@@ -62,5 +63,11 @@ class User extends Authenticatable
 	}
     public function cargo() {
 		return $this->belongsTo(Cargo::class);
+	}
+    public function centros() {
+		return $this->belongsTo(CentroCosto::class, 'centro_costo_id');
+	}
+    public function centroName() {
+        return $this->centros != null ? $this->centros->nombre : '';
 	}
 }

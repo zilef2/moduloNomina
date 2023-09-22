@@ -57,14 +57,14 @@ const chartData3 = {
 };
 const chartTrabajadoresHoy = {
     datasets: [{
-        label: 'Horas por trabajador',
+        label: 'Horas por trabajador (HOY)',
         data: props.trabajadoresHoy,
         backgroundColor: '#ffd979',
     }]
 };
 const centrosHoy = {
     datasets: [{
-        label: 'Horas por centro',
+        label: 'Horas por centro (HOY)',
         data: props.centrosHoy,
         backgroundColor: '#df1f79',
     }]

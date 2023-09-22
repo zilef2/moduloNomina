@@ -24,7 +24,7 @@ class UserIndexRequest extends FormRequest
     public function rules()
     {
         return [
-            'field' => ['in:name,email,created_at,updated_at,cedula,cargo_id,celular,telefono,fecha_de_ingreso'],
+            'field' => ['in:name,email,created_at,updated_at,cedula,cargo_id,celular,telefono,fecha_de_ingreso,centro_costo_id'],
             'order' => ['in:asc,desc'],
             'perPage' => ['numeric'],
         ];

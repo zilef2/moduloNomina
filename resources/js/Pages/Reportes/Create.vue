@@ -31,12 +31,13 @@ const props = defineProps({
     startDateMostrar: String,
     endDateMostrar: String,
     numberPermissions: Number,
+    ultimoReporte: Number,
 
 })
 //constantes intuitivas
     const MAXIMO_HORAS_SEMANALES = 48
     const LimiteHorasTrabajadas = 22
-    const TrabajoConAlmuerzo = 9
+    const TrabajoConAlmuerzo = 9 - props.ultimoReporte
 //fin intuitivas
 let ValorRealalmuerzo = 0
 
@@ -45,7 +46,7 @@ const emit = defineEmits(["close"]);
 const form = useForm({
     fecha_ini: '', fecha_fin: '',
     // fecha_ini: '2023-04-0'+diaoDominicla+'T'+horas[0]+':00', fecha_fin: '2023-04-0'+(diaoDominicla)+'T'+horas[1]+':00', //temp
-    // fecha_ini: '2023-06-01T07:00', fecha_fin: '2023-06-01T16:00', //temp
+    // fecha_ini: '2023-06-01T23:00', fecha_fin: '2023-06-01T23:59', //temp
 
     horas_trabajadas: '',
     centro_costo_id: props.IntegerDefectoSelect,
@@ -66,9 +67,11 @@ const form = useForm({
     dominical_extra_diurnas: 0,
     dominical_extra_nocturnas: 0
 });
-if(props.numberPermissions > 1){
-    form.fecha_ini = '2023-06-01T07:00'
-    form.fecha_fin = '2023-06-01T16:00'
+
+
+if(props.numberPermissions > 8){
+    form.fecha_ini = '2023-10-31T07:00'
+    form.fecha_fin = '2023-10-31T16:00'
 }
 
 function estaFechaEsFestivo(fecha){
@@ -100,10 +103,29 @@ function estaFechaEsFestivo(fecha){
 let TextFestivo = ''
 let Madrugada, Tarde //variables internas para calculo de horas nocturnas
 
+const Reporte11_59 = () => {
+    //si es 11:59 minutos -> agrega una hora
+    let fin = Date.parse(form.fecha_fin);
+    let finDate = new Date(fin);
+    const horafin = finDate.getHours()
+    const minfin = finDate.getMinutes()
+    if(horafin == 23 && minfin == 59){
+        // finDate.setMinutes(finDate.getMinutes() + 1)
+        // console.log("🧈 debu finDate:", finDate);
+        form.horas_trabajadas++
+        form.nocturnas++
+    }
+}
+
 const create = () => {
+    form.fecha_fin
+    Reporte11_59();
+
     if(form.horas_trabajadas <= LimiteHorasTrabajadas && form.horas_trabajadas != 0){
         if (Object.keys(form.errors).length === 0) {
             form.almuerzo = ValorRealalmuerzo
+
+            
             form.post(route('Reportes.store'), {
                 preserveScroll: true,
                 onSuccess: () => {
@@ -216,7 +238,7 @@ function calcularTerminaDomingo(ini,fin,CuandoEmpiezaExtra,ExtrasManana){
 function calcularDominicales(ini,fin,CuandoEmpiezaExtra,ExtrasManana){//date,date,int,bool
     let esFestivo = estaFechaEsFestivo(new Date(ini));
     let esFestivo2 = estaFechaEsFestivo(new Date(fin));
-    console.log("ini festivo - fin festivo :", esFestivo,esFestivo2);
+    // console.log("ini festivo - fin festivo :", esFestivo,esFestivo2);
 
     if(ini.getDay() == 0 || fin.getDay() == 0){
         form.dominicales = 'si'
@@ -279,16 +301,16 @@ function calcularHoras(inicio,final){
         form.nocturnas = Math.abs(calcularNocturnas(form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra)[1]);
         
     }else{ //extras
-        console.log('extras')
-        form.almuerzo = form.horas_trabajadas > 8 ?  1 : 0;
-        form.almuerzo = form.horas_trabajadas > 16 ? 2 : form.almuerzo;
+        let TemporalDiaAnterior = 0
+        TemporalDiaAnterior += props.ultimoReporte
+        form.almuerzo = form.horas_trabajadas + TemporalDiaAnterior > 8 ?  1 : 0;
+        form.almuerzo = form.horas_trabajadas + TemporalDiaAnterior > 16 ? 2 : form.almuerzo;
         ValorRealalmuerzo = form.almuerzo
         form.almuerzo += ' horas'
         
         let ExtrasPrematuras = 9
         if(props.horasemana > (MAXIMO_HORAS_SEMANALES - 9)){
             ExtrasPrematuras = props.horasemana - MAXIMO_HORAS_SEMANALES
-            console.log("🧈 debu ExtrasPrematuras:", ExtrasPrematuras);
         }
 
         CuandoEmpiezaExtra = parseInt(new Date(form.fecha_ini).getHours()) + ExtrasPrematuras;
@@ -306,7 +328,6 @@ function calcularHoras(inicio,final){
         form.extra_nocturnas = horasExtrasNocturnas[0];
         form.nocturnas = horasExtrasNocturnas[1];
     }
-    console.log("🧈 🧈  CuandoEmpiezaExtra:", CuandoEmpiezaExtra);
     calcularDominicales(ini,fin,CuandoEmpiezaExtra,ExtrasManana);
 }
 
@@ -333,11 +354,11 @@ function calcularDiurnas(Inicio, Fin,CuandoEmpiezaExtra){
                     HorasExtra = HorasDiurnas - horasNormales
                     HorasDiurnas = horasNormales
                 }else{
-                    console.log('imposible!')
+                    // console.log('imposible!')
                 }
             }//cuando las horas extra >= 21, no hay horas extra diurnas
         }
-        console.log("mismo DIA, HorasExtra & ordinarias", HorasExtra,HorasDiurnas); //nottemp
+        // console.log("mismo DIA, HorasExtra & ordinarias", HorasExtra,HorasDiurnas); //nottemp
 
         return [HorasExtra,HorasDiurnas];
     }else{ //de un dia a otro
@@ -381,7 +402,7 @@ function calcularDiurnas(Inicio, Fin,CuandoEmpiezaExtra){
                 }
             }
         }
-        console.log("🧈🧈🧈 DIA HorasExtra & ordinarias", HorasExtra,HorasDiurnasTotal); //nottemp
+        // console.log("🧈🧈🧈 DIA HorasExtra & ordinarias", HorasExtra,HorasDiurnasTotal); //nottemp
         return [HorasExtra, HorasDiurnasTotal]
     }
 }
@@ -444,7 +465,7 @@ function calcularNocturnas(Inicio, Fin,CuandoEmpiezaExtra){
     }
 
     let HorasNoc = Madrugada + Tarde;
-    console.log("🚀 Madrugada & tarde:", Madrugada,Tarde+' = '+(HorasNoc));
+    // console.log("🚀 Madrugada & tarde:", Madrugada,Tarde+' = '+(HorasNoc));
     let extra = 0, ordinarias = 0;
 
     // --------------- calculo extra ---------------
@@ -455,34 +476,32 @@ function calcularNocturnas(Inicio, Fin,CuandoEmpiezaExtra){
             if(horasFin >= 21){
                 extra = horasFin >= CuandoEmpiezaExtra? horasFin - CuandoEmpiezaExtra : 0
                 ordinarias = HorasNoc - extra
-                console.log("0a : extra & noche", extra,ordinarias);
             }else{
                 extra = 24 - CuandoEmpiezaExtra
                 extra += Madrugada
                 ordinarias = HorasNoc - extra
-                console.log("0a : extra & noche", extra,ordinarias);
             }
 
         }else{//extras empiezan en la madrugada
             if(CuandoEmpiezaExtra <= 6){
                 ordinarias = CuandoEmpiezaExtra + Tarde
                 extra = Madrugada >= CuandoEmpiezaExtra ? Madrugada - CuandoEmpiezaExtra : 0
-                console.log("🚀 1 : extra & noche", extra,ordinarias);
+                // console.log("🚀 1 : extra & noche", extra,ordinarias);
 
             }else{//empiezan en hora diurna
                 if(horasFin > 21){
                     extra = Tarde
                     ordinarias = Madrugada
-                    console.log("😶‍🌫️2  extra  ordinarias", extra,ordinarias);
+                    // console.log("😶‍🌫️2  extra  ordinarias", extra,ordinarias);
                 }else{
                     if(DiaInicio == DiaFin){//todo: validar que si sea optimo preguntar esto aqui
                         extra = 0
                         ordinarias = HorasNoc
-                        console.log("😶‍🌫️1  extra  ordinarias", extra,ordinarias);
+                        // console.log("😶‍🌫️1  extra  ordinarias", extra,ordinarias);
                     }else{
                         ordinarias = horasInicio < 6 ? 6 - horasInicio : 0 
                         extra = HorasNoc - ordinarias
-                        console.log("😶‍🌫️0  extra  ordinarias", extra,ordinarias);
+                        // console.log("😶‍🌫️0  extra  ordinarias", extra,ordinarias);
                     }
                 }
             }
@@ -495,9 +514,11 @@ watchEffect(() => {
     if (props.show) {
         form.errors = {}
 
+        
         if( Date.parse(form.fecha_ini) && Date.parse(form.fecha_fin) ){ // son fechas?
             let ini = Date.parse(form.fecha_ini);
             let fin = Date.parse(form.fecha_fin);
+            
             form.horas_trabajadas = 0
             form.almuerzo = 0
 
@@ -554,7 +575,10 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
             <form class="p-6" @submit.prevent="create">
                 <div class="flex space-x-4">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                        <b>{{ lang().label.add }} {{ props.title }}</b>
+                        <b>
+                            <!-- {{ lang().label.add }} -->
+                             {{ props.title }}
+                        </b>
                     </h2>
                     <h2 class="text-md font-medium text-gray-900 dark:text-gray-100">
                         Horas semana: {{ props?.horasemana }} 
@@ -649,7 +673,7 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                         <InputError class="mt-2" :message="form.errors.centro_costo_id" />
                     </div>
 
-                    <div v-if="form.dominicales == 'si'" class="">
+                    <div v-if="form.dominicales == 'si'" class="mt-4">
                         <label class="dark:text-white">Horario</label>
                         <TextInput id="dominicales" type="text" class="bg-gray-100 dark:bg-gray-700 block w-full" v-model="TextFestivo" disabled />
                     </div>
@@ -665,6 +689,9 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                 </div> -->
                 
                 <div class="flex justify-end">
+                    
+                    <p v-if="props.ultimoReporte > 0" class="m-2">Hay pendientes {{ props.ultimoReporte }} horas</p>
+
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
                     </SecondaryButton>
                     <PrimaryButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"

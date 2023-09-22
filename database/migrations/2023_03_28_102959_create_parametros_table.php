@@ -11,25 +11,25 @@ class CreateParametrosTable extends Migration
      *
      * @return void
      */
-    public function up() {
+    public function up()
+    {
         Schema::create('parametros', function (Blueprint $table) {
             $table->id();
-			$table->integer('HORAS_NECESARIAS_QUINCENA');
-			$table->double('subsidio_de_transporte_dia');
-			$table->double('salario_minimo');
-			    $table->double('valor_maximo_subsidio_de_transporte');//toask se calcula apartir del salario minimo
+            $table->integer('HORAS_NECESARIAS_SEMANA');
+            $table->double('subsidio_de_transporte_dia');
+            $table->double('salario_minimo');
+            $table->double('valor_maximo_subsidio_de_transporte'); //toask se calcula apartir del salario minimo
 
-			$table->double('porcentaje_diurno');
-			$table->double('porcentaje_nocturno');
-			$table->double('porcentaje_extra_diurno');
-			$table->double('porcentaje_extra_nocturno');
-			$table->double('porcentaje_dominical_diurno');
-			$table->double('porcentaje_dominical_nocturno');
-			$table->double('porcentaje_dominical_extra_diurno');
-			$table->double('porcentaje_dominical_extra_nocturno');
+            $table->double('porcentaje_diurno');
+            $table->double('porcentaje_nocturno');
+            $table->double('porcentaje_extra_diurno');
+            $table->double('porcentaje_extra_nocturno');
+            $table->double('porcentaje_dominical_diurno');
+            $table->double('porcentaje_dominical_nocturno');
+            $table->double('porcentaje_dominical_extra_diurno');
+            $table->double('porcentaje_dominical_extra_nocturno');
             $table->timestamps();
         });
-
     }
 
     /**

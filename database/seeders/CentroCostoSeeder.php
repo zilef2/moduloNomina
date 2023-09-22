@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\CentroCosto;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class CentroCostoSeeder extends Seeder
@@ -15,8 +14,9 @@ class CentroCostoSeeder extends Seeder
      */
     public function run()
     {
-        CentroCosto::create([ 'nombre' => 'centro'.rand(10,10000), ]);
-        CentroCosto::create([ 'nombre' => 'centro'.rand(10001,20000), ]);
+        CentroCosto::create([ 'nombre' => 'centro '.rand(1,10), ]);
+        CentroCosto::create([ 'nombre' => 'Unicentro']);
+        // CentroCosto::create([ 'nombre' => 'centro'.rand(10001,20000), ]);
 
     }
 }

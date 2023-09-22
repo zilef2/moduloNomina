@@ -15,20 +15,17 @@ use Illuminate\Support\Facades\Hash;
 
 use App\Imports\UsersImport;
 use App\Exports\UsersExport;
+use App\helpers\Myhelp;
 use App\Models\Cargo;
 use App\Models\CentroCosto;
 use App\Models\Reporte;
 use Carbon\Carbon;
-use DateTime;
-use Illuminate\Http\Response;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 
-class UserController extends Controller
-{
-
+class UserController extends Controller {
     public function __construct() {
         $this->middleware('permission:create user', ['only' => ['create', 'store']]);
         $this->middleware('permission:read user', ['only' => ['index', 'show']]);
@@ -36,24 +33,52 @@ class UserController extends Controller
         $this->middleware('permission:delete user', ['only' => ['destroy', 'destroyBulk']]);
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index(UserIndexRequest $request){
-        // $ListaControladoresYnombreClase = (explode('\\',get_class($this))); $nombreC = end($ListaControladoresYnombreClase);
-        // Log::info(' U -> '.Auth::user()->name. ' Accedio a la vista ' .$nombreC);
+    public function MapearClasePP(&$users, $numberPermissions) {
+        $users = $users->get()->map(function ($user) use ($numberPermissions) {
+            $user->cc = $user->centroName();
+            return $user;
+        })->filter();
+    }
 
-        $users = User::query();
+    public function Busqueda(UserIndexRequest $request){
+        $users = User::query()->with('roles','cargo');
+
         if ($request->has('search')) {
             $users->where('name', 'LIKE', "%" . $request->search . "%");
             $users->orWhere('email', 'LIKE', "%" . $request->search . "%");
+            $users->orWhere('cedula', 'LIKE', "%" . $request->search . "%");
         }
 
         if ($request->has(['field', 'order'])) {
             $users->orderBy($request->field, $request->order);
+        }else{
+            $users->orderByDesc('updated_at');
+
         }
+
+        if($request->has(['onlySupervis'])){
+            $users->whereHas('roles', function ($query) {
+                return $query->where('name', 'supervisor');
+            });
+        }
+
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'users'));
+        
+        if($numberPermissions == 3){
+            $centroID = Auth::user()->centro_costo_id;
+            if($centroID){
+                $users->Where('centro_costo_id' , $centroID);
+            }else{
+                $users->Where('id',0);
+            }
+        }
+        return $users;
+    }
+
+    public function index(UserIndexRequest $request){
+        $permissions = Myhelp::EscribirEnLog($this, ' users');
+        $numberPermissions = Myhelp::getPermissionToNumber($permissions);
+        $users = $this->Busqueda($request);
 
         $perPage = $request->has('perPage') ? $request->perPage : 10;
         $role = Auth()->user()->roles->pluck('name')[0];
@@ -67,18 +92,39 @@ class UserController extends Controller
                 ->get();
         }
         $cargos = Cargo::all();
+        $centros = CentroCosto::all();
+        
 
-        $sexoSelect[] = [ 'label' => 'Masculino', 'value' => 0 ];
-        $sexoSelect[] = [ 'label' => 'Femenino', 'value' => 1 ];
+        $this->MapearClasePP($users,$numberPermissions);
+
+        $page = request('page', 1); // Current page number
+        $total = $users->count();
+        $paginated = new LengthAwarePaginator(
+            $users->forPage($page, $perPage),
+            $total,
+            $perPage,
+            $page,
+            ['path' => request()->url()]
+        );
+
+        $sexoSelect[] = [ 'label' => 'masculino', 'value' => 0 ];
+        $sexoSelect[] = [ 'label' => 'femenino', 'value' => 1 ];
+
+        // 21sept
+        $superviNullCentro = User::whereHas('roles', function ($query) {
+            return $query->where('name', 'supervisor');
+        })->WhereNull('centro_costo_id')->count();
 
         return Inertia::render('User/Index', [
-            'title'         => __('app.label.user'),
-            'filters'       => $request->all(['search', 'field', 'order']),
-            'perPage'       => (int) $perPage,
-            'users'         => $users->with('roles','cargo')->paginate($perPage),
-            'roles'         => $roles,
-            'cargos'         => $cargos,
-            'sexoSelect'         => $sexoSelect,
+            'title'             => __('app.label.user'),
+            'filters'           => $request->all(['search', 'field', 'order']),
+            'perPage'           => (int) $perPage,
+            'users'             => $paginated,
+            'roles'             => $roles,
+            'cargos'            => $cargos,
+            'centros'           => $centros,
+            'sexoSelect'        => $sexoSelect,
+            'superviNullCentro' => $superviNullCentro,
             'breadcrumbs'   => [['label' => __('app.label.user'), 'href' => route('user.index')]],
         ]);
     }
@@ -93,6 +139,9 @@ class UserController extends Controller
     public function store(UserStoreRequest $request) {
         DB::beginTransaction();
         try {
+
+            $elCentroId = $request->centroid == 0 ? null : $request->centroid;
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -105,6 +154,8 @@ class UserController extends Controller
                 'fecha_de_ingreso' => $request->fecha_de_ingreso,
                 'sexo' => $request->sexo,
                 'salario' => $request->salario,
+
+                'centro_costo_id' => $elCentroId,
             ]);
             $user->assignRole($request->role);
             DB::commit();
@@ -123,6 +174,14 @@ class UserController extends Controller
         DB::beginTransaction();
         try {
             $user = User::findOrFail($id);
+            $elCentroId = $request->centroid == 0 ? null : $request->centroid;
+            
+            if($request->role === 'supervisor' && $elCentroId == null){
+                $elCentroId = CentroCosto::all()->first()->id;
+            }else{
+                // $elCentroId = null;
+            }
+
             $user->update([
                 'name'      => $request->name,
                 'email'     => $request->email,
@@ -135,6 +194,7 @@ class UserController extends Controller
                 'sexo' => $request->sexo,
                 'salario' => $request->salario,
 
+                'centro_costo_id' => $elCentroId,
             ]);
             $user->syncRoles($request->role);
             DB::commit();
@@ -151,8 +211,7 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(User $user)
-    {
+    public function destroy(User $user) {
         try {
             $user->delete();
             return back()->with('success', __('app.label.deleted_successfully', ['name' => $user->name]));
@@ -162,8 +221,7 @@ class UserController extends Controller
     }
    
 
-    public function destroyBulk(Request $request)
-    {
+    public function destroyBulk(Request $request) {
         try {
             $user = User::whereIn('id', $request->id);
             $user->delete();
@@ -206,8 +264,8 @@ class UserController extends Controller
             return back()->with('warning', 'El archivo debe ser de Excel');
         }
         $pesoKilobyte = ((int)($request->archivo1->getSize()))/(1024);
-        if ($pesoKilobyte > 256) { //debe pesar menos de 256KB
-            return back()->with('warning', 'El archivo debe pesar menos de 256KB');
+        if ($pesoKilobyte > 1256) { //debe pesar menos de 1MB +-
+            return back()->with('warning', 'El archivo debe pesar menos de 1MB');
         }
 
         try{
@@ -225,8 +283,20 @@ class UserController extends Controller
             session(['usuariosActualizados' => []]);
             if( $countNoleidos == 0 && $countNoCargo == 0 && $countSex == 0 && $countCedulaRepetida == 0)
                 $messageSuccess1 = 'Usuarios nuevos: '.$CountFilas;
-            else
-                $messageSuccess1 = 'Usuarios nuevos: '.$CountFilas. '.  Hubo ' .($countNoleidos).' no leidas, '.$countNoCargo. ' con cargo erroneo, '. $countSex.' sexo mal escrito '.$countCedulaRepetida. ' cedula repetida.';
+            else{
+
+                $messageSuccess1 = 'Usuarios nuevos: '.$CountFilas.
+                '.  Hubo ' .($countNoleidos).' no leidas, ';
+
+                $partSuccess1  = $countNoCargo > 0 ? $countNoCargo. ' con cargo erroneo, ' : '';
+                $messageSuccess1 .= $partSuccess1;
+
+                $partSuccess1  = $countSex > 0 ? $countSex. ' genero mal escrito, ' : '';
+                $messageSuccess1 .= $partSuccess1;
+
+                $partSuccess1  = $countCedulaRepetida > 0 ? $countCedulaRepetida. ' identificacion mal escrita, ' : '';
+                $messageSuccess1 .= $partSuccess1;
+            }
             if(count($usuariosActualizados) > 0){
                 $StringUsuariosRep = implode(", ",$usuariosActualizados);
                 session(['countCedulaRepetida' => 0]);
@@ -235,7 +305,6 @@ class UserController extends Controller
             }else{
                 return back()->with('success', $messageSuccess1);
             }
-            // return back()->with('success', __('upload_complete'). $CountFilas);
 
         } catch (ValidationException $e) {
             $failures = $e->failures();
@@ -277,7 +346,7 @@ class UserController extends Controller
         // return view('reporte1temp',$ini,$fin);
     }
 
-    public function CalcularIniFinQuincena($quincena,$month,$year){
+    private function CalcularIniFinQuincena($quincena,$month,$year){
         $ini = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(0)->setminutes(0);
         // dd($ini);
         $fin = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(23)->setminutes(0);
@@ -287,6 +356,9 @@ class UserController extends Controller
         }else{
             $ini->addDays(15);//
             $fin->addMonths(1)->addDays(-1); //antes era -4
+            $nombreDiaSemana = intval($fin->format('d'));
+
+            if( $nombreDiaSemana == 31) $fin->addDays(-1);
         }
         // dd($ini,$fin);
         $users = User::Select('id','name','cedula','cargo_id')->WhereHas("roles", function($q){
@@ -307,10 +379,6 @@ class UserController extends Controller
     }
 
     public function downloadsigo(Request $request) {
-        // $fechaIni = new DateTime($request->ini);
-        // $anio = $fechaIni->format('Y');
-        // $diaInicial = $fechaIni->format('d');
-        // $quincena = $diaInicial < 14 ? '1':'2';
         
         $quincena = intval($request->quincena);
         $year = intval($request->year);
@@ -318,17 +386,21 @@ class UserController extends Controller
         $ini = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(0);
         $fin = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(23);
         $NumeroDiasFestivos = intval($request->NumeroDiasFestivos);
+
+        //? NOTE:: values 15-30
         if($quincena == 1){
             // $ini->addDays(-3);
             $fin->addDays(14);//antes era 12            
         }else{
-            $ini->addDays(15);//
+            $ini->addDays(15);
             $fin->addMonths(1)->addDays(-1); //antes era -4
         }
         // dd($ini,$fin);
+
         $users = User::Select('id','name','cedula','cargo_id')->WhereHas("roles", function($q){
             $q->Where("name", "empleado");
         })->get();
+
         $NumReportes = 0;
         foreach ($users as $value) {
             $NumReportes += Reporte::where('user_id', $value->id)
@@ -379,10 +451,16 @@ class UserController extends Controller
             
             $Reportes->orderBy('fecha_ini'); $perPage = 15;
 
+            // $nombresTabla =[//0: como se ven //1 como es la BD
+            //     ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio",       "fin",        "horas trabajadas",   "observaciones"],
+            //     ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
+            //     [null,null,null,null,null,null,null,null,null,null,null,null,null,null] //campos ordenables
+            // ];
             $nombresTabla =[//0: como se ven //1 como es la BD
-                ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio",       "fin",        "horas trabajadas",   "observaciones"],
-                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
-                [null,null,null,null,null,null,null,null,null,null,null,null,null,null] //campos ordenables
+                
+                ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio","fin","horas trabajadas",  'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', "observaciones"],
+                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
+                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean 
             ];
 
             //sin uso1

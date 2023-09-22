@@ -29,9 +29,12 @@ const props = defineProps({
     users: Object,
     roles: Object,
     cargos: Object,
+    centros: Object,
     breadcrumbs: Object,
     perPage: Number,
     sexoSelect: Object,
+    onlySupervis: Number,
+    superviNullCentro: Number,
 })
 const data = reactive({
     params: {
@@ -39,6 +42,7 @@ const data = reactive({
         field: props.filters.field,
         order: props.filters.order,
         perPage: props.perPage,
+        onlySupervis: props.onlySupervis,
     },
     selectedId: [],
     multipleSelect: false,
@@ -60,6 +64,7 @@ const data = reactive({
 
         watch(() => _.cloneDeep(data.params), debounce(() => {
             let params = pickBy(data.params)
+            console.log("🧈 debu params:", params);
             router.get(route("user.index"), params, {
                 replace: true,
                 preserveState: true,
@@ -84,7 +89,7 @@ const data = reactive({
             }
         }
     //fin default functions
-
+    data.params.onlySupervis = data.params.onlySupervis === null ? false : data.params.onlySupervis;
 </script>
 
 <template>
@@ -100,19 +105,23 @@ const data = reactive({
                     </PrimaryButton>
                     <Link v-show="can(['isAdmin'])" :href="route('user.uploadexcel')" 
                         class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary">
-                        <PrimaryButton v-show="can(['isAdmin'])"
-                            class="flex items-center px-4">
-
-                            Exportar
-                            <ShieldCheckIcon class="w-3 h-3" />
+                        <PrimaryButton v-show="can(['isAdmin']) && props.superviNullCentro == 0" class="flex items-center px-4">
+                            Exportar e Importar
+                            <ShieldCheckIcon class="w-3 h-3 ml-2 mb-1" />
                             <!-- <span class="ml-3">{{ lang().button.importUser }}</span> -->
                         </PrimaryButton>
+
                     </Link>
+                    <div class="mx-4 pt-1 pb-3 inline-flex">‎
+                        <input id="onlySupervis" type="checkbox" v-model="data.params.onlySupervis"
+                        class="inline-flex items-center p-3  border-2 border-sky-500 rounded-md font-semibold hover:bg-primary/80 dark:hover:bg-primary/90 focus:bg-primary/80 dark:focus:bg-primary/80 active:bg-primary dark:active:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-primary transition ease-in-out duration-150 disabled:bg-primary/80"/>
+                        <label for="onlySupervis" class="mx-2">Mostrar solo supervisores ({{ props.superviNullCentro }})</label>
+                    </div>
 
                     <Create :show="data.createOpen" @close="data.createOpen = false" :roles="props.roles"
-                        :cargos="props.cargos" :sexoSelect="props.sexoSelect" :title="props.title" />
+                        :cargos="props.cargos" :centros="props.centros" :sexoSelect="props.sexoSelect" :title="props.title" />
                     <Edit :show="data.editOpen" @close="data.editOpen = false" :user="data.user" :roles="props.roles"
-                        :cargos="props.cargos" :sexoSelect="props.sexoSelect" :title="props.title" />
+                        :cargos="props.cargos" :centros="props.centros" :sexoSelect="props.sexoSelect" :title="props.title" />
                     <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :user="data.user"
                         :title="props.title" />
                     <DeleteBulk :show="data.deleteBulkOpen"
@@ -182,6 +191,12 @@ const data = reactive({
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
                                 </th>
+                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('centro_costo_id')">
+                                    <div class="flex justify-between items-center">
+                                        <span>{{ lang().label.centro_costo }}</span>
+                                        <ChevronUpDownIcon class="w-4 h-4" />
+                                    </div>
+                                </th>
                                 <th class="px-2 py-4 cursor-pointer" v-on:click="order('salario')">
                                     <div class="flex justify-between items-center">
                                         <span>{{ lang().label.salario }}</span>
@@ -215,28 +230,28 @@ const data = reactive({
                                     <!-- <CheckBadgeIcon class="ml-[2px] w-4 h-4 text-primary dark:text-white" v-show="user.email_verified_at" />  -->
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cedula }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cargo.length == 0 ? 'No tiene cargo'
-                                                                    : user.cargo.nombre }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.roles.length == 0 ? 'No tiene rol' :
-                                                                    user.roles[0].name }}</td>
+
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cargo.length == 0 ? 'No tiene cargo' : user.cargo.nombre }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.roles.length == 0 ? 'No tiene rol' : user.roles[0].name }}</td>
                                 <!-- <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.created_at }}</td> -->
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.celular }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.telefono }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.fecha_de_ingreso }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cc }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ number_format(user.salario,0,1) }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.updated_at }}</td>
                                 <td class="whitespace-nowrap p-4 sm:p-3">
                                     <div class="flex justify-center">
                                         <Link :href="route('user.showReporte',user.id)"
                                             v-show="can(['update centroCostos'])" type="button"
-                                            class="inline-flex  items-center p-1.5 bg-gray-600 border border-transparent rounded-sm font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"
+                                            class="inline-flex  items-center p-1.5 bg-gray-600 border border-transparent rounded-l-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"
                                             v-tooltip="lang().tooltip.seeReport">
-                                        <EyeIcon class="w-4 h-4" />
+                                            <EyeIcon class="w-4 h-4" />
                                         </Link>
                                         <div class="rounded-md overflow-hidden">
                                             <InfoButton v-show="can(['update user'])" type="button"
                                                 @click="(data.editOpen = true), (data.user = user)"
-                                                class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
+                                                class="px-2 py-1.5 rounded-sm mx-0.5" v-tooltip="lang().tooltip.edit">
                                                 <PencilIcon class="w-4 h-4" />
                                             </InfoButton>
                                             <DangerButton v-show="can(['delete user'])" type="button"

@@ -10,13 +10,13 @@ class Parametro extends Model
     use HasFactory;
 
     protected $fillable = [
-        
-        'HORAS_NECESARIAS_QUINCENA',
-        
+
+        'HORAS_NECESARIAS_SEMANA',
+
         'subsidio_de_transporte_dia',
         'salario_minimo',
         'valor_maximo_subsidio_de_transporte',
-        
+
 
 
         'porcentaje_diurno',

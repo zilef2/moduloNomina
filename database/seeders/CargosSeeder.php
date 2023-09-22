@@ -27,5 +27,10 @@ class CargosSeeder extends Seeder
         Cargo::create([ 'nombre' => 'Coordinadora SGI' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);//11
         Cargo::create([ 'nombre' => 'Analista SST' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);
         Cargo::create([ 'nombre' => 'Analista HSEQ' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);//12
+
+        //22 sept
+        Cargo::create([ 'nombre' => 'Auxiliar electricista ' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);//13
+        Cargo::create([ 'nombre' => 'Coordinadora de gestion humana' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);//14
+        Cargo::create([ 'nombre' => 'Coordinador de ingenieria' , 'salario_hora' => 8000, 'salario_total'=> 1280000 ]);//15
     }
 }

@@ -13,25 +13,11 @@ use App\Models\CentroCosto;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class ReportesController extends Controller
 {
-    /**
-     * @return \Illuminate\Http\Response
-     * valido states = {0 defect | 1 validada | 2 rechazada}
-     */
-    public function index(Request $request) {
-        $permissions = Myhelp::EscribirEnLog($this, 'reportes');
-        $numberPermissions = Myhelp::getPermissionToNumber($permissions); //0:error, 1:estudiante,  2: profesor, 3:++ )
-
-        $titulo = __('app.label.Reportes');
-        $Authuser = Auth::user();
-        $permissions = auth()->user()->roles->pluck('name')[0];
-        $Reportes = Reporte::query();
+    public function losSelect(&$valoresSelectConsulta, &$showUsers, &$valoresSelect) {
         $valoresSelectConsulta = CentroCosto::orderBy('nombre')->get();
-        $IntegerDefectoSelect = $valoresSelectConsulta->first()->id;
-
 
         foreach ($valoresSelectConsulta as $value) {
             $valoresSelect[] = [
@@ -45,35 +31,77 @@ class ReportesController extends Controller
             $showUsers[intval($value->id)] = $value->name;
         }
 
-        $quincena = [];
-        $horasemana = 0;
+        return $showSelect;
 
-        Carbon::setLocale('es');
-            $startDate = Carbon::now()->startOfWeek();
-            $endDate = Carbon::now()->endOfWeek();
-            $startDateMostrar = $startDate->isoFormat('dddd D [de] MMMM');
-            $endDateMostrar = $endDate->isoFormat('dddd D [de] MMMM');
+    }
+
+    public function Filtros($request, &$Reportes) {
         
-        if($permissions === "empleado") { //admin | administrativo
+        if ($request->has('search')) {
+            $Reportes->whereMonth('fecha_ini', $request->search);
+            $Reportes->OrwhereMonth('fecha_fin', $request->search);
+            $Reportes->OrwhereYear('fecha_ini', $request->search);
+            $Reportes->OrwhereYear('fecha_fin', $request->search);
+            $Reportes->OrwhereDay('fecha_ini', $request->search);
+            $Reportes->OrwhereDay('fecha_fin', $request->search);
+            // $Reportes->orWhere('fecha_fin', 'LIKE', "%" . $request->search . "%");
+        }
+        if ($request->has(['field', 'order'])) {
+                $Reportes->orderBy($request->field, $request->order);
+            }else{
+                $Reportes->orderByDesc('fecha_ini');
+        }
+    }
+
+    
+
+    private function CalcularTituloQuincena($numberPermissions,$Authuser) {
+        $esteMes = date("m");
+        $diaquincena = date("d");
+        if($diaquincena >= 15){
+            if($numberPermissions == 3){
+
+                $horasTrabajadas = Reporte::Where('centro_costo_id', $Authuser->centro_costo_id)
+                    ->WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','<=',15)->sum('horas_trabajadas');
+            }else{
+                $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','<=',15)->sum('horas_trabajadas');
+
+            }
+        }else{
+            if($numberPermissions == 3){
+                $horasTrabajadas = Reporte::Where('centro_costo_id', $Authuser->centro_costo_id)
+                    ->WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','>',15)->sum('horas_trabajadas');
+            }else{
+                $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','>',15)->sum('horas_trabajadas');
+            }
+        }
+        return 'Horas trabajadas quincena: '.$horasTrabajadas;
+    }
+
+    public function fNombresTabla($numberPermissions ,&$Reportes,$Authuser,$request, &$titulo) {
+        
+        $startDate = Carbon::now()->startOfWeek();
+        $endDate = Carbon::now()->endOfWeek();
+        $quincena = [];
+        if($numberPermissions === 1) { 
             $Reportes->whereUser_id($Authuser->id);
 
             if ($request->has(['field', 'order'])) {
                 $Reportes->orderBy($request->field, $request->order);
             }else{
-                $Reportes->orderBy('fecha_ini');
+                $Reportes->orderByDesc('fecha_ini');
             }
-            $perPage = $request->has('perPage') ? $request->perPage : 10;
 
-            $nombresTabla =[//0: como se ven //1 como es la BD //2??
-                ["Acciones","#","Centro costo","inicio", "fin", "horas trabajadas", "valido", "observaciones"],
-                ["t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
-                [null,null,null,"t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "b_valido", "s_observaciones"] //campos ordenables
+            $nombresTabla =[//0: como se ven //1 como es la BD
+                ["Acciones","#","Centro costo", "valido",   "inicio","fin","horas trabajadas",  'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', "observaciones"],
+                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
+                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean 
             ];
 
             //# horas de la semana
-            $horasemana = Reporte::Where('user_id',Auth::user()->id)
-                                ->WhereBetween('fecha_ini', [$startDate, $endDate])
-                                ->sum('horas_trabajadas');
+            $horasemana = Reporte::Where('user_id',$Authuser->id)
+                    ->WhereBetween('fecha_ini', [$startDate, $endDate])
+                    ->sum('horas_trabajadas');
 
             //# solo validos
             if ($request->has('soloValidos')) {
@@ -81,44 +109,86 @@ class ReportesController extends Controller
             }
             // dd($Reportes);
 
-        }else{ // not empleado
-            $horasemana = Reporte::WhereBetween('fecha_ini', [$startDate, $endDate])->sum('horas_trabajadas');
+        }else{ //administrativo, supervisor y admin
+            $titulo = $this->CalcularTituloQuincena($numberPermissions,$Authuser);
+            $this->Filtros($request,$Reportes);
+
+            $nombresTabla =[//0: como se ven //1 como es la BD
+                ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio","fin","horas trabajadas",  'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', "observaciones"],
+                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
+                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean 
+            ];
 
             $quincena = [
                 'Primera quincena' => Reporte::whereBetween('fecha_ini',[Carbon::now()->startOfMonth(),Carbon::now()->startOfMonth()->addDays(14)])->count(),
                 'Segunda quincena' => Reporte::whereBetween('fecha_ini',[Carbon::now()->startOfMonth()->addDays(15),Carbon::now()->LastOfMonth()])->count(),
             ];
-            // dd($quincena);
-            // $ReportesEsteMes = Reporte::WhereMonth('fecha_ini',$esteMes)->get()->count();
-            $titulo = $this->CalcularTituloQuincena();
-            
-           
+            $horasemana = Reporte::WhereBetween('fecha_ini', [$startDate, $endDate])->sum('horas_trabajadas');
 
-            if ($request->has('search')) {
-                $Reportes->whereMonth('fecha_ini', $request->search);
-                $Reportes->OrwhereMonth('fecha_fin', $request->search);
-                $Reportes->OrwhereYear('fecha_ini', $request->search);
-                $Reportes->OrwhereYear('fecha_fin', $request->search);
-                $Reportes->OrwhereDay('fecha_ini', $request->search);
-                $Reportes->OrwhereDay('fecha_fin', $request->search);
-                // $Reportes->orWhere('fecha_fin', 'LIKE', "%" . $request->search . "%");
-            }
-            if ($request->has(['field', 'order'])) {
-                    $Reportes->orderBy($request->field, $request->order);
-                }else{
-                    $Reportes->orderBy('fecha_ini');
-            }
-            $perPage = $request->has('perPage') ? $request->perPage : 10;
+            if($numberPermissions == 2){
 
-            $nombresTabla =[//0: como se ven //1 como es la BD
-                
-                ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio",       "fin",        "horas trabajadas",  'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', "observaciones"],
-                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
-                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean 
-            ];
+            }else{ //admin y supervisor
+
+                if($numberPermissions == 3){//supervisor
+                    $horasemana = Reporte::Where('centro_costo_id', $Authuser->centro_costo_id)
+                        ->WhereBetween('fecha_ini', [$startDate, $endDate])
+                        ->sum('horas_trabajadas');
+
+                    $Reportes->where('centro_costo_id', $Authuser->centro_costo_id);
+                    
+                }else{ //admin
+                }
+            }
         }
 
-        $sumhoras_trabajadas = $Reportes->sum('horas_trabajadas');
+        return [$nombresTabla , $horasemana, $quincena];
+
+    }
+
+
+    public function index(Request $request) {
+        $permissions = Myhelp::EscribirEnLog($this, ' |reportes index| ');
+        $numberPermissions = Myhelp::getPermissionToNumber($permissions); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        Carbon::setLocale('es');
+
+        $titulo = __('app.label.Reportes');
+        $Authuser = Auth::user();
+
+        
+        $Reportes = Reporte::query();
+        $showSelect = $this->losSelect($valoresSelectConsulta, $showUsers,$valoresSelect);
+        $IntegerDefectoSelect = $valoresSelectConsulta->first()->id;
+
+        $quincena = [];
+        $horasemana = 0;
+        $startDate = Carbon::now()->startOfWeek();
+        $endDate = Carbon::now()->endOfWeek();
+        $startDateMostrar = $startDate->isoFormat('dddd D [de] MMMM');
+        $endDateMostrar = $endDate->isoFormat('dddd D [de] MMMM');
+        
+        $perPage = $request->has('perPage') ? $request->perPage : 10;
+        
+        $fnombresT = $this->fNombresTabla($numberPermissions ,$Reportes,$Authuser,$request,$titulo);
+        $nombresTabla = $fnombresT[0];
+        $horasemana = $fnombresT[1];
+        $quincena = $fnombresT[2];
+
+
+        $sumhoras_trabajadas = $Reportes->sum('horas_trabajadas'); $sumdiurnas  = $Reportes->sum('diurnas'); $sumnocturnas  = $Reportes->sum('nocturnas'); $sumextra_diurnas  = $Reportes->sum('extra_diurnas'); $sumextra_nocturnas  = $Reportes->sum('extra_nocturnas'); $sumdominical_diurno  = $Reportes->sum('dominical_diurno'); $sumdominical_nocturno  = $Reportes->sum('dominical_nocturno'); $sumdominical_extra_diurno  = $Reportes->sum('dominical_extra_diurno'); $sumdominical_extra_nocturno = $Reportes->sum('dominical_extra_nocturno');
+
+        //# Para saber si tiene horas del dia anterior
+        //ultimo reporte que hizo el usuario autenticado
+        $ultiReporte = Reporte::Where('user_id',$Authuser->id)->orderBy('created_at','desc')->first();
+        $ultimoReporte = 0;
+        if($ultiReporte != null){
+            // $ultimoReporte = $ultimoReporte->fecha_fin;
+            $inihoraymin = intval(Carbon::parse($ultiReporte->fecha_ini)->format('H'));
+            $finhoraymin = Carbon::parse($ultiReporte->fecha_fin)->format('H:i');
+            if($finhoraymin == '23:59'){
+                $ultimoReporte = 24 - $inihoraymin;
+                $ultimoReporte = $ultimoReporte > 8 ? $ultimoReporte - 8 : $ultimoReporte;
+            }
+        }
 
         return Inertia::render('Reportes/Index', [ //carpeta
             'title'          =>  $titulo,
@@ -136,21 +206,21 @@ class ReportesController extends Controller
             'horasemana'            =>  $horasemana,
             'startDateMostrar'      =>  $startDateMostrar,
             'endDateMostrar'        =>  $endDateMostrar,
-            'sumhoras_trabajadas'   =>  intval($sumhoras_trabajadas),
             'numberPermissions'     =>  $numberPermissions,
+            'ultimoReporte'         =>  $ultimoReporte,
+
+            'sumhoras_trabajadas'   =>  intval($sumhoras_trabajadas),
+            'sumdiurnas'   =>  $sumdiurnas,
+            'sumnocturnas'   =>  $sumnocturnas,
+            'sumextra_diurnas'   =>  $sumextra_diurnas,
+            'sumextra_nocturnas'   =>  $sumextra_nocturnas,
+            'sumdominical_diurno'   =>  $sumdominical_diurno,
+            'sumdominical_nocturno'   =>  $sumdominical_nocturno,
+            'sumdominical_extra_diurno'   =>  $sumdominical_extra_diurno,
+            'sumdominical_extra_nocturno'   =>  $sumdominical_extra_nocturno,
+
         ]);
     }//fin index
-
-    public function CalcularTituloQuincena() {
-        $esteMes = date("m");
-        $diaquincena = date("d");
-        if($diaquincena >= 15){ //toask: el dia 15 se toma en cuenta para la quincena ? 
-            $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','<=',15)->sum('horas_trabajadas');
-        }else{
-            $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','>',15)->sum('horas_trabajadas');
-        }
-        return 'Horas trabajadas quincena: '.$horasTrabajadas;
-    }
 
     public function create() { }
 
@@ -162,6 +232,8 @@ class ReportesController extends Controller
     }
 
     public function store(ReporteRequest $request) {
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+
         DB::beginTransaction();
         try {
             $thisUserId = Auth::User()->id;
@@ -213,6 +285,8 @@ class ReportesController extends Controller
 
     public function show($id) { }
     public function edit($id) {
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+
         $Reportes = Reporte::findOrFail($id);
         return Inertia::render('Reportes.edit',['Reportes'=>$Reportes]);
     }
@@ -225,6 +299,8 @@ class ReportesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id) {
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+
         DB::beginTransaction();
         try {
             $Reportes = Reporte::findOrFail($id);
@@ -265,18 +341,24 @@ class ReportesController extends Controller
          * @return \Illuminate\Http\Response
      */
     public function destroy($id) {
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         DB::beginTransaction();
 
         try {
             // si se la rechazaron, tendra que hacer uno nuevo
             $Reportes = Reporte::findOrFail($id);
-            if($Reportes->valido == 0){
+            if($numberPermissions > 8){
                 $Reportes->delete();
                 DB::commit();
-                return back()->with('success', __('app.label.deleted_successfully'));
+                return back()->with('success', __('app.label.deleted_successfully', ['name' => 'Reporte']));
+            }
+            if($Reportes->valido == 0 || $Reportes->valido == 2){
+                $Reportes->delete();
+                DB::commit();
+                return back()->with('success', __('app.label.deleted_successfully', ['name' => 'Reporte']));
             }else{
                 DB::commit();
-                return back()->with('warning', __('app.label.not_deleted', ['name' => $Reportes->observaciones]). '. Ya esta aprobado');
+                return back()->with('warning', __('app.label.not_deleted', ['name' => 'Reporte']). '. Ya esta aprobado');
             }
             
         } catch (\Throwable $th) {

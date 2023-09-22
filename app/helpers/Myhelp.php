@@ -17,8 +17,9 @@ class Myhelp{
 
         if ($permissions == 'empleado') return 1;
         if ($permissions == 'administrativo') return 2;
-        if ($permissions == 'admin') return 3;
-        if ($permissions == 'superadmin') return 4;
+        if ($permissions == 'supervisor') return 3;
+        if ($permissions == 'admin') return 9;
+        if ($permissions == 'superadmin') return 10;
         return 0;
     }
     public static function EscribirEnLog($thiis, $clase = '', $mensaje = '', $returnPermission = true, $critico = false)

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\helpers\Myhelp;
 use App\Http\Controllers\Controller;
 
 use App\Models\CentroCosto;
@@ -9,15 +10,30 @@ use App\Http\Requests\CentroCostoRequest;
 use App\Models\Reporte;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class CentroCostosController extends Controller {
+
+    public function MapearClasePP(&$centroCostos, $numberPermissions)
+    {
+        $centroCostos = $centroCostos->get()->map(function ($centroCosto) use ($numberPermissions) {
+
+            if ($numberPermissions == 3) {
+                $objetoDelUser = Auth::user()->centro_costo_id;
+                if ($centroCosto->id != $objetoDelUser) return null;
+            }
+
+            $centroCosto->cuantoshijos = count($centroCosto->users);
+            $centroCosto->supervi = $centroCosto->supervisores($centroCosto->id);
+            return $centroCosto;
+        })->filter();
+        // dd($centroCostos);
+    }
     public function index(Request $request) {
-        $ListaControladoresYnombreClase = (explode('\\',get_class($this))); $nombreC = end($ListaControladoresYnombreClase);
-        Log::info(' U -> '.Auth::user()->name. ' Accedio a la vista ' .$nombreC);
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'centro costos')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 
         $centroCostos = centroCosto::query();
         if ($request->has('search')) {
@@ -27,6 +43,7 @@ class CentroCostosController extends Controller {
             $centroCostos->orderBy($request->field, $request->order);
         }
         $perPage = $request->has('perPage') ? $request->perPage : 10;
+        $this->MapearClasePP($centroCostos, $numberPermissions);
 
         $permissions = Auth()->user()->roles->pluck('name')[0];
         if($permissions === "empleado") { //admin | administrativo
@@ -36,15 +53,26 @@ class CentroCostosController extends Controller {
             ];
         }else{
             $nombresTabla =[//[0]: como se ven //[1] como es la BD
-                ["#","nombre","Acciones"],
-                [null,"nombre",null]
+                ["Acciones","#","nombre","usuarios","Supervisor"],
+                [null,null,"nombre","usuarios","Supervisor"]
             ];
         }
+
+        $page = request('page', 1); // Current page number
+        $total = $centroCostos->count();
+        $paginated = new LengthAwarePaginator(
+            $centroCostos->forPage($page, $perPage),
+            $total,
+            $perPage,
+            $page,
+            ['path' => request()->url()]
+        );
+
         return Inertia::render('CentroCostos/Index', [ //carpeta
             'title'          =>  __('app.label.CentroCostos'),
             'filters'        =>  $request->all(['search', 'field', 'order']),
             'perPage'        =>  (int) $perPage,
-            'fromController' =>  $centroCostos->paginate($perPage),
+            'fromController' =>  $paginated,
             'breadcrumbs'    =>  [['label' => __('app.label.CentroCostos'), 'href' => route('CentroCostos.index')]],
             'nombresTabla'   =>  $nombresTabla,
         ]);
@@ -53,6 +81,7 @@ class CentroCostosController extends Controller {
     public function create() { }
 
     public function store(CentroCostoRequest $request) {
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         DB::beginTransaction();
         try {
             $centroCostos = new centroCosto;
@@ -67,7 +96,7 @@ class CentroCostosController extends Controller {
     }
 
     public function show( $id) {
-        // $centroCostos = centroCosto::findOrFail($id);
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         $Reportes = Reporte::query();
         
         $titulo = __('app.label.Reportes');
@@ -95,12 +124,14 @@ class CentroCostosController extends Controller {
             $Reportes->orderBy('fecha_ini'); $perPage = 15;
 
             $nombresTabla =[//0: como se ven //1 como es la BD
-                ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio",       "fin",        "horas trabajadas",   "observaciones"],
-                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
-                [null,null,null,null,null,null,null,null,null,null,null,null,null,null] //campos ordenables
+                
+                ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio","fin","horas trabajadas",  'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', "observaciones"],
+                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
+                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean 
             ];
         }
         $sumhoras_trabajadas = $Reportes->sum('horas_trabajadas');
+        
         return Inertia::render('Reportes/Index', [ //carpeta
             'title'          =>  $titulo,
             'filters'        =>  null,
@@ -146,12 +177,14 @@ class CentroCostosController extends Controller {
 
 
     public function edit($id) {
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         $centroCostos = centroCosto::findOrFail($id);
         return Inertia::render('centroCostos.edit',['centroCostos'=>$centroCostos]);
     }
 
     public function update(CentroCostoRequest $request, $id) {
          DB::beginTransaction();
+         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 
         try {
             $centroCostos = centroCosto::findOrFail($id);
@@ -172,14 +205,19 @@ class CentroCostosController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function destroy($id) {
-        DB::beginTransaction();
-
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        DB::beginTransaction();        
         try {
-            $centroCostos = CentroCosto::findOrFail($id);
-            $centroCostos->delete();
+            if($numberPermissions > 8){
 
-            DB::commit();
-            return back()->with('success', __('app.label.deleted_successfully', ['name' => $centroCostos->nombre]));
+                $centroCostos = CentroCosto::findOrFail($id);
+                $centroCostos->delete();
+                
+                DB::commit();
+                return back()->with('success', __('app.label.deleted_successfully', ['name' => $centroCostos->nombre]));
+            }else{
+                return back()->with('error', 'No tiene permisos para borrar un centro de costos');
+            }
         } catch (\Throwable $th) {
             DB::rollback();
             return back()->with('error', __('app.label.deleted_error', ['name' => __('app.label.centroCostos')]) . $th->getMessage());

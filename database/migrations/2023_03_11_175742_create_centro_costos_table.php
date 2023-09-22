@@ -18,6 +18,16 @@ class CreateCentroCostosTable extends Migration
 			$table->string('nombre');
             $table->timestamps();
         });
+
+        Schema::table('users', function (Blueprint $table) {
+
+            $table->unsignedBigInteger('centro_costo_id')->nullable();
+            $table->foreign('centro_costo_id')
+            ->references('id')
+            ->on('centro_costos')
+            ->onDelete('restrict');
+        });
+
     }
 
     /**

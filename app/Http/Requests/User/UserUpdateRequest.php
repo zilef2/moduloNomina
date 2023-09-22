@@ -32,7 +32,7 @@ class UserUpdateRequest extends FormRequest
             'password_confirmation' => 'sometimes|required_with:password|same:password',
             'role'                  => ['required'],
             'salario'               => ['required'],
-            'telefono'              => ['required'],
+            'telefono'              => ['nullable'],
             'celular'               => ['required'],
             'fecha_de_ingreso'      => ['required'],
             'sexo'                  => ['required'],

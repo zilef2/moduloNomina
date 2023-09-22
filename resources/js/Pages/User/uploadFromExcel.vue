@@ -44,11 +44,7 @@ const data = reactive({
 
 })
 
-onMounted(() => {
-    if (props.flash.warning) {
-        data.warnn = props.flash.warning
-    }
-});
+onMounted(() => { });
 
 function getHoursColombianRandom(otraVez) {
 
@@ -84,6 +80,7 @@ const form = useForm({ //formulario para exportar el imforme quincenal
     quincena: 1,
     NumeroDiasFestivos: 0
 });
+
 const form2 = useForm({// formulario para sigo
     archivosigo: null,
     quincena_sigo: 1,
@@ -92,17 +89,21 @@ const form2 = useForm({// formulario para sigo
 });
 
 watchEffect(() => {
+
+    console.log("🧈 debu form2.quincena_sigo:", form2.quincena_sigo);
+    if (props.flash.warning) {
+        data.warnn = props.flash.warning
+    }
+    
     data.params.fecha_ini = form.fecha_ini,
     data.params.quincena = form.quincena
 
     if(form2.fecha_ini_sigo){
-
         form2.NumeroDiasFestivos = CuantosFestivosEstaQuincena(form2.quincena_sigo,form2.fecha_ini_sigo.month,form2.fecha_ini_sigo.year)
         // console.log("🧈 debu form2.NumeroDiasFestivos:", form2.NumeroDiasFestivos);
     }
 
     if(form.fecha_ini){
-
         form.NumeroDiasFestivos = CuantosFestivosEstaQuincena(form.quincena,form.fecha_ini.month,form.fecha_ini.year)
         // console.log("🧈 debu form.NumeroDiasFestivos:", form.NumeroDiasFestivos);
     }
@@ -124,8 +125,6 @@ function CuantosFestivosEstaQuincena(numQuicena,elmes,anio){
         monthFestivo = (dateFestivos.getMonth());
 
         if(monthFestivo == elmes){
-            // console.log("🧈 debu dateFestivos.getMonth():", dateFestivos.getMonth());
-            // console.log("🧈 debu dateFestivos.getDate:", dateFestivos.getDate());
             if(diaLimite == 14){
                 if(diaLimite > dateFestivos.getDate()){
                     contadorResult++;
@@ -175,7 +174,7 @@ const columnasImportarUser = [
     {value:'telefono',rule:'Obligatorio'},
     {value:'celular',rule:'Obligatorio'},
     {value:'rol',rule:'empleado o administrativo '},
-    {value:'cargo',rule:'Verificar que el rol exista en la lista (ir a crear nuevo usuario)'},
+    {value:'cargo',rule:'Verificar que el rol exista'},
     {value:'fecha ingreso',rule:'fecha ingreso a la empresa'},
     {value:'sexo',rule:'Masculino o Femenino'},
     {value:'salario',rule:'Sin puntos ni comas'}
@@ -225,7 +224,7 @@ data.tiposSiigo = [
                 <section class="text-gray-600 body-font">
                     <div class="container px-5 py-12 mx-auto">
                         <div v-if="can(['isAdmin'])" class="flex flex-wrap -m-4">
-                            <div class="p-4 w-full sm:w-1/2">
+                            <div class="p-4 w-full sm:w-1/3">
                                 <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
                                     <ArrowUpCircleIcon class=" h-24 lg:h-48 md:h-36 w-full object-cover object-center" />
 
@@ -283,12 +282,12 @@ data.tiposSiigo = [
                                 </div>
                             </div>
                             <!-- descargar quincena -->
-                            <div class="p-4 w-full md:w-1/2 xl:w-1/4">
+                            <div class="p-4 w-full md:w-1/2 xl:w-1/3">
                                 <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
                                     <ArrowDownCircleIcon class=" h-24 lg:h-48 md:h-36 w-full object-cover object-center" />
 
                                     <div class="p-6">
-                                        <form @submit.prevent="downloadExcel" id="downloadReporte">
+                                        <form @submit.prevent="downloadExcel" id="downloadReporte" class="text-center">
                                             <h2 class="tracking-widest text-xs title-font font-medium text-gray-400 mb-1">
                                                 Formato xlsx</h2>
                                             <h3 class="title-font text-lg font-medium text-gray-900 mb-3">Descargar reporte
@@ -309,7 +308,8 @@ data.tiposSiigo = [
                                                         :error="form.errors.fecha_ini" />
                                                 </div>
                                             </div>
-                                            <PrimaryButton v-show="can(['create user'])" :disabled="form.fecha_ini == null"
+                                            <PrimaryButton v-show="can(['create user'])" v-if="form.fecha_ini && props.NumReportes > 0"
+                                                :disabled="form.fecha_ini == null"
                                                 class="rounded-none my-4">
                                                 Exportar Quincena
                                             </PrimaryButton>
@@ -339,28 +339,29 @@ data.tiposSiigo = [
                             </div>
 
                         <!-- sigoo -->
-                        <div class="p-4 w-full md:w-1/2 xl:w-1/4">
+                        <div class="p-4 w-full md:w-1/2 xl:w-1/3">
                             <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
                                 <BookOpenIcon class=" h-24 lg:h-48 md:h-36 w-full object-cover object-center" />
 
                                 <div class="p-6">
-                                    <form @submit.prevent="downloadsigo" id="downloadReporte">
+                                    <form @submit.prevent="downloadsigo" id="downloadReporte" class="text-center">
                                         <h2 class="tracking-widest text-xs title-font font-medium text-gray-400 mb-1">
                                             Seleccione quincena</h2>
-                                        <h3 class="title-font text-lg font-medium text-gray-900 mb-3">Descargar siigo
-                                        </h3>
-                                        <p class="leading-relaxed mb-3"> Este formulario permite descargar el reporte de
-                                            la quincena para siigo</p>
+                                        <h3 class="title-font text-lg font-medium text-gray-900 mb-3">Descargar siigo </h3>
+                                        <p class="leading-relaxed mb-3"> Este formulario permite descargar el reporte de la quincena para siigo</p>
 
-                                        <InputLabel for="quincena_sigo" :value="lang().label.quincena_sigo" />
-                                        <SelectInput v-model="form2.quincena_sigo" id="quincena_sigo"
-                                            :dataSet="QuincenaArray" class="mt-1 block w-full" />
+                                        <div class="flex">
+                                            <!-- <InputLabel for="quincena_si" :value="lang().label.quincena_sigo" /> -->
+                                            <SelectInput v-model="form2.quincena_sigo" id="quincena_si"
+                                                :dataSet="QuincenaArray" class="mt-1 block w-1/3 mx-1" />
+                                            <VueDatePicker month-picker auto-apply :teleport="true" id="fecha_ini_sigo"
+                                                type="date" v-model="form2.fecha_ini_sigo"
+                                                required :placeholder="lang().placeholder.fecha_ini_sigo"
+                                                :error="form2.errors.fecha_ini_sigo"
+                                                class="mt-1 w-1/3"/>
+                                            </div>
 
-                                        <VueDatePicker month-picker auto-apply :teleport="true" id="fecha_ini_sigo"
-                                            type="date" class="mt-1 block w-full" v-model="form2.fecha_ini_sigo"
-                                            required :placeholder="lang().placeholder.fecha_ini_sigo"
-                                            :error="form2.errors.fecha_ini_sigo" />
-                                        <PrimaryButton v-show="can(['create user'])"
+                                        <PrimaryButton v-if="form2.fecha_ini_sigo.year"
                                             :disabled="form2.fecha_ini_sigo == null" class="rounded-none my-4">
                                             Descargar formato siigo
                                         </PrimaryButton>

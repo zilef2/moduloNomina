@@ -11,10 +11,12 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
+
+//Exportar el informe 
 class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
-    public $ini, $fin,$NumeroDiasFestivos;
-    public function __construct($ini, $fin,$NumeroDiasFestivos) {
+    public $ini, $fin, $NumeroDiasFestivos;
+    public function __construct($ini, $fin, $NumeroDiasFestivos) {
         $this->ini = $ini;
         $this->fin = $fin;
         $this->NumeroDiasFestivos = $NumeroDiasFestivos;
@@ -22,10 +24,8 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
 
     public function CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, &$H_diurno, &$nocturnas, &$extra_diurnas, &$extra_nocturnas, &$dominical_diurno, &$dominical_nocturno, &$dominical_extra_diurno, &$dominical_extra_nocturno) {
         $H_diurno = round(intval($reportes->sum('diurnas')) * doubleval($salario_hora), 0, PHP_ROUND_HALF_UP);
-
         $recargoNocturno = $cumplioQuicena ? $paramBD->porcentaje_nocturno - 1 : $paramBD->porcentaje_nocturno;
         $nocturnas = intval($reportes->sum('nocturnas')) * doubleval($salario_hora) * $recargoNocturno;
-
         // extras simples
         $extra_diurnas = intval($reportes->sum('extra_diurnas')) * doubleval($salario_hora) * $paramBD->porcentaje_extra_diurno;
         $extra_nocturnas = intval($reportes->sum('extra_nocturnas')) * doubleval($salario_hora) * $paramBD->porcentaje_extra_nocturno;
@@ -39,28 +39,29 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
 
         return [
             intval($reportes->sum('extra_diurnas')) +
-            intval($reportes->sum('extra_nocturnas')) +
-            intval($reportes->sum('dominical_diurno')) +
-            intval($reportes->sum('dominical_nocturno')) +
-            intval($reportes->sum('dominical_extra_diurno')) +
-            intval($reportes->sum('dominical_extra_nocturno')),
+                intval($reportes->sum('extra_nocturnas')) +
+                intval($reportes->sum('dominical_diurno')) +
+                intval($reportes->sum('dominical_nocturno')) +
+                intval($reportes->sum('dominical_extra_diurno')) +
+                intval($reportes->sum('dominical_extra_nocturno')),
 
-            intval($reportes->sum('extra_diurnas')) ,
-            intval($reportes->sum('extra_nocturnas')) ,
-            intval($reportes->sum('dominical_diurno')) ,
-            intval($reportes->sum('dominical_nocturno')) ,
-            intval($reportes->sum('dominical_extra_diurno')) ,
+            intval($reportes->sum('extra_diurnas')),
+            intval($reportes->sum('extra_nocturnas')),
+            intval($reportes->sum('dominical_diurno')),
+            intval($reportes->sum('dominical_nocturno')),
+            intval($reportes->sum('dominical_extra_diurno')),
             intval($reportes->sum('dominical_extra_nocturno'))
         ];
     }
 
     public function SalarioHoras_OR_Dias($cumplioQuicena, $salario_quincena, &$users, $key, $H_diurno, $NumReportes) {
-        // if($Total_Horas >= $HORAS_NECESARIAS_QUINCENA){ // usuario cumplio con sus horas quincenales
+        // if($Total_Horas >= $HORAS_NECESARIAS_SEMANA){ // usuario cumplio con sus horas quincenales
         if ($cumplioQuicena) { // cumplio con los dias de la quincena
             $users[$key]->Salario = $salario_quincena;
             $diasEfectivos = 15;
         } else {
             $users[$key]->Salario = $H_diurno;
+            //todo: no puede contar mas de un reporte por dia
             $diasEfectivos = $NumReportes;
         }
         return $diasEfectivos;
@@ -78,39 +79,42 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
     }
 
     public function CalculoDomingoGanadosTodo($value) {
-        // $reportesOrdenados = $reportes->orderby('fecha_ini','asc');
+        $HORAS_NECESARIAS_SEMANA = intval(Parametro::find(1)->HORAS_NECESARIAS_SEMANA);
+        $HORAS_NECESARIAS_QUINCENA = $HORAS_NECESARIAS_SEMANA * 2;
 
         $reportes = Reporte::Where('user_id', $value->id)
             ->where('valido', 1)
             ->whereBetween('fecha_ini', [$this->ini, $this->fin])->orderby('fecha_ini', 'asc');
 
-        if($reportes->count() == 0) return 0;
+        if ($reportes->count() == 0) return 0;
 
         $ElLunes = Carbon::parse($reportes->first()->fecha_ini)->startOfWeek();
         $esPrimeraQuincena = Carbon::parse($this->ini)->day == 1;
 
-        //con el lunes de la quincena, comenzamos a recorrer las semanas contando los domingos validos
-        $valido = true;
+        //ANTES: con el lunes de la quincena, comenzamos a recorrer las semanas contando los domingos validos
         $domingosGanados = 0;
-        $ElSabado = Carbon::parse($ElLunes)->endOfWeek(-1);
-        while($valido) {
-            if ($esPrimeraQuincena) {
-                $valido = ($ElSabado->day) < 15;
-            } else {
-                $valido = ($ElSabado->day) < $ElLunes->endOfMonth(-1)->day;
-            }
-            if (!$valido) {
-                break;
-            }
+        $valido = true;
 
+        $ElSabado = Carbon::parse($ElLunes)->endOfWeek(-1);
+        while($valido){
             $ValidarReportes = Reporte::Where('user_id', $value->id)
                 ->where('valido', 1)
                 ->whereBetween('fecha_ini', [$ElLunes, $ElSabado])
-                ->count();
-            $domingosGanados += intval($ValidarReportes == 6 ? 1 : 0);
+                ->sum('horas_trabajadas');
+
+            //? NOTE:: values 15-30
+            //todo : esta malo, necesito saber si en la semana hubo festivo
+            $HORAS_NECESARIAS_QUINCENA -= $this->NumeroDiasFestivos * 8;
+            $domingosGanados += intval($ValidarReportes) >= ($HORAS_NECESARIAS_QUINCENA) ? 1 : 0;
             $ElLunes->addDays(7);
             $ElSabado = clone $ElLunes;
             $ElSabado->endOfWeek(-1);
+
+            if($esPrimeraQuincena){
+                $valido = $ElSabado->day < 16;
+            }else{
+                $valido = $ElSabado->day > 14;
+            }
         }
         return $domingosGanados;
     }
@@ -118,8 +122,7 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
     /**
      * @return \Illuminate\Support\Collection
      */
-    public function collection()
-    {
+    public function collection() {
         $H_diurno = 0;
         $nocturnas = 0;
         $extra_diurnas = 0;
@@ -139,15 +142,17 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
 
         $pruebasCon = 0; //debug
         foreach ($users as $key => $value) {
-            $NumReportes = HelpExcel::cumplioQuincena($users,$key,$this->ini,$this->fin,$value,$reportes, $salario_hora, $salario_quincena, $cumplioQuicena, $paramBD,$this->NumeroDiasFestivos );
-
+            $NumReportes = HelpExcel::cumplioQuincena($users, $key, $this->ini, $this->fin, $value, $reportes, $salario_hora, $salario_quincena, $cumplioQuicena, $paramBD, $this->NumeroDiasFestivos);
             $extrasyDominicales = $this->CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, $H_diurno, $nocturnas, $extra_diurnas, $extra_nocturnas, $dominical_diurno, $dominical_nocturno, $dominical_extra_diurno, $dominical_extra_nocturno);
             $diasEfectivos = $this->SalarioHoras_OR_Dias($cumplioQuicena, $salario_quincena, $users, $key, $H_diurno, $NumReportes);
             $domingosGanados = $this->CalculoDomingoGanadosTodo($value);
-            $diasEfectivos += $domingosGanados;
+            $diasEfectivos += $domingosGanados; //se usa para el subsidio de transporte
+            
             // if($pruebasCon ==0)dd($users[$key]->Salario,$cumplioQuicena); $pruebasCon ++; //debug
+            if($salario_quincena == 0)dd(''.$value->name.' no tiene salario registrado');
 
             $users[$key]->Salario = $salario_quincena;
+            $users[$key]->SalarioHora = $salario_hora;
             $users[$key]->diurnas = intval($reportes->sum('diurnas'));
             $users[$key]->nocturnas = intval($reportes->sum('nocturnas'));
             $users[$key]->extra_diurnas = $extrasyDominicales[1];
@@ -163,19 +168,20 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
             $Total_Horas = $users[$key]->diurnas + $users[$key]->nocturnas + $users[$key]->extrasYDominicales;
             $users[$key]->Total_Horas = $Total_Horas;
 
-
             $this->unsetAllunnesesary($users, $key);
 
             $ExtraTotal = $nocturnas + $extra_diurnas + $extra_nocturnas + $dominical_diurno + $dominical_nocturno + $dominical_extra_diurno + $dominical_extra_nocturno;
-            $users[$key]->Horas_Extras = $ExtraTotal;
-            $salYextras = $users[$key]->Salario + $ExtraTotal;
-
+            $users[$key]->Valor_Horas_Extras = $ExtraTotal;//this is money
+            
+            // $salYextras es la variable que tiene todas las horas, diurnas, noc, extras,dominicales
             //# SALUD Y PENSION
             if ($cumplioQuicena) {
+                $salYextras = $users[$key]->Salario + $ExtraTotal;
                 $saludPension = round($salYextras * 0.04, 0, PHP_ROUND_HALF_UP); //QUEMADO: salud y la pension = salario total * 4%
                 $users[$key]->Salud = $saludPension;
                 $users[$key]->Pension = $saludPension;
             } else {
+                $salYextras = ($H_diurno + $ExtraTotal);
                 $saludPension = 0;
                 $users[$key]->Salud = 0;
                 $users[$key]->Pension = 0;
@@ -201,10 +207,13 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
             // # Total
             $users[$key]->Total_pagado = round(($salYextras + $S_Transporte) - (2 * $saludPension), 0, PHP_ROUND_HALF_UP);
         }
+        // dd(
+        //     $users[3]->toArray(),
+        // );
         return $users;
     }
 
-    public function headings(): array { 
+    public function headings(): array {
         return [
             // 'Año',
             // 'Quincena',
@@ -213,13 +222,14 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
             'Num reportes',
             'Empleado',
             'Salario (Quincena)',
+            'Salario (Hora)',
             'diurnas', 'nocturnas',
-            'extra_diurnas','extra_nocturnas','dominical_diurno','dominical_nocturno','dominical_extra_diurno','dominical_extra_nocturno',
+            'extra_diurnas', 'extra_nocturnas', 'dominical_diurno', 'dominical_nocturno', 'dominical_extra_diurno', 'dominical_extra_nocturno',
             'extrasYDominicales',
             'Domingos',
             'Total_Horas',
 
-            'Horas_Extras', 
+            'Valor_Horas_Extras',
             'Salud',
             'Pension',
             'S_Transporte',

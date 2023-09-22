@@ -32,10 +32,11 @@ class UserStoreRequest extends FormRequest
             // 'password'      => ['required', 'confirmed', Password::defaults()],
             'role'          => ['required'],
             'salario'       => ['required'],
-            'telefono'      => ['required'],
+            'telefono'      => ['nullable'],
             'celular'       => ['required'],
             'fecha_de_ingreso' => ['required'],
             'sexo'          => ['required'],
+            'centroid'          => ['nullable'],
         ];
     }
 }
