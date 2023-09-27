@@ -96,10 +96,10 @@ class RoleSeeder extends Seeder
             'read user',
             'create user',
             // 'read role',
+            'update user',
 
              //#reporte
              'read reporte',
-             'update reporte',
              'updateCorregido reporte',
  
              //#centroCostos

@@ -6,6 +6,7 @@ use App\helpers\HelpExcel;
 use App\helpers\Myhelp;
 use App\Models\Cargo;
 use App\Models\User;
+use App\Rules\CustomEmailRule;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\Importable;
@@ -15,54 +16,41 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 class UsersImport implements ToModel,WithChunkReading,ShouldQueue, WithValidation, WithHeadingRow {
-
     use Importable;
-
-    // public function rules(): array
-    // {
-    //     return [
-    //         // '1' => [Rule::unique(['users', 'email'])],
-    //         // 'correo' => 'required|email|min:5',
-    //         // 'cedula' => 'required|min:6',
-    //         'usuario' => 'min:2'
-    //     ];
-    // }
-
-    public function rules(): array
-    {
+    public function rules(): array {
         return [
-            'correo' => 'required|email|min:5',
+            'correo'  => 'min:4',
             'usuario' => 'min:2'
         ];
     }
-
-    /**
-     * @return array
-     */
-    public function customValidationMessages()
-    {
+    public function customValidationMessages() {
         return [
             'correo' => 'Correo invalido. Fila :attribute.',
             'usuario' => 'Nombre corto. Fila :attribute.',
         ];
     }
-
     public function chunkSize(): int { return 11000; }
 
-    public function model(array $row)
-    {
+    public function model(array $row) {
         $countfilas = session('CountFilas',0);
         $countNoleidos = session('countNoleidos',0);
         $countSex = session('countSex',0);
         $countNoCargo = session('countNoCargo',0);
         $countCedulaRepetida = session('countCedulaRepetida',0);
 
+        if(!isset($row['nombre'])) {
+            return null;
+        }
+
         if (strtolower(trim($row['nombre'])) == 'nombre') {
             session(['countNoleidos' => $countNoleidos+1]);
             return null;
         }
 
-        $laCedula = trim(intval($row['cedula']));
+        // Hubo 2 no leidas, 5 con cargo erroneo, 4 identificacion mal escrita
+        //toask:  "rodrigo_acosta" => "Carolina Garcia Carillo "
+        // Usuarios nuevos: 0. Hubo 2 no leidas, 5 con cargo erroneo, 4 identificacion mal escrita,
+        $laCedula = intval(trim($row['cedula']));
         if(!is_numeric($laCedula)){
             return null;
         }
@@ -83,11 +71,12 @@ class UsersImport implements ToModel,WithChunkReading,ShouldQueue, WithValidatio
         }
         $elCorreo = trim($row['correo']);
         $elCorreo = Myhelp::quitarTildes($elCorreo);
+        $elCorreo = str_replace(' ', '', $elCorreo);
+        // $CorreoInValido = filter_var($elCorreo, FILTER_VALIDATE_EMAIL) === false;
+        
         //fin validaciones
 
         $fechaIngreso = HelpExcel::getFechaExcel($row['fecha_ingreso']);
-
-
         if (User::where('email', $elCorreo)->exists()) {
             
             $usuariosActualizados = session('usuariosActualizados',[]);

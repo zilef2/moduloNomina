@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route; use Illuminate\Support\Facades\Session; use Inertia\Inertia;
-
+// use Stevebauman\Location\Facades\Location;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -85,8 +85,20 @@ Route::get('/dashboard', function () {
         }
     }
 
+    //#location
+
+    // if ($position = Location::get()) {
+    //     // Successfully retrieved position.
+    //     $positio = $position->countryName;
+    //     Log::channel('stevebauman')->info('Vista: welcome. User => '  .Auth::user()->name .' posicion:'. $positio);
+    // } else {
+    //     $positio =' Failed retrieving position.';
+    //     Log::channel('stevebauman')->info('Vista: welcome. User => '  .Auth::user()->name .' '. $positio);
+    // }
+
     return Inertia::render('Dashboard', 
     [
+        'versionZilef'  => '0.9.1',
         'users'         => (int) User::count(),
         'roles'         => (int) Role::count(),
         'permissions'   => (int) Permission::count(),
@@ -129,6 +141,10 @@ Route::middleware('auth', 'verified')->group(function () {
     //# excel
     Route::get('users/export/{NumeroDiasFestivos}/{quincena}/{month}/{year}', [UserController::class, 'export'])->name('reporte1');
     Route::get('users/downloadsigo/{NumeroDiasFestivos}/{quincena}/{month}/{year}', [UserController::class, 'downloadsigo']);
+    
+    
+    //# LocationRequest
+    // Route::get('/asd', [UserController::class,'asd'])->name('asd');
     
 });
 

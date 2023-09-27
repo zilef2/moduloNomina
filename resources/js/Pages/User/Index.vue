@@ -103,9 +103,9 @@ const data = reactive({
                     <PrimaryButton v-show="can(['create user'])" class="rounded-md mx-2" @click="data.createOpen = true">
                         {{ lang().button.add }}
                     </PrimaryButton>
-                    <Link v-show="can(['isAdmin'])" :href="route('user.uploadexcel')" 
+                    <Link v-show="can(['update user'])" :href="route('user.uploadexcel')" 
                         class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary">
-                        <PrimaryButton v-show="can(['isAdmin']) && props.superviNullCentro == 0" class="flex items-center px-4">
+                        <PrimaryButton v-show="can(['update user']) && props.superviNullCentro == 0" class="flex items-center px-4">
                             Exportar e Importar
                             <ShieldCheckIcon class="w-3 h-3 ml-2 mb-1" />
                             <!-- <span class="ml-3">{{ lang().button.importUser }}</span> -->

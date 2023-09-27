@@ -575,7 +575,8 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     {{ lang().label.edit }} {{ props.title }} <b>{{ props.showUsers[props.Reporte.user_id] }}</b>
                 </h2>
-                <div class="my-6 grid grid-cols-2 gap-6">
+                <div class="my-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+
                     <div>
                         <InputLabel for="fecha_ini" :value="lang().label.fecha_ini" />
                         <VueDatePicker :is-24="false" :day-names="daynames" auto-apply :flow="['calendar', 'time']" :enable-time-picker="true" :teleport="true"
@@ -602,7 +603,7 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                             :placeholder="lang().placeholder.almuerzo" :error="form.errors.almuerzo" />
                     </div>
                     <!-- mt-80 -->
-                    <div class="mt-4 grid grid-cols-2 gap-6">
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <InputLabel ref="label_diurnas" for="diurnas" :value="lang().label.diurnas" />
                             <TextInput id="diurnas" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.diurnas" disabled
@@ -615,7 +616,7 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                         </div>
                     </div>
                     <!-- mt-80 -->
-                    <div v-if="form.extra_diurnas || form.extra_nocturnas || form.dominicales == 'si'" class="mt-4 grid grid-cols-2 gap-6">
+                    <div v-if="form.extra_diurnas || form.extra_nocturnas || form.dominicales == 'si'" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <InputLabel ref="label_extra_diurnas" for="extra_diurnas" :value="lang().label.extra_diurnas" />
                             <TextInput id="extra_diurnas" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.extra_diurnas" disabled
@@ -628,7 +629,7 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                         </div>
                     </div>
                     <!-- dominicales -->
-                    <div v-if="form.dominicales == 'si'" class="grid grid-cols-2 gap-6">
+                    <div v-if="form.dominicales == 'si'" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <InputLabel ref="label_diurnas" for="dominical_diurnas" :value="lang().label.dominical_diurnas" />
                             <TextInput id="dominical_diurnas" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.dominical_diurnas" disabled
@@ -640,7 +641,7 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                                 :placeholder="lang().placeholder.dominical_nocturnas" :error="form.errors.dominical_nocturnas" />
                         </div>
                     </div>
-                    <div v-if="form.dominicales == 'si'" class="grid grid-cols-2 gap-6">
+                    <div v-if="form.dominicales == 'si'" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <InputLabel ref="label_extra_diurnas" for="dominical_extra_diurnas" :value="lang().label.dominical_extra_diurnas" />
                             <TextInput id="dominical_extra_diurnas" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.dominical_extra_diurnas" disabled

@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
         $superadmin = User::create([
             'name'              => 'Superadmin',
             'email'             => 'superadminmodnom@superadmin.com',
-            'password'          => bcrypt($genPa.'superadmin00.+-*'.$genPa),
+            'password'          => bcrypt($genPa.'superadmin00.+-*'.$genPa), 
             // 'password'          => bcrypt('superadmin0+-*/'),
             'email_verified_at' => date('Y-m-d H:i'),
             'cedula' => '11232454',
@@ -35,7 +35,7 @@ class UserSeeder extends Seeder
         $admin = User::create([
             'name'              => "$nombreAdmin $App",
             'email'             => "$nombreAdmin$App"."@gmail.com",
-            'password'          => bcrypt($genPa.'**123**'.$genPa),
+            'password'          => bcrypt($genPa.'**¿_?**'.$genPa),
             'email_verified_at' => date('Y-m-d H:i'),
             'sexo' => $sexos[rand(0, 1)],
             'cedula' => '11232411',
@@ -47,7 +47,7 @@ class UserSeeder extends Seeder
         $empleado = User::create([
             'name'              => 'empleado',
             'email'             => 'empleado@empleado.com',
-            'password'          => bcrypt('empleado00+*'),
+            'password'          => bcrypt('empleado1234+*'),
             'email_verified_at' => date('Y-m-d H:i'),
             'cedula' => '11232412',
             'cargo_id' => 2,
@@ -68,7 +68,7 @@ class UserSeeder extends Seeder
             $unUsuario = User::create([
                 'name'              => $key,
                 'email'             => $key . '@'.env('verifidedenv') . $key . '.com',
-                'password'          => bcrypt($genPa.'asd+-*'),
+                'password'          => bcrypt($genPa.'qwe+-*'),
                 'email_verified_at' => date('Y-m-d H:i'),
                 'fecha_de_ingreso' => $anios,
                 'cedula' => $value,
@@ -80,42 +80,23 @@ class UserSeeder extends Seeder
             ]);
             $unUsuario->assignRole('empleado');
         }
+
+
+        //users real
+
+        $unUsuario = User::create([
+            'name'              => 'Jessica Maria Perez Meza',
+            'email'             => 'perezmezajessica@gmail.com',
+            'password'          => bcrypt('1193231624+-'),
+            'email_verified_at' => date('Y-m-d H:i'),
+            'fecha_de_ingreso' => date('Y-m-d',strtotime('01/08/2023')),
+            'cedula' => '1193231624',
+            'sexo' => 'femenino',
+            'celular' => '3012124273',
+            'salario' => 1600000,
+            'cargo_id' => 14, //Coordinadora de gestion humana
+            // 'centro_costo_id' => 1,
+        ]);
+        $unUsuario->assignRole('Administrativo');
     }
 }
-
-        
-        
-//         $superadmin = User::create([
-//             'name'              => 'Superadmin',
-//             'email'             => 'superadmin@superadmin.com',
-//             'password'          => bcrypt('superadmin0+-*/'),
-//             'email_verified_at' => date('Y-m-d H:i'),
-//             'cargo_id' => 2
-//         ]);
-//         $superadmin->assignRole('superadmin');
-
-//         $admin = User::create([
-//             'name'              => 'Admin',
-//             'email'             => 'admin@admin.com',
-//             'password'          => bcrypt('alejoasd00+*??'),
-//             'email_verified_at' => date('Y-m-d H:i'),
-//         ]);
-//         $admin->assignRole('admin');
-
-//         $empleado = User::create([
-//             'name'              => 'empleado',
-//             'email'             => 'empleado@empleado.com',
-//             'password'          => bcrypt('empleado00+*'),
-//             'email_verified_at' => date('Y-m-d H:i')
-//         ]);
-//         $empleado->assignRole('empleado');
-
-//         $administrativo = User::create([
-//             'name'              => 'administrativo',
-//             'email'             => 'administrativo@administrativo.com',
-//             'password'          => bcrypt('administrativo00+*'),
-//             'email_verified_at' => date('Y-m-d H:i')
-//         ]);
-//         $administrativo->assignRole('administrativo');
-//     }
-// }

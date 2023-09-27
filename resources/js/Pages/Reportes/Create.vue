@@ -588,7 +588,7 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                         {{ props?.endDateMostrar }}
                     </h2>
                 </div>
-                <div class="my-6 grid grid-cols-2 gap-6">
+                <div class="my-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <InputLabel for="fecha_ini" :value="lang().label.fecha_ini" />
                         <VueDatePicker :is-24="false" :day-names="daynames" auto-apply :flow="['calendar', 'time']" :enable-time-picker="true" :teleport="true"

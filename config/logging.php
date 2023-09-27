@@ -62,6 +62,11 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
+        'stevebauman' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/laravelLocation.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
 
         'daily' => [
             'driver' => 'daily',

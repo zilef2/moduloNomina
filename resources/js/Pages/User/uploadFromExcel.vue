@@ -223,7 +223,7 @@ data.tiposSiigo = [
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <section class="text-gray-600 body-font">
                     <div class="container px-5 py-12 mx-auto">
-                        <div v-if="can(['isAdmin'])" class="flex flex-wrap -m-4">
+                        <div v-if="can(['update user'])" class="flex flex-wrap -m-4">
                             <div class="p-4 w-full sm:w-1/3">
                                 <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
                                     <ArrowUpCircleIcon class=" h-24 lg:h-48 md:h-36 w-full object-cover object-center" />

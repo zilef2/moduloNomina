@@ -48,7 +48,9 @@ const update = () => {
             emit("close")
             form.reset()
         },
-        onError: () => null,
+        onError: () => {
+            alert('Hay campos incompletos o erroneos')
+        },
         onFinish: () => {
             data.AutoActualizarse = true
         },

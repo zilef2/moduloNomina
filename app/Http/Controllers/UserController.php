@@ -22,8 +22,12 @@ use App\Models\Reporte;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Fluent;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
+use Stevebauman\Location\Request as LocationRequest;
+
 
 class UserController extends Controller {
     public function __construct() {
@@ -137,7 +141,9 @@ class UserController extends Controller {
     public function create() { }
 
     public function store(UserStoreRequest $request) {
+        Myhelp::EscribirEnLog($this, 'users');
         DB::beginTransaction();
+
         try {
 
             $elCentroId = $request->centroid == 0 ? null : $request->centroid;
@@ -166,11 +172,19 @@ class UserController extends Controller {
         }
     }
 
+    // protected function asd(LocationRequest $request): Fluent
+    // {
+    //     $response = Http::get("https://driver-url.com", ['ip' => $request->getIp()]);
+         
+    //     $justprobing = new Fluent($response->json());
+    //     dd($justprobing);
+    // }
 
     public function show($id) { } public function edit($id) { }
 
 
     public function update(UserUpdateRequest $request, $id) {
+        Myhelp::EscribirEnLog($this, 'users');
         DB::beginTransaction();
         try {
             $user = User::findOrFail($id);
@@ -212,6 +226,7 @@ class UserController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function destroy(User $user) {
+        Myhelp::EscribirEnLog($this, 'users');
         try {
             $user->delete();
             return back()->with('success', __('app.label.deleted_successfully', ['name' => $user->name]));
@@ -222,6 +237,7 @@ class UserController extends Controller {
    
 
     public function destroyBulk(Request $request) {
+        Myhelp::EscribirEnLog($this, ' |users Bulk| ');
         try {
             $user = User::whereIn('id', $request->id);
             $user->delete();
@@ -232,6 +248,7 @@ class UserController extends Controller {
     }
 
     public function FunctionUploadFromEx(Request $request) {
+        Myhelp::EscribirEnLog($this, 'users FunctionUploadFromEx');
         $users = User::Select('id','name','cedula','cargo_id')->WhereHas("roles", function($q){
             $q->Where("name", "empleado");
         })->count();
@@ -258,6 +275,7 @@ class UserController extends Controller {
     }
 
     public function FunctionUploadFromExPost(Request $request) { //import
+        Myhelp::EscribirEnLog($this, 'users FunctionUploadFromExPost');
         $exten = $request->archivo1->getClientOriginalExtension();
         // Validar que el archivo es de Excel
         if ($exten != 'xlsx' && $exten != 'xls') {
@@ -330,6 +348,7 @@ class UserController extends Controller {
 
 
     public function export(Request $request) {
+        Myhelp::EscribirEnLog($this, 'users export');
         $quincena = intval($request->quincena);
         
         $year = intval($request->year);
@@ -379,6 +398,7 @@ class UserController extends Controller {
     }
 
     public function downloadsigo(Request $request) {
+        Myhelp::EscribirEnLog($this, ' |users sigo download| ');
         
         $quincena = intval($request->quincena);
         $year = intval($request->year);
@@ -424,6 +444,7 @@ class UserController extends Controller {
     }
 
     public function showReporte($id) {
+        Myhelp::EscribirEnLog($this, 'users showreporte');
         // $centroCostos = centroCosto::findOrFail($id);
         $Reportes = Reporte::query();
         $nombrePersona = User::find($id)->name;

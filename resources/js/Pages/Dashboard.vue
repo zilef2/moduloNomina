@@ -20,6 +20,7 @@ const props = defineProps({
     diasNovalidos: Array,
     trabajadoresHoy: Array,
     centrosHoy: Array,
+    versionZilef: String,
 })
 let width;
 
@@ -100,6 +101,22 @@ const centrosHoy = {
                         <div class="flex flex-col">
                             <p class="text-4xl font-bold">{{ props.users }}</p>
                             <p class="text-md md:text-lg uppercase">{{ lang().label.user }}</p>
+                        </div>
+                        <div> <UserIcon class="w-16 h-auto" /> </div>
+                    </div>
+                    <div 
+                        class="bg-blue-600 dark:bg-blue-600/80 rounded-b-none sm:rounded-b-lg p-2 overflow-hidden hover:bg-blue-800/90 dark:hover:bg-blue-800/70">
+                        <Link :href="route('user.index')" class="flex justify-between items-center">
+                        <p>{{ lang().label.more }}</p>
+                            <ChevronRightIcon class="w-5 h-5" />
+                        </Link>
+                    </div>
+                </div>
+                <div v-show="can(['isAdmin'])">
+                    <div class="rounded-t-none sm:rounded-t-lg px-4 py-6 flex justify-between bg-blue-700/70 dark:bg-blue-500/80 items-center overflow-hidden">
+                        <div class="flex flex-col">
+                            <p class="text-4xl font-bold">Version</p>
+                            <p class="text-md md:text-lg uppercase">{{ props.versionZilef }}</p>
                         </div>
                         <div> <UserIcon class="w-16 h-auto" /> </div>
                     </div>
