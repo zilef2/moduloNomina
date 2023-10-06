@@ -8,8 +8,7 @@ return [
          * The name of this application. You can use this name to monitor
          * the backups.
          */
-        'name' => env('APP_NAME', 'laravel-backup'),
-
+        'name' => env('APP_NAME', 'laravel-backup').'_06oct2023',
         'source' => [
 
             'files' => [
@@ -18,7 +17,7 @@ return [
                  * The list of directories and files that will be included in the backup.
                  */
                 'include' => [
-                    base_path(),
+                    // base_path(),
                 ],
 
                 /*
@@ -29,6 +28,15 @@ return [
                 'exclude' => [
                     base_path('vendor'),
                     base_path('node_modules'),
+                    base_path('git'),
+                    base_path('vscode'),
+                    base_path('.vscode'),
+                    base_path('bootstrap'),
+                    base_path('database'),
+                    base_path('public'),
+                    base_path('routes'),
+                    base_path('tests'),
+                    base_path('storage'),
                 ],
 
                 /*
@@ -139,6 +147,17 @@ return [
          * available on your system.
          */
         'encryption' => 'default',
+
+        /**
+         * The number of attempts, in case the backup command encounters an exception
+         */
+        'tries' => 1,
+
+        /**
+         * The number of seconds to wait before attempting a new backup if the previous try failed
+         * Set to `0` for none
+         */
+        'retry_delay' => 0,
     ],
 
     /*
@@ -166,7 +185,7 @@ return [
         'notifiable' => \Spatie\Backup\Notifications\Notifiable::class,
 
         'mail' => [
-            'to' => 'your@example.com',
+            'to' => 'ajelof2@gmail.com',
 
             'from' => [
                 'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
@@ -247,7 +266,7 @@ return [
             /*
              * The number of days for which backups must be kept.
              */
-            'keep_all_backups_for_days' => 7,
+            'keep_all_backups_for_days' => 27,
 
             /*
              * The number of days for which daily backups must be kept.
@@ -275,6 +294,17 @@ return [
              */
             'delete_oldest_backups_when_using_more_megabytes_than' => 5000,
         ],
+
+        /**
+         * The number of attempts, in case the cleanup command encounters an exception
+         */
+        'tries' => 1,
+
+        /**
+         * The number of seconds to wait before attempting a new cleanup if the previous try failed
+         * Set to `0` for none
+         */
+        'retry_delay' => 0,
     ],
 
 ];

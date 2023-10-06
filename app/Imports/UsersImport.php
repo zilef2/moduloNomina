@@ -6,7 +6,6 @@ use App\helpers\HelpExcel;
 use App\helpers\Myhelp;
 use App\Models\Cargo;
 use App\Models\User;
-use App\Rules\CustomEmailRule;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\Importable;

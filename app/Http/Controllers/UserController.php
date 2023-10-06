@@ -172,14 +172,6 @@ class UserController extends Controller {
         }
     }
 
-    // protected function asd(LocationRequest $request): Fluent
-    // {
-    //     $response = Http::get("https://driver-url.com", ['ip' => $request->getIp()]);
-         
-    //     $justprobing = new Fluent($response->json());
-    //     dd($justprobing);
-    // }
-
     public function show($id) { } public function edit($id) { }
 
 
@@ -347,6 +339,7 @@ class UserController extends Controller {
     }
 
 
+    //exportar el formato unico de ECnomina
     public function export(Request $request) {
         Myhelp::EscribirEnLog($this, 'users export');
         $quincena = intval($request->quincena);

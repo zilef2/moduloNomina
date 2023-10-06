@@ -35,7 +35,7 @@ class UserSeeder extends Seeder
         $admin = User::create([
             'name'              => "$nombreAdmin $App",
             'email'             => "$nombreAdmin$App"."@gmail.com",
-            'password'          => bcrypt($genPa.'**¿_?**'.$genPa),
+            'password'          => bcrypt($genPa.'**¿_?**'.$genPa),//1234_modnom**¿_?**1234_modnom
             'email_verified_at' => date('Y-m-d H:i'),
             'sexo' => $sexos[rand(0, 1)],
             'cedula' => '11232411',

@@ -22,6 +22,7 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
         $this->NumeroDiasFestivos = $NumeroDiasFestivos;
     }
 
+    //this function returns hours (the money is &$variables)
     public function CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, &$H_diurno, &$nocturnas, &$extra_diurnas, &$extra_nocturnas, &$dominical_diurno, &$dominical_nocturno, &$dominical_extra_diurno, &$dominical_extra_nocturno) {
         $H_diurno = round(intval($reportes->sum('diurnas')) * doubleval($salario_hora), 0, PHP_ROUND_HALF_UP);
         $recargoNocturno = $cumplioQuicena ? $paramBD->porcentaje_nocturno - 1 : $paramBD->porcentaje_nocturno;
@@ -143,9 +144,21 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
         $pruebasCon = 0; //debug
         foreach ($users as $key => $value) {
             $NumReportes = HelpExcel::cumplioQuincena($users, $key, $this->ini, $this->fin, $value, $reportes, $salario_hora, $salario_quincena, $cumplioQuicena, $paramBD, $this->NumeroDiasFestivos);
+            
+            //? sumamos las horas que trabajo, y lo multiplicamos por el valor del tipo de hora
             $extrasyDominicales = $this->CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, $H_diurno, $nocturnas, $extra_diurnas, $extra_nocturnas, $dominical_diurno, $dominical_nocturno, $dominical_extra_diurno, $dominical_extra_nocturno);
+            
+            //? vemos si se paga por horas o por dias
             $diasEfectivos = $this->SalarioHoras_OR_Dias($cumplioQuicena, $salario_quincena, $users, $key, $H_diurno, $NumReportes);
+
+            /**
+            calculamos cuantos domingos se gano || 10:31am, cambiamos los domingos ganados por horas ganadas (cada domingo  = 9 horas | 2.5(1h) + 1.75(8h))
+            DOM EXT NOC
+            
+            */ 
             $domingosGanados = $this->CalculoDomingoGanadosTodo($value);
+
+            
             $diasEfectivos += $domingosGanados; //se usa para el subsidio de transporte
             
             // if($pruebasCon ==0)dd($users[$key]->Salario,$cumplioQuicena); $pruebasCon ++; //debug
@@ -187,22 +200,12 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
                 $users[$key]->Pension = 0;
             }
 
-            //# Subsidio de transporte
+            //# Subsidio de transporte (por dias)
             $S_Transporte = ($users[$key]->Salario * 2) >= ($paramBD->valor_maximo_subsidio_de_transporte) ? 0 : $diasEfectivos * $paramBD->subsidio_de_transporte_dia;
             $users[$key]->S_Transporte = round($S_Transporte, 0, PHP_ROUND_HALF_UP);
 
             // # Novedades
-            $users[$key]->Prima = '0';
-            $users[$key]->Vacaciones = '0';
-            $users[$key]->Cesantias = '0';
-            $users[$key]->Intereses = '0';
-            $users[$key]->Prestamo = '0';
-            $users[$key]->Anticipo = '0';
-            $users[$key]->Auxilio = '0';
-            $users[$key]->Bonificacion = '0';
-            $users[$key]->Reintegro = '0';
-            $users[$key]->Abono_Prestamo = '0';
-            $users[$key]->Otras_Deducciones = '0';
+            $users[$key]->Prima = '0'; $users[$key]->Vacaciones = '0'; $users[$key]->Cesantias = '0'; $users[$key]->Intereses = '0'; $users[$key]->Prestamo = '0'; $users[$key]->Anticipo = '0'; $users[$key]->Auxilio = '0'; $users[$key]->Bonificacion = '0'; $users[$key]->Reintegro = '0'; $users[$key]->Abono_Prestamo = '0'; $users[$key]->Otras_Deducciones = '0';
 
             // # Total
             $users[$key]->Total_pagado = round(($salYextras + $S_Transporte) - (2 * $saludPension), 0, PHP_ROUND_HALF_UP);

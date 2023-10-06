@@ -25,10 +25,11 @@ class HelpExcel
             ->orderBy('fecha_ini')
             ;
 
-        $NumReportes = $reportes->count();
+        // $NumReportes = $reportes->count();
+        $NumReportes = $reportesAgrupados->count();
 
         $elSalario = intval($empleado->salario);
-        $salario_hora = $elSalario / (30 * 8);
+        $salario_hora = $elSalario / (235);// 30 * 7.8333
         $salario_quincena = round($elSalario / (2), 0, PHP_ROUND_HALF_UP);
 
 
