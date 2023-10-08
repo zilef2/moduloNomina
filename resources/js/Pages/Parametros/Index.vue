@@ -255,16 +255,16 @@ const form = useForm({
                                 <div class="flex-grow pl-6">
                                     <div class="inline-flex">
                                         <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
-                                            Domingos
+                                            Calculo de salud y pension
                                         </h2>
                                         <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">
                                     </div>
-                                    <!-- <h1 class="title-font text-xl font-medium text-gray-900 mb-3">¿ Cumplió la quincena ?</h1> -->
+                                    <h1 class="title-font text-xl font-medium text-gray-900 mb-3">¿ Cumplió la quincena ?</h1>
                                     <p class="leading-relaxed text-lg mb-5">
-                                        Si en la semana supera las horas (47 o menos) se gana 1 domingo
+                                        Salario quincena ($595.000) * 4%
                                     </p>
                                     <p class="leading-relaxed text-lg mb-5">
-                                        esos domingo cuentan para el subsidio de transporte?
+                                        no tiene derecho
                                     </p>
                                 </div>
                             </div>

@@ -68,7 +68,7 @@ class UserController extends Controller {
 
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'users'));
         
-        if($numberPermissions == 3){
+        if($numberPermissions == 3){//supervisor
             $centroID = Auth::user()->centro_costo_id;
             if($centroID){
                 $users->Where('centro_costo_id' , $centroID);
@@ -87,7 +87,7 @@ class UserController extends Controller {
         $perPage = $request->has('perPage') ? $request->perPage : 10;
         $role = Auth()->user()->roles->pluck('name')[0];
         $roles = Role::get();
-        if ($role != 'superadmin') {
+        if ($numberPermissions != 3 && $numberPermissions < 10) {
             $users->whereHas('roles', function ($query) {
                 return $query->where('name', '<>', 'superadmin');
             });

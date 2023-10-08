@@ -25,7 +25,9 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
     //this function returns hours (the money is &$variables)
     public function CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, &$H_diurno, &$nocturnas, &$extra_diurnas, &$extra_nocturnas, &$dominical_diurno, &$dominical_nocturno, &$dominical_extra_diurno, &$dominical_extra_nocturno) {
         $H_diurno = round(intval($reportes->sum('diurnas')) * doubleval($salario_hora), 0, PHP_ROUND_HALF_UP);
-        $recargoNocturno = $cumplioQuicena ? $paramBD->porcentaje_nocturno - 1 : $paramBD->porcentaje_nocturno;
+        
+        $recargoNocturno = $paramBD->porcentaje_nocturno;
+        // $recargoNocturno = $cumplioQuicena ? $paramBD->porcentaje_nocturno - 1 : $paramBD->porcentaje_nocturno;
         $nocturnas = intval($reportes->sum('nocturnas')) * doubleval($salario_hora) * $recargoNocturno;
         // extras simples
         $extra_diurnas = intval($reportes->sum('extra_diurnas')) * doubleval($salario_hora) * $paramBD->porcentaje_extra_diurno;
@@ -152,12 +154,10 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
             $diasEfectivos = $this->SalarioHoras_OR_Dias($cumplioQuicena, $salario_quincena, $users, $key, $H_diurno, $NumReportes);
 
             /**
-            calculamos cuantos domingos se gano || 10:31am, cambiamos los domingos ganados por horas ganadas (cada domingo  = 9 horas | 2.5(1h) + 1.75(8h))
-            DOM EXT NOC
-            
+            cambiar en |create reporte| cuando el reporte anterior finaliza en 11:59pm, entonces esas horas trabajadas se le suman al siguiente reporte
             */ 
-            $domingosGanados = $this->CalculoDomingoGanadosTodo($value);
 
+            $domingosGanados = $this->CalculoDomingoGanadosTodo($value);
             
             $diasEfectivos += $domingosGanados; //se usa para el subsidio de transporte
             
@@ -168,12 +168,8 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
             $users[$key]->SalarioHora = $salario_hora;
             $users[$key]->diurnas = intval($reportes->sum('diurnas'));
             $users[$key]->nocturnas = intval($reportes->sum('nocturnas'));
-            $users[$key]->extra_diurnas = $extrasyDominicales[1];
-            $users[$key]->extra_nocturnas = $extrasyDominicales[2];
-            $users[$key]->dominical_diurno = $extrasyDominicales[3];
-            $users[$key]->dominical_nocturno = $extrasyDominicales[4];
-            $users[$key]->dominical_extra_diurno = $extrasyDominicales[5];
-            $users[$key]->dominical_extra_nocturno = $extrasyDominicales[6];
+
+            $users[$key]->extra_diurnas = $extrasyDominicales[1]; $users[$key]->extra_nocturnas = $extrasyDominicales[2]; $users[$key]->dominical_diurno = $extrasyDominicales[3]; $users[$key]->dominical_nocturno = $extrasyDominicales[4]; $users[$key]->dominical_extra_diurno = $extrasyDominicales[5]; $users[$key]->dominical_extra_nocturno = $extrasyDominicales[6];
 
             $users[$key]->extrasYDominicales = intval($extrasyDominicales[0]);
             $users[$key]->DerechoDomingo = intval($domingosGanados);
@@ -183,18 +179,20 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
 
             $this->unsetAllunnesesary($users, $key);
 
-            $ExtraTotal = $nocturnas + $extra_diurnas + $extra_nocturnas + $dominical_diurno + $dominical_nocturno + $dominical_extra_diurno + $dominical_extra_nocturno;
+            $ExtraTotal = $extra_diurnas + $extra_nocturnas + $dominical_diurno + $dominical_nocturno + $dominical_extra_diurno + $dominical_extra_nocturno;
             $users[$key]->Valor_Horas_Extras = $ExtraTotal;//this is money
             
             // $salYextras es la variable que tiene todas las horas, diurnas, noc, extras,dominicales
             //# SALUD Y PENSION
+                $salYextras = ($H_diurno + $nocturnas + $ExtraTotal);
             if ($cumplioQuicena) {
-                $salYextras = $users[$key]->Salario + $ExtraTotal;
-                $saludPension = round($salYextras * 0.04, 0, PHP_ROUND_HALF_UP); //QUEMADO: salud y la pension = salario total * 4%
+                // $salYextras = $users[$key]->Salario + $ExtraTotal;
+                // $saludPension = round($salYextras * 0.04, 0, PHP_ROUND_HALF_UP); //QUEMADO: salud y la pension = salario total * 4%
+                $saludPension = round($users[$key]->Salario * 0.04, 0, PHP_ROUND_HALF_UP);
                 $users[$key]->Salud = $saludPension;
                 $users[$key]->Pension = $saludPension;
-            } else {
-                $salYextras = ($H_diurno + $ExtraTotal);
+            }else{
+                // $salYextras = ($H_diurno + $ExtraTotal);
                 $saludPension = 0;
                 $users[$key]->Salud = 0;
                 $users[$key]->Pension = 0;
@@ -205,14 +203,19 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
             $users[$key]->S_Transporte = round($S_Transporte, 0, PHP_ROUND_HALF_UP);
 
             // # Novedades
-            $users[$key]->Prima = '0'; $users[$key]->Vacaciones = '0'; $users[$key]->Cesantias = '0'; $users[$key]->Intereses = '0'; $users[$key]->Prestamo = '0'; $users[$key]->Anticipo = '0'; $users[$key]->Auxilio = '0'; $users[$key]->Bonificacion = '0'; $users[$key]->Reintegro = '0'; $users[$key]->Abono_Prestamo = '0'; $users[$key]->Otras_Deducciones = '0';
+            // $users[$key]->Prima = '0'; $users[$key]->Vacaciones = '0'; $users[$key]->Cesantias = '0'; $users[$key]->Intereses = '0'; $users[$key]->Prestamo = '0'; $users[$key]->Anticipo = '0'; $users[$key]->Auxilio = '0'; $users[$key]->Bonificacion = '0'; $users[$key]->Reintegro = '0'; $users[$key]->Abono_Prestamo = '0'; $users[$key]->Otras_Deducciones = '0';
 
             // # Total
+            $users[$key]->salYextras = $salYextras;
             $users[$key]->Total_pagado = round(($salYextras + $S_Transporte) - (2 * $saludPension), 0, PHP_ROUND_HALF_UP);
         }
-        // dd(
-        //     $users[3]->toArray(),
-        // );
+        dd(
+            // $users[0],//empleado
+            // $users[1],//elalejo
+            // $users[2],//Alejo
+            // $users[3],//jose
+            $users[2]->toArray(),
+        );
         return $users;
     }
 
@@ -227,31 +230,28 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
             'Salario (Quincena)',
             'Salario (Hora)',
             'diurnas', 'nocturnas',
-            'extra_diurnas', 'extra_nocturnas', 'dominical_diurno', 'dominical_nocturno', 'dominical_extra_diurno', 'dominical_extra_nocturno',
+            'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno',
             'extrasYDominicales',
             'Domingos',
-            'Total_Horas',
+            'Total Horas',
 
-            'Valor_Horas_Extras',
+            'Valor Horas Extras',
             'Salud',
             'Pension',
-            'S_Transporte',
-            'Prima',
-            'Vacaciones',
-            'Cesantias',
-            'Intereses',
-            'Prestamo',
-            'Anticipo',
-            'Auxilio',
-            'Bonificacion',
-            'Reintegro',
-            'Abono_Prestamo',
-            'Otras_Deducciones',
-            'Total_pagado',
-            // "name",
-            // "email",
-            // "created_at",
-            // "updated_at",
+            'S Transporte',
+            // 'Prima',
+            // 'Vacaciones',
+            // 'Cesantias',
+            // 'Intereses',
+            // 'Prestamo',
+            // 'Anticipo',
+            // 'Auxilio',
+            // 'Bonificacion',
+            // 'Reintegro',
+            // 'Abono Prestamo',
+            // 'Otras Deducciones',
+            'Salario Y extras',
+            'Total pagado',
         ];
     }
 }

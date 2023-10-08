@@ -125,17 +125,20 @@ class ReportesController extends Controller
             ];
             $horasemana = Reporte::WhereBetween('fecha_ini', [$startDate, $endDate])->sum('horas_trabajadas');
 
-            if($numberPermissions == 2){
-
-            }else{ //admin y supervisor
-
-                if($numberPermissions == 3){//supervisor
+            if($numberPermissions == 3){ //supervisor
+                $quincena = [
+                    'Primera quincena' => Reporte::whereBetween('fecha_ini',[Carbon::now()->startOfMonth(),Carbon::now()->startOfMonth()->addDays(14)])
+                        ->Where('centro_costo_id',$Authuser->centro_costo_id)->count(),
+                    'Segunda quincena' => Reporte::whereBetween('fecha_ini',[Carbon::now()->startOfMonth()->addDays(15),Carbon::now()->LastOfMonth()])
+                        ->Where('centro_costo_id',$Authuser->centro_costo_id)->count(),
+                ];
+            }else{ //admin y administrativo
+                if($numberPermissions == 2){//administrativo
                     $horasemana = Reporte::Where('centro_costo_id', $Authuser->centro_costo_id)
                         ->WhereBetween('fecha_ini', [$startDate, $endDate])
                         ->sum('horas_trabajadas');
 
                     $Reportes->where('centro_costo_id', $Authuser->centro_costo_id);
-                    
                 }else{ //admin
                 }
             }

@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
         $superadmin = User::create([
             'name'              => 'Superadmin',
             'email'             => 'superadminmodnom@superadmin.com',
-            'password'          => bcrypt($genPa.'superadmin00.+-*'.$genPa), 
+            'password'          => bcrypt($genPa.'superadmin00.+-*'.$genPa),  // 
             // 'password'          => bcrypt('superadmin0+-*/'),
             'email_verified_at' => date('Y-m-d H:i'),
             'cedula' => '11232454',
@@ -35,7 +35,7 @@ class UserSeeder extends Seeder
         $admin = User::create([
             'name'              => "$nombreAdmin $App",
             'email'             => "$nombreAdmin$App"."@gmail.com",
-            'password'          => bcrypt($genPa.'**¿_?**'.$genPa),//1234_modnom**¿_?**1234_modnom
+            'password'          => bcrypt($genPa.'**¿_?**'.$genPa),//
             'email_verified_at' => date('Y-m-d H:i'),
             'sexo' => $sexos[rand(0, 1)],
             'cedula' => '11232411',

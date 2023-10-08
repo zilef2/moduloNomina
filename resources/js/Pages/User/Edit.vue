@@ -21,6 +21,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(["close"]);
+const data = reactive({ })
 
 const form = useForm({
     name: '',
@@ -36,10 +37,6 @@ const form = useForm({
     centroid:  '',
 });
 
-const data = reactive({
-    mostrarCentro:false,
-    AutoActualizarse:true,
-})
 
 const update = () => {
     form.put(route('user.update', props.user?.id), {
@@ -79,6 +76,8 @@ watchEffect(() => {
             form.cargo = props.user?.cargo_id == 0 ? '' : props.user?.cargo.id
             console.log("🧈 debu props.user?.centro_costo_id:", props.user?.centro_costo_id);
             form.centroid = props.user?.centro_costo_id == 0 ? 0 : props.user?.centro_costo_id
+
+            
 
             data.AutoActualizarse = false
         }

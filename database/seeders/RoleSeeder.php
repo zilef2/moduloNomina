@@ -98,37 +98,39 @@ class RoleSeeder extends Seeder
             // 'read role',
             'update user',
 
-             //#reporte
-             'read reporte',
-             'updateCorregido reporte',
- 
-             //#centroCostos
-             'update centroCostos',
-             'read centroCostos',
+            //#reporte
+            'read reporte',
+            'delete reporte',
+            'updateCorregido reporte',
 
-             //#parametros
-             'read parametros',
+            //#centroCostos
+            'update centroCostos',
+            'read centroCostos',
+
+            //#parametros
+            'read parametros',
         ]);
         $supervisor = Role::create(['name' => 'supervisor']);
         $supervisor->givePermissionTo([
             'issupervisor',
 
-             //#user
+            //#user
             'read user',
             // 'create user',
             // 'read role',
 
-             //#reporte
-             'read reporte',
-             'create reporte',
-             'update reporte',
-             'updateCorregido reporte',
+            //#reporte
+            'read reporte',
+            'create reporte',
+            'update reporte',
+            'delete reporte',
+            'updateCorregido reporte',
  
-             //#centroCostos
-             'update centroCostos',
-             'read centroCostos',
+            //#centroCostos
+            'update centroCostos',
+            'read centroCostos',
 
-             //#parametros
+            //#parametros
             //  'read parametros',
         ]);
 

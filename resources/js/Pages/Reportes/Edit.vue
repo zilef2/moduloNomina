@@ -14,6 +14,7 @@ import Modal from '@/Components/Modal.vue';
     import VueDatePicker from '@vuepic/vue-datepicker';
     import '@vuepic/vue-datepicker/dist/main.css'
 import FestivosColombia from 'festivos-colombia';
+import { TransformTdate } from '@/global.ts';
 
 
 let CurrentlyYear = new Date().getFullYear()    
@@ -37,6 +38,27 @@ const props = defineProps({
     correccionUsuario: Boolean,
 })
 const emit = defineEmits([ "close", ]);
+
+const data = reactive({
+    
+    horas_trabajadas: '',
+    almuerzo: '0',
+
+    diurnas: 0,
+    nocturnas: 0,
+    extra_diurnas: 0,
+    extra_nocturnas: 0,
+    
+    dominicales: 'no',
+    extra: 'no',
+    esFestivo: false,
+
+    dominical_diurnas: 0,
+    dominical_nocturnas: 0,
+    dominical_extra_diurnas: 0,
+    dominical_extra_nocturnas: 0
+})
+
 const form = useForm({
     fecha_ini: '',
     fecha_fin: '',
@@ -485,15 +507,18 @@ function calcularNocturnas(Inicio, Fin,CuandoEmpiezaExtra){
     }
 }
 
-
-function TransformTdate (dateString){
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = ('0' + (date.getMonth() + 1)).slice(-2);
-    const day = ('0' + date.getDate()).slice(-2);
-    const hours = ('0' + date.getHours()).slice(-2);
-    const minutes = ('0' + date.getMinutes()).slice(-2);
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+//si termina a las 11:59pm -> agrega una hora
+const Reporte11_59 = () => {
+    let fin = Date.parse(form.fecha_fin);
+    let finDate = new Date(fin);
+    const horafin = finDate.getHours()
+    const minfin = finDate.getMinutes()
+    if(horafin == 23 && minfin == 59){
+        // finDate.setMinutes(finDate.getMinutes() + 1)
+        // console.log("🧈 debu finDate:", finDate);
+        form.horas_trabajadas++
+        form.nocturnas++
+    }
 }
 
 watchEffect(() => {
@@ -508,6 +533,7 @@ watchEffect(() => {
         form.fecha_fin = props.Reporte?.fecha_fin
         form.observaciones = props.Reporte?.observaciones
         form.horas_trabajadas = props.Reporte?.horas_trabajadas
+        Reporte11_59()
     
         if( Date.parse(form.fecha_ini) > Date.parse(form.fecha_fin) ){
             form.horas = '0';
@@ -580,20 +606,20 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                     <div>
                         <InputLabel for="fecha_ini" :value="lang().label.fecha_ini" />
                         <VueDatePicker :is-24="false" :day-names="daynames" auto-apply :flow="['calendar', 'time']" :enable-time-picker="true" :teleport="true"
-                            id="fecha_ini" type="date" class="mt-1 block w-full" v-model="form.fecha_ini" required
+                            id="fecha_ini" type="date" class="mt-1 block w-full" v-model="form.fecha_ini" disabled
                             :placeholder="lang().placeholder.fecha_ini" :error="form.errors.fecha_ini" />
                         <InputError class="mt-2" :message="form.errors.fecha_ini" />
                     </div>
                     <div>
                         <InputLabel for="fecha_fin" :value="lang().label.fecha_fin" />
                         <VueDatePicker :is-24="false" :day-names="daynames" auto-apply :flow="['calendar', 'time']" :enable-time-picker="true" :teleport="true"
-                            id="fecha_fin" type="date" class="mt-1 block w-full" v-model="form.fecha_fin" required
+                            id="fecha_fin" type="date" class="mt-1 block w-full" v-model="form.fecha_fin" disabled
                             :placeholder="lang().placeholder.fecha_fin" :error="form.errors.fecha_fin" />
                         <InputError class="mt-2" :message="form.errors.fecha_fin" />
                     </div>
                     <div>
                         <InputLabel for="horas_trabajadas" :value="lang().label.horas_trabajadas" />
-                        <TextInput id="horas_trabajadas" type="number" class="mt-1 block w-full" v-model="form.horas_trabajadas" disabled
+                        <TextInput id="horas_trabajadas" type="number" class="mt-1 block w-full bg-gray-100 dark:bg-gray-700" v-model="form.horas_trabajadas" disabled
                             :placeholder="lang().placeholder.horas_trabajadas" :error="form.errors.horas_trabajadas" />
                         <InputError class="mt-2" :message="form.errors.horas_trabajadas" />
                     </div>

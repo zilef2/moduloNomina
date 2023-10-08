@@ -179,7 +179,7 @@
                         :title="props.title" :valoresSelect="props.valoresSelect" :showUsers="props.showUsers"
                         :correccionUsuario="true" />
 
-                    <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :Reporte="data.generico"
+                    <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :Reporte="data.generico" v-show="can(['delete reporte'])"
                         :title="props.title" />
                 </div>
             </div>
@@ -189,7 +189,7 @@
                 <div class="flex justify-between p-2">
                     <div class="flex space-x-2">
                         <SelectInput v-if="filters !== null" v-model="data.params.perPage" :dataSet="data.dataSet" />
-                        <DangerButton @click="data.deleteBulkOpen = true" v-show="data.selectedId.length != 0"
+                        <DangerButton @click="data.deleteBulkOpen = true" v-show="data.selectedId.length != 0 && can(['delete reporte'])"
                             class="px-3 py-1.5" v-tooltip="lang().tooltip.delete_selected">
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton>
@@ -235,24 +235,25 @@
                                             <form @submit.prevent="updateThisReporte">
                                                 <InfoButton v-if="can(['update reporte'])" type="button"
                                                     @click="(data.editOpen = true), (data.generico = clasegenerica)"
-                                                    class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
+                                                    class="px-2 py-1.5 rounded-sm" v-tooltip="lang().tooltip.edit">
                                                     <PencilIcon class="w-4 h-4" />
                                                 </InfoButton>
-                                                <SuccessButton v-if="can(['update reporte'])" type="button" class="ml-3"
+                                                <SuccessButton v-if="can(['update reporte'])" type="button" class="mx-1 w-10 h-8 p-0 rounded-lg"
                                                     :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
-                                                    @click=" (data.generico = clasegenerica),(updateThisReporte(true))">
+                                                    @click=" (data.generico = clasegenerica),(updateThisReporte(true))"
+                                                    v-tooltip="'Aprobar'">
                                                     <CheckIcon class="w-4 h-4" />
                                                 </SuccessButton>
                                             </form>
                                             <InfoButton v-if="(can(['delete reporte'])) && (clasegenerica.valido === 2)"
                                                 type="button"
                                                 @click="(data.editCorregirOpen = true), (data.generico = clasegenerica)"
-                                                class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
+                                                class="px-2 py-1.5 rounded-lg" v-tooltip="'hola'">
                                                 <DocumentCheckIcon class="w-4 h-4" />
                                             </InfoButton>
                                             <DangerButton v-if="(can(['delete reporte']))" type="button"
                                                 @click="(data.deleteOpen = true), (data.generico = clasegenerica)"
-                                                class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.delete">
+                                                class="px-2 py-1.5 rounded-sm" v-tooltip="lang().tooltip.delete">
                                                 <TrashIcon class="w-4 h-4" />
                                             </DangerButton>
                                         </div>
@@ -316,9 +317,8 @@
                 <div class="container px-5 py-4 mx-auto">
                     <div class="flex flex-wrap m-2">
                         <div class="p-1 md:w-1/2 flex flex-col items-start">
-                            <span
-                                class="inline-block py-1 px-2 rounded bg-indigo-50 text-indigo-500 text-xs font-medium tracking-widest">Este
-                                mes</span>
+                            <span class="inline-block py-1 px-2 rounded bg-indigo-50 text-indigo-500 text-xs font-medium tracking-widest">
+                                Este mes</span>
                             <h2 class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">Numero de
                                 reportes de {{ props.nombrePersona }}</h2>
                             <div class="m-1 p-1 w-full">

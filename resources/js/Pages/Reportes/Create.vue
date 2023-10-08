@@ -10,7 +10,7 @@ import Modal from '@/Components/Modal.vue';
     import { useForm } from '@inertiajs/vue3';
 
     
-    import { ref, watchEffect } from 'vue';
+    import { ref, watchEffect,reactive } from 'vue';
 
     import VueDatePicker from '@vuepic/vue-datepicker';
     import '@vuepic/vue-datepicker/dist/main.css'
@@ -34,6 +34,8 @@ const props = defineProps({
     ultimoReporte: Number,
 
 })
+
+
 //constantes intuitivas
     const MAXIMO_HORAS_SEMANALES = 48
     const LimiteHorasTrabajadas = 22
@@ -43,14 +45,19 @@ let ValorRealalmuerzo = 0
 
 const emit = defineEmits(["close"]);
 
+
+const data = reactive({
+    respuestaSeguro:''
+})
+
 const form = useForm({
     fecha_ini: '', fecha_fin: '',
     // fecha_ini: '2023-04-0'+diaoDominicla+'T'+horas[0]+':00', fecha_fin: '2023-04-0'+(diaoDominicla)+'T'+horas[1]+':00', //temp
     // fecha_ini: '2023-06-01T23:00', fecha_fin: '2023-06-01T23:59', //temp
 
-    horas_trabajadas: '',
     centro_costo_id: props.IntegerDefectoSelect,
     observaciones: '',
+    horas_trabajadas: '',
     almuerzo: '0',
 
     diurnas: 0,
@@ -120,30 +127,33 @@ const Reporte11_59 = () => {
 const create = () => {
     form.fecha_fin
     Reporte11_59();
+    data.respuestaSeguro = confirm("¿Estás seguro de enviar el formulario?");
 
-    if(form.horas_trabajadas <= LimiteHorasTrabajadas && form.horas_trabajadas != 0){
-        if (Object.keys(form.errors).length === 0) {
-            form.almuerzo = ValorRealalmuerzo
-
+    if(data.respuestaSeguro){
+        if(form.horas_trabajadas <= LimiteHorasTrabajadas && form.horas_trabajadas != 0){
+            if (Object.keys(form.errors).length === 0) {
+                form.almuerzo = ValorRealalmuerzo
             
-            form.post(route('Reportes.store'), {
-                preserveScroll: true,
-                onSuccess: () => {
-                    emit("close")
-                    form.reset()
-                },
-                onError: () =>{
-                    // alert(JSON.stringify(form.errors, null, 4));
-                    null
-                },
-                onFinish: () => emit("close"),
-            })
-        }else{
-            alert('Verifique de nuevo')
+                    form.post(route('Reportes.store'), {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                            emit("close")
+                            form.reset()
+                        },
+                        onError: () =>{
+                            // alert(JSON.stringify(form.errors, null, 4));
+                            null
+                        },
+                        onFinish: () => emit("close"),
+                    })
 
+            }else{
+                alert('Verifique de nuevo')
+
+            }
+        }else{
+            alert('Horas invalidas') //toask
         }
-    }else{
-        alert('Horas invalidas') //toask
     }
 }
 
@@ -572,7 +582,7 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
 <template>
     <section class="space-y-6">
         <Modal :show="props.show" @close="emit('close')">
-            <form class="p-6" @submit.prevent="create">
+            <form class="p-6">
                 <div class="flex space-x-4">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                         <b>
