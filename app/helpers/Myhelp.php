@@ -10,11 +10,25 @@ use Normalizer;
 
 class Myhelp{
 
+    const MyRoles =[
+        'empleado' => 1,
+        'administrativo' => 2,
+        'supervisor' => 3,
+        'admin' => 9,
+        'superadmin' => 10
+    ];
+
     //************************logs************************\\
     
-    public static function getPermissionToNumber($permissions)
-    {
+    public static function getPermissionToNumber($permissions) {
 
+        // $valorReturn = 0;
+        // if(in_array($permissions, constant('MyRoles'))){
+        //     $valorReturn = constant('MyRoles')[$permissions];
+        // }
+        // dd($valorReturn);
+        // return $valorReturn;
+        
         if ($permissions == 'empleado') return 1;
         if ($permissions == 'administrativo') return 2;
         if ($permissions == 'supervisor') return 3;

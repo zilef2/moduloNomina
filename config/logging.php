@@ -56,6 +56,11 @@ return [
             'channels' => ['single'],
             'ignore_exceptions' => false,
         ],
+        'soloadmin' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Adminlaravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
 
         'single' => [
             'driver' => 'single',
@@ -120,7 +125,7 @@ return [
         ],
 
         'emergency' => [
-            'path' => storage_path('logs/laravel.log'),
+            'path' => storage_path('logs/emergencylaravel.log'),
         ],
     ],
 

@@ -37,6 +37,91 @@ class UserController extends Controller {
         $this->middleware('permission:delete user', ['only' => ['destroy', 'destroyBulk']]);
     }
 
+    public function Dashboard(&$users, $numberPermissions) {
+        $ListaControladoresYnombreClase = (explode('\\',get_class($this))); $nombreC = end($ListaControladoresYnombreClase);
+        Log::info(' U -> '.Auth::user()->name. ' Accedio a la vista ' .$nombreC);
+    
+        $Authuser = Auth::user();
+        $permissions = auth()->user()->roles->pluck('name')[0];
+        $ultimos5dias = null;
+        if($permissions === "empleado") { //admin | administrativo
+            $reportes = (int) Reporte::Where('user_id', $Authuser->id)->count();
+            
+        }else{
+            $reportes = (int) Reporte::count();
+            
+            $ultimos5dias = [
+                'Mes pasado' => Reporte::whereValido(1)->where('fecha_ini','<', Carbon::today()->addMonth(-1))->get()->count(),
+    
+                'Semana pasada' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->addDays(-7)->startOfWeek() ,
+                    Carbon::now()->addDays(-7)->endOfWeek()])
+                    ->get()->count(),
+    
+                'Semana actual' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->startOfWeek() ,
+                    Carbon::now()->endOfWeek()])
+                    ->get()->count(),
+            ];
+            $diasNovalidos = [
+                'Mes pasado' => Reporte::whereIn('valido',[0,2])->where('fecha_ini','<', Carbon::today()->startOfMonth())->get()->count(),
+                'Mes actual' => Reporte::whereIn('valido',[0,2])->where('fecha_ini','>', Carbon::today()->startOfMonth())->get()->count(),
+            ];
+    
+            $usuariosConRol = User::whereHas("roles", function($q){ 
+                $q->where("name", "empleado");
+            }) ->take(6)->get();
+            //todo2: organizar por quien ha trabajado mas
+    
+            foreach ($usuariosConRol as $value) {
+                $BooleanreportoHoy = Reporte::where('user_id',$value->id)
+                    ->whereDate('fecha_fin',Carbon::today())
+                    ->first();
+    
+                if($BooleanreportoHoy !== null)
+                    $trabajadoresHoy[$value->name] = $BooleanreportoHoy->horas_trabajadas;
+                else
+                    $trabajadoresHoy[$value->name] = 0;
+            }
+    
+            $centros = CentroCosto::all();
+            foreach ($centros as $value) {
+                $BooleanReporteCentro = Reporte::where('centro_costo_id',$value->id)->whereDate('fecha_fin',Carbon::today())->sum('horas_trabajadas');
+                if($BooleanReporteCentro !== null){
+                    $centrosHoy[$value->nombre] = $BooleanReporteCentro;
+                }
+                else
+                    $centrosHoy[$value->nombre] = 0;
+    
+            }
+        }
+    
+        //#location
+    
+        // if ($position = Location::get()) {
+        //     // Successfully retrieved position.
+        //     $positio = $position->countryName;
+        //     Log::channel('stevebauman')->info('Vista: welcome. User => '  .Auth::user()->name .' posicion:'. $positio);
+        // } else {
+        //     $positio =' Failed retrieving position.';
+        //     Log::channel('stevebauman')->info('Vista: welcome. User => '  .Auth::user()->name .' '. $positio);
+        // }
+    
+        return Inertia::render('Dashboard', 
+        [
+            'versionZilef'  => '0.9.1',
+            'users'         => (int) User::count(),
+            'roles'         => (int) Role::count(),
+            'permissions'   => (int) Permission::count(),
+            'reportes'   => $reportes,
+            'ultimos5dias' => $ultimos5dias,
+            'diasNovalidos' => $diasNovalidos ?? [],
+            'trabajadoresHoy' => $trabajadoresHoy ?? [],
+            'centrosHoy' => $centrosHoy ?? [],
+        ]);
+    }
+
+
+
+    //empieza el index
     public function MapearClasePP(&$users, $numberPermissions) {
         $users = $users->get()->map(function ($user) use ($numberPermissions) {
             $user->cc = $user->centroName();
