@@ -175,9 +175,9 @@
                         :valoresSelect="props.valoresSelect" :showUsers="props.showUsers" :correccionUsuario="false" />
 
                     <!-- solo el usuario puede corregir sus propios reportes -->
-                    <Edit :show="data.editCorregirOpen" @close="data.editCorregirOpen = false" :Reporte="data.generico"
+                    <!-- <Edit :show="data.editCorregirOpen" @close="data.editCorregirOpen = false" :Reporte="data.generico"
                         :title="props.title" :valoresSelect="props.valoresSelect" :showUsers="props.showUsers"
-                        :correccionUsuario="true" />
+                        :correccionUsuario="true" /> -->
 
                     <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :Reporte="data.generico" v-show="can(['delete reporte'])"
                         :title="props.title" />
@@ -245,12 +245,12 @@
                                                     <CheckIcon class="w-4 h-4" />
                                                 </SuccessButton>
                                             </form>
-                                            <InfoButton v-if="(can(['delete reporte'])) && (clasegenerica.valido === 2)"
+                                            <!-- <InfoButton v-if="(can(['delete reporte'])) && (clasegenerica.valido === 2)"
                                                 type="button"
                                                 @click="(data.editCorregirOpen = true), (data.generico = clasegenerica)"
-                                                class="px-2 py-1.5 rounded-lg" v-tooltip="'hola'">
+                                                class="px-2 py-1.5 rounded-lg" v-tooltip="'Corregir'">
                                                 <DocumentCheckIcon class="w-4 h-4" />
-                                            </InfoButton>
+                                            </InfoButton> -->
                                             <DangerButton v-if="(can(['delete reporte']))" type="button"
                                                 @click="(data.deleteOpen = true), (data.generico = clasegenerica)"
                                                 class="px-2 py-1.5 rounded-sm" v-tooltip="lang().tooltip.delete">

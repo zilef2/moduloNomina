@@ -36,33 +36,39 @@ class Myhelp{
         if ($permissions == 'superadmin') return 10;
         return 0;
     }
-    public static function EscribirEnLog($thiis, $clase = '', $mensaje = '', $returnPermission = true, $critico = false)
-    {
+    public static function EscribirEnLog($thiis, $clase = '', $mensaje = '', $returnPermission = true, $critico = false) {
         $permissions = $returnPermission ? auth()->user()->roles->pluck('name')[0] : null;
         $ListaControladoresYnombreClase = (explode('\\', get_class($thiis)));
         $nombreC = end($ListaControladoresYnombreClase);
         if (!$critico) {
-
             $Elpapa = (explode('\\', get_parent_class($thiis)));
             $nombreP = end($Elpapa);
 
+            $ElMensaje = $mensaje != '' ? ' Mensaje: ' . $mensaje : '';
+            $ElMensaje = 'Vista: ' . $nombreC . ' Padre: ' . $nombreP . 'U:' . Auth::user()->name . ' | clase: ' . $clase . '|| ' . ' Mensaje: ' . $ElMensaje;
             if ($permissions == 'admin' || $permissions == 'superadmin') {
-                $ElMensaje = $mensaje != '' ? ' Mensaje: ' . $mensaje : '';
-                Log::channel('soloadmin')->info('Vista:' . $nombreC . ' Padre: ' . $nombreP . '|  U:' . Auth::user()->name . $ElMensaje);
+                Log::channel('soloadmin')->info($ElMensaje);
             } else {
-                Log::info('Vista: ' . $nombreC . ' Padre: ' . $nombreP . 'U:' . Auth::user()->name . ' ||' . $clase . '|| ' . ' Mensaje: ' . $mensaje);
+                if($permissions == 'isadministrativo'){
+                    Log::channgel('soloadministrativo')->info($ElMensaje);
+                }else{
+                    if($permissions == 'issupervisor'){
+                        Log::channgel('issupervisor')->info($ElMensaje);
+                    }else{
+                        Log::info($ElMensaje);
+                    }
+                }
             }
             return $permissions;
         } else {
-            Log::critical('Vista: ' . $nombreC . 'U:' . Auth::user()->name . ' ||' . $clase . '|| ' . ' Mensaje: ' . $mensaje);
+            Log::critical('Vista: ' . ($nombreC??'null') . 'U:' . Auth::user()->name . ' ||' . ($clase??'null') . '|| ' . ' Mensaje: ' . ($mensaje??'null'));
         }
     }
 
     //************************laravel************************\\
 
 
-    public function redirect($ruta,$seconds = 4)
-    {
+    public function redirect($ruta,$seconds = 4) {
         sleep($seconds);
         return redirect()->to($ruta);
     }

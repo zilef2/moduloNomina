@@ -29,6 +29,8 @@ return new class extends Migration
             $table->date('fecha_de_ingreso')->nullable();
             $table->string('sexo')->nullable();
             $table->string('salario')->nullable();
+            
+            $table->softDeletes();
         });
     }
 

@@ -83,14 +83,15 @@ class ReportesController extends Controller
         $startDate = Carbon::now()->startOfWeek();
         $endDate = Carbon::now()->endOfWeek();
         $quincena = [];
+
+        if ($request->has(['field', 'order'])) {
+            $Reportes->orderBy($request->field, $request->order);
+        }else{
+            $Reportes->orderBy('valido')->orderByDesc('fecha_ini');
+        }
+
         if($numberPermissions === 1) { 
             $Reportes->whereUser_id($Authuser->id);
-
-            if ($request->has(['field', 'order'])) {
-                $Reportes->orderBy($request->field, $request->order);
-            }else{
-                $Reportes->orderByDesc('fecha_ini');
-            }
 
             $nombresTabla =[//0: como se ven //1 como es la BD
                 ["Acciones","#","Centro costo", "valido",   "inicio","fin","horas trabajadas",  'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', "observaciones"],
@@ -126,12 +127,14 @@ class ReportesController extends Controller
             $horasemana = Reporte::WhereBetween('fecha_ini', [$startDate, $endDate])->sum('horas_trabajadas');
 
             if($numberPermissions == 3){ //supervisor
+                $Reportes->Where('centro_costo_id',$Authuser->centro_costo_id);
                 $quincena = [
                     'Primera quincena' => Reporte::whereBetween('fecha_ini',[Carbon::now()->startOfMonth(),Carbon::now()->startOfMonth()->addDays(14)])
                         ->Where('centro_costo_id',$Authuser->centro_costo_id)->count(),
                     'Segunda quincena' => Reporte::whereBetween('fecha_ini',[Carbon::now()->startOfMonth()->addDays(15),Carbon::now()->LastOfMonth()])
                         ->Where('centro_costo_id',$Authuser->centro_costo_id)->count(),
                 ];
+
             }else{ //admin y administrativo
                 if($numberPermissions == 2){//administrativo
                     $horasemana = Reporte::Where('centro_costo_id', $Authuser->centro_costo_id)
@@ -157,7 +160,6 @@ class ReportesController extends Controller
         $titulo = __('app.label.Reportes');
         $Authuser = Auth::user();
 
-        
         $Reportes = Reporte::query();
         $showSelect = $this->losSelect($valoresSelectConsulta, $showUsers,$valoresSelect);
         $IntegerDefectoSelect = $valoresSelectConsulta->first()->id;

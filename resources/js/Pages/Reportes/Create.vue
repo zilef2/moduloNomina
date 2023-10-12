@@ -77,8 +77,8 @@ const form = useForm({
 
 
 if(props.numberPermissions > 8){
-    form.fecha_ini = '2023-10-31T07:00'
-    form.fecha_fin = '2023-10-31T16:00'
+    form.fecha_ini = '2023-11-01T00:00'
+    form.fecha_fin = '2023-11-01T05:00'
 }
 
 function estaFechaEsFestivo(fecha){
@@ -305,7 +305,7 @@ function calcularHoras(inicio,final){
     let ExtrasManana = false
 
     let TemporalDiaAnterior = 0
-        TemporalDiaAnterior += props.ultimoReporte
+    TemporalDiaAnterior += props.ultimoReporte
     
     if(form.horas_trabajadas < TrabajoConAlmuerzo){
         form.almuerzo = 'No';
@@ -325,7 +325,7 @@ function calcularHoras(inicio,final){
             ExtrasPrematuras = props.horasemana - MAXIMO_HORAS_SEMANALES
         }
 
-        CuandoEmpiezaExtra = parseInt(new Date(form.fecha_ini).getHours()) + ExtrasPrematuras;
+        CuandoEmpiezaExtra = parseInt(new Date(form.fecha_ini).getHours()) + ExtrasPrematuras - TemporalDiaAnterior;
         if(CuandoEmpiezaExtra >= 24){
             CuandoEmpiezaExtra = 24 //version horasmismodia
             // CuandoEmpiezaExtra -= 24 //version diaAyB
@@ -350,18 +350,18 @@ function calcularDiurnas(Inicio, Fin,CuandoEmpiezaExtra){
     const DiaInicio = new Date(Inicio).getDate();
     const DiaFin = new Date(Fin).getDate();
 
-    let BaseInicial = horasInicio >= 6 ? horasInicio : 6 
+    let BaseInicial = horasInicio >= 6 ? horasInicio : 6
 
     if(DiaInicio == DiaFin){
         let HorasExtra = 0
         const BaseFinal = horasFin >= 21 ? 21 : horasFin
         let HorasDiurnas = BaseFinal - BaseInicial;
-        HorasDiurnas = HorasDiurnas < 0 ? 0 : HorasDiurnas //todo: es mejor calcular bien
+        HorasDiurnas = HorasDiurnas < 0 ? 0 : HorasDiurnas
 
         if(CuandoEmpiezaExtra !== null){
             if(CuandoEmpiezaExtra < 21){
                 let horasNormales = CuandoEmpiezaExtra - BaseInicial
-                horasNormales < 0 ? 0 : horasNormales
+                horasNormales = horasNormales < 0 ? 0 : horasNormales
                 if(HorasDiurnas >= horasNormales){
                     HorasExtra = HorasDiurnas - horasNormales
                     HorasDiurnas = horasNormales
@@ -370,8 +370,7 @@ function calcularDiurnas(Inicio, Fin,CuandoEmpiezaExtra){
                 }
             }//cuando las horas extra >= 21, no hay horas extra diurnas
         }
-        // console.log("mismo DIA, HorasExtra & ordinarias", HorasExtra,HorasDiurnas); //nottemp
-
+        console.log("mismo DIA, HorasExtra & ordinarias", HorasExtra,HorasDiurnas); //nottemp
         return [HorasExtra,HorasDiurnas];
     }else{ //de un dia a otro
         let HorasDiurnasTotal = 0

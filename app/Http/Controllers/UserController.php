@@ -159,6 +159,7 @@ class UserController extends Controller {
         }
 
         if ($request->has(['field', 'order'])) {
+            dd($request->field, $request->order);
             $users->orderBy($request->field, $request->order);
         }else{
             $users->orderByDesc('updated_at');

@@ -344,7 +344,7 @@ function calcularDiurnas(Inicio, Fin,CuandoEmpiezaExtra){
         if(CuandoEmpiezaExtra !== null){
             if(CuandoEmpiezaExtra < 21){
                 let horasNormales = CuandoEmpiezaExtra - BaseInicial
-                horasNormales < 0 ? 0 : horasNormales
+                horasNormales = horasNormales < 0 ? 0 : horasNormales
                 if(HorasDiurnas >= horasNormales){
                     HorasExtra = HorasDiurnas - horasNormales
                     HorasDiurnas = horasNormales

@@ -61,6 +61,16 @@ return [
             'path' => storage_path('logs/Adminlaravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
+        'soloadministrativo' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Administrativolaravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
+        'issupervisor' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/supervisorlaravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
 
         'single' => [
             'driver' => 'single',
