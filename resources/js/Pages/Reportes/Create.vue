@@ -303,6 +303,9 @@ function calcularHoras(inicio,final){
     let fin = new Date(final)
     let CuandoEmpiezaExtra = null
     let ExtrasManana = false
+
+    let TemporalDiaAnterior = 0
+        TemporalDiaAnterior += props.ultimoReporte
     
     if(form.horas_trabajadas < TrabajoConAlmuerzo){
         form.almuerzo = 'No';
@@ -311,8 +314,7 @@ function calcularHoras(inicio,final){
         form.nocturnas = Math.abs(calcularNocturnas(form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra)[1]);
         
     }else{ //extras
-        let TemporalDiaAnterior = 0
-        TemporalDiaAnterior += props.ultimoReporte
+        
         form.almuerzo = form.horas_trabajadas + TemporalDiaAnterior > 8 ?  1 : 0;
         form.almuerzo = form.horas_trabajadas + TemporalDiaAnterior > 16 ? 2 : form.almuerzo;
         ValorRealalmuerzo = form.almuerzo

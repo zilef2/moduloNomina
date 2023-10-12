@@ -7,15 +7,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
-use App\Models\CentroCosto;
-use App\Models\Permission;
-use App\Models\Reporte;
-use App\Models\Role; use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Foundation\Application; 
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route; use Illuminate\Support\Facades\Session; use Inertia\Inertia;
 // use Stevebauman\Location\Facades\Location;
 
@@ -28,9 +21,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [UserController::class, 'Dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/setLang/{locale}', function ($locale) { Session::put('locale', $locale); return back(); })->name('setlang');
 

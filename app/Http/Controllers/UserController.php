@@ -18,15 +18,17 @@ use App\Exports\UsersExport;
 use App\helpers\Myhelp;
 use App\Models\Cargo;
 use App\Models\CentroCosto;
+use App\Models\Permission;
 use App\Models\Reporte;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Fluent;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
+use Illuminate\Support\Facades\Log;
 use Stevebauman\Location\Request as LocationRequest;
+
 
 
 class UserController extends Controller {
@@ -37,40 +39,62 @@ class UserController extends Controller {
         $this->middleware('permission:delete user', ['only' => ['destroy', 'destroyBulk']]);
     }
 
-    public function Dashboard(&$users, $numberPermissions) {
+    public function Dashboard() {
         $ListaControladoresYnombreClase = (explode('\\',get_class($this))); $nombreC = end($ListaControladoresYnombreClase);
         Log::info(' U -> '.Auth::user()->name. ' Accedio a la vista ' .$nombreC);
-    
         $Authuser = Auth::user();
         $permissions = auth()->user()->roles->pluck('name')[0];
+        $numberPermissions = Myhelp::getPermissionToNumber($permissions);
+    
         $ultimos5dias = null;
-        if($permissions === "empleado") { //admin | administrativo
-            $reportes = (int) Reporte::Where('user_id', $Authuser->id)->count();
-            
+        if($numberPermissions === 1) {
+            return redirect()->route('Reportes.index')->with('success', 'Bienvenido');
+            // $reportes = (int) Reporte::Where('user_id', $Authuser->id)->count();
         }else{
             $reportes = (int) Reporte::count();
             
-            $ultimos5dias = [
-                'Mes pasado' => Reporte::whereValido(1)->where('fecha_ini','<', Carbon::today()->addMonth(-1))->get()->count(),
-    
-                'Semana pasada' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->addDays(-7)->startOfWeek() ,
-                    Carbon::now()->addDays(-7)->endOfWeek()])
-                    ->get()->count(),
-    
-                'Semana actual' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->startOfWeek() ,
-                    Carbon::now()->endOfWeek()])
-                    ->get()->count(),
-            ];
-            $diasNovalidos = [
-                'Mes pasado' => Reporte::whereIn('valido',[0,2])->where('fecha_ini','<', Carbon::today()->startOfMonth())->get()->count(),
-                'Mes actual' => Reporte::whereIn('valido',[0,2])->where('fecha_ini','>', Carbon::today()->startOfMonth())->get()->count(),
-            ];
-    
+            if($numberPermissions === 3){
+                $centroMio = $Authuser->centro_costo_id;
+                $reportes = (int) Reporte::Where('centro_costo_id',$centroMio)->count();
+
+                $ultimos5dias = [
+                    'Mes pasado' => Reporte::Where('centro_costo_id',$centroMio)->whereValido(1)->where('fecha_ini','<', Carbon::today()->addMonth(-1))->get()->count(),
+        
+                    'Semana pasada' => Reporte::Where('centro_costo_id',$centroMio)->whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->addDays(-7)->startOfWeek() ,
+                        Carbon::now()->addDays(-7)->endOfWeek()])
+                        ->get()->count(),
+        
+                    'Semana actual' => Reporte::Where('centro_costo_id',$centroMio)->whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->startOfWeek() ,
+                        Carbon::now()->endOfWeek()])
+                        ->get()->count(),
+                ];
+
+                $diasNovalidos = [
+                    'Mes pasado' => Reporte::Where('centro_costo_id',$centroMio)->whereIn('valido',[0,2])->where('fecha_ini','<', Carbon::today()->startOfMonth())->get()->count(),
+                    'Mes actual' => Reporte::Where('centro_costo_id',$centroMio)->whereIn('valido',[0,2])->where('fecha_ini','>', Carbon::today()->startOfMonth())->get()->count(),
+                ];
+
+            }else{
+                $ultimos5dias = [
+                    'Mes pasado' => Reporte::whereValido(1)->where('fecha_ini','<', Carbon::today()->addMonth(-1))->get()->count(),
+        
+                    'Semana pasada' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->addDays(-7)->startOfWeek() ,
+                        Carbon::now()->addDays(-7)->endOfWeek()])
+                        ->get()->count(),
+        
+                    'Semana actual' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->startOfWeek() ,
+                        Carbon::now()->endOfWeek()])
+                        ->get()->count(),
+                ];
+                $diasNovalidos = [
+                    'Mes pasado' => Reporte::whereIn('valido',[0,2])->where('fecha_ini','<', Carbon::today()->startOfMonth())->get()->count(),
+                    'Mes actual' => Reporte::whereIn('valido',[0,2])->where('fecha_ini','>', Carbon::today()->startOfMonth())->get()->count(),
+                ];
+               
+            }
             $usuariosConRol = User::whereHas("roles", function($q){ 
                 $q->where("name", "empleado");
-            }) ->take(6)->get();
-            //todo2: organizar por quien ha trabajado mas
-    
+            })->take(5)->get();
             foreach ($usuariosConRol as $value) {
                 $BooleanreportoHoy = Reporte::where('user_id',$value->id)
                     ->whereDate('fecha_fin',Carbon::today())
@@ -95,15 +119,11 @@ class UserController extends Controller {
         }
     
         //#location
-    
-        // if ($position = Location::get()) {
-        //     // Successfully retrieved position.
-        //     $positio = $position->countryName;
-        //     Log::channel('stevebauman')->info('Vista: welcome. User => '  .Auth::user()->name .' posicion:'. $positio);
-        // } else {
-        //     $positio =' Failed retrieving position.';
-        //     Log::channel('stevebauman')->info('Vista: welcome. User => '  .Auth::user()->name .' '. $positio);
-        // }
+            // if ($position = Location::get()) { // Successfully retrieved position.
+            //     $positio = $position->countryName;
+            //     Log::channel('stevebauman')->info('Vista: welcome. User => '  .Auth::user()->name .' posicion:'. $positio); } else {
+            //     $positio =' Failed retrieving position.';
+            //     Log::channel('stevebauman')->info('Vista: welcome. User => '  .Auth::user()->name .' '. $positio); }
     
         return Inertia::render('Dashboard', 
         [
@@ -153,14 +173,14 @@ class UserController extends Controller {
 
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'users'));
         
-        if($numberPermissions == 3){//supervisor
-            $centroID = Auth::user()->centro_costo_id;
-            if($centroID){
-                $users->Where('centro_costo_id' , $centroID);
-            }else{
-                $users->Where('id',0);
-            }
-        }
+//         if($numberPermissions == 3){//supervisor
+//             $centroID = Auth::user()->centro_costo_id;
+//             if($centroID){
+//                 $users->Where('centro_costo_id' , $centroID);
+//             }else{
+            // $users->Where('id', 0);
+// }
+        // }
         return $users;
     }
 
