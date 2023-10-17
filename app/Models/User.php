@@ -58,6 +58,8 @@ class User extends Authenticatable
             return [$pr['name'] => true];
         });
     }
+    //fin permissions
+
 
     public function reportes() {
 		return $this->hasMany('App\Models\Reporte');

@@ -121,16 +121,18 @@ class ParametrosController extends Controller
                 $parametro->HORAS_NECESARIAS_SEMANA = $request->input('HORAS_NECESARIAS_SEMANA');
                 $parametro->save();
                 DB::commit();
-                Log::info(
-                    ' U -> ' . Auth::user()->name . ' Accedio a la vista ' . $nombreC . ' y actualizo los paramaetros:
-                    subsidio_de_transporte_dia = ' . $parametro->subsidio_de_transporte_dia .
-                        'salario_minimo =' . $parametro->salario_minimo
-                );
+                $mensaje = ' U -> ' . Auth::user()->name . ' Accedio a la vista ' . $nombreC . ' y actualizo los paramaetros:
+                subsidio_de_transporte_dia = ' . $parametro->subsidio_de_transporte_dia . 'salario_minimo =' . $parametro->salario_minimo;
+                
+                Myhelp::EscribirEnLog($this, 'ParametrosController',$mensaje,false);
+
                 return back()->with('success', __('app.label.updated_successfully', ['name' => 'Parametros']));
             }
         } catch (\Throwable $th) {
             DB::rollback();
-            Log::critical(' U -> ' . Auth::user()->name . ' Accedio a la vista ' . $nombreC . ' Fallo la operacion: ' . $th->getMessage());
+            $mensaje = ' U -> ' . Auth::user()->name . ' Accedio a la vista ' . $nombreC . ' Fallo la operacion: ' . $th->getMessage();
+            Myhelp::EscribirEnLog($this, 'ParametrosController',$mensaje,false,true);
+
             return back()->with('error', __('app.label.updated_error', ['name' => __('app.label.Parametross')]) . $th->getMessage());
         }
     }

@@ -214,7 +214,12 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
             // $users[1],//elalejo
             // $users[2],//Alejo
             // $users[3],//jose
-            $users[2]->toArray(),
+            // $users[2]->toArray(),
+            $users[3]->toArray(),
+            // $users[4]->toArray(),
+            $users[5]->toArray(),
+            // $users[6]->toArray(),
+            // $users[7]->toArray(),
         );
         return $users;
     }

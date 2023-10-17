@@ -41,7 +41,8 @@ class UserController extends Controller {
 
     public function Dashboard() {
         $ListaControladoresYnombreClase = (explode('\\',get_class($this))); $nombreC = end($ListaControladoresYnombreClase);
-        Log::info(' U -> '.Auth::user()->name. ' Accedio a la vista ' .$nombreC);
+        Myhelp::EscribirEnLog($this, $nombreC, ' U -> '.Auth::user()->name. ' Accedio al dashboard ', false);
+        
         $Authuser = Auth::user();
         $permissions = auth()->user()->roles->pluck('name')[0];
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
