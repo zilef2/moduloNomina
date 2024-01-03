@@ -28,13 +28,12 @@ class HelpExcel
         // $NumReportes = $reportes->count();
         $NumReportes = $reportesAgrupados->count();
 
-        $elSalario = intval($empleado->salario);
+        $elSalario = (int)($empleado->salario);
         $salario_hora = $elSalario / (235);// 30 * 7.8333
         $salario_quincena = round($elSalario / (2), 0, PHP_ROUND_HALF_UP);
 
-
-        $horasN = (intval($paramBD->HORAS_NECESARIAS_SEMANA) * 2) - ($NumeroDiasFestivos * 8); //por defecto $horasN es 47, pero si hay festivos se le tiene que restar
-        $horasTotalTrabajador = intval($reportes->sum('horas_trabajadas'));
+        $horasN = ((int)($paramBD->HORAS_NECESARIAS_SEMANA) * 2) - ($NumeroDiasFestivos * 8); //por defecto $horasN es 47, pero si hay festivos se le tiene que restar
+        $horasTotalTrabajador = (int)($reportes->sum('horas_trabajadas'));
         $cumplioQuicena = $horasTotalTrabajador >= $horasN;
 
         if ($sigo === null) {

@@ -18,8 +18,17 @@ class Myhelp{
         'superadmin' => 10
     ];
 
+    public static function AuthU()
+    {
+        $TheUser = Auth::user();
+        if($TheUser){
+            return $TheUser;
+        }
+        return redirect()->to('/');
+    }
+
     //************************logs************************\\
-    
+
     public static function getPermissionToNumber($permissions) {
 
         // $valorReturn = 0;
@@ -28,12 +37,12 @@ class Myhelp{
         // }
         // dd($valorReturn);
         // return $valorReturn;
-        
-        if ($permissions == 'empleado') return 1;
-        if ($permissions == 'administrativo') return 2;
-        if ($permissions == 'supervisor') return 3;
-        if ($permissions == 'admin') return 9;
-        if ($permissions == 'superadmin') return 10;
+
+        if ($permissions === 'empleado') return 1;
+        if ($permissions === 'administrativo') return 2;
+        if ($permissions === 'supervisor') return 3;
+        if ($permissions === 'admin') return 9;
+        if ($permissions === 'superadmin') return 10;
         return 0;
     }
     public static function EscribirEnLog($thiis, $clase = '', $mensaje = '', $returnPermission = true, $critico = false) {
@@ -86,7 +95,7 @@ class Myhelp{
         if ($numPalabras > $maxPalabras) {
             $offset = $maxPalabras - 1;
             while (in_array($palabras[$offset], $noTerminales) && $offset < $numPalabras) {
-                $offset++; 
+                $offset++;
             }
             $ultimaPalabra = $palabras[$offset];
             if((intval($ultimaPalabra)) != 0){

@@ -19,14 +19,18 @@
 
 
     import Create from '@/Pages/Reportes/Create.vue';
-    import Edit from '@/Pages/Reportes/Edit.vue'; 
+    import CreateMass from '@/Pages/Reportes/CreateMassive.vue';
+    import Edit from '@/Pages/Reportes/Edit.vue';
     import Delete from '@/Pages/Reportes/Delete.vue';
+    import DeleteBulk from "@/Pages/Reportes/DeleteBulk.vue";
 
 
     import {formatDate, number_format, monthName} from '@/global.ts';
 
     import { Bar } from 'vue-chartjs'
     import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
+    import InputError from "@/Components/InputError.vue";
+    import InputLabel from "@/Components/InputLabel.vue";
     ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
     const { _, debounce, pickBy } = pkg
@@ -41,6 +45,7 @@
         valoresSelect: Object,
         showSelect: Object,
         showUsers: Object,
+        userFiltro: Object,
         IntegerDefectoSelect: Number,
         horasemana: Number,
         startDateMostrar: String,
@@ -63,12 +68,16 @@
         sumdominical_extra_nocturno: Number,
 
     })
+
     let vieneDeReportes = typeof props.ultimoReporte != 'undefined';
+
+
+    // <!--<editor-fold desc="Charts">-->
     const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
         color: "#000",
-        // todo 
+        // todo
         darkcolor: "#fff",
     }
     const chartData = {
@@ -79,7 +88,8 @@
             backgroundColor: '#f87979',
         }]
     };
-   
+    // <!--</editor-fold>-->
+
     const data = reactive({
         params: {
             soloValidos: props.filters?.soloValidos,
@@ -87,10 +97,12 @@
             field: props.filters?.field,
             order: props.filters?.order,
             perPage: props.perPage,
+            FiltroUser: props.FiltroUser,
         },
         selectedId: [],
         multipleSelect: false,
         createOpen: false,
+        createMassOpen: false,
         editOpen: false,
         editCorregirOpen: false,
         deleteOpen: false,
@@ -101,12 +113,14 @@
     })
 
     const order = (field) => {
-        if(field != undefined && field != null){
+        if(field !== undefined && field !== null && props.userFiltro){
 
             field = field.substr(2);
             data.params.field = field.replace(/ /g, "_")
 
             data.params.order = data.params.order === "asc" ? "desc" : "asc"
+        }else{
+          alert('No esta permitido organizar la tabla en esta vista')
         }
     }
 
@@ -136,7 +150,7 @@
         }
     }
 
-    //aprobar o no 
+    //aprobar o no
     const form = useForm({
         valido: false,
     });
@@ -160,14 +174,32 @@
         <div class="space-y-4">
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">
-                    <PrimaryButton v-if="can(['create reporte'])" class="rounded-none" @click="data.createOpen = true">
-                        {{ lang().button.add }}
-                    </PrimaryButton>
+                    <div class="mt-4 inline-flex">
+                        <PrimaryButton v-if="can(['create reporte'])" class="rounded-md mx-2 h-10 mt-6" @click="data.createOpen = true">
+                            {{ lang().button.add }}
+                        </PrimaryButton>
+                        <PrimaryButton v-if="can(['isAdmin'])" class="rounded-md mx-2 h-10 mt-6" @click="data.createMassOpen = true">
+                            {{ lang().button.add }} Masivamente
+                        </PrimaryButton>
+
+                        <div v-if="can(['update reporte']) && props.userFiltro" class="mx-4">
+                            <InputLabel for="centro_costo_id" value="Filtrar"/>
+                            <SelectInput v-model="data.params.FiltroUser" :dataSet="props.userFiltro"
+                                         class="mt-1 block w-full"/>
+                            <InputError class="mt-2" :message="form.errors.centro_costo_id"/>
+                        </div>
+                    </div>
 
                     <Create :show="data.createOpen" @close="data.createOpen = false" :title="props.title"
                         :valoresSelect="props.valoresSelect" :IntegerDefectoSelect="props.IntegerDefectoSelect"
                         :horasemana="props.horasemana" :startDateMostrar="props.startDateMostrar"
-                        :endDateMostrar="props.endDateMostrar" :numberPermissions="props.numberPermissions" 
+                        :endDateMostrar="props.endDateMostrar" :numberPermissions="props.numberPermissions"
+                        :ultimoReporte="props.ultimoReporte"
+                        />
+                    <CreateMass :show="data.createMassOpen" @close="data.createMassOpen = false" :title="props.title"
+                        :valoresSelect="props.valoresSelect" :IntegerDefectoSelect="props.IntegerDefectoSelect"
+                        :horasemana="props.horasemana" :startDateMostrar="props.startDateMostrar"
+                        :endDateMostrar="props.endDateMostrar" :numberPermissions="props.numberPermissions"
                         :ultimoReporte="props.ultimoReporte"
                         />
 
@@ -181,6 +213,10 @@
 
                     <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :Reporte="data.generico" v-show="can(['delete reporte'])"
                         :title="props.title" />
+
+                    <DeleteBulk :show="data.deleteBulkOpen" v-if="can(['delete reporte']) && can(['updateCorregido reporte'])"
+                                @close="data.deleteBulkOpen = false, data.multipleSelect = false, data.selectedId = []"
+                                :selectedId="data.selectedId" :title="props.title" />
                 </div>
             </div>
 
@@ -194,13 +230,13 @@
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton>
                     </div>
+                    <div v-if="filters !== null" class="flex">
                     <TextInput v-if="filters !== null" v-show="can(['update reporte'])" v-model="data.params.search"
-                        type="text" class="block w-3/6 md:w-2/6 lg:w-1/6 rounded-lg"
+                        type="text" class="block w-full rounded-lg"
                         :placeholder="lang().placeholder.searchDates" />
 
-                    <div v-if="props.quincena === null" class="flex space-x-8">
-                        <label for="soloval">Solo validos</label>
-                        <input v-if="filters !== null" v-model="data.params.soloValidos" id="soloval" type="checkbox"
+                        <label for="soloval" class="mx-3">Solo validos</label>
+                        <input v-model="data.params.soloValidos" id="soloval" type="checkbox"
                             class="bg-black h-7 w-7" />
                     </div>
                 </div>
@@ -236,25 +272,25 @@
                                                 <InfoButton v-if="can(['update reporte'])" type="button"
                                                     @click="(data.editOpen = true), (data.generico = clasegenerica)"
                                                     class="px-2 py-1.5 rounded-sm" v-tooltip="lang().tooltip.edit">
-                                                    <PencilIcon class="w-4 h-4" />
+                                                    <PencilIcon class="w-6 h-6" />
                                                 </InfoButton>
-                                                <SuccessButton v-if="can(['update reporte'])" type="button" class="mx-1 w-10 h-8 p-0 rounded-lg"
+                                                <SuccessButton v-if="can(['update reporte'])" type="button" class="mx-1 w-12 h-10"
                                                     :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                                                     @click=" (data.generico = clasegenerica),(updateThisReporte(true))"
                                                     v-tooltip="'Aprobar'">
-                                                    <CheckIcon class="w-4 h-4" />
+                                                    <CheckIcon class="w-6 h-6" />
                                                 </SuccessButton>
                                             </form>
                                             <!-- <InfoButton v-if="(can(['delete reporte'])) && (clasegenerica.valido === 2)"
                                                 type="button"
                                                 @click="(data.editCorregirOpen = true), (data.generico = clasegenerica)"
                                                 class="px-2 py-1.5 rounded-lg" v-tooltip="'Corregir'">
-                                                <DocumentCheckIcon class="w-4 h-4" />
+                                                <DocumentCheckIcon class="w-6 h-6" />
                                             </InfoButton> -->
                                             <DangerButton v-if="(can(['delete reporte']))" type="button"
                                                 @click="(data.deleteOpen = true), (data.generico = clasegenerica)"
                                                 class="px-2 py-1.5 rounded-sm" v-tooltip="lang().tooltip.delete">
-                                                <TrashIcon class="w-4 h-4" />
+                                                <TrashIcon class="w-6 h-6" />
                                             </DangerButton>
                                         </div>
                                     </div>
@@ -264,11 +300,11 @@
                                 <td v-show="can(['updateCorregido reporte'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ showUsers[clasegenerica.user_id] }}</td>
 
                                 <td v-for="(titulo_slug, indi) in nombresTabla[1]" :key="indi" class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    <div v-if="titulo_slug.substr(0,1) == 's'">{{ (clasegenerica[titulo_slug.substr(2)]) }} </div>
-                                    <div v-else-if="titulo_slug.substr(0,1) == 'd'">{{ formatDate(clasegenerica[titulo_slug.substr(2)]) }}</div>
-                                    <div v-else-if="titulo_slug.substr(0,1) == 't'">{{ formatDate(clasegenerica[titulo_slug.substr(2)],'conLaHora') }}</div>
+                                    <div v-if="titulo_slug.substr(0,1) === 's'">{{ (clasegenerica[titulo_slug.substr(2)]) }} </div>
+                                    <div v-else-if="titulo_slug.substr(0,1) === 'd'">{{ formatDate(clasegenerica[titulo_slug.substr(2)]) }}</div>
+                                    <div v-else-if="titulo_slug.substr(0,1) === 't'">{{ formatDate(clasegenerica[titulo_slug.substr(2)],'conLaHora') }}</div>
 
-                                    <div v-else-if="titulo_slug.substr(0,1) == 'b'">
+                                    <div v-else-if="titulo_slug.substr(0,1) === 'b'">
                                         <div v-if="clasegenerica[titulo_slug.substr(2)] === 0"> Aun no validada</div>
                                         <div v-else-if="clasegenerica[titulo_slug.substr(2)] === 1">
                                             <CheckIcon class="w-8 h-8 text-green-600" />

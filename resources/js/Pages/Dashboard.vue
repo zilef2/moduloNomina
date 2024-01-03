@@ -6,7 +6,7 @@ import { Head, Link } from '@inertiajs/vue3';
 
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
-import { watchEffect, onMounted } from "vue";
+import { watchEffect, onMounted,defineAsyncComponent, Suspense, reactive, ref } from "vue";
 
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
@@ -16,13 +16,16 @@ const props = defineProps({
     // roles: Number,
     permissions: Number,
     reportes: Number,
-    ultimos5dias: Array,
-    diasNovalidos: Array,
-    trabajadoresHoy: Array,
-    centrosHoy: Array,
+    ultimos5dias: Object,
+    diasNovalidos: Object,
+    trabajadoresHoy: Object,
+    centrosHoy: Object,
     versionZilef: String,
 })
 let width;
+const data = reactive({
+
+})
 
 onMounted(() => {
   width = window.innerWidth;
@@ -34,43 +37,73 @@ watchEffect(() => {
     chartOptions.height = width
   });
 });
-const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    color: "#808080",
+
+
+// <!--<editor-fold desc="Charts">-->
+// # puro charts
+
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        color: "#808080",
+    }
+
+    const chartData = {
+        name: 'Numero de reportes',
+        datasets: [{
+            label: 'Numero de Reportes',
+            data: props.ultimos5dias,
+            backgroundColor: '#f87979',
+        }]
+    };
+    const chartData3 = {
+        name: 'Reportes invalidos',
+        datasets: [{
+            label: 'Reportes no validos',
+            data: props.diasNovalidos,
+            backgroundColor: '#1ff979',
+        }]
+    };
+    const chartTrabajadoresHoy = {
+        datasets: [{
+            label: 'Horas por trabajador (HOY)',
+            data: props.trabajadoresHoy,
+            backgroundColor: '#ffd979',
+        }]
+    };
+    const centrosHoy = {
+        datasets: [{
+            label: 'Horas por centro (HOY)',
+            data: props.centrosHoy,
+            backgroundColor: '#df1f79',
+        }]
+    };
+// # fin charts
+// <!--</editor-fold>-->
+
+// const ip = ''
+// const token = '87303ba169a724'
+// const url = 'ipinfo.io/${ip}?token=87303ba169a724'
+// const res = await fetch(url);
+// const json = await res.json()
+// console.log("🧈 debu res:", res);
+
+const fetchData = async () => {
+    const ip = '181.134.144.14'
+    // const token = '87303ba169a724'
+    const url = 'https://ipinfo.io/'+ip+'?token=87303ba169a724'
+    const res = await fetch(url);
+    let datau
+    if(res){
+        datau = await res.json()
+    }
+    return datau;
 }
 
-const chartData = {
-    name: 'Numero de reportes',
-    datasets: [{
-        label: 'Numero de Reportes',
-        data: props.ultimos5dias,
-        backgroundColor: '#f87979',
-    }]
-};
-const chartData3 = {
-    name: 'Reportes invalidos',
-    datasets: [{
-        label: 'Reportes no validos',
-        data: props.diasNovalidos,
-        backgroundColor: '#1ff979',
-    }]
-};
-const chartTrabajadoresHoy = {
-    datasets: [{
-        label: 'Horas por trabajador (HOY)',
-        data: props.trabajadoresHoy,
-        backgroundColor: '#ffd979',
-    }]
-};
-const centrosHoy = {
-    datasets: [{
-        label: 'Horas por centro (HOY)',
-        data: props.centrosHoy,
-        backgroundColor: '#df1f79',
-    }]
-};
-
+let data2 = ref(null);
+fetchData().then(result => {
+  data2.value = result;
+});
 </script>
 
 <template>
@@ -104,7 +137,7 @@ const centrosHoy = {
                         </div>
                         <div> <UserIcon class="w-16 h-auto" /> </div>
                     </div>
-                    <div 
+                    <div
                         class="bg-blue-600 dark:bg-blue-600/80 rounded-b-none sm:rounded-b-lg p-2 overflow-hidden hover:bg-blue-800/90 dark:hover:bg-blue-800/70">
                         <Link :href="route('user.index')" class="flex justify-between items-center">
                         <p>{{ lang().label.more }}</p>
@@ -120,7 +153,7 @@ const centrosHoy = {
                         </div>
                         <div> <UserIcon class="w-16 h-auto" /> </div>
                     </div>
-                    <div 
+                    <div
                         class="bg-blue-600 dark:bg-blue-600/80 rounded-b-none sm:rounded-b-lg p-2 overflow-hidden hover:bg-blue-800/90 dark:hover:bg-blue-800/70">
                         <Link :href="route('user.index')" class="flex justify-between items-center">
                         <p>{{ lang().label.more }}</p>
@@ -146,7 +179,7 @@ const centrosHoy = {
                 </div>
             </div>
 
-            <div v-show="can(['updateCorregido reporte']) || can(['isAdmin'])" 
+            <div v-show="can(['updateCorregido reporte']) || can(['isAdmin'])"
                 class="grid xs:grid-cols-1 sm:grid-cols-1 md:grid-cols-2 mt-26 gap-8">
                 <div class="shadowCard">
                     <h2 class="my-3">Numero de reportes</h2>
@@ -161,7 +194,7 @@ const centrosHoy = {
                         :data="chartData3" />
                     </div>
                 </div>
-                
+
                 <div class="shadowCard">
                     <h2 class="my-3">Horas</h2>
                     <div class="my-2 mx-5 p-1">
@@ -177,5 +210,7 @@ const centrosHoy = {
                 </div>
             </div>
         </div>
+
+        <p class="mx-auto mt-8">{{data2?.city}}</p>
     </AuthenticatedLayout>
 </template>

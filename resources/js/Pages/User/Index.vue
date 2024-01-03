@@ -11,12 +11,13 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
     import pkg from 'lodash';
     import { router } from '@inertiajs/vue3';
     import Pagination from '@/Components/Pagination.vue';
-    import { ShieldCheckIcon, CheckBadgeIcon,EyeIcon, ChevronUpDownIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/solid';
+    import { ShieldCheckIcon, CheckBadgeIcon,EyeIcon, ChevronUpDownIcon,LinkIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/solid';
 
     import {number_format} from '@/global.ts';
 
 import Create from '@/Pages/User/Create.vue';
 import Edit from '@/Pages/User/Edit.vue';
+import EdiCentro from '@/Pages/User/EdiCentro.vue';
 import Delete from '@/Pages/User/Delete.vue';
 import DeleteBulk from '@/Pages/User/DeleteBulk.vue';
 import Checkbox from '@/Components/Checkbox.vue';
@@ -48,6 +49,7 @@ const data = reactive({
     multipleSelect: false,
     createOpen: false,
     editOpen: false,
+    EdiCentroOpen: false,
     deleteOpen: false,
     deleteBulkOpen: false,
     user: null,
@@ -97,36 +99,46 @@ const data = reactive({
 
     <AuthenticatedLayout>
         <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />
+        <p v-if="!props.superviNullCentro" class="text-lg mt-2 mb-5 text-red-600"> Hay supervisores sin centro</p>
         <div class="space-y-4">
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit gap-8">
                     <PrimaryButton v-show="can(['create user'])" class="rounded-md mx-2" @click="data.createOpen = true">
                         {{ lang().button.add }}
                     </PrimaryButton>
-                    <Link v-show="can(['update user'])" :href="route('user.uploadexcel')" 
+                    <Link v-show="can(['update user'])" :href="route('IndexTrashed')"
+                          class=" mx-1 bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary">
+                        <PrimaryButton v-show="can(['create user'])" class="flex items-center px-4">
+                            Desvinculados
+                        </PrimaryButton>
+                    </Link>
+                    <Link v-show="can(['update user'])" :href="route('user.uploadexcel')"
                         class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary">
-                        <PrimaryButton v-show="can(['update user']) && props.superviNullCentro == 0" class="flex items-center px-4">
+                        <PrimaryButton v-show="can(['update user']) && props.superviNullCentro" class="flex items-center px-4">
                             Exportar e Importar
                             <ShieldCheckIcon class="w-3 h-3 ml-2 mb-1" />
                             <!-- <span class="ml-3">{{ lang().button.importUser }}</span> -->
                         </PrimaryButton>
 
                     </Link>
-                    <div class="mx-4 pt-1 pb-3 inline-flex">‎
-                        <input id="onlySupervis" type="checkbox" v-model="data.params.onlySupervis"
-                        class="inline-flex items-center p-3  border-2 border-sky-500 rounded-md font-semibold hover:bg-primary/80 dark:hover:bg-primary/90 focus:bg-primary/80 dark:focus:bg-primary/80 active:bg-primary dark:active:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-primary transition ease-in-out duration-150 disabled:bg-primary/80"/>
-                        <label for="onlySupervis" class="mx-2">Mostrar solo supervisores ({{ props.superviNullCentro }})</label>
-                    </div>
-
                     <Create :show="data.createOpen" @close="data.createOpen = false" :roles="props.roles"
                         :cargos="props.cargos" :centros="props.centros" :sexoSelect="props.sexoSelect" :title="props.title" />
                     <Edit :show="data.editOpen" @close="data.editOpen = false" :user="data.user" :roles="props.roles"
                         :cargos="props.cargos" :centros="props.centros" :sexoSelect="props.sexoSelect" :title="props.title" />
+                    <EdiCentro :show="data.EdiCentroOpen" @close="data.EdiCentroOpen = false" :user="data.user"
+                               :centros="props.centros" :title="props.title" />
                     <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :user="data.user"
                         :title="props.title" />
                     <DeleteBulk :show="data.deleteBulkOpen"
                         @close="data.deleteBulkOpen = false, data.multipleSelect = false, data.selectedId = []"
                         :selectedId="data.selectedId" :title="props.title" />
+                </div>
+                <div class="rounded-lg overflow-hidden w-fit gap-8 my-2">
+                    <div class="mx-4 pt-1 pb-3 inline-flex">‎
+                        <input id="onlySupervis" type="checkbox" v-model="data.params.onlySupervis"
+                               class="inline-flex items-center p-3  border-2 border-sky-500 rounded-md font-semibold hover:bg-primary/80 dark:hover:bg-primary/90 focus:bg-primary/80 dark:focus:bg-primary/80 active:bg-primary dark:active:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-primary transition ease-in-out duration-150 disabled:bg-primary/80"/>
+                        <label for="onlySupervis" class="mx-2">Mostrar solo supervisores</label>
+                    </div>
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
@@ -179,12 +191,6 @@ const data = reactive({
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
                                 </th>
-                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('telefono')">
-                                    <div class="flex justify-between items-center">
-                                        <span>{{ lang().label.telefono }}</span>
-                                        <ChevronUpDownIcon class="w-4 h-4" />
-                                    </div>
-                                </th>
                                 <th class="px-2 py-4 cursor-pointer" v-on:click="order('fecha_de_ingreso')">
                                     <div class="flex justify-between items-center">
                                         <span>{{ lang().label.fecha_de_ingreso }}</span>
@@ -231,11 +237,10 @@ const data = reactive({
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cedula }}</td>
 
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cargo.length == 0 ? 'No tiene cargo' : user.cargo.nombre }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.roles.length == 0 ? 'No tiene rol' : user.roles[0].name }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cargo.length === 0 ? 'No tiene cargo' : user.cargo.nombre }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.roles.length === 0 ? 'No tiene rol' : user.roles[0].name }}</td>
                                 <!-- <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.created_at }}</td> -->
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.celular }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.telefono }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.celular }} <span> {{ user.telefono }} </span></td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.fecha_de_ingreso }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cc }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ number_format(user.salario,0,1) }}</td>
@@ -244,7 +249,8 @@ const data = reactive({
                                     <div class="flex justify-center">
                                         <Link :href="route('user.showReporte',user.id)"
                                             v-show="can(['update centroCostos'])" type="button"
-                                            class="inline-flex  items-center p-1.5 bg-gray-600 border border-transparent rounded-l-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"
+                                            class="inline-flex  items-center p-1.5 bg-gray-600 border border-transparent rounded-l-lg font-semibold text-xs text-white uppercase tracking-widest
+                                             hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-250"
                                             v-tooltip="lang().tooltip.seeReport">
                                             <EyeIcon class="w-4 h-4" />
                                         </Link>
@@ -253,6 +259,11 @@ const data = reactive({
                                                 @click="(data.editOpen = true), (data.user = user)"
                                                 class="px-2 py-1.5 rounded-sm mx-0.5" v-tooltip="lang().tooltip.edit">
                                                 <PencilIcon class="w-4 h-4" />
+                                            </InfoButton>
+                                            <InfoButton v-show="can(['update user']) && user.roles[0].name === 'supervisor'" type="button"
+                                                @click="(data.EdiCentroOpen = true), (data.user = user)"
+                                                class="px-2 py-1.5 rounded-sm mx-0.5" v-tooltip="'Asignar'">
+                                                <LinkIcon class="w-4 h-4" />
                                             </InfoButton>
                                             <DangerButton v-show="can(['delete user'])" type="button"
                                                 @click="(data.deleteOpen = true), (data.user = user)"

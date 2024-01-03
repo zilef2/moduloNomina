@@ -19,15 +19,16 @@ class CentroCostosController extends Controller {
 
     public function MapearClasePP(&$centroCostos, $numberPermissions)
     {
-        $centroCostos = $centroCostos->get()->map(function ($centroCosto) use ($numberPermissions) {
+        $AUuser = Myhelp::AuthU();
+        $centroCostos = $centroCostos->get()->map(function ($centroCosto) use ($numberPermissions,$AUuser) {
 
-            if ($numberPermissions == 3) {
-                $objetoDelUser = Auth::user()->centro_costo_id;
-                if ($centroCosto->id != $objetoDelUser) return null;
+            if ($numberPermissions === 3) {
+                $objetoDelUser = $AUuser->ArrayCentrosID();
+                if (in_array($centroCosto->id,$objetoDelUser)) return null;
             }
 
             $centroCosto->cuantoshijos = count($centroCosto->users);
-            $centroCosto->supervi = $centroCosto->supervisores($centroCosto->id);
+            $centroCosto->supervi = implode(',',$centroCosto->ArrayListaSupervisores($centroCosto->id));
             return $centroCosto;
         })->filter();
         // dd($centroCostos);
@@ -54,7 +55,7 @@ class CentroCostosController extends Controller {
         }else{
             $nombresTabla =[//[0]: como se ven //[1] como es la BD
                 ["Acciones","#","nombre","usuarios","Supervisor"],
-                [null,null,"nombre","usuarios","Supervisor"]
+                [null,null,"nombre",null,null]
             ];
         }
 
@@ -98,7 +99,7 @@ class CentroCostosController extends Controller {
     public function show( $id) {
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         $Reportes = Reporte::query();
-        
+
         $titulo = __('app.label.Reportes');
         $permissions = Auth()->user()->roles->pluck('name')[0];
         $Reportes->Where('centro_costo_id',$id);
@@ -107,31 +108,32 @@ class CentroCostosController extends Controller {
         foreach ($valoresSelectConsulta as $value) {
             $valoresSelect[] = [
                 'label' => $value->nombre, //centro de costos
-                'value' => intval($value->id),
+                'value' => (int)($value->id),
             ];
-            $showSelect[intval($value->id)] = $value->nombre;
+            $showSelect[(int)($value->id)] = $value->nombre;
         }
         $usuariosSelectConsulta = User::orderBy('name')->get();
         foreach ($usuariosSelectConsulta as $value) {
-            $showUsers[intval($value->id)] = $value->name;
+            $showUsers[(int)($value->id)] = $value->name;
         }
-        
-        if($permissions === "empleado") { //admin | administrativo
+
+        if($numberPermissions === 1) { //1 : empleado | 2 : administrativo | 3 :supervisor
         }else{ // not empleado
-            // $ReportesEsteMes = Reporte::WhereMonth('fecha_ini',$esteMes)->get()->count();
             $titulo = $this->CalcularTituloQuincena($permissions);
-            
             $Reportes->orderBy('fecha_ini'); $perPage = 15;
 
             $nombresTabla =[//0: como se ven //1 como es la BD
-                
+
                 ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio","fin","horas trabajadas",  'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', "observaciones"],
-                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
-                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean 
+                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean
+                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean
             ];
         }
         $sumhoras_trabajadas = $Reportes->sum('horas_trabajadas');
-        
+
+//        $reporController = new ReportesController();
+//        $showSelect = $reporController->losSelect($valoresSelectConsulta, $showUsers,$valoresSelect,$userFiltro);
+
         return Inertia::render('Reportes/Index', [ //carpeta
             'title'          =>  $titulo,
             'filters'        =>  null,
@@ -145,6 +147,9 @@ class CentroCostosController extends Controller {
             'IntegerDefectoSelect'   =>  $IntegerDefectoSelect,
             'showUsers'   =>  $showUsers,
             'sumhoras_trabajadas'   =>  $sumhoras_trabajadas,
+
+            //18dic2023 
+            'userFiltro'            =>  null,
         ]);
     }
 
@@ -206,13 +211,13 @@ class CentroCostosController extends Controller {
      */
     public function destroy($id) {
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
-        DB::beginTransaction();        
+        DB::beginTransaction();
         try {
             if($numberPermissions > 8){
 
                 $centroCostos = CentroCosto::findOrFail($id);
                 $centroCostos->delete();
-                
+
                 DB::commit();
                 return back()->with('success', __('app.label.deleted_successfully', ['name' => $centroCostos->nombre]));
             }else{

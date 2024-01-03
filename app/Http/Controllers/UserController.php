@@ -42,47 +42,47 @@ class UserController extends Controller {
     public function Dashboard() {
         $ListaControladoresYnombreClase = (explode('\\',get_class($this))); $nombreC = end($ListaControladoresYnombreClase);
         Myhelp::EscribirEnLog($this, $nombreC, ' U -> '.Auth::user()->name. ' Accedio al dashboard ', false);
-        
-        $Authuser = Auth::user();
+
+        $Authuser = Myhelp::AuthU();
         $permissions = auth()->user()->roles->pluck('name')[0];
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
-    
+
         $ultimos5dias = null;
         if($numberPermissions === 1) {
             return redirect()->route('Reportes.index')->with('success', 'Bienvenido');
             // $reportes = (int) Reporte::Where('user_id', $Authuser->id)->count();
         }else{
             $reportes = (int) Reporte::count();
-            
+
             if($numberPermissions === 3){
-                $centroMio = $Authuser->centro_costo_id;
-                $reportes = (int) Reporte::Where('centro_costo_id',$centroMio)->count();
+                $centroMio = $Authuser->ArrayCentrosID();
+                $reportes = (int) Reporte::WhereIn('centro_costo_id',$centroMio)->count();
 
                 $ultimos5dias = [
-                    'Mes pasado' => Reporte::Where('centro_costo_id',$centroMio)->whereValido(1)->where('fecha_ini','<', Carbon::today()->addMonth(-1))->get()->count(),
-        
-                    'Semana pasada' => Reporte::Where('centro_costo_id',$centroMio)->whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->addDays(-7)->startOfWeek() ,
+                    'Mes pasado' => Reporte::WhereIn('centro_costo_id',$centroMio)->whereValido(1)->where('fecha_ini','<', Carbon::today()->addMonth(-1))->get()->count(),
+
+                    'Semana pasada' => Reporte::WhereIn('centro_costo_id',$centroMio)->whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->addDays(-7)->startOfWeek() ,
                         Carbon::now()->addDays(-7)->endOfWeek()])
                         ->get()->count(),
-        
-                    'Semana actual' => Reporte::Where('centro_costo_id',$centroMio)->whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->startOfWeek() ,
+
+                    'Semana actual' => Reporte::WhereIn('centro_costo_id',$centroMio)->whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->startOfWeek() ,
                         Carbon::now()->endOfWeek()])
                         ->get()->count(),
                 ];
 
                 $diasNovalidos = [
-                    'Mes pasado' => Reporte::Where('centro_costo_id',$centroMio)->whereIn('valido',[0,2])->where('fecha_ini','<', Carbon::today()->startOfMonth())->get()->count(),
-                    'Mes actual' => Reporte::Where('centro_costo_id',$centroMio)->whereIn('valido',[0,2])->where('fecha_ini','>', Carbon::today()->startOfMonth())->get()->count(),
+                    'Mes pasado' => Reporte::WhereIn('centro_costo_id',$centroMio)->whereIn('valido',[0,2])->where('fecha_ini','<', Carbon::today()->startOfMonth())->get()->count(),
+                    'Mes actual' => Reporte::WhereIn('centro_costo_id',$centroMio)->whereIn('valido',[0,2])->where('fecha_ini','>', Carbon::today()->startOfMonth())->get()->count(),
                 ];
 
             }else{
                 $ultimos5dias = [
                     'Mes pasado' => Reporte::whereValido(1)->where('fecha_ini','<', Carbon::today()->addMonth(-1))->get()->count(),
-        
+
                     'Semana pasada' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->addDays(-7)->startOfWeek() ,
                         Carbon::now()->addDays(-7)->endOfWeek()])
                         ->get()->count(),
-        
+
                     'Semana actual' => Reporte::whereValido(1)->whereBetween('fecha_ini', [Carbon::now()->startOfWeek() ,
                         Carbon::now()->endOfWeek()])
                         ->get()->count(),
@@ -91,22 +91,22 @@ class UserController extends Controller {
                     'Mes pasado' => Reporte::whereIn('valido',[0,2])->where('fecha_ini','<', Carbon::today()->startOfMonth())->get()->count(),
                     'Mes actual' => Reporte::whereIn('valido',[0,2])->where('fecha_ini','>', Carbon::today()->startOfMonth())->get()->count(),
                 ];
-               
+
             }
-            $usuariosConRol = User::whereHas("roles", function($q){ 
+            $usuariosConRol = User::whereHas("roles", function($q){
                 $q->where("name", "empleado");
             })->take(5)->get();
             foreach ($usuariosConRol as $value) {
                 $BooleanreportoHoy = Reporte::where('user_id',$value->id)
                     ->whereDate('fecha_fin',Carbon::today())
                     ->first();
-    
+
                 if($BooleanreportoHoy !== null)
                     $trabajadoresHoy[$value->name] = $BooleanreportoHoy->horas_trabajadas;
                 else
                     $trabajadoresHoy[$value->name] = 0;
             }
-    
+
             $centros = CentroCosto::all();
             foreach ($centros as $value) {
                 $BooleanReporteCentro = Reporte::where('centro_costo_id',$value->id)->whereDate('fecha_fin',Carbon::today())->sum('horas_trabajadas');
@@ -115,18 +115,18 @@ class UserController extends Controller {
                 }
                 else
                     $centrosHoy[$value->nombre] = 0;
-    
+
             }
         }
-    
+
         //#location
             // if ($position = Location::get()) { // Successfully retrieved position.
             //     $positio = $position->countryName;
             //     Log::channel('stevebauman')->info('Vista: welcome. User => '  .Auth::user()->name .' posicion:'. $positio); } else {
             //     $positio =' Failed retrieving position.';
             //     Log::channel('stevebauman')->info('Vista: welcome. User => '  .Auth::user()->name .' '. $positio); }
-    
-        return Inertia::render('Dashboard', 
+
+        return Inertia::render('Dashboard',
         [
             'versionZilef'  => '0.9.1',
             'users'         => (int) User::count(),
@@ -145,13 +145,17 @@ class UserController extends Controller {
     //empieza el index
     public function MapearClasePP(&$users, $numberPermissions) {
         $users = $users->get()->map(function ($user) use ($numberPermissions) {
-            $user->cc = $user->centroName();
+            $user->cc = is_string($user->ArraycentroName()) ? $user->ArraycentroName() : implode(',', $user->ArraycentroName());
             return $user;
         })->filter();
     }
 
-    public function Busqueda(UserIndexRequest $request){
-        $users = User::query()->with('roles','cargo');
+    public function Busqueda(UserIndexRequest $request,$isTrashed = false){
+        if($isTrashed === 'trashed'){
+            $users = User::query()->onlyTrashed()->with('roles','cargo');
+        }else{
+            $users = User::query()->with('roles','cargo');
+        }
 
         if ($request->has('search')) {
             $users->where('name', 'LIKE', "%" . $request->search . "%");
@@ -160,7 +164,7 @@ class UserController extends Controller {
         }
 
         if ($request->has(['field', 'order'])) {
-            dd($request->field, $request->order);
+//            dd($request->field, $request->order);
             $users->orderBy($request->field, $request->order);
         }else{
             $users->orderByDesc('updated_at');
@@ -174,7 +178,7 @@ class UserController extends Controller {
         }
 
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'users'));
-        
+
 //         if($numberPermissions == 3){//supervisor
 //             $centroID = Auth::user()->centro_costo_id;
 //             if($centroID){
@@ -192,7 +196,6 @@ class UserController extends Controller {
         $users = $this->Busqueda($request);
 
         $perPage = $request->has('perPage') ? $request->perPage : 10;
-        $role = Auth()->user()->roles->pluck('name')[0];
         $roles = Role::get();
         if ($numberPermissions != 3 && $numberPermissions < 10) {
             $users->whereHas('roles', function ($query) {
@@ -204,7 +207,7 @@ class UserController extends Controller {
         }
         $cargos = Cargo::all();
         $centros = CentroCosto::all();
-        
+
 
         $this->MapearClasePP($users,$numberPermissions);
 
@@ -222,10 +225,19 @@ class UserController extends Controller {
         $sexoSelect[] = [ 'label' => 'femenino', 'value' => 1 ];
 
         // 21sept
-        $superviNullCentro = User::whereHas('roles', function ($query) {
+//        $superviNullCentro = User::whereHas('roles', function ($query) {
+//            return $query->where('name', 'supervisor');
+//        })->whereDoesntHave('centros')->count();
+        $supervisores = User::whereHas('roles', function ($query) {
             return $query->where('name', 'supervisor');
-        })->WhereNull('centro_costo_id')->count();
-
+        })->get();
+        $superviNullCentro = true;
+        foreach ($supervisores as $index => $supervisor) {
+            if(count($supervisor->ArrayCentrosID()) == 0) {
+                $superviNullCentro = false;
+                break;
+            }
+        }
         return Inertia::render('User/Index', [
             'title'             => __('app.label.user'),
             'filters'           => $request->all(['search', 'field', 'order']),
@@ -268,7 +280,7 @@ class UserController extends Controller {
                 'sexo' => $request->sexo,
                 'salario' => $request->salario,
 
-                'centro_costo_id' => $elCentroId,
+//                'centro_costo_id' => $elCentroId,
             ]);
             $user->assignRole($request->role);
             DB::commit();
@@ -280,36 +292,37 @@ class UserController extends Controller {
     }
 
     public function show($id) { } public function edit($id) { }
-
-
-    public function update(UserUpdateRequest $request, $id) {
+    public function update(Request $request, $id) {
         Myhelp::EscribirEnLog($this, 'users');
         DB::beginTransaction();
         try {
             $user = User::findOrFail($id);
-            $elCentroId = $request->centroid == 0 ? null : $request->centroid;
-            
-            if($request->role === 'supervisor' && $elCentroId == null){
-                $elCentroId = CentroCosto::all()->first()->id;
+            $Arraycentros = $request->centroids;
+            if($Arraycentros !== null){ // 1-1)) actualizando centros de costo
+                $cents = [];
+                foreach($Arraycentros as $centroids){
+                    if($centroids !== null)
+                        $cents[] = $centroids;
+                }
+                $user->centros()->sync($cents);
+
             }else{
-                // $elCentroId = null;
+                //1-2))update normalito
+                $user->update([
+                    'name'      => $request->name,
+                    'email'     => $request->email,
+                    // 'password'  => $request->password ? Hash::make($request->password) : $user->password,
+                    'cargo_id' => $request->cargo,
+                    'cedula'=> $request->cedula,
+                    'telefono' => $request->telefono,
+                    'celular' => $request->celular,
+                    'fecha_de_ingreso' => $request->fecha_de_ingreso,
+                    'sexo' => $request->sexo,
+                    'salario' => $request->salario,
+                ]);
+                $user->syncRoles($request->role);
             }
 
-            $user->update([
-                'name'      => $request->name,
-                'email'     => $request->email,
-                // 'password'  => $request->password ? Hash::make($request->password) : $user->password,
-                'cargo_id' => $request->cargo,
-                'cedula'=> $request->cedula,
-                'telefono' => $request->telefono,
-                'celular' => $request->celular,
-                'fecha_de_ingreso' => $request->fecha_de_ingreso,
-                'sexo' => $request->sexo,
-                'salario' => $request->salario,
-
-                'centro_costo_id' => $elCentroId,
-            ]);
-            $user->syncRoles($request->role);
             DB::commit();
             return back()->with('success', __('app.label.updated_successfully', ['name' => $user->name]));
         } catch (\Throwable $th) {
@@ -317,7 +330,6 @@ class UserController extends Controller {
             return back()->with('error', __('app.label.updated_error', ['name' => $user->name]) . $th->getMessage());
         }
     }
-
     /**
      * Remove the specified resource from storage.
      *
@@ -333,8 +345,16 @@ class UserController extends Controller {
             return back()->with('error', __('app.label.deleted_error', ['name' => $user->name]) . $th->getMessage());
         }
     }
-   
-
+    public function Recontratar($userid) {
+        $user = User::withTrashed()->Where('id',$userid)->first();
+        Myhelp::EscribirEnLog($this, 'users Recontratar ');
+        try {
+            $user->restore();
+            return back()->with('success', __('app.label.recontratado_successfully', ['name' => $user->name]));
+        } catch (\Throwable $th) {
+            return back()->with('error', __('app.label.deleted_error', ['name' => $user->name]) . $th->getMessage());
+        }
+    }
     public function destroyBulk(Request $request) {
         Myhelp::EscribirEnLog($this, ' |users Bulk| ');
         try {
@@ -354,22 +374,23 @@ class UserController extends Controller {
         $iniFormat = '';
         $finFormat = '';
         if($request->quincena && $request->fecha_ini){
-            $quincena = intval($request->quincena);
-        
-            $year = intval($request->fecha_ini['year']);
-            $month = intval($request->fecha_ini['month']+1);
+            $quincena = (int)($request->quincena);
+
+            $year = (int)($request->fecha_ini['year']);
+            $month = (int)($request->fecha_ini['month'])+1;
             $NumReportesIniFin = $this->CalcularIniFinQuincena($quincena,$month,$year);
             $iniFormat = Carbon::parse($NumReportesIniFin['ini'])->format('d-m-Y');
             $finFormat = Carbon::parse($NumReportesIniFin['fin'])->format('d-m-Y');
         }
-
         return Inertia::render('User/uploadFromExcel', [
-            'title'       => __('app.label.user'),
-            'breadcrumbs' => [['label' => __('app.label.user'), 'href' => route('user.index')]],
-            'NumUsers'    => $users,
-            'NumReportes' => $NumReportesIniFin['NumReportes']?? 0,
-            'ini'         => $iniFormat,
-            'fin'         => $finFormat,
+            'title'             => __('app.label.user'),
+            'breadcrumbs'       => [['label' => __('app.label.user'), 'href' => route('user.index')]],
+            'NumUsers'          => $users,
+            'NumReportes'       => $NumReportesIniFin['NumReportes']?? 0,
+            'NumReportesRecha'  => $NumReportesIniFin['NumReportesRecha']?? 0,
+            'NumReportesSinval' => $NumReportesIniFin['NumReportesSinval']?? 0,
+            'ini'               => $iniFormat,
+            'fin'               => $finFormat,
         ]);
     }
 
@@ -449,12 +470,12 @@ class UserController extends Controller {
     //exportar el formato unico de ECnomina
     public function export(Request $request) {
         Myhelp::EscribirEnLog($this, 'users export');
-        $quincena = intval($request->quincena);
-        
-        $year = intval($request->year);
-        $month = intval($request->month+1);
+        $quincena = (int)($request->quincena);
+
+        $year = (int)($request->year);
+        $month = (int)($request->month)+1;
         $NumReportesIniFin = $this->CalcularIniFinQuincena($quincena,$month,$year);
-        $NumeroDiasFestivos = intval($request->NumeroDiasFestivos);
+        $NumeroDiasFestivos = (int)($request->NumeroDiasFestivos);
         if($NumReportesIniFin['NumReportes'] > 0){
             return Excel::download(new UsersExport( $NumReportesIniFin['ini'],$NumReportesIniFin['fin'], $NumeroDiasFestivos),
                     "".$year.'Quincena'.$quincena.'DelMes'.$month.".xlsx"
@@ -467,15 +488,13 @@ class UserController extends Controller {
 
     private function CalcularIniFinQuincena($quincena,$month,$year){
         $ini = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(0)->setminutes(0);
-        // dd($ini);
         $fin = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(23)->setminutes(0);
         if($quincena == 1){
-            // $ini->addDays(-3);
             $fin->addDays(14);//antes era 12
         }else{
             $ini->addDays(15);//
             $fin->addMonths(1)->addDays(-1); //antes era -4
-            $nombreDiaSemana = intval($fin->format('d'));
+            $nombreDiaSemana = (int)($fin->format('d'));
 
             if( $nombreDiaSemana == 31) $fin->addDays(-1);
         }
@@ -484,33 +503,41 @@ class UserController extends Controller {
             $q->Where("name", "empleado");
         })->get();
         $NumReportes = 0;
+        $NumReportesRecha = 0;
+        $NumReportesSinval = 0;
         foreach ($users as $value) {
-            $NumReportes += Reporte::where('user_id', $value->id)
-                ->where('valido',1)
-                ->whereBetween('fecha_ini', [$ini,$fin])->count();
-        }
+            $query = Reporte::where('user_id', $value->id)
+                ->whereBetween('fecha_ini', [$ini,$fin]);
 
+            $rechazados = clone $query;
+            $SinValidar = clone $query;
+            $NumReportesRecha += $rechazados->where('valido',2)->count();
+            $NumReportesSinval += $SinValidar->where('valido',0)->count();
+            $NumReportes += $query->where('valido',1)->count();
+        }
         return [
             'NumReportes' => $NumReportes,
             'ini' => $ini,
             'fin' => $fin,
+            'NumReportesRecha' => $NumReportesRecha,
+            'NumReportesSinval' => $NumReportesSinval,
         ];
     }
 
     public function downloadsigo(Request $request) {
         Myhelp::EscribirEnLog($this, ' |users sigo download| ');
-        
-        $quincena = intval($request->quincena);
-        $year = intval($request->year);
-        $month = intval($request->month+1);
+
+        $quincena = (int)($request->quincena);
+        $year = (int)($request->year);
+        $month = (int)($request->month)+1;
         $ini = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(0);
         $fin = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(23);
-        $NumeroDiasFestivos = intval($request->NumeroDiasFestivos);
+        $NumeroDiasFestivos = (int)($request->NumeroDiasFestivos);
 
         //? NOTE:: values 15-30
         if($quincena == 1){
             // $ini->addDays(-3);
-            $fin->addDays(14);//antes era 12            
+            $fin->addDays(14);//antes era 12
         }else{
             $ini->addDays(15);
             $fin->addMonths(1)->addDays(-1); //antes era -4
@@ -531,7 +558,7 @@ class UserController extends Controller {
         if($NumReportes > 0){
             return Excel::download(new SiigoExport($ini,$fin, $NumeroDiasFestivos), "Siigo ".$year.'Quincena'.$quincena.'DelMes'.$month.".xlsx");
         }else{
-            return redirect()->route('user.uploadexcel')->with('warning', 
+            return redirect()->route('user.uploadexcel')->with('warning',
                 'El numero de reportes en esa quincena es 0. '.
                 'formato de la fecha: Año - Mes - dia. '.
                 'fecha inicial: '.$ini->format('Y-m-d').' - '.
@@ -564,24 +591,24 @@ class UserController extends Controller {
         foreach ($usuariosSelectConsulta as $value) {
             $showUsers[intval($value->id)] = $value->name;
         }
-        
+
         if($permissions === "empleado") { //NO admin | administrativo
         }else{ // not empleado
             // $ReportesEsteMes = Reporte::WhereMonth('fecha_ini',$esteMes)->get()->count();
             $titulo = $this->CalcularTituloQuincena($permissions);
-            
+
             $Reportes->orderBy('fecha_ini'); $perPage = 15;
 
             // $nombresTabla =[//0: como se ven //1 como es la BD
             //     ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio",       "fin",        "horas trabajadas",   "observaciones"],
-            //     ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
+            //     ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean
             //     [null,null,null,null,null,null,null,null,null,null,null,null,null,null] //campos ordenables
             // ];
             $nombresTabla =[//0: como se ven //1 como es la BD
-                
+
                 ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio","fin","horas trabajadas",  'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', "observaciones"],
-                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean 
-                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean 
+                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean
+                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean
             ];
 
             //sin uso1
@@ -649,5 +676,48 @@ class UserController extends Controller {
         }
 
         return 'Horas trabajadas quincena: '.$horasTrabajadas;
+    }
+
+
+    public function IndexTrashed(UserIndexRequest $request){
+        $permissions = Myhelp::EscribirEnLog($this, ' users');
+        $numberPermissions = Myhelp::getPermissionToNumber($permissions);
+        $users = $this->Busqueda($request,'trashed');
+
+        $perPage = $request->has('perPage') ? $request->perPage : 10;
+        $roles = Role::get();
+        if ($numberPermissions != 3 && $numberPermissions < 10) {
+            $users->whereHas('roles', function ($query) {
+                return $query->where('name', '<>', 'superadmin');
+            });
+            $roles = Role::where('name', '<>', 'superadmin')
+                ->where('name', '<>', 'admin')
+                ->get();
+        }
+        $cargos = Cargo::all();
+        $centros = CentroCosto::all();
+
+        $this->MapearClasePP($users,$numberPermissions);
+
+        $page = request('page', 1); // Current page number
+        $total = $users->count();
+        $paginated = new LengthAwarePaginator(
+            $users->forPage($page, $perPage),
+            $total,
+            $perPage,
+            $page,
+            ['path' => request()->url()]
+        );
+
+        return Inertia::render('User/IndeDeleted', [
+            'title'             => __('app.label.user'),
+            'filters'           => $request->all(['search', 'field', 'order']),
+            'perPage'           => (int) $perPage,
+            'users'             => $paginated,
+            'roles'             => $roles,
+            'cargos'            => $cargos,
+            'centros'           => $centros,
+            'breadcrumbs'   => [['label' => __('app.label.user'), 'href' => route('user.index')]],
+        ]);
     }
 }

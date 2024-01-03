@@ -24,8 +24,8 @@ class User extends Authenticatable
         'email',
         'password',
         'cedula',
-        'telefono', 
-        'celular', 
+        'telefono',
+        'celular',
         'cargo_id',
         //24abril
         'fecha_de_ingreso',
@@ -68,9 +68,49 @@ class User extends Authenticatable
 		return $this->belongsTo(Cargo::class);
 	}
     public function centros() {
-		return $this->belongsTo(CentroCosto::class, 'centro_costo_id');
+		return $this->belongsToMany(CentroCosto::class,'centro_user');
 	}
-    public function centroName() {
-        return $this->centros != null ? $this->centros->nombre : '';
+    public function ArrayCentrosID() {
+        $result = [];
+        if(!$this->centros->isEmpty()){
+            foreach ($this->centros as $index => $centro) {
+                $result[] = $centro->id;
+            }
+        }
+        return $result;
+    }
+    public function ArraycentroName($numeroDeCentros = 0) {
+        if(!$this->centros->isEmpty()){
+            if($numeroDeCentros != 0){
+                $arrayNombres = [];
+                for ($i = 0; $i < $numeroDeCentros;$i++){
+                    $tempCentro = $this->centros->skip($i)->first();
+                    if(isset($tempCentro)){
+                        $arrayNombres[] = $this->centros->skip($i)->first()->nombre;
+                    }else{
+                        break;
+                    }
+                }
+            }else{
+                foreach ($this->centros as $index => $centro) {
+                    $arrayNombres[] = $centro->nombre;
+                }
+            }
+            $result = $arrayNombres;
+        } else{
+            $result = 'Sin centros';
+        }
+        return $result;
 	}
+
+    public static function UsersWithRol($rol){
+        return User::whereHas('roles', function ($query) use ($rol) {
+            return $query->where('name', $rol);
+        });
+    }
+    public function TieneEsteCentro($centroid){
+        $susCentros = $this->centros()->pluck('centro_costos.id')->toArray();
+        $result = in_array($centroid,$susCentros);
+        return $result;
+    }
 }

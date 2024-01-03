@@ -4,7 +4,8 @@ return [
     'label' => [
         'HORAS_NECESARIAS_SEMANA' => 'Horas necesarias para la semana',
         'centro_costo' => 'centro de costo',
-        'quincena' => 'quincena',
+        'Recontratar' => 'Recontratar',
+        'Recontratar_confirm' => 'Desea recontratar a',
         //parametros
         'Params' => 'Parametros',
         'Parametros' => 'Parametros',
@@ -96,7 +97,6 @@ return [
         'updated' => 'Actualizado',
         'verified' => 'Verificado',
         'search' => 'Buscar',
-        'of' => 'de',
         'logout_confirm' => 'Seguro que va a salir?',
         'delete_confirm' => 'Desea borrar ',
         'created_successfully' => '<b>:name</b> creado satisfactoriamente.',
@@ -104,6 +104,7 @@ return [
         'updated_successfully' => '<b>:name</b> actualizado satisfactoriamente.',
         'updated_error' => 'Error actualizando :name.',
         'deleted_successfully' => '<b>:name</b> borrado satisfactoriamente.',
+        'recontratado_successfully' => '<b>:name</b> recontratado.',
         'deleted_error' => 'Error borrando :name.',
         'all_permission' => 'Todos los Permisos',
         'no_permission' => 'No hay Permisos',
@@ -124,6 +125,7 @@ return [
         'of' => 'de',
     ],
     'button' => [
+        'Recontratar' => 'Recontratar',
         //edit reportes
         'corect' => 'corregir',
 

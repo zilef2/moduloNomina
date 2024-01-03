@@ -23,9 +23,9 @@ class CreateCentroCostosTable extends Migration
 
             $table->unsignedBigInteger('centro_costo_id')->nullable();
             $table->foreign('centro_costo_id')
-            ->references('id')
-            ->on('centro_costos')
-            ->onDelete('restrict');
+                ->references('id')
+                ->on('centro_costos')
+                ->onDelete('restrict');
         });
 
     }

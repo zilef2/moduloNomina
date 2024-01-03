@@ -28,9 +28,11 @@ const props = defineProps({
     ini: Date,
     fin: Date,
     flash: String,
+    NumReportesRecha: Number,
+    NumReportesSinval: Number,
 })
 
-const CurrentlyYear = new Date().getFullYear()    
+const CurrentlyYear = new Date().getFullYear()
 
 
 const data = reactive({
@@ -94,7 +96,7 @@ watchEffect(() => {
     if (props.flash.warning) {
         data.warnn = props.flash.warning
     }
-    
+
     data.params.fecha_ini = form.fecha_ini,
     data.params.quincena = form.quincena
 
@@ -107,7 +109,7 @@ watchEffect(() => {
         form.NumeroDiasFestivos = CuantosFestivosEstaQuincena(form.quincena,form.fecha_ini.month,form.fecha_ini.year)
         // console.log("🧈 debu form.NumeroDiasFestivos:", form.NumeroDiasFestivos);
     }
-    
+
 })
 
 
@@ -224,14 +226,14 @@ data.tiposSiigo = [
                 <section class="text-gray-600 body-font">
                     <div class="container px-5 py-12 mx-auto">
                         <div v-if="can(['update user'])" class="flex flex-wrap -m-4">
-                            <div class="p-4 w-full sm:w-1/3">
+                            <div class="p-4 w-full sm:w-1/2">
                                 <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
                                     <ArrowUpCircleIcon class=" h-24 lg:h-48 md:h-36 w-full object-cover object-center" />
 
                                     <div class="p-6">
-                                        <h2 class="tracking-widest text-xs title-font font-medium text-gray-400 mb-1">
-                                                Formato xlsx</h2>
-                                        <h3 class="title-font text-lg font-medium text-gray-900 mb-3">Subir empleados</h3>
+                                        <h3 class="mx-auto  text-center title-font text-xl font-medium text-gray-900 mb-2">Subir empleados</h3>
+                                        <h2 class="mb-4 tracking-widest text-center text-sm title-font font-medium text-gray-400 dark:text-gray-100">
+                                            Formato xlsx</h2>
                                         <p class="leading-relaxed mb-3"> Este formulario solo permite cargar empleados o administrativos</p>
                                         <form @submit.prevent="uploadFile" id="upload">
                                             <input type="file" @input="formUp.archivo1 = $event.target.files[0]"
@@ -239,7 +241,7 @@ data.tiposSiigo = [
                                             <progress v-if="formUp.progress" :value="formUp.progress.percentage" max="100">
                                                 {{ formUp.progress.percentage }}%
                                             </progress>
-                                         
+
                                             <div class="w-full">
                                                     <PrimaryButton v-show="can(['create user'])" :disabled="formUp.archivo1 == null"
                                                     class="rounded-none my-4">
@@ -282,7 +284,7 @@ data.tiposSiigo = [
                                 </div>
                             </div>
                             <!-- descargar quincena -->
-                            <div class="p-4 w-full md:w-1/2 xl:w-1/3">
+                            <div class="p-4 w-full sm:w-1/2">
                                 <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
                                     <ArrowDownCircleIcon class=" h-24 lg:h-48 md:h-36 w-full object-cover object-center" />
 
@@ -319,78 +321,75 @@ data.tiposSiigo = [
                                         <div class="container p-5 mx-auto">
                                             <div class="text-center mb-1">
                                                 <h1 class="text-xl font-medium text-center title-font text-gray-900 mb-4">
-                                                    Recuerde
-                                                </h1>
+                                                    Recuerde</h1>
                                                 <p class="text-base leading-relaxed w-full mx-auto">
-                                                    Solo se descargarán, Los reportes que sean validos.
+                                                    Solo se descargarán, Los reportes que sean validos.</p>
+                                                <p v-if="props.NumReportes != 0" class="text-xl leading-relaxed w-full mx-auto">
+                                                    Para esta fecha, hay <b>{{ props.NumReportes }}</b> reportes.</p>
+                                                <p v-if="props.NumReportes != 0" class="text-base leading-relaxed w-full mx-auto">
+                                                    <small>{{ props.ini }}</small> - <small>{{ props.fin }}</small>
                                                 </p>
                                                 <p v-if="props.NumReportes != 0" class="text-xl leading-relaxed w-full mx-auto">
-                                                    Para esta fecha, hay <b>{{ props.NumReportes }}</b> reportes.
+                                                    Existen <b>{{ props.NumReportesRecha }}</b> rechazados
+                                                    y <b>{{ props.NumReportesSinval }}</b> sin aprobar.</p>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                            <!-- sigoo -->
+                            <div class="p-4 w-full sm:w-1/2">
+                                <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
+                                    <BookOpenIcon class=" h-24 lg:h-48 md:h-36 w-full object-cover object-center" />
+
+                                    <div class="p-6">
+                                        <form @submit.prevent="downloadsigo" id="downloadReporte" class="text-center">
+                                            <h2 class="tracking-widest text-xs title-font font-medium text-gray-400 mb-1">
+                                                Seleccione quincena</h2>
+                                            <h3 class="title-font text-lg font-medium text-gray-900 mb-3">Descargar siigo </h3>
+                                            <p class="leading-relaxed mb-3"> Este formulario permite descargar el reporte de la quincena para siigo</p>
+
+                                            <div class="flex">
+                                                <!-- <InputLabel for="quincena_si" :value="lang().label.quincena_sigo" /> -->
+                                                <SelectInput v-model="form2.quincena_sigo" id="quincena_si"
+                                                    :dataSet="QuincenaArray" class="mt-1 block w-1/3 mx-1" />
+                                                <VueDatePicker month-picker auto-apply :teleport="true" id="fecha_ini_sigo"
+                                                    type="date" v-model="form2.fecha_ini_sigo"
+                                                    required :placeholder="lang().placeholder.fecha_ini_sigo"
+                                                    :error="form2.errors.fecha_ini_sigo"
+                                                    class="mt-1 w-1/3"/>
+                                                </div>
+
+                                            <PrimaryButton v-if="form2.fecha_ini_sigo.year"
+                                                :disabled="form2.fecha_ini_sigo == null" class="rounded-none my-4">
+                                                Descargar formato siigo
+                                            </PrimaryButton>
+                                        </form>
+                                    </div>
+
+                                    <section class="text-gray-600 body-font">
+                                        <div class="container p-5 mx-auto">
+                                            <div class="text-center mb-1">
+                                                <h1 class="text-xl font-medium text-center title-font text-gray-900 mb-4">
+                                                    Este formato incluye
+                                                </h1>
+                                                <p class="text-base leading-relaxed w-full mx-auto">
+                                                    <!-- Solo se descargarán, Los reportes que sean validos. -->
                                                 </p>
-                                                <p v-if="props.NumReportes != 0" class="text-base leading-relaxed w-full mx-auto">
-                                                    <small>{{ props.ini }}</small> 
-                                                    - 
-                                                    <small>{{ props.fin }}</small>
+
+                                                <p v-for="tiposigo in data.tiposSiigo" class="text-base leading-relaxed w-full mx-auto">
+                                                    <p>{{ tiposigo }}</p>
                                                 </p>
                                             </div>
                                         </div>
                                     </section>
                                 </div>
                             </div>
-
-                        <!-- sigoo -->
-                        <div class="p-4 w-full md:w-1/2 xl:w-1/3">
-                            <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
-                                <BookOpenIcon class=" h-24 lg:h-48 md:h-36 w-full object-cover object-center" />
-
-                                <div class="p-6">
-                                    <form @submit.prevent="downloadsigo" id="downloadReporte" class="text-center">
-                                        <h2 class="tracking-widest text-xs title-font font-medium text-gray-400 mb-1">
-                                            Seleccione quincena</h2>
-                                        <h3 class="title-font text-lg font-medium text-gray-900 mb-3">Descargar siigo </h3>
-                                        <p class="leading-relaxed mb-3"> Este formulario permite descargar el reporte de la quincena para siigo</p>
-
-                                        <div class="flex">
-                                            <!-- <InputLabel for="quincena_si" :value="lang().label.quincena_sigo" /> -->
-                                            <SelectInput v-model="form2.quincena_sigo" id="quincena_si"
-                                                :dataSet="QuincenaArray" class="mt-1 block w-1/3 mx-1" />
-                                            <VueDatePicker month-picker auto-apply :teleport="true" id="fecha_ini_sigo"
-                                                type="date" v-model="form2.fecha_ini_sigo"
-                                                required :placeholder="lang().placeholder.fecha_ini_sigo"
-                                                :error="form2.errors.fecha_ini_sigo"
-                                                class="mt-1 w-1/3"/>
-                                            </div>
-
-                                        <PrimaryButton v-if="form2.fecha_ini_sigo.year"
-                                            :disabled="form2.fecha_ini_sigo == null" class="rounded-none my-4">
-                                            Descargar formato siigo
-                                        </PrimaryButton>
-                                    </form>
-                                </div>
-                                
-                                <section class="text-gray-600 body-font">
-                                    <div class="container p-5 mx-auto">
-                                        <div class="text-center mb-1">
-                                            <h1 class="text-xl font-medium text-center title-font text-gray-900 mb-4">
-                                                Este formato incluye
-                                            </h1>
-                                            <p class="text-base leading-relaxed w-full mx-auto">
-                                                <!-- Solo se descargarán, Los reportes que sean validos. -->
-                                            </p>
-                                            
-                                            <p v-for="tiposigo in data.tiposSiigo" class="text-base leading-relaxed w-full mx-auto">
-                                                <p>{{ tiposigo }}</p> 
-                                            </p>
-                                        </div>
-                                    </div>
-                                </section>
-                            </div>
                         </div>
 
-
                     </div>
-                </div>
-            </section>
+                </section>
+            </div>
         </div>
-    </div>
-</AuthenticatedLayout></template>
+    </AuthenticatedLayout>
+</template>

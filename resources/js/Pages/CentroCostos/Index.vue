@@ -10,7 +10,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
     import { Head,router,usePage,Link } from '@inertiajs/vue3';
 
     import Create from '@/Pages/CentroCostos/Create.vue';
-    import Edit from '@/Pages/CentroCostos/Edit.vue'; 
+    import Edit from '@/Pages/CentroCostos/Edit.vue';
     import Delete from '@/Pages/CentroCostos/Delete.vue';
 
     import Pagination from '@/Components/Pagination.vue';
@@ -29,7 +29,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
         perPage: Number,
         nombresTabla: Array,
     })
-    
+
     const data = reactive({
         params: {
             search: props.filters?.search,
@@ -46,14 +46,14 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
         generico: null,
         dataSet: usePage().props.app.perpage,
     })
-        
+
     const order = (field) => {
         if(field != undefined){
             // console.log("🚀 ~ file: Index.vue:54 ~ order ~ field:", field)
             // field = field.substr(2)
             // console.log("🚀 field:", field)
             data.params.field = field.replace(/ /g, "_")
-            
+
             data.params.order = data.params.order === "asc" ? "desc" : "asc"
         }
     }
@@ -119,7 +119,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
                         <tbody>
                             <tr v-for="(clasegenerica, index) in fromController.data" :key="index"
                                 class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
-
                                 <td v-if="can(['update centroCostos'])"
                                     class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
                                     <div class="flex justify-start items-center">
@@ -143,12 +142,10 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
                                         </div>
                                     </div>
                                 </td>
-
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (index+1) }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.nombre) }} </td>
                                 <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.cuantoshijos) }} </td>
-                                <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.supervi.name) }} </td>
-                                
+                                <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">({{clasegenerica.supervi.split(',').length}}) {{ (clasegenerica.supervi) }} </td>
                             </tr>
                         </tbody>
                     </table>

@@ -11,15 +11,25 @@ class CentroCosto extends Model
     protected $fillable = [
 		'nombre'
 	];
-    
-    public function reportes() { return $this->hasMany(Reporte::class); }
-    public function users() { return $this->hasMany(User::class); }
 
-    public function supervisores($id) { 
-		return $this->users->flatMap(function($user) use ($id){
-			$rol = $user->roles->pluck('name')[0];
-			if($user->centro_costo_id == $id && $rol == 'supervisor')
-			return collect($user);
-		});
+    public function reportes() { return $this->hasMany(Reporte::class); }
+    public function users() { return $this->BelongstoMany(User::class,'centro_user'); }
+
+    public function ArrayListaSupervisores($centroid):Array {
+        $supervisores = User::UsersWithRol('supervisor')->get();
+        $result = $supervisores->map(function($user) use($centroid) {
+            if($user->TieneEsteCentro($centroid)){
+               return $user->name;
+            }
+            return null;
+        })->filter()->toArray();
+//		$result = $this->users->flatMap(function($user) use ($centroid){
+//			$rol = $user->roles->pluck('name')[0];
+//            $tieneAlCentro = $user->centros()->get()->contains('id', $centroid);
+//
+//			if($tieneAlCentro && $rol === 'supervisor')
+//			return collect($user);
+//		});
+        return $result;
 	}
 }

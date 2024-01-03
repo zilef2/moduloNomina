@@ -44,7 +44,7 @@ class RoleSeeder extends Seeder
         $vectorModelo = ['reporte','centroCostos','parametros'];
         foreach ($vectorCRUD as $value) { foreach ($vectorModelo as $model) { $superadmin->givePermissionTo([ $value.' '.$model ]); } }
 
-        $admin = Role::create([ 'name'=> 'admin' ]);
+        $admin = Role::create(['name'=> 'admin' ]);
         $admin->givePermissionTo([
             'isAdmin',
             'isadministrativo',
@@ -63,7 +63,7 @@ class RoleSeeder extends Seeder
             'delete reporte',
             'updateCorregido reporte',
         ]);
-        
+
         $modelo = 'centroCostos';
         $acciones = ['create','update','read','delete'];
         foreach ($acciones as $accion) {
@@ -77,7 +77,7 @@ class RoleSeeder extends Seeder
 
         //no more admins
 
-        $empleado = Role::create([ 'name' => 'empleado' ]);
+        $empleado = Role::create(['name' => 'empleado' ]);
         $empleado->givePermissionTo([
              //#reporte
             'read reporte',
@@ -125,7 +125,7 @@ class RoleSeeder extends Seeder
             'update reporte',
             'delete reporte',
             'updateCorregido reporte',
- 
+
             //#centroCostos
             'update centroCostos',
             'read centroCostos',
