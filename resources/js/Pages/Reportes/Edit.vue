@@ -339,7 +339,7 @@ function calcularDiurnas(Inicio, Fin,CuandoEmpiezaExtra){
         let HorasExtra = 0
         const BaseFinal = horasFin >= 21 ? 21 : horasFin
         let HorasDiurnas = BaseFinal - BaseInicial;
-        HorasDiurnas = HorasDiurnas < 0 ? 0 : HorasDiurnas //todo: es mejor calcular bien
+        HorasDiurnas = HorasDiurnas < 0 ? 0 : HorasDiurnas
 
         if(CuandoEmpiezaExtra !== null){
             if(CuandoEmpiezaExtra < 21){

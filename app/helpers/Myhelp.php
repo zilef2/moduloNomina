@@ -2,11 +2,11 @@
 
 namespace App\helpers;
 
+use App\Models\Reporte;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Normalizer;
-
-// use Hamcrest\Type\IsInteger;
 
 class Myhelp{
 
@@ -39,8 +39,9 @@ class Myhelp{
         // return $valorReturn;
 
         if ($permissions === 'empleado') return 1;
-        if ($permissions === 'administrativo') return 2;
-        if ($permissions === 'supervisor') return 3;
+        if ($permissions === 'administrativo') return 2;// no reportan
+        if ($permissions === 'supervisor') return 3;// no reportan
+        if ($permissions === 'ingeniero') return 3;
         if ($permissions === 'admin') return 9;
         if ($permissions === 'superadmin') return 10;
         return 0;
@@ -125,6 +126,43 @@ class Myhelp{
             return $laFecha;
         }
         return '';
+    }
+
+    public static function CalcularHorasDeCadaSemana(Carbon $startDate,Carbon  $endDate,$Authuser){
+        $vector  = self::HorasDeLasSemanasProximas();
+        $horasemana[0] = Carbon::now()->weekOfYear;
+        foreach ($vector as $vec) {
+            $horasemana[$vec['numero_semana']] = (int)Reporte::Where('user_id',$Authuser->id)
+                ->WhereBetween('fecha_ini', [$vec['primer_dia_semana'], $vec['ultimo_dia_semana']])
+                ->sum('horas_trabajadas');
+        }
+        return $horasemana;
+    }
+
+    private static function HorasDeLasSemanasProximas() {
+        $valorParametro = 3;
+        $valorParametro10 = $valorParametro * 10;
+        $vectorSemanas = [];
+        // Obtener la fecha actual
+        $fechaActual = Carbon::now()->addMonths($valorParametro);
+
+        for ($i = 0; $i < $valorParametro10; $i++) {
+            // Calcular el primer día de la semana
+            $primerDiaSemana = $fechaActual->startOfWeek();
+            $ultimoDiaSemana = clone $primerDiaSemana;
+            $ultimoDiaSemana = $ultimoDiaSemana->endOfWeek();
+
+            // Almacenar el número de la semana y el primer día de la semana en el vector
+            $vectorSemanas[] = [
+                'numero_semana' => $primerDiaSemana->weekOfYear,
+                'anio' => $primerDiaSemana->year,
+                'primer_dia_semana' => $primerDiaSemana->toDateString(),
+                'ultimo_dia_semana' => $ultimoDiaSemana->toDateString(),
+            ];
+            // Moverse a la semana anterior
+            $fechaActual->subWeek();
+        }
+        return $vectorSemanas;
     }
 
 } ?>

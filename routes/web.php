@@ -46,6 +46,7 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::get('/userUploadExcel', [UserController::class,'FunctionUploadFromEx'])->name('user.uploadexcel');
     Route::post('/userUploadExcelPost', [UserController::class,'FunctionUploadFromExPost'])->name('user.uploadexcelpost');
     Route::get('/userReportes/{id}', [UserController::class,'showReporte'])->name('user.showReporte');
+    Route::post('/userdestroyDefinitive/{id}', [UserController::class,'userdestroyDefinitive'])->name('userdestroyDefinitive');
     //</editor-fold>
 
 

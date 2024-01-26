@@ -16,6 +16,7 @@ import { BookOpenIcon, ArrowUpCircleIcon, ArrowDownCircleIcon } from '@heroicons
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 import FestivosColombia from 'festivos-colombia';
+import { CuantosFestivosEstaQuincena2 } from '@/global'
 
 
 const { _, debounce, pickBy } = pkg
@@ -30,16 +31,15 @@ const props = defineProps({
     flash: String,
     NumReportesRecha: Number,
     NumReportesSinval: Number,
+    haySinsalario: Number,
 })
-
-const CurrentlyYear = new Date().getFullYear()
-
 
 const data = reactive({
     respuesta: '',
     params:{
         fecha_ini: '',
-        quincena: ''
+        quincena: '',
+        arrayFestivos: '',
     },
     warnn:'',
     tiposSiigo:[],
@@ -48,20 +48,6 @@ const data = reactive({
 
 onMounted(() => { });
 
-function getHoursColombianRandom(otraVez) {
-
-    let hora_inicial = '09'
-    let vec_final = ['15', '21', '23', '24']
-    let num = Math.floor(Math.random() * (vec_final.length - 1));
-
-    if (otraVez) return vec_final[num]
-
-    let hora_final = vec_final[num]
-    return [hora_inicial, hora_final];
-}
-
-const horas = getHoursColombianRandom()
-
 watch(() => _.cloneDeep(data.params), debounce(() => {
         let params = pickBy(data.params)
         router.get(route("user.uploadexcel"), params, {
@@ -69,13 +55,13 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
             preserveState: true,
             preserveScroll: true,
         })
-    }, 150)
+    }, 15)
 )
 
 const formUp = useForm({ //formulario para importar usuarios
     archivo1: null,
 });
-const form = useForm({ //formulario para exportar el imforme quincenal
+const form = useForm({ //formulario para exportar el informe quincenal
     // nombre1: null,
     archivo1: null,
     fecha_ini: '',
@@ -90,61 +76,36 @@ const form2 = useForm({// formulario para sigo
     NumeroDiasFestivos: 0
 });
 
+watch(() => form.fecha_ini,
+    (newX) => {
+      data.params.fecha_ini = form.fecha_ini
+      data.params.quincena = form.quincena
+      data.params.arrayFestivos =
+          CuantosFestivosEstaQuincena2(data.params.quincena, newX.month, newX.year)
+      // console.log('festivos: ',data.params.arrayFestivos)
+      form.NumeroDiasFestivos = data.params.arrayFestivos.length
+      console.log('festivos:',data.params.arrayFestivos)
+      // form2.NumeroDiasFestivos
+    })
+
+
 watchEffect(() => {
 
-    console.log("🧈 debu form2.quincena_sigo:", form2.quincena_sigo);
     if (props.flash.warning) {
         data.warnn = props.flash.warning
     }
 
-    data.params.fecha_ini = form.fecha_ini,
-    data.params.quincena = form.quincena
-
     if(form2.fecha_ini_sigo){
-        form2.NumeroDiasFestivos = CuantosFestivosEstaQuincena(form2.quincena_sigo,form2.fecha_ini_sigo.month,form2.fecha_ini_sigo.year)
+        // form2.NumeroDiasFestivos = CuantosFestivosEstaQuincena(form2.quincena_sigo,form2.fecha_ini_sigo.month,form2.fecha_ini_sigo.year)
         // console.log("🧈 debu form2.NumeroDiasFestivos:", form2.NumeroDiasFestivos);
     }
 
-    if(form.fecha_ini){
-        form.NumeroDiasFestivos = CuantosFestivosEstaQuincena(form.quincena,form.fecha_ini.month,form.fecha_ini.year)
-        // console.log("🧈 debu form.NumeroDiasFestivos:", form.NumeroDiasFestivos);
-    }
+    // if(form.fecha_ini){
+    //     form.NumeroDiasFestivos = CuantosFestivosEstaQuincena(form.quincena,form.fecha_ini.month,form.fecha_ini.year)
+    // }
 
 })
 
-
-function CuantosFestivosEstaQuincena(numQuicena,elmes,anio){
-    let holidaysSelect = FestivosColombia.getHolidaysByYear(anio)
-
-    let dateFestivos,dateArr,monthFestivo;
-    var BreakException = {};
-    let contadorResult = 0
-    let diaLimite = numQuicena == 1 ? 14 : 31
-    holidaysSelect.forEach(element => {
-        dateArr = element.date.split('/'); //array con la fecha del foreach
-
-        dateFestivos = new Date(dateArr[2], dateArr[1] - 1, dateArr[0]);
-        monthFestivo = (dateFestivos.getMonth());
-
-        if(monthFestivo == elmes){
-            if(diaLimite == 14){
-                if(diaLimite > dateFestivos.getDate()){
-                    contadorResult++;
-                }
-            }else{
-                if(dateFestivos.getDate() > 14 && diaLimite > dateFestivos.getDate()){
-                    contadorResult++;
-                }
-
-            }
-
-        }
-        else{
-            return
-        }
-    });
-    return contadorResult
-}
 
 
 function uploadFile() {
@@ -163,6 +124,8 @@ const downloadExcel = () => { window.open('users/export/' + form.NumeroDiasFesti
 const downloadsigo = () => { window.open('users/downloadsigo/' + form2.NumeroDiasFestivos + '/' + form2.quincena_sigo + '/' + (form2.fecha_ini_sigo.month) + '/' + form2.fecha_ini_sigo.year, '_blank') }
 
 
+
+// <!--<editor-fold desc="constates">-->
 const QuincenaArray = [
     { 'value': null, 'label': 'seleccione una quincena' },
     { 'value': 1, 'label': 1 },
@@ -195,6 +158,7 @@ data.tiposSiigo = [
 
     '26- Recargo nocturno- Ingreso', //7 noc
 ];
+// <!--</editor-fold>-->
 
 </script>
 
@@ -252,7 +216,7 @@ data.tiposSiigo = [
 
                                         <div class="flex items-center flex-wrap my-6">
                                             <a class="text-indigo-500 inline-flex items-center md:mb-2 lg:mb-0">
-                                                Numero de Usuarios: {{props.NumUsers}}
+                                                Numero de Empleados: {{props.NumUsers}}
                                             </a>
 
                                             <section class="text-gray-600 body-font">
@@ -278,7 +242,6 @@ data.tiposSiigo = [
                                                 </div>
                                             </section>
 
-
                                         </div>
                                     </div>
                                 </div>
@@ -294,8 +257,7 @@ data.tiposSiigo = [
                                                 Formato xlsx</h2>
                                             <h3 class="title-font text-lg font-medium text-gray-900 mb-3">Descargar reporte
                                             </h3>
-                                            <p class="leading-relaxed mb-3"> Este formulario permite descargar el reporte de
-                                                la quincena</p>
+                                            <p class="leading-relaxed mb-3"> Este formulario permite descargar el reporte de la quincena</p>
 
                                             <div class="">
                                                 <div class="">
@@ -310,14 +272,15 @@ data.tiposSiigo = [
                                                         :error="form.errors.fecha_ini" />
                                                 </div>
                                             </div>
-                                            <PrimaryButton v-show="can(['create user'])" v-if="form.fecha_ini && props.NumReportes > 0"
+
+                                            <PrimaryButton v-show="can(['create user'])" v-if="form.fecha_ini && props.NumReportes > 0 && props.haySinsalario == false"
                                                 :disabled="form.fecha_ini == null"
                                                 class="rounded-none my-4">
                                                 Exportar Quincena
                                             </PrimaryButton>
                                         </form>
                                     </div>
-                                    <section class="text-gray-600 body-font">
+                                    <section v-if="props.haySinsalario === 0" class="text-gray-600 body-font">
                                         <div class="container p-5 mx-auto">
                                             <div class="text-center mb-1">
                                                 <h1 class="text-xl font-medium text-center title-font text-gray-900 mb-4">
@@ -335,6 +298,14 @@ data.tiposSiigo = [
                                             </div>
                                         </div>
                                     </section>
+                                  <section v-else class="text-gray-600 body-font">
+                                    <div class="container p-5 mx-auto">
+                                      <div class="text-center mb-1">
+                                        <h1 class="text-xl font-medium text-center title-font text-gray-900 mb-4">
+                                          Hay empleados con salario en cero</h1>
+                                      </div>
+                                    </div>
+                                  </section>
                                 </div>
                             </div>
                             <!-- sigoo -->

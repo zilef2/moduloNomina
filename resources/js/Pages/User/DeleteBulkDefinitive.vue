@@ -3,19 +3,22 @@ import DangerButton from '@/Components/DangerButton.vue';
 import Modal from '@/Components/Modal.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import { useForm } from '@inertiajs/vue3';
+import { watchEffect } from 'vue';
 
 const props = defineProps({
     show: Boolean,
     title: String,
-    user: Object,
+    selectedId: Object,
 })
 
 const emit = defineEmits(["close"]);
 
-const form = useForm({});
+const form = useForm({
+    id: []
+})
 
 const destory = () => {
-    form.delete(route('user.destroy', props.user?.id), {
+    form.post(route('userdestroyDefinitive'), {
         preserveScroll: true,
         onSuccess: () => {
             emit("close")
@@ -25,6 +28,12 @@ const destory = () => {
         onFinish: () => null,
     })
 }
+
+watchEffect(() => {
+    if (props.show) {
+        form.id = props.selectedId
+    }
+})
 
 </script>
 
@@ -36,17 +45,14 @@ const destory = () => {
                     {{ lang().label.delete }} {{ props.title }}
                 </h2>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    {{ lang().label.delete_confirm }} <b>{{ props.user?.name }}</b>?
-                </p>
-                <p class="mt-1 text-red-600 dark:text-gray-400">
-                    Esta accion, borrará los reportes asociados a este usuario
+                    {{ lang().label.delete_confirm }} {{ props.selectedId?.length }} {{ props.title }}?
                 </p>
                 <div class="mt-6 flex justify-end">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
                     </SecondaryButton>
                     <DangerButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                         @click="destory">
-                        {{ form.processing ? lang().button.delete + '...' : lang().button.delete }}
+                        {{ form.processing ? 'Delete...' : 'Delete' }}
                     </DangerButton>
                 </div>
             </form>

@@ -66,6 +66,8 @@
         sumdominical_nocturno: Number,
         sumdominical_extra_diurno: Number,
         sumdominical_extra_nocturno: Number,
+        horasTrabajadasHoy: Array, //horas que lleva trabajadas solo el dia de seleccionado(index)
+        HorasDeCadaSemana: Array,  //horas de las semanas proximas a la actual
 
     })
 
@@ -75,9 +77,8 @@
     // <!--<editor-fold desc="Charts">-->
     const chartOptions = {
         responsive: true,
-        maintainAspectRatio: false,
+        maintainAspectRatio: true,
         color: "#000",
-        // todo
         darkcolor: "#fff",
     }
     const chartData = {
@@ -112,6 +113,9 @@
         dataSet: usePage().props.app.perpage,
     })
 
+
+
+    // <!--<editor-fold desc="Order clonedeep select">-->
     const order = (field) => {
         if(field !== undefined && field !== null && props.userFiltro){
 
@@ -149,6 +153,7 @@
             data.multipleSelect = false
         }
     }
+    // <!--</editor-fold>-->
 
     //aprobar o no
     const form = useForm({
@@ -182,11 +187,13 @@
                             {{ lang().button.add }} Masivamente
                         </PrimaryButton>
 
-                        <div v-if="can(['update reporte']) && props.userFiltro" class="mx-4">
-                            <InputLabel for="centro_costo_id" value="Filtrar"/>
+                        <div v-if="props.userFiltro && props.userFiltro.length > 0" v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro" class="mx-4">
+                            <InputLabel for="centro_costo_id" value="Filtrar por trabajador"/>
                             <SelectInput v-model="data.params.FiltroUser" :dataSet="props.userFiltro"
                                          class="mt-1 block w-full"/>
-                            <InputError class="mt-2" :message="form.errors.centro_costo_id"/>
+                        </div>
+                        <div v-else v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro" class="mx-4">
+                          <p class="pt-1 mt-6 font-extrabold">Sin reportes</p>
                         </div>
                     </div>
 
@@ -194,7 +201,8 @@
                         :valoresSelect="props.valoresSelect" :IntegerDefectoSelect="props.IntegerDefectoSelect"
                         :horasemana="props.horasemana" :startDateMostrar="props.startDateMostrar"
                         :endDateMostrar="props.endDateMostrar" :numberPermissions="props.numberPermissions"
-                        :ultimoReporte="props.ultimoReporte"
+                        :ultimoReporte="props.ultimoReporte" :horasTrabajadasHoy = "props.horasTrabajadasHoy"
+                        :HorasDeCadaSemana="props.HorasDeCadaSemana"
                         />
                     <CreateMass :show="data.createMassOpen" @close="data.createMassOpen = false" :title="props.title"
                         :valoresSelect="props.valoresSelect" :IntegerDefectoSelect="props.IntegerDefectoSelect"
@@ -231,13 +239,13 @@
                         </DangerButton>
                     </div>
                     <div v-if="filters !== null" class="flex">
-                    <TextInput v-if="filters !== null" v-show="can(['update reporte'])" v-model="data.params.search"
+                    <TextInput v-show="can(['update reporte'])" v-model="data.params.search"
                         type="text" class="block w-full rounded-lg"
                         :placeholder="lang().placeholder.searchDates" />
 
                         <label for="soloval" class="mx-3">Solo validos</label>
                         <input v-model="data.params.soloValidos" id="soloval" type="checkbox"
-                            class="bg-black h-7 w-7" />
+                            class="bg-gray-100 h-7 w-7 mt-2 ml-5" />
                     </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
@@ -354,9 +362,11 @@
                     <div class="flex flex-wrap m-2">
                         <div class="p-1 md:w-1/2 flex flex-col items-start">
                             <span class="inline-block py-1 px-2 rounded bg-indigo-50 text-indigo-500 text-xs font-medium tracking-widest">
-                                Este mes</span>
-                            <h2 class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">Numero de
-                                reportes de {{ props.nombrePersona }}</h2>
+                                Este mes
+                            </span>
+                            <h2 v-if="props.nombrePersona" class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">
+                              Reportes de este mes: <b>{{ props.nombrePersona }}</b>
+                            </h2>
                             <div class="m-1 p-1 w-full">
                                 <Bar id="my-chart-id" :options="chartOptions" :data="chartData" />
                             </div>

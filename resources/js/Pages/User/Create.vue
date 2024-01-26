@@ -31,7 +31,6 @@ const form = useForm({
     sexo: 0,
     // salario: '',
 
-
     // email: 'ajelosept@gmail.com',
     // cedula: '225219455',
 
@@ -65,9 +64,8 @@ const validateFormSupervisor = () => {
     return valid
 }
 
-
 const create = () => {
-    if(form.role == 'supervisor' && form.centroid == 0){
+    if(form.role === 'supervisor' && form.centroid === 0){
         validateFormSupervisor()
     }else{
         form.post(route('user.store'), {
@@ -85,18 +83,17 @@ const create = () => {
 watchEffect(() => {
     if (props.show) {
         form.errors = {}
-        
-        if(form.role == 'supervisor')
+
+        if(form.role === 'supervisor')
             data.mostrarCentro = true
         else
             data.mostrarCentro = false
     }
-
 })
 //TOREVISE
-const roles = props.roles?.map(role => ({ 
-    label: role.name.charAt(0).toUpperCase() + role.name.slice(1)  , 
-    value: role.name 
+const roles = props.roles?.map(role => ({
+    label: role.name.charAt(0).toUpperCase() + role.name.slice(1)  ,
+    value: role.name
 }))
 const cargos = props.cargos?.map(cargo => ({ label: cargo.nombre, value: cargo.id }))
 const centros = props.centros?.map(centro => ({ label: centro.nombre, value: centro.id }))
@@ -134,7 +131,7 @@ const centros = props.centros?.map(centro => ({ label: centro.nombre, value: cen
                         <InputError class="mt-2" :message="form.errors.email" />
                     </div>
 
-                    
+
                     <div class="grid grid-cols-2 gap-6">
 
                         <div>
@@ -167,7 +164,7 @@ const centros = props.centros?.map(centro => ({ label: centro.nombre, value: cen
                                 :placeholder="lang().placeholder.celular" :error="form.errors.celular" />
                             <InputError class="mt-2" :message="form.errors.celular" />
                         </div>
-                    
+
                         <div>
                             <InputLabel for="salario" :value="lang().label.salario" />
                             <TextInput id="salario" type="number" class="mt-1 block w-full" v-model="form.salario" required

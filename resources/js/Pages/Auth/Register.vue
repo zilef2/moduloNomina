@@ -74,9 +74,9 @@ const submit = () => {
                 {{ lang().label.registered }}
                 </Link>
 
-                <PrimaryButton class="ml-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    {{ form.processing ? lang().button.register + '...' : lang().button.register }}
-                </PrimaryButton>
+<!--                <PrimaryButton class="ml-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">-->
+<!--                    {{ form.processing ? lang().button.register + '...' : lang().button.register }}-->
+<!--                </PrimaryButton>-->
             </div>
         </form>
     </GuestLayout>

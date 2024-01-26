@@ -10,7 +10,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
     import pkg from 'lodash';
     import { router } from '@inertiajs/vue3';
     import Pagination from '@/Components/Pagination.vue';
-    import { EyeIcon, ChevronUpDownIcon,LinkIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/solid';
+    import { EyeIcon, ChevronUpDownIcon, TrophyIcon } from '@heroicons/vue/24/solid';
 
     import {number_format} from '@/global.ts';
 
@@ -55,7 +55,7 @@ const data = reactive({
         watch(() => _.cloneDeep(data.params), debounce(() => {
             let params = pickBy(data.params)
             console.log("🧈 debu params:", params);
-            router.get(route("user.index"), params, {
+            router.get(route("IndexTrashed"), params, {
                 replace: true,
                 preserveState: true,
                 preserveScroll: true,
@@ -111,11 +111,11 @@ const data = reactive({
                         <DangerButton @click="data.deleteBulkOpen = true"
                             v-show="data.selectedId.length !== 0 && can(['delete user'])" class="px-3 py-1.5"
                             v-tooltip="lang().tooltip.delete_selected">
-                            <TrashIcon class="w-5 h-5" />
+                            <TrophyIcon class="w-5 h-5" />
                         </DangerButton>
                     </div>
                     <TextInput v-model="data.params.search" type="text" class="block w-3/6 md:w-2/6 lg:w-1/6 rounded-lg"
-                        placeholder="Buscar por nombre o correo" />
+                        placeholder="Buscar solo por nombre" />
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table class="w-full">
@@ -214,7 +214,7 @@ const data = reactive({
                                             <DangerButton v-show="can(['delete user'])" type="button"
                                                 @click="(data.RecontratarOpen = true), (data.user = user)"
                                                 class="px-2 py-1.5 rounded-none hover:text-sky-400" v-tooltip="'Recontratar'">
-                                                <TrashIcon class="w-4 h-4" />
+                                                <TrophyIcon class="w-4 h-4" />
                                             </DangerButton>
                                         </div>
                                     </div>

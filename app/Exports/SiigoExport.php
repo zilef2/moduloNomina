@@ -21,7 +21,7 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
     }
 
     public function CalculoHorasExtrasDominicalesTodo($reportes,$cumplioQuicena,$salario_hora,$paramBD, &$H_diurno, &$nocturnas, &$extra_diurnas, &$extra_nocturnas, &$dominical_diurno, &$dominical_nocturno, &$dominical_extra_diurno, &$dominical_extra_nocturno){
-        
+
         $H_diurno = round(intval($reportes->sum('diurnas')) * doubleval($salario_hora),0,PHP_ROUND_HALF_UP);
 
         $recargoNocturno = $cumplioQuicena ? $paramBD->porcentaje_nocturno-1 : $paramBD->porcentaje_nocturno;
@@ -30,7 +30,7 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
         // extras simples
         $extra_diurnas = intval($reportes->sum('extra_diurnas')) * doubleval($salario_hora) * $paramBD->porcentaje_extra_diurno;
         $extra_nocturnas = intval($reportes->sum('extra_nocturnas')) * doubleval($salario_hora) * $paramBD->porcentaje_extra_nocturno;
-        // dominicales 
+        // dominicales
         $dominical_diurno = intval($reportes->sum('dominical_diurno')) * doubleval($salario_hora) * $paramBD->porcentaje_dominical_diurno;
         $dominical_nocturno = intval($reportes->sum('dominical_nocturno')) * doubleval($salario_hora) * $paramBD->porcentaje_dominical_nocturno;
         // dominicales extras
@@ -72,8 +72,7 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
         //traer todos los empleado
         $users = User::Select('id','name','cedula','cargo_id','salario')->WhereHas("roles", function($q){
             $q->Where("name", "empleado");
-            $q->orWhere("name", "administrativo");//todo: sin extras?
-            //todo: supervisor
+            $q->orWhere("name", "supervisor");
         })->get();
         $paramBD = Parametro::find(1);
         $mensajeSigo = [
@@ -90,13 +89,17 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
 
             '26- Recargo nocturno- Ingreso', //7 noc
         ];
-        
+
         $this->unsetAllunnesesary($users);
         foreach ($users as $key => $empleado) {
 
             $empleado->Contrato = $empleado->cedula;
 
-            HelpExcel::cumplioQuincena($users,$key,$this->ini,$this->fin,$empleado,$reportes, $salario_hora, $salario_quincena, $cumplioQuicena,$paramBD,$this->NumeroDiasFestivos,'siigo');
+            HelpExcel::cumplioQuincena(
+                $users,$key,$this->ini,$this->fin,
+                $empleado,$reportes, $salario_hora,
+                $salario_quincena, $cumplioQuicena,$paramBD,
+                $this->NumeroDiasFestivos,session('datesFest'),'siigo');
             $ArrayExtrasyDominicales = $this->CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, $H_diurno, $nocturnas, $extra_diurnas, $extra_nocturnas, $dominical_diurno, $dominical_nocturno, $dominical_extra_diurno, $dominical_extra_nocturno);
             // $Num_extra_diurnas = $ArrayExtrasyDominicales[1]; $Num_extra_nocturnas = $ArrayExtrasyDominicales[2]; $Num_dominical_diurno = $ArrayExtrasyDominicales[3]; $Num_dominical_nocturno = $ArrayExtrasyDominicales[4]; $Num_dominical_extra_diurno = $ArrayExtrasyDominicales[5]; $Num_dominical_extra_nocturno = $ArrayExtrasyDominicales[6];
             $ArrayExtrasyDominicales[7] = intval($reportes->sum('nocturnas'));
@@ -122,14 +125,14 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
                     $Novedad++;//novedades de un usuarios
                 }
             }
-            
-            if($Novedad === 0){
-                $empleado->Quenov = 'Sin novedades';
-                $empleado->Quenov = '';
-                $empleado->tiponov = '';
-                $empleado->diasValornovedad = '';
-                $empleado->fechaininov = '';
-                $empleado->fechafinnov = '';
+
+            if($Novedad === 0){ //Sin novedades
+                unset($users[$key]);
+//                $empleado->Quenov = '';
+//                $empleado->tiponov = '';
+//                $empleado->diasValornovedad = '';
+//                $empleado->fechaininov = '';
+//                $empleado->fechafinnov = '';
             }
         }
 

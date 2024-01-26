@@ -3,6 +3,7 @@
 namespace App\helpers;
 
 use App\Models\Reporte;
+use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Facades\DB;
 
@@ -10,11 +11,14 @@ use Illuminate\Support\Facades\DB;
 
 class HelpExcel
 {
-    //todo: domingosGanados
-    public static function cumplioQuincena(&$users, $key, $ini, $fin, $empleado, &$reportes, &$salario_hora, &$salario_quincena, &$cumplioQuicena, $paramBD, $NumeroDiasFestivos, $sigo = null) {
+    public static function cumplioQuincena(&$users, $key, $ini, $fin,
+                                           $empleado, &$reportes, &$salario_hora, &$salario_quincena,
+                                           &$cumplioQuicena, $paramBD, $NumeroDiasFestivos,
+                                           $ArrayDatesFest, $sigo = null) {
         $reportes = Reporte::where('user_id', $empleado->id)
             ->where('valido', 1)
             ->whereBetween('fecha_ini', [$ini, $fin]);
+        $horasTotalTrabajador = (int)($reportes->sum('horas_trabajadas'));
 
         $reportesAgrupados = DB::table('reportes')
             ->where('user_id', $empleado->id)
@@ -24,20 +28,40 @@ class HelpExcel
             ->distinct()
             ->orderBy('fecha_ini')
             ;
-
-        // $NumReportes = $reportes->count();
         $NumReportes = $reportesAgrupados->count();
+
+        $currentDate = clone $ini;
+//        $finishDate = clone $fin;
+//        $finishDate->addDay();
+        $workingDays = 0;
+        $SaturDays = 0;
+
+        while ($currentDate->lte($fin)) {
+            if ($currentDate->isWeekday()) {
+                $workingDays++;
+            }
+            if ($currentDate->isSaturday()) {
+                $SaturDays++;
+            }
+            $currentDate->addDay();
+        }
+        foreach ($ArrayDatesFest as $item) {
+            if($item->isWeekday()) $workingDays--;
+            else{
+                if ($item->isSaturday()) $SaturDays--;
+            }
+        }
 
         $elSalario = (int)($empleado->salario);
         $salario_hora = $elSalario / (235);// 30 * 7.8333
         $salario_quincena = round($elSalario / (2), 0, PHP_ROUND_HALF_UP);
 
-        $horasN = ((int)($paramBD->HORAS_NECESARIAS_SEMANA) * 2) - ($NumeroDiasFestivos * 8); //por defecto $horasN es 47, pero si hay festivos se le tiene que restar
-        $horasTotalTrabajador = (int)($reportes->sum('horas_trabajadas'));
+        $horasN = $workingDays*8 + $SaturDays*7;
+//        dd($ini,$fin,$workingDays,$SaturDays, $NumeroDiasFestivos,$horasN);
         $cumplioQuicena = $horasTotalTrabajador >= $horasN;
 
         if ($sigo === null) {
-            $users[$key]->Completa = $cumplioQuicena ? 'Si (' . $horasN . ')' : 'No (' . $horasN . ')';
+            $users[$key]->Completa = $cumplioQuicena ? 'Si (' .$horasTotalTrabajador.' de ' . $horasN . ')' : 'No (' .$horasTotalTrabajador.' de '. $horasN . ')';
             $users[$key]->Num = $reportesAgrupados->count();
             // $users[$key]->Num = $NumReportes; //quizas se use
             $users[$key]->Empleado = $empleado->name;
@@ -45,8 +69,7 @@ class HelpExcel
         return $NumReportes;
     }
 
-    public static function getFechaExcel($lafecha)
-    {
+    public static function getFechaExcel($lafecha){
         //the date fix
         if (is_numeric($lafecha)) { //toproof
             $unixDate = ($lafecha - 25568) * 86400;

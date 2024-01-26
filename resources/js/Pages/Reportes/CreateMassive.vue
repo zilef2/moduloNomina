@@ -99,7 +99,6 @@ onMounted(() => {
 
 
 
-//TODO: restar el almuerzo a el valor mayor entre los 8 (dia,noc,extras,domin)
 let TextFestivo = ''
 let Madrugada, Tarde //variables internas para calculo de horas nocturnas
 

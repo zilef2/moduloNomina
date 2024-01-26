@@ -152,16 +152,19 @@ class UserController extends Controller {
 
     public function Busqueda(UserIndexRequest $request,$isTrashed = false){
         if($isTrashed === 'trashed'){
-            $users = User::query()->onlyTrashed()->with('roles','cargo');
+            $users = User::query()->with('roles','cargo')->onlyTrashed();
+            if ($request->has('search')) {
+                $users->where('name', 'LIKE', "%" . $request->search . "%");
+            }
         }else{
             $users = User::query()->with('roles','cargo');
+            if ($request->has('search')) {
+                $users->where('name', 'LIKE', "%" . $request->search . "%");
+                $users->orWhere('email', 'LIKE', "%" . $request->search . "%");
+                $users->orWhere('cedula', 'LIKE', "%" . $request->search . "%");
+            }
         }
 
-        if ($request->has('search')) {
-            $users->where('name', 'LIKE', "%" . $request->search . "%");
-            $users->orWhere('email', 'LIKE', "%" . $request->search . "%");
-            $users->orWhere('cedula', 'LIKE', "%" . $request->search . "%");
-        }
 
         if ($request->has(['field', 'order'])) {
 //            dd($request->field, $request->order);
@@ -176,17 +179,11 @@ class UserController extends Controller {
                 return $query->where('name', 'supervisor');
             });
         }
+        if($isTrashed === 'trashed'){
+            $users = $users->onlyTrashed();
+        }
 
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'users'));
-
-//         if($numberPermissions == 3){//supervisor
-//             $centroID = Auth::user()->centro_costo_id;
-//             if($centroID){
-//                 $users->Where('centro_costo_id' , $centroID);
-//             }else{
-            // $users->Where('id', 0);
-// }
-        // }
+//        Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'users'));
         return $users;
     }
 
@@ -334,17 +331,34 @@ class UserController extends Controller {
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(User $user) {
         Myhelp::EscribirEnLog($this, 'users');
         try {
-            $user->delete();
-            return back()->with('success', __('app.label.deleted_successfully', ['name' => $user->name]));
+            $susReportes = $user->reportes()->get();
+            $countReportes = count($susReportes);
+            if($countReportes < 20){
+
+                foreach ($susReportes as $index => $reporte) {
+                    $reporte->delete();
+                }
+                $user->delete();
+                $mensajeSucces = __('app.label.deleted_successfully', ['name' => $user->name]);
+                Myhelp::EscribirEnLog($this, 'users',$mensajeSucces);
+                return back()->with('success',$mensajeSucces);
+            }else{
+                $mensajeLog = 'Se intentó eliminar demasiados reportes';
+                Myhelp::EscribirEnLog($this, 'users',$mensajeLog);
+                return back()->with('warning',$mensajeLog);
+            }
         } catch (\Throwable $th) {
-            return back()->with('error', __('app.label.deleted_error', ['name' => $user->name]) . $th->getMessage());
+            $mensajeLog = $th->getMessage() . ' - File:'.$th->getFile(). ' - LINE:'.$th->getLine();
+            Myhelp::EscribirEnLog($this, 'DELETE users',$mensajeLog);
+            return back()->with('error', __('app.label.deleted_error', ['name' => $user->name]) . $mensajeLog);
         }
     }
+
     public function Recontratar($userid) {
         $user = User::withTrashed()->Where('id',$userid)->first();
         Myhelp::EscribirEnLog($this, 'users Recontratar ');
@@ -368,29 +382,42 @@ class UserController extends Controller {
 
     public function FunctionUploadFromEx(Request $request) {
         Myhelp::EscribirEnLog($this, 'users FunctionUploadFromEx');
-        $users = User::Select('id','name','cedula','cargo_id')->WhereHas("roles", function($q){
+//        $usersQuery = User::Select('id','name','cedula','cargo_id','salario')->WhereHas("roles", function($q){
+        $usersQuery = User::query()->WhereHas("roles", function($q){
             $q->Where("name", "empleado");
-        })->count();
+            $q->orWhere("name", "supervisor");
+        })->get();
+
+        $haySinsalario = clone $usersQuery;
+        $haySinsalario = $haySinsalario->where('salario', '0')->count();
+
+        $NumUsers = $usersQuery->count();
         $iniFormat = '';
         $finFormat = '';
         if($request->quincena && $request->fecha_ini){
             $quincena = (int)($request->quincena);
-
             $year = (int)($request->fecha_ini['year']);
             $month = (int)($request->fecha_ini['month'])+1;
             $NumReportesIniFin = $this->CalcularIniFinQuincena($quincena,$month,$year);
             $iniFormat = Carbon::parse($NumReportesIniFin['ini'])->format('d-m-Y');
             $finFormat = Carbon::parse($NumReportesIniFin['fin'])->format('d-m-Y');
         }
+        if($request->arrayFestivos){
+            foreach($request->arrayFestivos as $dateFest)
+            $datesFest[] = Carbon::parse($dateFest);
+            session(['datesFest'=>$datesFest]);
+        }
+
         return Inertia::render('User/uploadFromExcel', [
             'title'             => __('app.label.user'),
             'breadcrumbs'       => [['label' => __('app.label.user'), 'href' => route('user.index')]],
-            'NumUsers'          => $users,
+            'NumUsers'          => $NumUsers,
             'NumReportes'       => $NumReportesIniFin['NumReportes']?? 0,
             'NumReportesRecha'  => $NumReportesIniFin['NumReportesRecha']?? 0,
             'NumReportesSinval' => $NumReportesIniFin['NumReportesSinval']?? 0,
             'ini'               => $iniFormat,
             'fin'               => $finFormat,
+            'haySinsalario'     => $haySinsalario,
         ]);
     }
 
@@ -470,6 +497,7 @@ class UserController extends Controller {
     //exportar el formato unico de ECnomina
     public function export(Request $request) {
         Myhelp::EscribirEnLog($this, 'users export');
+        $ArrayDatesFest = session('datesFest');
         $quincena = (int)($request->quincena);
 
         $year = (int)($request->year);
@@ -477,7 +505,7 @@ class UserController extends Controller {
         $NumReportesIniFin = $this->CalcularIniFinQuincena($quincena,$month,$year);
         $NumeroDiasFestivos = (int)($request->NumeroDiasFestivos);
         if($NumReportesIniFin['NumReportes'] > 0){
-            return Excel::download(new UsersExport( $NumReportesIniFin['ini'],$NumReportesIniFin['fin'], $NumeroDiasFestivos),
+            return Excel::download(new UsersExport( $NumReportesIniFin['ini'],$NumReportesIniFin['fin'], $NumeroDiasFestivos,$ArrayDatesFest),
                     "".$year.'Quincena'.$quincena.'DelMes'.$month.".xlsx"
             );
         }else{
@@ -719,5 +747,17 @@ class UserController extends Controller {
             'centros'           => $centros,
             'breadcrumbs'   => [['label' => __('app.label.user'), 'href' => route('user.index')]],
         ]);
+    }
+
+
+    public function userdestroyDefinitive(Request $request) {
+        Myhelp::EscribirEnLog($this, ' | Deleting definitive users Bulk| ');
+        try {
+            $user = User::where('id', $request->id);
+            $user->forceDelete();
+            return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
+        } catch (\Throwable $th) {
+            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.user')]) . $th->getMessage());
+        }
     }
 }

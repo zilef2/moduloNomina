@@ -56,8 +56,8 @@ defineProps({
                                     <Link :href="route('login')"
                                         class="text-lg text-gray-700 dark:text-gray-500 underline">{{ lang().label.login }}</Link>
 
-                                    <Link v-if="canRegister" :href="route('register')"
-                                        class="ml-4 text-lg text-gray-700 dark:text-gray-500 underline">{{ lang().label.register }}</Link>
+<!--                                    <Link v-if="canRegister" :href="route('register')"-->
+<!--                                        class="ml-4 text-lg text-gray-700 dark:text-gray-500 underline">{{ lang().label.register }}</Link>-->
                                 </template>
                             </div>
                         </div>

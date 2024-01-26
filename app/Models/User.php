@@ -34,7 +34,10 @@ class User extends Authenticatable
         'centro_costo_id',
     ];
 
-    /** * The attributes that should be hidden for serialization. * * @var array<int, string> */
+    /**
+     * * The attributes that should be hidden for serialization. * *
+     * @var array<int, string>
+     */
     protected $hidden = [ 'password', 'remember_token', ];
 
     public function getFechaIngreso() {
@@ -73,7 +76,7 @@ class User extends Authenticatable
     public function ArrayCentrosID() {
         $result = [];
         if(!$this->centros->isEmpty()){
-            foreach ($this->centros as $index => $centro) {
+            foreach ($this->centros as $centro) {
                 $result[] = $centro->id;
             }
         }
@@ -106,6 +109,11 @@ class User extends Authenticatable
     public static function UsersWithRol($rol){
         return User::whereHas('roles', function ($query) use ($rol) {
             return $query->where('name', $rol);
+        });
+    }
+    public static function UsersWithManyRols($ArrayRoles){
+        return User::whereHas('roles', function ($query) use ($ArrayRoles) {
+            return $query->whereIn('name', $ArrayRoles);
         });
     }
     public function TieneEsteCentro($centroid){

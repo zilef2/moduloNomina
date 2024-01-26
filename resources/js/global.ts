@@ -1,8 +1,9 @@
 /*
 -- this Project
 
- --DATE
- IsDate_GOES_formatDate
+--FROM others projects
+
+ // --DATE functions
  formatToVue
  formatDate
  monthName
@@ -30,12 +31,72 @@
 */
 
 
+//FROM others projects
+import FestivosColombia from 'festivos-colombia';
+
+    export function estaFechaEsFestivo(fecha){
+
+        let holidays = FestivosColombia.getHolidaysByYear(fecha.getFullYear());
+
+        let dateFestivos,dateArr,daysfestivo,monthFestivo,result = false;
+        var BreakException = {};
+        let dayEvaluado = Math.floor(fecha.getDate());
+        let MonthEvaluado = (fecha.getMonth());
+        try{
+            holidays.forEach(element => {
+                dateArr = element.date.split('/');
+                dateFestivos = new Date(dateArr[2], dateArr[1] - 1, dateArr[0]);
+                daysfestivo = Math.floor(dateFestivos.getDate());
+                monthFestivo = (dateFestivos.getMonth());
+
+                if(daysfestivo === dayEvaluado && monthFestivo === MonthEvaluado) {
+                    result = true;
+                    throw BreakException
+                }
+            });
+        } catch (e) {
+            // if (e !== BreakException) throw e;
+        }
+
+        return result
+    }
+export function CuantosFestivosEstaQuincena2(numQuicena,elmes,anio) {
+    let dateFestivos, dateArr, monthFestivo,arrayFechas=[];
+
+    //se llama la libreria
+    let holidaysSelect:object[] = FestivosColombia.getHolidaysByYear(anio)
+    let diaLimite = numQuicena == 1 ? 14 : 31
+    holidaysSelect.forEach(element => {
+        // @ts-ignore
+        dateArr = element.date.split('/'); //array con la fecha del foreach
+        dateFestivos = new Date(dateArr[2], dateArr[1] - 1, dateArr[0]);
+        monthFestivo = parseInt((dateFestivos.getMonth()))
+        if (monthFestivo == elmes) {
+            if (diaLimite == 14) { //primera quincena
+                if (diaLimite > dateFestivos.getDate()) {
+                    arrayFechas.push(dateFestivos)
+                    // contadorResult++;
+                }
+            } else { //segunda quincena
+                if (dateFestivos.getDate() > 14 && diaLimite > dateFestivos.getDate()) {
+                    // contadorResult++;
+                    arrayFechas.push(dateFestivos)
+                }
+            }
+        }else{
+            return
+        }
+    });
+    return arrayFechas
+}
+
+//fin FROM others prjects
 // this Project
     export function LookForValueInArray(arrayOfObjects:Object[] , searchValue): String {
         //ex: { title: '123', value: 1 },
         let foundObject = '';
         for (const obj of arrayOfObjects) {
-            
+
             if(typeof searchValue == 'string'){
                 // if (obj['title'] === searchValue) {
                 //     foundObject = obj['value'];
@@ -48,13 +109,38 @@
                 }
             }
         }
-        
+
         return foundObject;
     }
 // end this Project
 
 
-// DATE functions 
+// --DATE functions
+    export function weekNumber(date) {
+        if (!(date instanceof Date) || isNaN(date.getTime())) {
+            return 0
+        }
+        // Clonar la fecha para no modificar el objeto original
+        var clonedDate = new Date(date.getTime());
+
+        // Configurar el tiempo al inicio del día para evitar problemas con las zonas horarias
+        clonedDate.setHours(0, 0, 0, 0);
+
+        // Obtener la fecha de inicio del año
+        var startOfYear = new Date(clonedDate.getFullYear(), 0, 1);
+
+        // Calcular la diferencia en milisegundos entre la fecha dada y el inicio del año
+        var timeDiff = clonedDate - startOfYear;
+
+        // Calcular el número de semanas completas y redondear hacia abajo
+        var weekNumber = Math.floor(timeDiff / (7 * 24 * 60 * 60 * 1000));
+
+        // Agregar 1 para contar la primera semana del año
+        weekNumber += 1;
+
+        return weekNumber;
+    }
+
     export function formatToVue(date) : String{
         const day = date.getDate();
         const month = date.getMonth() + 1;
@@ -97,7 +183,7 @@
     export function TimeTo12Format(timeString) {
         if(timeString === null) return '';
         const [hours, minutes, seconds] = timeString.split(':');
-        
+
         // Convert the time to 12-hour format and add 'am' or 'pm'
         const timeIn12HourFormat = new Date(2023, 7, 5, parseInt(hours), parseInt(minutes)).toLocaleString('es-CO', {
           hour: 'numeric',
@@ -117,7 +203,7 @@
 
         let hora = validDate.getHours();
         let hourAndtime =  hora + ':'+ (validDate.getMinutes() < 10 ? '0': '') + validDate.getMinutes() + ':00';
-        
+
         return `${hourAndtime}`;
     }
     export function monthName(monthNumber){
@@ -145,11 +231,11 @@
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
 
-// fin DATE functions 
+// fin DATE functions
 
 
 
-// MATH 
+// MATH
     export function CalcularAvg(TheArray,NameValue = '',isTime = false) {
         let sum = 0
         if(NameValue === ''){
@@ -225,7 +311,7 @@
         if(texto){
 
             if(texto.length > caracteres + 5){
-                
+
                 const primeros = texto.substring(0,caracteres);
                 return primeros + '...';
             }

@@ -102,31 +102,14 @@ const form = useForm({
                                 </td>
                                 <td v-for="(titulo_slug, indi) in nombresTabla[1]" :key="indi"
                                     class="whitespace-nowrap py-4 px-5 sm:py-3">
-                                    <div v-if="titulo_slug.substr(0, 1) == 's'">{{ (clasegenerica[titulo_slug.substr(2)]) }}
-                                    </div>
-                                    <div v-else-if="titulo_slug.substr(0, 1) == 'd'">{{
-                                        formatDate(clasegenerica[titulo_slug.substr(2)]) }}</div>
-                                    <div v-else-if="titulo_slug.substr(0, 1) == 't'">{{
-                                        formatDate(clasegenerica[titulo_slug.substr(2)], 'conLaHora') }}</div>
-                                    <div v-else-if="titulo_slug.substr(0, 1) == 'o'">{{
-                                        number_format(clasegenerica[titulo_slug.substr(2)], 0, 1) }}</div>
-                                    <div v-else-if="titulo_slug.substr(0, 1) == 'p'">{{
-                                        (number_format(clasegenerica[titulo_slug.substr(2)], 2, 0)) }} </div>
+                                    <div v-if="titulo_slug.substr(0, 1) === 's'">{{ (clasegenerica[titulo_slug.substr(2)]) }}</div>
+                                    <div v-else-if="titulo_slug.substr(0, 1) === 'd'">{{ formatDate(clasegenerica[titulo_slug.substr(2)]) }}</div>
+                                    <div v-else-if="titulo_slug.substr(0, 1) === 't'">{{ formatDate(clasegenerica[titulo_slug.substr(2)], 'conLaHora') }}</div>
+                                    <div v-else-if="titulo_slug.substr(0, 1) === 'o'">{{ number_format(clasegenerica[titulo_slug.substr(2)], 0, 1) }}</div>
+                                    <div v-else-if="titulo_slug.substr(0, 1) === 'p'">{{ (number_format(clasegenerica[titulo_slug.substr(2)], 2, 0)) }} </div>
 
-                                    <div v-else-if="titulo_slug.substr(0, 1) == 'b'">
-                                        <div v-if="clasegenerica[titulo_slug.substr(2)] === 0"> Aun no validada</div>
-                                        <div v-else-if="clasegenerica[titulo_slug.substr(2)] === 1">
-                                            <CheckIcon class="w-8 h-8 text-green-600" />
-                                        </div>
-                                        <div v-else-if="clasegenerica[titulo_slug.substr(2)] === 2">
-                                            <XCircleIcon class="w-8 h-8 text-red-600" />
-                                        </div>
-                                    </div>
-
-                                    <div v-else-if="titulo_slug.substr(0, 1) == 'i'">{{
-                                        number_format(clasegenerica[titulo_slug.substr(2)]) }}</div>
-                                    <div v-else-if="titulo_slug.substr(0, 1) == 'm'">{{
-                                        number_format(clasegenerica[titulo_slug.substr(2)], 0, 1) }}</div>
+                                    <div v-else-if="titulo_slug.substr(0, 1) === 'i'">{{ number_format(clasegenerica[titulo_slug.substr(2)]) }}</div>
+                                    <div v-else-if="titulo_slug.substr(0, 1) === 'm'">{{ number_format(clasegenerica[titulo_slug.substr(2)], 0, 1) }}</div>
                                 </td>
                             </tr>
                             <tr
@@ -147,29 +130,26 @@ const form = useForm({
                 <div class="container px-5 py-8 mx-auto">
                     <div class="text-center my-8">
                         <h2 class="tracking-widest text-2xl title-font font-medium text-black dark:text-white mb-1">
-                            ¿Como se calculan las variables en el aplicativo?
+                            Parametros del aplicativo
                         </h2>
                     </div>
                     <div class="flex flex-wrap -mx-4 my-8">
                         <div class="py-8 px-4 lg:w-1/3">
                             <div class="h-full flex items-start">
                                 <div class="w-12 flex-shrink-0 flex flex-col text-center leading-none">
-                                    <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">7</span>
-                                    <span class="font-medium text-lg text-gray-800 title-font leading-none">sept</span>
+                                    <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">9</span>
+                                    <span class="font-medium text-lg text-gray-800 title-font leading-none">nov 2023</span>
                                 </div>
                                 <div class="flex-grow pl-6">
                                     <div class="inline-flex">
                                         <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
-                                            Salario hora 
+                                            Salario hora
                                         </h2>
-                                        <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">
+<!--                                        <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">-->
                                     </div>
                                     <!-- <h1 class="title-font text-xl font-medium text-gray-900 mb-3">The 400 Blows</h1> -->
                                     <p class="leading-relaxed text-lg mb-5">
-                                        SH = salario mensual / (30 * 8)
-                                    </p>
-                                    <p class="leading-relaxed text-lg mb-5">
-                                        SH = salario mensual / (240)
+                                        Salrio Hora = salario mensual / (235)
                                     </p>
                                 </div>
                             </div>
@@ -178,22 +158,22 @@ const form = useForm({
                             <div class="h-full flex items-start">
                                 <div class="w-12 flex-shrink-0 flex flex-col text-center leading-none">
                                     <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">7</span>
-                                    <span class="font-medium text-lg text-gray-800 title-font leading-none">sept</span>
+                                    <span class="font-medium text-lg text-gray-800 title-font leading-none">sept 2023</span>
                                 </div>
                                 <div class="flex-grow pl-6">
                                     <div class="inline-flex">
                                         <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
                                             Hora de comida
                                         </h2>
-                                        <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">
+<!--                                        <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">-->
                                     </div>
 
                                     <!-- <h1 class="title-font text-xl font-medium text-gray-900 mb-3">¿ Cumplió la quincena ?</h1> -->
                                     <p class="leading-relaxed text-lg mb-5">
-                                        si las horas trabajadas > 8 entonces Comida = 1
+                                        Horas trabajadas > 8 <b>entonces</b> Comida = 1
                                     </p>
                                     <p class="leading-relaxed text-lg mb-5">
-                                        si las horas trabajadas > 16 entonces Comida = 2
+                                        Horas trabajadas > 16 <b>entonces</b> Comida = 2
                                     </p>
                                 </div>
                             </div>
@@ -202,21 +182,18 @@ const form = useForm({
                             <div class="h-full flex items-start">
                                 <div class="w-12 flex-shrink-0 flex flex-col text-center leading-none">
                                     <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">7</span>
-                                    <span class="font-medium text-lg text-gray-800 title-font leading-none">sept</span>
+                                    <span class="font-medium text-lg text-gray-800 title-font leading-none">sept 2023</span>
                                 </div>
                                 <div class="flex-grow pl-6">
                                     <div class="inline-flex">
                                     <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
                                         Subsidio de transporte
                                     </h2>
-                                    <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">
+<!--                                    <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">-->
                                     </div>
                                     <!-- <h1 class="title-font text-xl font-medium text-gray-900 mb-3">¿ Cumplió la quincena ?</h1> -->
                                     <p class="leading-relaxed text-lg mb-5">
-                                        Subsidio Transporte = Salario  >= 2.320.000
-                                    </p>
-                                    <p class="leading-relaxed text-lg mb-5">
-                                        Si el salario es mayor  <b>Subsidio Transporte = 0</b>
+                                        Si el salario supera el doble del SMLV  <b>Subsidio Transporte = 0</b>
                                     </p>
                                     <p class="leading-relaxed text-lg mb-5">
                                         Si no  <b>Subsidio Transporte = dias * subsidio transporte (dia)</b>
@@ -227,21 +204,18 @@ const form = useForm({
                         <div class="py-8 px-4 lg:w-1/3">
                             <div class="h-full flex items-start">
                                 <div class="w-12 flex-shrink-0 flex flex-col text-center leading-none">
-                                    <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">7</span>
-                                    <span class="font-medium text-lg text-gray-800 title-font leading-none">sept</span>
+                                    <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">14</span>
+                                    <span class="font-medium text-lg text-gray-800 title-font leading-none">dic 2023</span>
                                 </div>
                                 <div class="flex-grow pl-6">
                                     <div class="inline-flex">
                                     <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
                                         Horas de los administrativos
                                     </h2>
-                                    <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">
+<!--                                    <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">-->
                                     </div>
                                     <p class="leading-relaxed text-lg mb-5">
-                                        Total Horas = Horas extras (sin recargo)
-                                    </p>
-                                    <p class="leading-relaxed text-lg mb-5">
-                                        Todo cuenta como hora diurna
+                                        Los administrativos no tienen que reportar
                                     </p>
                                 </div>
                             </div>
@@ -250,21 +224,21 @@ const form = useForm({
                             <div class="h-full flex items-start">
                                 <div class="w-12 flex-shrink-0 flex flex-col text-center leading-none">
                                     <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">7</span>
-                                    <span class="font-medium text-lg text-gray-800 title-font leading-none">sept</span>
+                                    <span class="font-medium text-lg text-gray-800 title-font leading-none">sept 2023</span>
                                 </div>
                                 <div class="flex-grow pl-6">
                                     <div class="inline-flex">
                                         <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
                                             Calculo de salud y pension
                                         </h2>
-                                        <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">
+<!--                                        <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">-->
                                     </div>
                                     <h1 class="title-font text-xl font-medium text-gray-900 mb-3">¿ Cumplió la quincena ?</h1>
                                     <p class="leading-relaxed text-lg mb-5">
-                                        Salario quincena ($595.000) * 4%
+                                        Salario quincena * 4%
                                     </p>
                                     <p class="leading-relaxed text-lg mb-5">
-                                        no tiene derecho
+                                        No tiene derecho
                                     </p>
                                 </div>
                             </div>

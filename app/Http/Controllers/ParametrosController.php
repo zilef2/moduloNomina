@@ -18,7 +18,7 @@ class ParametrosController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Inertia\Response
      */
     public function index()
     {
@@ -59,7 +59,7 @@ class ParametrosController extends Controller
 
         if($numberPermissions != 3){//supervisor
             array_unshift($nombresTabla[0],'Editar');
-            array_unshift($nombresTabla[1],'Editar');
+//            array_unshift($nombresTabla[1],'Editar');
         }
         return Inertia::render('Parametros/Index', [ //carpetaP
             'title'          =>  $titulo,
@@ -74,8 +74,7 @@ class ParametrosController extends Controller
     {
     }
 
-    public function store(ParametroRequest $request)
-    {
+    public function store(ParametroRequest $request){
         $parametro = new Parametro;
         $parametro->subsidio_de_transporte = $request->input('subsidio_de_transporte');
         $parametro->salario_minimo = $request->input('salario_minimo');
@@ -91,8 +90,7 @@ class ParametrosController extends Controller
         return redirect()->route('parametros.index');
     }
 
-    public function update(ParametroRequest $request, $id)
-    {
+    public function update(ParametroRequest $request, $id){
         DB::beginTransaction();
         $ListaControladoresYnombreClase = (explode('\\', get_class($this)));
         $nombreC = end($ListaControladoresYnombreClase);
@@ -100,30 +98,27 @@ class ParametrosController extends Controller
             $parametro = Parametro::findOrFail($id);
             $parametro->subsidio_de_transporte_dia = $request->input('subsidio_de_transporte_dia');
             $parametro->salario_minimo = $request->input('salario_minimo');
-            // $parametro->porcentaje_diurno = $request->input('porcentaje_diurno');
-            // $parametro->porcentaje_nocturno = $request->input('porcentaje_nocturno');
-            // $parametro->porcentaje_extra_diurno = $request->input('porcentaje_extra_diurno');
-            // $parametro->porcentaje_extra_nocturno = $request->input('porcentaje_extra_nocturno');
-            // $parametro->porcentaje_dominical_diurno = $request->input('porcentaje_dominical_diurno');
-            // $parametro->porcentaje_dominical_nocturno = $request->input('porcentaje_dominical_nocturno');
-            // $parametro->porcentaje_dominical_extra_diurno = $request->input('porcentaje_dominical_extra_diurno');
-            // $parametro->porcentaje_dominical_extra_nocturno = $request->input('porcentaje_dominical_extra_nocturno');
+            $parametro->valor_maximo_subsidio_de_transporte = 2*(int)$request->input('salario_minimo');
             $today = Carbon::now();
             $last_update = Carbon::parse($parametro->updated_at);
             $diff = $today->isSameYear($last_update);
 
 
             if ($diff) {
-                if ($parametro->HORAS_NECESARIAS_SEMANA != intval($request->input('HORAS_NECESARIAS_SEMANA'))) {
-                    return back()->with('warning', 'No se puede actualizar las horas necesarias por semana mas de una vez por año');
+                Myhelp::EscribirEnLog($this, 'ParametrosController',' No dejo actualizar parametros',false);
+                if ($parametro->HORAS_NECESARIAS_SEMANA != (int)($request->input('HORAS_NECESARIAS_SEMANA'))) {
+                    return back()->with('error', 'No se puede actualizar las horas necesarias por semana mas de una vez por año');
                 }
+                $parametro->save();
+                DB::commit();
+                return back()->with('success', __('app.label.updated_successfully', ['name' => 'Parametros']));
             } else {
                 $parametro->HORAS_NECESARIAS_SEMANA = $request->input('HORAS_NECESARIAS_SEMANA');
                 $parametro->save();
                 DB::commit();
                 $mensaje = ' U -> ' . Auth::user()->name . ' Accedio a la vista ' . $nombreC . ' y actualizo los paramaetros:
                 subsidio_de_transporte_dia = ' . $parametro->subsidio_de_transporte_dia . 'salario_minimo =' . $parametro->salario_minimo;
-                
+
                 Myhelp::EscribirEnLog($this, 'ParametrosController',$mensaje,false);
 
                 return back()->with('success', __('app.label.updated_successfully', ['name' => 'Parametros']));

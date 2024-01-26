@@ -34,7 +34,8 @@ onMounted(() => {
 watchEffect(() => {
   window.addEventListener('resize', () => {
     width = window.innerWidth;
-    chartOptions.height = width
+    if(width < 2000)
+      chartOptions.height = width
   });
 });
 
@@ -88,22 +89,21 @@ watchEffect(() => {
 // const json = await res.json()
 // console.log("🧈 debu res:", res);
 
-const fetchData = async () => {
-    const ip = '181.134.144.14'
-    // const token = '87303ba169a724'
-    const url = 'https://ipinfo.io/'+ip+'?token=87303ba169a724'
-    const res = await fetch(url);
-    let datau
-    if(res){
-        datau = await res.json()
-    }
-    return datau;
-}
-
-let data2 = ref(null);
-fetchData().then(result => {
-  data2.value = result;
-});
+// const fetchData = async () => {
+//     // const token = '87303ba169a724'
+//     const url = 'https://ipinfo.io/'+ip+'?token=87303ba169a724'
+//     const res = await fetch(url);
+//     let datau
+//     if(res){
+//         datau = await res.json()
+//     }
+//     return datau;
+// }
+//
+// let data2 = ref(null);
+// fetchData().then(result => {
+//   data2.value = result;
+// });
 </script>
 
 <template>

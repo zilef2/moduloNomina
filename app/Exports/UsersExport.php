@@ -15,20 +15,21 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 //Exportar el informe
 class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
-    public $ini, $fin, $NumeroDiasFestivos;
-    public function __construct($ini, $fin, $NumeroDiasFestivos) {
+    public $ini, $fin, $NumeroDiasFestivos,$ArrayDatesFest;
+    public function __construct($ini, $fin, $NumeroDiasFestivos,$ArrayDatesFest) {
         $this->ini = $ini;
         $this->fin = $fin;
         $this->NumeroDiasFestivos = $NumeroDiasFestivos;
+        $this->ArrayDatesFest = $ArrayDatesFest;
     }
 
     //this function returns hours (the money is &$variables)
     public function CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, &$H_diurno, &$nocturnas, &$extra_diurnas, &$extra_nocturnas, &$dominical_diurno, &$dominical_nocturno, &$dominical_extra_diurno, &$dominical_extra_nocturno) {
-        $H_diurno = round((int)($reportes->sum('diurnas')) * (double)($salario_hora), 0, PHP_ROUND_HALF_UP);
+        $H_diurno = round((int)($reportes->sum('diurnas')) * (double)($salario_hora));
 
         $recargoNocturno = $paramBD->porcentaje_nocturno;
         // $recargoNocturno = $cumplioQuicena ? $paramBD->porcentaje_nocturno - 1 : $paramBD->porcentaje_nocturno;
-        $nocturnas = (int)($reportes->sum('nocturnas')) * (double)($salario_hora) * $recargoNocturno;
+        $nocturnas = (int)($reportes->sum('nocturnas')) * (double)($salario_hora) * ($recargoNocturno - 1);
         // extras simples
         $extra_diurnas = (int)($reportes->sum('extra_diurnas')) * (double)($salario_hora) * $paramBD->porcentaje_extra_diurno;
         $extra_nocturnas = (int)($reportes->sum('extra_nocturnas')) * (double)($salario_hora) * $paramBD->porcentaje_extra_nocturno;
@@ -39,14 +40,13 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
         $dominical_extra_diurno = (int)($reportes->sum('dominical_extra_diurno')) * (double)($salario_hora) * $paramBD->porcentaje_dominical_extra_diurno;
         $dominical_extra_nocturno = (int)($reportes->sum('dominical_extra_nocturno')) * (double)($salario_hora) * $paramBD->porcentaje_dominical_extra_nocturno;
 
-
         return [
             (int)($reportes->sum('extra_diurnas')) +
-                (int)($reportes->sum('extra_nocturnas')) +
-                (int)($reportes->sum('dominical_diurno')) +
-                (int)($reportes->sum('dominical_nocturno')) +
-                (int)($reportes->sum('dominical_extra_diurno')) +
-                (int)($reportes->sum('dominical_extra_nocturno')),
+            (int)($reportes->sum('extra_nocturnas')) +
+            (int)($reportes->sum('dominical_diurno')) +
+            (int)($reportes->sum('dominical_nocturno')) +
+            (int)($reportes->sum('dominical_extra_diurno')) +
+            (int)($reportes->sum('dominical_extra_nocturno')),
 
             (int)($reportes->sum('extra_diurnas')),
             (int)($reportes->sum('extra_nocturnas')),
@@ -57,18 +57,6 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
         ];
     }
 
-    public function SalarioHoras_OR_Dias($cumplioQuicena, $salario_quincena, &$users, $key, $H_diurno, $NumReportes) {
-        // if($Total_Horas >= $HORAS_NECESARIAS_SEMANA){ // usuario cumplio con sus horas quincenales
-        if ($cumplioQuicena) { // cumplio con los dias de la quincena
-            $users[$key]->Salario = $salario_quincena;
-            $diasEfectivos = 15;
-        } else {
-            $users[$key]->Salario = $H_diurno;
-            //todo: no puede contar mas de un reporte por dia
-            $diasEfectivos = $NumReportes;
-        }
-        return $diasEfectivos;
-    }
 
     public function unsetAllunnesesary(&$users, $key) {
         $unecesary = ['id', 'name', 'cargo_id', 'salario'];
@@ -77,16 +65,12 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
         }
     }
 
-    public function LunesSabadoSemana($ElLunes, $primeraQuincena, $value) {
-        //todo: es necesario?
-        //todo:validar si trabajo de lunes a sabado
-    }
-
-    public function CalculoDomingoGanadosTodo($value) {
+    /**/
+    public function CalculoDomingoGanadosTodo($empleado) {
         $HORAS_NECESARIAS_SEMANA = (int)(Parametro::find(1)->HORAS_NECESARIAS_SEMANA);
         $HORAS_NECESARIAS_QUINCENA = $HORAS_NECESARIAS_SEMANA * 2;
 
-        $reportes = Reporte::Where('user_id', $value->id)
+        $reportes = Reporte::Where('user_id', $empleado->id)
             ->where('valido', 1)
             ->whereBetween('fecha_ini', [$this->ini, $this->fin])->orderby('fecha_ini', 'asc');
 
@@ -101,15 +85,14 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
 
         $ElSabado = Carbon::parse($ElLunes)->endOfWeek(-1);
         while($valido){
-            $ValidarReportes = Reporte::Where('user_id', $value->id)
+            $ValidarReportes = Reporte::Where('user_id', $empleado->id)
                 ->where('valido', 1)
                 ->whereBetween('fecha_ini', [$ElLunes, $ElSabado])
                 ->sum('horas_trabajadas');
 
             //? NOTE:: values 15-30
-            //todo : esta malo, necesito saber si en la semana hubo festivo
-            $HORAS_NECESARIAS_QUINCENA -= $this->NumeroDiasFestivos * 8;
-            $domingosGanados += (int)($ValidarReportes) >= ($HORAS_NECESARIAS_QUINCENA) ? 1 : 0;
+            $HORAS_NECESARIAS_SEMANA -= $this->NumeroDiasFestivos * 8;
+            $domingosGanados += (int)($ValidarReportes) >= ($HORAS_NECESARIAS_SEMANA) ? 1 : 0;
             $ElLunes->addDays(7);
             $ElSabado = clone $ElLunes;
             $ElSabado->endOfWeek(-1);
@@ -129,117 +112,148 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
     public function collection() {
         $H_diurno = 0;$nocturnas = 0;$extra_diurnas = 0;$extra_nocturnas = 0;$dominical_diurno = 0;$dominical_nocturno = 0;$dominical_extra_diurno = 0;$dominical_extra_nocturno = 0;
         $paramBD = Parametro::find(1);
-
         //traer todos los empleado
         $usersEmpleados = User::Select('id', 'name', 'cedula', 'cargo_id', 'salario')->WhereHas("roles", function ($q) {
             $q->Where("name", "empleado");
             $q->orWhere("name", "supervisor");
         })->get();
 
-        $pruebasCon = 0; //debug
         foreach ($usersEmpleados as $key => $value) {
-            $NumReportes = HelpExcel::cumplioQuincena($usersEmpleados, $key, $this->ini, $this->fin, $value, $reportes, $salario_hora, $salario_quincena, $cumplioQuicena, $paramBD, $this->NumeroDiasFestivos);
-            //? sumamos las horas que trabajo, y lo multiplicamos por el valor del tipo de hora
-            $extrasyDominicales = $this->CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, $H_diurno, $nocturnas, $extra_diurnas, $extra_nocturnas, $dominical_diurno, $dominical_nocturno, $dominical_extra_diurno, $dominical_extra_nocturno);
+            $DiasTrabajados = HelpExcel::cumplioQuincena(
+                $usersEmpleados, $key, $this->ini, $this->fin,
+                $value, $reportes, $salario_hora,
+                $salario_quincena, $cumplioQuicena, $paramBD,
+                $this->NumeroDiasFestivos,$this->ArrayDatesFest
+            );
 
-            //? vemos si se paga por horas o por dias
-            $diasEfectivos = $this->SalarioHoras_OR_Dias($cumplioQuicena, $salario_quincena, $usersEmpleados, $key, $H_diurno, $NumReportes);
+            //todo: debugging
+//            if(substr($usersEmpleados[$key]->Completa,0,5) === 'No (0'){
+//                dd(
+//                    substr($usersEmpleados[$key]->Completa,0,2)
+//                );
+//                continue;
+//            }
+            $HorasExtrasyDominicales = $this->CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, $H_diurno, $nocturnas, $extra_diurnas, $extra_nocturnas, $dominical_diurno, $dominical_nocturno, $dominical_extra_diurno, $dominical_extra_nocturno);
 
-            /**
-                cambiar en |create reporte| cuando el reporte anterior finaliza en 11:59pm, entonces esas horas trabajadas se le suman al siguiente reporte
-            */
+            if ($cumplioQuicena) { // cumplio con los dias de la quincena
+                $usersEmpleados[$key]->Salario = $salario_quincena;
+            } else {
+                $usersEmpleados[$key]->Salario = $H_diurno;
+            }
 
             $domingosGanados = $this->CalculoDomingoGanadosTodo($value);
+//            if(substr($value->Completa,0,2) == 'Si') dd($value,$domingosGanados);
+            $DiasTrabajados += $domingosGanados; //se usa para el subsidio de transporte
 
-            $diasEfectivos += $domingosGanados; //se usa para el subsidio de transporte
-
-            // if($pruebasCon ==0)dd($usersEmpleados[$key]->Salario,$cumplioQuicena); $pruebasCon ++; //debug
-            if($salario_quincena == 0)dd(''.$value->name.' no tiene salario registrado');
-
-            $usersEmpleados[$key]->Salario = $salario_quincena;
             $usersEmpleados[$key]->SalarioHora = $salario_hora;
             $usersEmpleados[$key]->diurnas = (int)($reportes->sum('diurnas'));
             $usersEmpleados[$key]->nocturnas = (int)($reportes->sum('nocturnas'));
+            $usersEmpleados[$key]->extra_diurnas = $HorasExtrasyDominicales[1] .' = ' .$extra_diurnas;
+            $usersEmpleados[$key]->extra_nocturnas = $HorasExtrasyDominicales[2].' = ' .$extra_nocturnas;
+            $usersEmpleados[$key]->dominical_diurno = $HorasExtrasyDominicales[3].' = ' .$dominical_diurno;
+            $usersEmpleados[$key]->dominical_nocturno = $HorasExtrasyDominicales[4].' = ' .$dominical_nocturno;
+            $usersEmpleados[$key]->dominical_extra_diurno = $HorasExtrasyDominicales[5].' = ' .$dominical_extra_diurno;
+            $usersEmpleados[$key]->dominical_extra_nocturno = $HorasExtrasyDominicales[6].' = ' .$dominical_extra_nocturno;
 
-            $usersEmpleados[$key]->extra_diurnas = $extrasyDominicales[1]; $usersEmpleados[$key]->extra_nocturnas = $extrasyDominicales[2]; $usersEmpleados[$key]->dominical_diurno = $extrasyDominicales[3]; $usersEmpleados[$key]->dominical_nocturno = $extrasyDominicales[4]; $usersEmpleados[$key]->dominical_extra_diurno = $extrasyDominicales[5]; $usersEmpleados[$key]->dominical_extra_nocturno = $extrasyDominicales[6];
-
-            $usersEmpleados[$key]->extrasYDominicales = $extrasyDominicales[0];
-            $usersEmpleados[$key]->DerechoDomingo = $domingosGanados;
+            $usersEmpleados[$key]->extrasYDominicales = $HorasExtrasyDominicales[0];
+//            $usersEmpleados[$key]->DerechoDomingo = $domingosGanados;
 
             $Total_Horas = $usersEmpleados[$key]->diurnas + $usersEmpleados[$key]->nocturnas + $usersEmpleados[$key]->extrasYDominicales;
             $usersEmpleados[$key]->Total_Horas = $Total_Horas;
 
+            //! borrando atributos que no se necesitan en el reporte
             $this->unsetAllunnesesary($usersEmpleados, $key);
 
+
+            //!De aqui, empieza a calcular dinero. Hacia arriba solo son horas
             $ExtraTotal = $extra_diurnas + $extra_nocturnas + $dominical_diurno + $dominical_nocturno + $dominical_extra_diurno + $dominical_extra_nocturno;
+            $usersEmpleados[$key]->RecargoNocturno = $nocturnas;//this is money
             $usersEmpleados[$key]->Valor_Horas_Extras = $ExtraTotal;//this is money
 
             // $salYextras es la variable que tiene todas las horas, diurnas, noc, extras,dominicales
             //# SALUD Y PENSION
-                $salYextras = ($H_diurno + $nocturnas + $ExtraTotal);
+            $salYextras = ($H_diurno + $nocturnas + $ExtraTotal);
+//            if($cumplioQuicena)dd($cumplioQuicena,$value);
             if ($cumplioQuicena) {
-                // $salYextras = $usersEmpleados[$key]->Salario + $ExtraTotal;
+                 $salYextras = $usersEmpleados[$key]->Salario + $nocturnas + $ExtraTotal;
                 // $saludPension = round($salYextras * 0.04, 0, PHP_ROUND_HALF_UP); //QUEMADO: salud y la pension = salario total * 4%
-                $saludPension = round($usersEmpleados[$key]->Salario * 0.04, 0, PHP_ROUND_HALF_UP);
+
+                $saludPension = round($salYextras * 0.04);
                 $usersEmpleados[$key]->Salud = $saludPension;
                 $usersEmpleados[$key]->Pension = $saludPension;
+
+                $S_Transporte = ($usersEmpleados[$key]->Salario * 2) >= ($paramBD->valor_maximo_subsidio_de_transporte) ?
+                    0 : 15 * $paramBD->subsidio_de_transporte_dia;
             }else{
                 // $salYextras = ($H_diurno + $ExtraTotal);
                 $saludPension = 0;
                 $usersEmpleados[$key]->Salud = 0;
                 $usersEmpleados[$key]->Pension = 0;
+                //# Subsidio de transporte (por dias)
+                $S_Transporte = ($usersEmpleados[$key]->Salario * 2) >= ($paramBD->valor_maximo_subsidio_de_transporte) ? 0 : $DiasTrabajados * $paramBD->subsidio_de_transporte_dia;
             }
-
-            //# Subsidio de transporte (por dias)
-            $S_Transporte = ($usersEmpleados[$key]->Salario * 2) >= ($paramBD->valor_maximo_subsidio_de_transporte) ? 0 : $diasEfectivos * $paramBD->subsidio_de_transporte_dia;
-            $usersEmpleados[$key]->S_Transporte = round($S_Transporte, 0, PHP_ROUND_HALF_UP);
-
+            $usersEmpleados[$key]->S_Transporte = round($S_Transporte);
             // # Novedades
             // $usersEmpleados[$key]->Prima = '0'; $usersEmpleados[$key]->Vacaciones = '0'; $usersEmpleados[$key]->Cesantias = '0'; $usersEmpleados[$key]->Intereses = '0'; $usersEmpleados[$key]->Prestamo = '0'; $usersEmpleados[$key]->Anticipo = '0'; $usersEmpleados[$key]->Auxilio = '0'; $usersEmpleados[$key]->Bonificacion = '0'; $usersEmpleados[$key]->Reintegro = '0'; $usersEmpleados[$key]->Abono_Prestamo = '0'; $usersEmpleados[$key]->Otras_Deducciones = '0';
 
             // # Total
-            $usersEmpleados[$key]->salYextras = $salYextras;
-            $usersEmpleados[$key]->Total_pagado = round(($salYextras + $S_Transporte) - (2 * $saludPension), 0, PHP_ROUND_HALF_UP);
+//            $usersEmpleados[$key]->salYextras = $usersEmpleados[$key]->Salario + $ExtraTotal;
+            $usersEmpleados[$key]->SalarioNocExtras = $salYextras;
+            $usersEmpleados[$key]->Total_pagado = round(($salYextras + $S_Transporte) - (2 * $saludPension));
         }
 
 
-        //*Los administrativos e ingenieros no ganan extras*//
-
-
-        $usersAdministrativos = User::Select('id', 'name', 'cedula', 'cargo_id', 'salario')->WhereHas("roles", function ($q) {
-            $q->orWhere("name", "administrativo");
-            $q->orWhere("name", "ingeniero");
-        })->get();
-        foreach ($usersAdministrativos as $index => $user) {
-            $this->unsetAllunnesesary($usersAdministrativos, $key);
+        //<editor-fold desc="administrativos e ingenieros no ganan extras">
+        //WhereNotIn('id',[2,1])
+        $usersAdministrativos = User::Select('id', 'name', 'cedula', 'cargo_id', 'salario')->WhereNotIn('id',[2,1])
+            ->WhereHas("roles", function ($q) {
+                $q->Where("name", "administrativo");
+                $q->orWhere("name", "ingeniero");
+            })->get();
+        foreach ($usersAdministrativos as $key2 => $user) {
+            $usersEmpleados[$key2+$key] = $user;
 
             $salario = $user->salario/2;
-            $transporte = round($paramBD->subsidio_de_transporte_dia*15, 0, PHP_ROUND_HALF_UP);
-            $usersAdministrativos[$key]->Salario = $salario;
-            $usersAdministrativos[$key]->diurnas = 0;$usersAdministrativos[$key]->nocturnas = 0;$usersAdministrativos[$key]->extra_diurnas = 0; $usersAdministrativos[$key]->extra_nocturnas = 0; $usersAdministrativos[$key]->dominical_diurno = 0; $usersAdministrativos[$key]->dominical_nocturno = 0; $usersAdministrativos[$key]->dominical_extra_diurno = 0; $usersAdministrativos[$key]->dominical_extra_nocturno = 0;
-            $usersAdministrativos[$key]->extrasYDominicales = 0;
-            $usersAdministrativos[$key]->DerechoDomingo = 0;
-            $usersAdministrativos[$key]->Total_Horas = 0;
-            $usersAdministrativos[$key]->Valor_Horas_Extras = 0;
+            $usersEmpleados[$key2+$key]->Completa = 'Administrativo o ingeniero';
+            $usersEmpleados[$key2+$key]->Num = 0;
+            $usersEmpleados[$key2+$key]->Empleado = $user->name;
+            $this->unsetAllunnesesary($usersAdministrativos, ($key2));
+            $transporte = round($paramBD->subsidio_de_transporte_dia*15);
+            $usersEmpleados[$key2+$key]->Salario = $salario;
+            $salario_hora = $salario / (235);// 30 * 7.8333
+            $usersEmpleados[$key2+$key]->SalarioHora = $salario_hora;
+            $usersEmpleados[$key2+$key]->diurnas = 0;$usersEmpleados[$key2+$key]->nocturnas = 0;$usersEmpleados[$key2+$key]->extra_diurnas = 0; $usersEmpleados[$key2+$key]->extra_nocturnas = 0; $usersEmpleados[$key2+$key]->dominical_diurno = 0; $usersEmpleados[$key2+$key]->dominical_nocturno = 0; $usersEmpleados[$key2+$key]->dominical_extra_diurno = 0; $usersEmpleados[$key2+$key]->dominical_extra_nocturno = 0;
+            $usersEmpleados[$key2+$key]->extrasYDominicales = 0;
+//            $usersEmpleados[$key2+$key]->DerechoDomingo = 0;
+            $usersEmpleados[$key2+$key]->Total_Horas = 0;
+            $usersEmpleados[$key2+$key]->Valor_Horas_Extras = 0;
 
-            $saludPension = round($usersAdministrativos[$key]->Salario * 0.04, 0, PHP_ROUND_HALF_UP);
-            $usersAdministrativos[$key]->Salud = $saludPension;
-            $usersAdministrativos[$key]->Pension = $saludPension;
-            $usersAdministrativos[$key]->S_Transporte = $transporte;
-            $usersAdministrativos[$key]->salYextras = 0;
-            $usersAdministrativos[$key]->Total_pagado = round((($salario + $transporte) - (2 * $saludPension)), 0, PHP_ROUND_HALF_UP);
+            $saludPension = round($salario * 0.04);
+            $usersEmpleados[$key2+$key]->Salud = $saludPension;
+            $usersEmpleados[$key2+$key]->Pension = $saludPension;
+            $usersEmpleados[$key2+$key]->S_Transporte = $transporte;
+            $usersEmpleados[$key2+$key]->RecargoNocturno = $nocturnas;//this is money
+            $usersEmpleados[$key2+$key]->SalarioNocExtras = $salario;
+            $usersEmpleados[$key2+$key]->Total_pagado = round((($salario + $transporte) - (2 * $saludPension)));
         }
+        //</editor-fold>
 
         //# prod =>  5:jessica 3:jose
+//        $resetKeysArray = array_values($usersEmpleados->toArray());
+//        $firstElement = $resetKeysArray[0] ?? '';
+//        $secondElement = $resetKeysArray[1] ?? '';
+//        $s3econdElement = $resetKeysArray[2] ?? '';
+//        $s4econdElement = $resetKeysArray[3] ?? '';
+//        $s5econdElement = $resetKeysArray[4] ?? '';
 //        dd(
-//            // $users[0],//empleado
-//            $users[1]->toArray(),//elalejo
-//            $users[2]->toArray(),//Alejo
-//            $users[3]->toArray(),
-//            $users[5]->toArray(),
-//            $usersEmpleados,
+//            $firstElement,
+//            $secondElement,
+//            $s3econdElement,
+//            $s4econdElement,
+//            $s5econdElement,
 //        );
         return $usersEmpleados;
+//        return array_merge($usersEmpleados, $usersAdministrativos);
     }
 
     public function headings(): array {
@@ -250,14 +264,16 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
             'Quincena Completa',
             'Num reportes',
             'Empleado',
+
             'Salario (Quincena)',
             'Salario (Hora)',
             'diurnas', 'nocturnas',
             'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno',
             'extrasYDominicales',
-            'Domingos',
+//            'Domingos',
             'Total Horas',
 
+            'Recargo nocturno',
             'Valor Horas Extras',
             'Salud',
             'Pension',
@@ -273,7 +289,7 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
             // 'Reintegro',
             // 'Abono Prestamo',
             // 'Otras Deducciones',
-            'Salario Y extras',
+            'Salario Noc extras',
             'Total pagado',
         ];
     }
