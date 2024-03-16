@@ -55,7 +55,7 @@ class ReportesController extends Controller
 
     }
 
-    public function Filtros($request, &$Reportes) {
+    public function Filtros(&$request, &$Reportes) {
 
         if ($request->has('search')) {
             $Reportes->whereMonth('fecha_ini', $request->search);
@@ -71,10 +71,9 @@ class ReportesController extends Controller
             }else{
                 $Reportes->orderByDesc('fecha_ini');
         }
-        //# solo validos
-        if ($request->has('soloValidos')) {
-            $Reportes->where('valido', 1); //0 aun no | 1 valido | 2 rechazado
-        }
+        //# solo validos //0 aun no | 1 valido | 2 rechazado
+        if ($request->has('soloValidos')) {$Reportes->where('valido', 1);}
+
         if ($request->has(['FiltroUser'])) {
             $Reportes->Where('user_id',$request->FiltroUser);
         }
@@ -137,10 +136,9 @@ class ReportesController extends Controller
 
 
 
-            //# solo validos
-            if ($request->has('soloValidos')) {
-                $Reportes->where('valido', 1); //0 aun no | 1 valido | 2 rechazado
-            }
+            //# solo validos 0 aun no | 1 valido | 2 rechazado
+            if ($request->has('soloValidos')) {$Reportes->where('valido', 1);}
+
 
         }else{ //administrativo, supervisor y admin
             $this->Filtros($request,$Reportes);
@@ -243,7 +241,6 @@ class ReportesController extends Controller
         $horasTrabajadasHoy = Reporte::WhereMonth('fecha_ini',$esteMes)
             ->Where('user_id',$Authuser->id)->pluck('horas_trabajadas','fecha_ini')
             ->toArray();
-//        dd($horasTrabajadasHoy);
         foreach ($horasTrabajadasHoy as $index => $item) {
             $elIndex = (int)Carbon::parse($index)->format('d');
             if(isset($horasTrabajadasHoy2[$elIndex]) ){
@@ -253,9 +250,6 @@ class ReportesController extends Controller
             }
         }
 
-
-//        dd($horasTrabajadasHoy2);
-//        dd($Reportes->first()->);
         return Inertia::render('Reportes/Index', [ //carpeta
             'title'                 =>  $titulo,
             'filters'               =>  $request->all(['search', 'field', 'order','soloValidos','FiltroUser']),

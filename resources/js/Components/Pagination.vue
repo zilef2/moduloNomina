@@ -15,6 +15,10 @@ const data = reactive({
         field: props.filters?.field,
         order: props.filters?.order,
         perPage: props.filters?.perPage,
+
+        soloValidos: props.filters?.soloValidos,
+        FiltroUser: props.filters?.FiltroUser,
+
     },
 })
 
@@ -32,6 +36,8 @@ watchEffect(() => {
     data.params.field = props.filters?.field
     data.params.order = props.filters?.order
     data.params.perPage = props.filters?.perPage
+    data.params.soloValidos = props.filters?.soloValidos
+    data.params.FiltroUser = props.filters?.FiltroUser
 })
 </script>
 <template>
@@ -43,27 +49,27 @@ watchEffect(() => {
         <p>{{ lang().label.no_data }}</p>
     </div>
     <div v-if="links.links.length > 3">
-       <!-- <ul
+        <ul
             class="hidden lg:flex justify-center items-center rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
             <li v-for="(link, index) in links.links" :key="index">
                 <button v-on:click="goto(link.url)" class="px-4 py-2 hover:bg-primary hover:text-white"
                     :class="{'bg-primary text-white':link.active}" v-html="link.label"
                     :disabled="link.url == null"></button>
             </li>
-        </ul> -->
-        <ul
-            class="flex justify-center items-center rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-            <li>
-                <button v-on:click="goto(links.prev_page_url)" class="px-4 py-2" v-html="'&laquo;'"
-                    :disabled="links.prev_page_url == null"></button>
-                       </li>
-            <li>
-                <p class="px-4 py-2 bg-primary text-white" v-html="links.current_page"></p>
-                </li>
-            <li>
-                <button v-on:click="goto(links.next_page_url)" class="px-4 py-2" v-html="'&raquo;'"
-                    :disabled="links.next_page_url == null"></button>
-                    </li>
         </ul>
+<!--        <ul-->
+<!--            class="flex justify-center items-center rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">-->
+<!--            <li>-->
+<!--                <button v-on:click="goto(links.prev_page_url)" class="px-4 py-2" v-html="'&laquo;'"-->
+<!--                    :disabled="links.prev_page_url == null"></button>-->
+<!--                       </li>-->
+<!--            <li>-->
+<!--                <p class="px-4 py-2 bg-primary text-white" v-html="links.current_page"></p>-->
+<!--                </li>-->
+<!--            <li>-->
+<!--                <button v-on:click="goto(links.next_page_url)" class="px-4 py-2" v-html="'&raquo;'"-->
+<!--                    :disabled="links.next_page_url == null"></button>-->
+<!--                    </li>-->
+<!--        </ul>-->
     </div>
 </template>

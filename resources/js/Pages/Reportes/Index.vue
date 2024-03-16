@@ -94,11 +94,12 @@
     const data = reactive({
         params: {
             soloValidos: props.filters?.soloValidos,
+            FiltroUser: props.filters?.FiltroUser,
+
             search: props.filters?.search,
             field: props.filters?.field,
             order: props.filters?.order,
             perPage: props.perPage,
-            FiltroUser: props.FiltroUser,
         },
         selectedId: [],
         multipleSelect: false,

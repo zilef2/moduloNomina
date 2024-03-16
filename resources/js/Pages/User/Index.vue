@@ -240,7 +240,7 @@ const data = reactive({
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cargo.length === 0 ? 'No tiene cargo' : user.cargo.nombre }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.roles.length === 0 ? 'No tiene rol' : user.roles[0].name }}</td>
                                 <!-- <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.created_at }}</td> -->
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.celular }} <span> {{ user.telefono }} </span></td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.celular }} <span v-if="user.telefono && user.telefono !== user.celular"> / {{ user.telefono }} </span></td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.fecha_de_ingreso }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cc }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ number_format(user.salario,0,1) }}</td>

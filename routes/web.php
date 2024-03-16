@@ -12,14 +12,15 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route; use Illuminate\Support\Facades\Session; use Inertia\Inertia;
 // use Stevebauman\Location\Facades\Location;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+//Route::get('/', function () {
+//    return Inertia::render('Welcome', [
+//        'canLogin' => Route::has('login'),
+//        'canRegister' => Route::has('register'),
+//        'laravelVersion' => Application::VERSION,
+//        'phpVersion' => PHP_VERSION,
+//    ]);
+//});
+Route::get('/', function () { return redirect('/login'); });
 
 Route::get('/dashboard', [UserController::class, 'Dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 

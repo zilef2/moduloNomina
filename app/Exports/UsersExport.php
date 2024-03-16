@@ -58,10 +58,10 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
     }
 
 
-    public function unsetAllunnesesary(&$users, $key) {
+    public function unsetAllunnesesary(&$users, $keyp) {
         $unecesary = ['id', 'name', 'cargo_id', 'salario'];
         foreach ($unecesary as $value) {
-            unset($users[$key]->{$value});
+            unset($users[$keyp]->{$value});
         }
     }
 
@@ -113,10 +113,11 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
         $H_diurno = 0;$nocturnas = 0;$extra_diurnas = 0;$extra_nocturnas = 0;$dominical_diurno = 0;$dominical_nocturno = 0;$dominical_extra_diurno = 0;$dominical_extra_nocturno = 0;
         $paramBD = Parametro::find(1);
         //traer todos los empleado
-        $usersEmpleados = User::Select('id', 'name', 'cedula', 'cargo_id', 'salario')->WhereHas("roles", function ($q) {
+        $usersEmpleados = User::Select('id','name', 'cedula', 'cargo_id', 'salario')->WhereHas("roles", function ($q) {
             $q->Where("name", "empleado");
             $q->orWhere("name", "supervisor");
         })->get();
+
 
         foreach ($usersEmpleados as $key => $value) {
             $DiasTrabajados = HelpExcel::cumplioQuincena(
@@ -127,43 +128,32 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
             );
 
             //todo: debugging
-//            if(substr($usersEmpleados[$key]->Completa,0,5) === 'No (0'){
+//            if(substr($usersEmpleados[$key]->Completa,0,3) === 'Si '){
 //                dd(
-//                    substr($usersEmpleados[$key]->Completa,0,2)
+//                    substr($usersEmpleados[$key]->Completa,0,2),
+//                    ($usersEmpleados[$key])
 //                );
-//                continue;
 //            }
             $HorasExtrasyDominicales = $this->CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, $H_diurno, $nocturnas, $extra_diurnas, $extra_nocturnas, $dominical_diurno, $dominical_nocturno, $dominical_extra_diurno, $dominical_extra_nocturno);
 
-            if ($cumplioQuicena) { // cumplio con los dias de la quincena
+//            if ($cumplioQuicena) { // cumplio con los dias de la quincena
                 $usersEmpleados[$key]->Salario = $salario_quincena;
-            } else {
-                $usersEmpleados[$key]->Salario = $H_diurno;
-            }
+//            } else {
+//                $usersEmpleados[$key]->Salario = $H_diurno;
+//            }
 
-            $domingosGanados = $this->CalculoDomingoGanadosTodo($value);
-//            if(substr($value->Completa,0,2) == 'Si') dd($value,$domingosGanados);
-            $DiasTrabajados += $domingosGanados; //se usa para el subsidio de transporte
+
+//            $domingosGanados = $this->CalculoDomingoGanadosTodo($value);
+//            $DiasTrabajados += $domingosGanados; //se usa para el subsidio de transporte
 
             $usersEmpleados[$key]->SalarioHora = $salario_hora;
-            $usersEmpleados[$key]->diurnas = (int)($reportes->sum('diurnas'));
-            $usersEmpleados[$key]->nocturnas = (int)($reportes->sum('nocturnas'));
-            $usersEmpleados[$key]->extra_diurnas = $HorasExtrasyDominicales[1] .' = ' .$extra_diurnas;
-            $usersEmpleados[$key]->extra_nocturnas = $HorasExtrasyDominicales[2].' = ' .$extra_nocturnas;
-            $usersEmpleados[$key]->dominical_diurno = $HorasExtrasyDominicales[3].' = ' .$dominical_diurno;
-            $usersEmpleados[$key]->dominical_nocturno = $HorasExtrasyDominicales[4].' = ' .$dominical_nocturno;
-            $usersEmpleados[$key]->dominical_extra_diurno = $HorasExtrasyDominicales[5].' = ' .$dominical_extra_diurno;
-            $usersEmpleados[$key]->dominical_extra_nocturno = $HorasExtrasyDominicales[6].' = ' .$dominical_extra_nocturno;
-
-            $usersEmpleados[$key]->extrasYDominicales = $HorasExtrasyDominicales[0];
-//            $usersEmpleados[$key]->DerechoDomingo = $domingosGanados;
+            $usersEmpleados[$key]->diurnas = (int)($reportes->sum('diurnas'));$usersEmpleados[$key]->nocturnas = (int)($reportes->sum('nocturnas'));$usersEmpleados[$key]->extra_diurnas = $HorasExtrasyDominicales[1] .' = ' .$extra_diurnas;$usersEmpleados[$key]->extra_nocturnas = $HorasExtrasyDominicales[2].' = ' .$extra_nocturnas;$usersEmpleados[$key]->dominical_diurno = $HorasExtrasyDominicales[3].' = ' .$dominical_diurno;$usersEmpleados[$key]->dominical_nocturno = $HorasExtrasyDominicales[4].' = ' .$dominical_nocturno;$usersEmpleados[$key]->dominical_extra_diurno = $HorasExtrasyDominicales[5].' = ' .$dominical_extra_diurno;$usersEmpleados[$key]->dominical_extra_nocturno = $HorasExtrasyDominicales[6].' = ' .$dominical_extra_nocturno;$usersEmpleados[$key]->extrasYDominicales = $HorasExtrasyDominicales[0];
 
             $Total_Horas = $usersEmpleados[$key]->diurnas + $usersEmpleados[$key]->nocturnas + $usersEmpleados[$key]->extrasYDominicales;
             $usersEmpleados[$key]->Total_Horas = $Total_Horas;
 
             //! borrando atributos que no se necesitan en el reporte
             $this->unsetAllunnesesary($usersEmpleados, $key);
-
 
             //!De aqui, empieza a calcular dinero. Hacia arriba solo son horas
             $ExtraTotal = $extra_diurnas + $extra_nocturnas + $dominical_diurno + $dominical_nocturno + $dominical_extra_diurno + $dominical_extra_nocturno;
@@ -172,36 +162,41 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
 
             // $salYextras es la variable que tiene todas las horas, diurnas, noc, extras,dominicales
             //# SALUD Y PENSION
-            $salYextras = ($H_diurno + $nocturnas + $ExtraTotal);
-//            if($cumplioQuicena)dd($cumplioQuicena,$value);
-            if ($cumplioQuicena) {
+//            $salYextras = ($H_diurno + $nocturnas + $ExtraTotal);
+            if ($Total_Horas != 0) {
                  $salYextras = $usersEmpleados[$key]->Salario + $nocturnas + $ExtraTotal;
-                // $saludPension = round($salYextras * 0.04, 0, PHP_ROUND_HALF_UP); //QUEMADO: salud y la pension = salario total * 4%
-
                 $saludPension = round($salYextras * 0.04);
                 $usersEmpleados[$key]->Salud = $saludPension;
                 $usersEmpleados[$key]->Pension = $saludPension;
 
                 $S_Transporte = ($usersEmpleados[$key]->Salario * 2) >= ($paramBD->valor_maximo_subsidio_de_transporte) ?
                     0 : 15 * $paramBD->subsidio_de_transporte_dia;
-            }else{
-                // $salYextras = ($H_diurno + $ExtraTotal);
-                $saludPension = 0;
+
+                $usersEmpleados[$key]->S_Transporte = round($S_Transporte);
+                // # Total
+//            $usersEmpleados[$key]->salYextras = $usersEmpleados[$key]->Salario + $ExtraTotal;
+                $usersEmpleados[$key]->SalarioNocExtras = $salYextras;
+                $usersEmpleados[$key]->Total_pagado = round(($salYextras + $S_Transporte) - (2 * $saludPension));
+            }else { //no cumplio la quincena
                 $usersEmpleados[$key]->Salud = 0;
                 $usersEmpleados[$key]->Pension = 0;
-                //# Subsidio de transporte (por dias)
-                $S_Transporte = ($usersEmpleados[$key]->Salario * 2) >= ($paramBD->valor_maximo_subsidio_de_transporte) ? 0 : $DiasTrabajados * $paramBD->subsidio_de_transporte_dia;
+                $usersEmpleados[$key]->S_Transporte = 0;
+                // # Total
+                $usersEmpleados[$key]->SalarioNocExtras = 0;
+                $usersEmpleados[$key]->Total_pagado = 0;
             }
-            $usersEmpleados[$key]->S_Transporte = round($S_Transporte);
+//            }else{ //no cumplio la quincena
+//                // $salYextras = ($H_diurno + $ExtraTotal);
+//                $saludPension = 0;
+//                $usersEmpleados[$key]->Salud = 0;
+//                $usersEmpleados[$key]->Pension = 0;
+//                //# Subsidio de transporte (por dias)
+//                $S_Transporte = ($usersEmpleados[$key]->Salario * 2) >= ($paramBD->valor_maximo_subsidio_de_transporte) ? 0 : $DiasTrabajados * $paramBD->subsidio_de_transporte_dia;
+//            }
+
             // # Novedades
             // $usersEmpleados[$key]->Prima = '0'; $usersEmpleados[$key]->Vacaciones = '0'; $usersEmpleados[$key]->Cesantias = '0'; $usersEmpleados[$key]->Intereses = '0'; $usersEmpleados[$key]->Prestamo = '0'; $usersEmpleados[$key]->Anticipo = '0'; $usersEmpleados[$key]->Auxilio = '0'; $usersEmpleados[$key]->Bonificacion = '0'; $usersEmpleados[$key]->Reintegro = '0'; $usersEmpleados[$key]->Abono_Prestamo = '0'; $usersEmpleados[$key]->Otras_Deducciones = '0';
-
-            // # Total
-//            $usersEmpleados[$key]->salYextras = $usersEmpleados[$key]->Salario + $ExtraTotal;
-            $usersEmpleados[$key]->SalarioNocExtras = $salYextras;
-            $usersEmpleados[$key]->Total_pagado = round(($salYextras + $S_Transporte) - (2 * $saludPension));
         }
-
 
         //<editor-fold desc="administrativos e ingenieros no ganan extras">
         //WhereNotIn('id',[2,1])
@@ -210,6 +205,8 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
                 $q->Where("name", "administrativo");
                 $q->orWhere("name", "ingeniero");
             })->get();
+        $key++;
+
         foreach ($usersAdministrativos as $key2 => $user) {
             $usersEmpleados[$key2+$key] = $user;
 
@@ -240,17 +237,25 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
 
         //# prod =>  5:jessica 3:jose
 //        $resetKeysArray = array_values($usersEmpleados->toArray());
-//        $firstElement = $resetKeysArray[0] ?? '';
 //        $secondElement = $resetKeysArray[1] ?? '';
 //        $s3econdElement = $resetKeysArray[2] ?? '';
 //        $s4econdElement = $resetKeysArray[3] ?? '';
 //        $s5econdElement = $resetKeysArray[4] ?? '';
+//        $s6econdElement = $resetKeysArray[6] ?? '';
+//        $s7econdElement = $resetKeysArray[8] ?? '';
+//        $s8econdElement = $resetKeysArray[10] ?? '';
+//        $s9econdElement = $resetKeysArray[12] ?? '';
+//        $s10econdElement = $resetKeysArray[14] ?? '';
 //        dd(
-//            $firstElement,
 //            $secondElement,
 //            $s3econdElement,
 //            $s4econdElement,
 //            $s5econdElement,
+//            $s6econdElement,
+//            $s7econdElement,
+//            $s8econdElement,
+//            $s9econdElement,
+//            $s10econdElement,
 //        );
         return $usersEmpleados;
 //        return array_merge($usersEmpleados, $usersAdministrativos);
