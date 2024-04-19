@@ -32,6 +32,8 @@ class User extends Authenticatable
         'sexo',
         'salario',
         'centro_costo_id',
+        //12 abril
+        'numero_contrato',
     ];
 
     /**

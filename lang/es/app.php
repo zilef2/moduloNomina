@@ -2,6 +2,11 @@
 
 return [
     'label' => [
+        //parametros
+        'servicio' => 'servicio',
+        'servicios' => 'servicios',
+        'Servicio' => 'Servicio',
+        'Servicios' => 'Servicios',
         'HORAS_NECESARIAS_SEMANA' => 'Horas necesarias para la semana',
         'centro_costo' => 'centro de costo',
         'Recontratar' => 'Recontratar',
@@ -154,11 +159,13 @@ return [
         'reject' => 'Rechazar'
     ],
     'placeholder' => [
+        'searchDDay' => 'Dia',
+
         'subsidio_de_transporte_dia' => 'subsidio de transporte por dia',
         'salario_minimo' => 'salario minimo',
 
         'search' => 'Buscar...',
-        'searchDates' => 'Buscar por dia o mes...',
+        'searchDates' => 'Mes',
         'email' => 'email@email.com',
         'password' => 'contraseña',
         'password_confirmation' => 'Confirmacion de la contraseña',

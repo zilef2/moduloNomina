@@ -552,15 +552,14 @@ class UserController extends Controller {
         ];
     }
 
-    public function downloadsigo(Request $request) {
-        Myhelp::EscribirEnLog($this, ' |users sigo download| ');
+    private function SeeNumbersOfReporters(Request $request){
+        Myhelp::EscribirEnLog($this, ' | getNumReportesSiigo | ');
 
         $quincena = (int)($request->quincena);
         $year = (int)($request->year);
         $month = (int)($request->month)+1;
         $ini = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(0);
         $fin = Carbon::createFromFormat('d/m/Y',  '1/'.$month.'/'.$year)->setHour(23);
-        $NumeroDiasFestivos = (int)($request->NumeroDiasFestivos);
 
         //? NOTE:: values 15-30
         if($quincena == 1){
@@ -573,29 +572,80 @@ class UserController extends Controller {
         // dd($ini,$fin);
 
         $users = User::Select('id','name','cedula','cargo_id')->WhereHas("roles", function($q){
-            $q->Where("name", "empleado");
+            $q->Where("name", "empleado")
+                ->orWhere("name", "supervisor")
+            ;
         })->get();
 
         $NumReportes = 0;
+        $NumReportesRecha = 0;
+        $NumReportesSinval = 0;
         foreach ($users as $value) {
-            $NumReportes += Reporte::where('user_id', $value->id)
+            $NumReportes += Reporte::Where('user_id', $value->id)
                 ->where('valido',1)
                 ->whereBetween('fecha_ini', [$ini,$fin])->count();
+            $NumReportesRecha += Reporte::Where('user_id', $value->id)
+                ->where('valido',2)
+                ->whereBetween('fecha_ini', [$ini,$fin])->count();
+            $NumReportesSinval += Reporte::Where('user_id', $value->id)
+                ->where('valido',0)
+                ->whereBetween('fecha_ini', [$ini,$fin])->count();
         }
+        $NumReporteSigo['NumReportesSigo'] = $NumReportes;
+        $NumReporteSigo['NumReportesRechaSigo'] = $NumReportesRecha;
+        $NumReporteSigo['NumReportesSinvalSigo'] = $NumReportesSinval;
 
-        if($NumReportes > 0){
+        $NumReporteSigo['quincena'] = $quincena;
+        $NumReporteSigo['year'] = $year;
+        $NumReporteSigo['month'] = $month;
+        $NumReporteSigo['ini'] = $ini;
+        $NumReporteSigo['fin'] = $fin;
+
+        return $NumReporteSigo;
+    }
+
+
+    public function getNumReportesSiigo(Request $request){
+        $NumReporteSigo = $this->SeeNumbersOfReporters($request);
+        $ini = $NumReporteSigo['ini'];
+        $fin = $NumReporteSigo['fin'];
+        return Inertia::render('User/uploadFromExcel', [
+            'title'             => __('app.label.user'),
+            'breadcrumbs'       => [['label' => __('app.label.user'), 'href' => route('user.index')]],
+            // 'NumUsers'          => $NumUsers,
+            'NumReportes'       => $NumReportesIniFin['NumReportes']?? 0,
+            'NumReportesRecha'  => $NumReportesIniFin['NumReportesRecha']?? 0,
+            'NumReportesSinval' => $NumReportesIniFin['NumReportesSinval']?? 0,
+            'ini'               => $ini,
+            'fin'               => $fin,
+            // 'haySinsalario'     => $haySinsalario,
+            'NumReportesSigo'       => $NumReporteSigo['NumReportesSigo']?? 0,
+            'NumReportesRechaSigo'  => $NumReporteSigo['NumReportesRechaSigo']?? 0,
+            'NumReportesSinvalSigo' => $NumReporteSigo['NumReportesSinvalSigo']?? 0,
+        ]);
+    }
+
+    public function downloadsigo(Request $request) {
+
+        $NumeroDiasFestivos = (int)($request->NumeroDiasFestivos);
+        $NumReporteSigo = $this->SeeNumbersOfReporters($request);
+
+        $ini = $NumReporteSigo['ini'];
+        $fin = $NumReporteSigo['fin'];
+
+        if($NumReporteSigo['NumReportesSigo'] > 0){
+            $quincena = $NumReporteSigo['quincena'];
+            $year = $NumReporteSigo['year'];
+            $month = $NumReporteSigo['month'];
             return Excel::download(new SiigoExport($ini,$fin, $NumeroDiasFestivos), "Siigo ".$year.'Quincena'.$quincena.'DelMes'.$month.".xlsx");
-        }else{
-            return redirect()->route('user.uploadexcel')->with('warning',
-                'El numero de reportes en esa quincena es 0. '.
-                'formato de la fecha: Año - Mes - dia. '.
-                'fecha inicial: '.$ini->format('Y-m-d').' - '.
-                'fecha final: '.$fin->format('Y-m-d')
-            );
-
-            // return back()->with('error', __('app.label.created_error', ['name' => 'No hay reportes']) . 'En el rango de fechas seleccionadas');
         }
-        // return view('reporte1temp',$ini,$fin);
+
+        return redirect()->route('user.uploadexcel')->with('warning',
+            'El numero de reportes en esa quincena es 0. '.
+            'formato de la fecha: Año - Mes - dia. '.
+            'fecha inicial: '.$ini->format('Y-m-d').' - '.
+            'fecha final: '.$fin->format('Y-m-d')
+        );
     }
 
     public function showReporte($id) {

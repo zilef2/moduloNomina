@@ -68,11 +68,7 @@ class ParametrosController extends Controller
             'nombresTabla'   =>  $nombresTabla,
         ]);
     }
-
-
-    public function create()
-    {
-    }
+    public function create(){}
 
     public function store(ParametroRequest $request){
         $parametro = new Parametro;
@@ -92,21 +88,21 @@ class ParametrosController extends Controller
 
     public function update(ParametroRequest $request, $id){
         DB::beginTransaction();
-        $ListaControladoresYnombreClase = (explode('\\', get_class($this)));
-        $nombreC = end($ListaControladoresYnombreClase);
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'Parametros update'));
+
         try {
             $parametro = Parametro::findOrFail($id);
             $parametro->subsidio_de_transporte_dia = $request->input('subsidio_de_transporte_dia');
             $parametro->salario_minimo = $request->input('salario_minimo');
             $parametro->valor_maximo_subsidio_de_transporte = 2*(int)$request->input('salario_minimo');
             $today = Carbon::now();
+
             $last_update = Carbon::parse($parametro->updated_at);
             $diff = $today->isSameYear($last_update);
 
-
-            if ($diff) {
-                Myhelp::EscribirEnLog($this, 'ParametrosController',' No dejo actualizar parametros',false);
+            if ($numberPermissions < 10 && $diff) {
                 if ($parametro->HORAS_NECESARIAS_SEMANA != (int)($request->input('HORAS_NECESARIAS_SEMANA'))) {
+                    Myhelp::EscribirEnLog($this, 'ParametrosController',' No dejo actualizar parametros',false);
                     return back()->with('error', 'No se puede actualizar las horas necesarias por semana mas de una vez por año');
                 }
                 $parametro->save();
@@ -116,8 +112,9 @@ class ParametrosController extends Controller
                 $parametro->HORAS_NECESARIAS_SEMANA = $request->input('HORAS_NECESARIAS_SEMANA');
                 $parametro->save();
                 DB::commit();
-                $mensaje = ' U -> ' . Auth::user()->name . ' Accedio a la vista ' . $nombreC . ' y actualizo los paramaetros:
-                subsidio_de_transporte_dia = ' . $parametro->subsidio_de_transporte_dia . 'salario_minimo =' . $parametro->salario_minimo;
+                $mensaje = ' U -> ' . Auth::user()->name . '  actualizo los paramaetros:'.
+                'subsidio_de_transporte_dia = ' . $parametro->subsidio_de_transporte_dia .
+                ' salario_minimo =' . $parametro->salario_minimo;
 
                 Myhelp::EscribirEnLog($this, 'ParametrosController',$mensaje,false);
 
@@ -125,7 +122,7 @@ class ParametrosController extends Controller
             }
         } catch (\Throwable $th) {
             DB::rollback();
-            $mensaje = ' U -> ' . Auth::user()->name . ' Accedio a la vista ' . $nombreC . ' Fallo la operacion: ' . $th->getMessage();
+            $mensaje = ' U -> ' . Auth::user()->name . ' Accedio a la vista parametros y Fallo la operacion: ' . $th->getMessage();
             Myhelp::EscribirEnLog($this, 'ParametrosController',$mensaje,false,true);
 
             return back()->with('error', __('app.label.updated_error', ['name' => __('app.label.Parametross')]) . $th->getMessage());

@@ -56,7 +56,7 @@
         quincena: Object,
         nombrePersona: String,
         numberPermissions: Number,
-        ultimoReporte: Number,
+        ArrayOrdinarias: Array,
 
         sumdiurnas: Number,
         sumnocturnas: Number,
@@ -68,11 +68,9 @@
         sumdominical_extra_nocturno: Number,
         horasTrabajadasHoy: Array, //horas que lleva trabajadas solo el dia de seleccionado(index)
         HorasDeCadaSemana: Array,  //horas de las semanas proximas a la actual
+        ArrayHorasSemanales: Array,  //parametros
 
     })
-
-    let vieneDeReportes = typeof props.ultimoReporte != 'undefined';
-
 
     // <!--<editor-fold desc="Charts">-->
     const chartOptions = {
@@ -97,9 +95,11 @@
             FiltroUser: props.filters?.FiltroUser,
 
             search: props.filters?.search,
+            searchDDay: props.filters?.searchDDay,
             field: props.filters?.field,
             order: props.filters?.order,
             perPage: props.perPage,
+
         },
         selectedId: [],
         multipleSelect: false,
@@ -176,6 +176,7 @@
 <template>
     <Head :title="props.title"></Head>
     <AuthenticatedLayout>
+
         <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />
         <div class="space-y-4">
             <div class="px-4 sm:px-0">
@@ -193,6 +194,7 @@
                             <SelectInput v-model="data.params.FiltroUser" :dataSet="props.userFiltro"
                                          class="mt-1 block w-full"/>
                         </div>
+
                         <div v-else v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro" class="mx-4">
                           <p class="pt-1 mt-6 font-extrabold">Sin reportes</p>
                         </div>
@@ -202,14 +204,15 @@
                         :valoresSelect="props.valoresSelect" :IntegerDefectoSelect="props.IntegerDefectoSelect"
                         :horasemana="props.horasemana" :startDateMostrar="props.startDateMostrar"
                         :endDateMostrar="props.endDateMostrar" :numberPermissions="props.numberPermissions"
-                        :ultimoReporte="props.ultimoReporte" :horasTrabajadasHoy = "props.horasTrabajadasHoy"
+                        :ArrayOrdinarias="props.ArrayOrdinarias" :horasTrabajadasHoy = "props.horasTrabajadasHoy"
                         :HorasDeCadaSemana="props.HorasDeCadaSemana"
+                        :ArrayHorasSemanales="props.ArrayHorasSemanales"
                         />
                     <CreateMass :show="data.createMassOpen" @close="data.createMassOpen = false" :title="props.title"
                         :valoresSelect="props.valoresSelect" :IntegerDefectoSelect="props.IntegerDefectoSelect"
                         :horasemana="props.horasemana" :startDateMostrar="props.startDateMostrar"
                         :endDateMostrar="props.endDateMostrar" :numberPermissions="props.numberPermissions"
-                        :ultimoReporte="props.ultimoReporte"
+                        :ArrayOrdinarias="props.ArrayOrdinarias"
                         />
 
                     <Edit :show="data.editOpen" @close="data.editOpen = false" :Reporte="data.generico" :title="props.title"
@@ -239,14 +242,17 @@
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton>
                     </div>
-                    <div v-if="filters !== null" class="flex">
-                    <TextInput v-show="can(['update reporte'])" v-model="data.params.search"
-                        type="text" class="block w-full rounded-lg"
+                    <div  class="flex">
+                    <!--                        solo mes-->
+                    <TextInput v-model="data.params.search"
+                        type="number" min="0" max="12" class="block w-full rounded-lg"
                         :placeholder="lang().placeholder.searchDates" />
-
-                        <label for="soloval" class="mx-3">Solo validos</label>
-                        <input v-model="data.params.soloValidos" id="soloval" type="checkbox"
-                            class="bg-gray-100 h-7 w-7 mt-2 ml-5" />
+                    <TextInput v-model="data.params.searchDDay"
+                        type="number" min="0" max="31" class="block w-full rounded-lg"
+                        :placeholder="lang().placeholder.searchDDay" />
+                    <label for="soloval" class="mx-3">Solo validos</label>
+                    <input v-model="data.params.soloValidos" id="soloval" type="checkbox"
+                        class="bg-gray-100 h-7 w-7 mt-2 ml-5" />
                     </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
@@ -355,7 +361,6 @@
                     <Pagination :links="props.fromController" :filters="data.params" />
                 </div>
             </div>
-
             <section v-if="props.quincena != null"
                 v-show="can(['updateCorregido reporte']) || can(['isAdmin']) || can(['isadministrativo'])"
                 class="text-gray-600 body-font overflow-hidden">

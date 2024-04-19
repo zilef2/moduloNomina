@@ -5,6 +5,7 @@ use App\Http\Controllers\ParametrosController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportesController;
+use App\Http\Controllers\ServiciosController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
@@ -45,6 +46,7 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::post('/Recontratar/{id}', [UserController::class,'Recontratar'])->name('Recontratar');
     Route::post('/user/destroy-bulk', [UserController::class, 'destroyBulk'])->name('user.destroy-bulk');
     Route::get('/userUploadExcel', [UserController::class,'FunctionUploadFromEx'])->name('user.uploadexcel');
+    Route::get('/validatingSigo', [UserController::class,'getNumReportesSiigo'])->name('user.uploadexceSigo');
     Route::post('/userUploadExcelPost', [UserController::class,'FunctionUploadFromExPost'])->name('user.uploadexcelpost');
     Route::get('/userReportes/{id}', [UserController::class,'showReporte'])->name('user.showReporte');
     Route::post('/userdestroyDefinitive/{id}', [UserController::class,'userdestroyDefinitive'])->name('userdestroyDefinitive');
@@ -61,6 +63,8 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::get('users/export/{NumeroDiasFestivos}/{quincena}/{month}/{year}', [UserController::class, 'export'])->name('reporte1');
     Route::get('users/downloadsigo/{NumeroDiasFestivos}/{quincena}/{month}/{year}', [UserController::class, 'downloadsigo']);
 
+    //19abril2024
+    Route::resource('/Servicios', ServiciosController::class);
 });
 
 require __DIR__.'/auth.php';

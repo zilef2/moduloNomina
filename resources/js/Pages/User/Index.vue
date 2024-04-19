@@ -53,10 +53,33 @@ const data = reactive({
     deleteOpen: false,
     deleteBulkOpen: false,
     user: null,
-    dataSet: usePage().props.app.perpage
+    dataSet: usePage().props.app.perpage,
+    columsVisible:{
+        0:true,
+        1:true,
+        2:true,
+        3:true,
+        4:true,
+        5:true,
+        6:true,
+        7:true,
+        8:true,
+        9:true,
+        10:true,
+        11:true,
+        12:true,
+        13:true,
+        14:true,
+        15:true,
+    }
 })
 
-    //default functions
+
+const toggleColumn = (index) =>
+    data.columsVisible[index] = !data.columsVisible[index];
+
+
+// <!--<editor-fold desc="default functions | order, watch, selectall">-->
         const order = (field) => {
             data.params.field = field
             data.params.order = data.params.order === "asc" ? "desc" : "asc"
@@ -90,8 +113,10 @@ const data = reactive({
                 data.multipleSelect = false
             }
         }
-    //fin default functions
-    data.params.onlySupervis = data.params.onlySupervis === null ? false : data.params.onlySupervis;
+// <!--</editor-fold>-->
+
+
+data.params.onlySupervis = data.params.onlySupervis === null ? false : data.params.onlySupervis;
 </script>
 
 <template>
@@ -156,22 +181,44 @@ const data = reactive({
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table class="w-full">
+                        <thead class="uppercase text-xs border-t border-gray-300 dark:border-gray-50">
+                            <tr class="dark:bg-gray-900/50 text-left">
+                                <th class="px-2 py-4 text-center cursor-pointer"> - </th>
+                                <th v-on:click="toggleColumn(0)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">#</th>
+                                <th v-on:click="toggleColumn(1)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">Nombre</th>
+                                <th v-on:click="toggleColumn(2)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">Identificacion</th>
+                                <th v-on:click="toggleColumn(3)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">Numero de contrato</th>
+                                <th v-on:click="toggleColumn(4)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">ocultar</th>
+                                <th v-on:click="toggleColumn(5)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">ocultar</th>
+                                <th v-on:click="toggleColumn(6)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">ocultar</th>
+                                <th v-on:click="toggleColumn(6)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">ocultar</th>
+                                <th v-on:click="toggleColumn(6)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">ocultar</th>
+                            </tr>
+                        </thead>
                         <thead class="uppercase text-sm border-t border-gray-200 dark:border-gray-700">
                             <tr class="dark:bg-gray-900/50 text-left">
                                 <th class="px-2 py-4 text-center">
                                     <Checkbox v-model:checked="data.multipleSelect" @change="selectAll" />
                                 </th>
-                                <th class="px-2 py-4 text-center">#</th>
-                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('name')">
+                                <th v-show="data.columsVisible[0]" class="px-2 py-4 text-center">#</th>
+                                <th v-show="data.columsVisible[1]" class="px-2 py-4 cursor-pointer" v-on:click="order('name')">
                                     <div class="flex justify-between items-center">
                                         <span>{{ lang().label.name }}</span>
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
                                 </th>
-                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('cedula')">
+                                <th v-show="data.columsVisible[2]" class="px-2 py-4 cursor-pointer" v-on:click="order('cedula')">
                                     <div class="flex justify-between items-center">
                                         <span>
                                             Identificacion
+                                        </span>
+                                        <ChevronUpDownIcon class="w-4 h-4" />
+                                    </div>
+                                </th>
+                                <th v-show="data.columsVisible[3]" class="px-2 py-4 cursor-pointer" v-on:click="order('numero_contrato')">
+                                    <div class="flex justify-between items-center">
+                                        <span>
+                                            Numero de contrato
                                         </span>
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
@@ -227,15 +274,22 @@ const data = reactive({
                                         class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary dark:text-primary shadow-sm focus:ring-primary/80 dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-primary dark:checked:border-primary"
                                         type="checkbox" @change="select" :value="user.id" v-model="data.selectedId" />
                                 </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++index }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                <td v-show="data.columsVisible[0]" class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++index }}</td>
+                                <td v-show="data.columsVisible[1]" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     <span class="flex justify-start items-center">
                                         {{ user.name }}
                                     </span>
-                                    <small>{{ user.email }} </small>
+                                    <small class="text-sm">{{ user.email }} </small>
+
+
                                     <!-- <CheckBadgeIcon class="ml-[2px] w-4 h-4 text-primary dark:text-white" v-show="user.email_verified_at" />  -->
                                 </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cedula }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                    {{ user.cedula }}
+                                </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                    {{ user.numero_contrato }}
+                                </td>
 
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cargo.length === 0 ? 'No tiene cargo' : user.cargo.nombre }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.roles.length === 0 ? 'No tiene rol' : user.roles[0].name }}</td>
@@ -260,7 +314,7 @@ const data = reactive({
                                                 class="px-2 py-1.5 rounded-sm mx-0.5" v-tooltip="lang().tooltip.edit">
                                                 <PencilIcon class="w-4 h-4" />
                                             </InfoButton>
-                                            <InfoButton v-show="can(['update user']) && user.roles[0].name === 'supervisor'" type="button"
+                                            <InfoButton v-if="user.roles[0]" v-show="can(['update user']) && user.roles[0]?.name === 'supervisor'" type="button"
                                                 @click="(data.EdiCentroOpen = true), (data.user = user)"
                                                 class="px-2 py-1.5 rounded-sm mx-0.5" v-tooltip="'Asignar'">
                                                 <LinkIcon class="w-4 h-4" />

@@ -12,6 +12,7 @@ const props = defineProps({
 const data = reactive({
     params: {
         search: props.filters?.search,
+        searchDDay: props.filters?.searchDDay,
         field: props.filters?.field,
         order: props.filters?.order,
         perPage: props.filters?.perPage,

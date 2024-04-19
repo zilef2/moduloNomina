@@ -81,12 +81,9 @@ if(props.numberPermissions > 8){
 }
 
 onMounted(() => {
-  if(localStorage.getItem('centroCostoId')){
-
-    form.centro_costo_id = localStorage.getItem('centroCostoId')
-  }
-    console.log(form.centro_costo_id)
-
+    if(localStorage.getItem('centroCostoId')){
+        form.centro_costo_id = localStorage.getItem('centroCostoId')
+    }
     const startDate = new Date();
 });
 

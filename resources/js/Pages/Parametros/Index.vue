@@ -167,8 +167,6 @@ const form = useForm({
                                         </h2>
 <!--                                        <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">-->
                                     </div>
-
-                                    <!-- <h1 class="title-font text-xl font-medium text-gray-900 mb-3">¿ Cumplió la quincena ?</h1> -->
                                     <p class="leading-relaxed text-lg mb-5">
                                         Horas trabajadas > 8 <b>entonces</b> Comida = 1
                                     </p>
@@ -191,7 +189,7 @@ const form = useForm({
                                     </h2>
 <!--                                    <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">-->
                                     </div>
-                                    <!-- <h1 class="title-font text-xl font-medium text-gray-900 mb-3">¿ Cumplió la quincena ?</h1> -->
+                                     <h1 class="title-font text-xl font-medium text-gray-900 mb-3">¿ Cumplió la quincena ?</h1>
                                     <p class="leading-relaxed text-lg mb-5">
                                         Si el salario supera el doble del SMLV  <b>Subsidio Transporte = 0</b>
                                     </p>
@@ -243,6 +241,72 @@ const form = useForm({
                                 </div>
                             </div>
                         </div>
+
+                        <div class="py-8 px-4 lg:w-1/3">
+                            <div class="h-full flex items-start">
+                                <div class="w-12 flex-shrink-0 flex flex-col text-center leading-none">
+                                    <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">4</span>
+                                    <span class="font-medium text-lg text-gray-800 title-font leading-none">abril 2024</span>
+                                </div>
+                                <div class="flex-grow pl-6">
+                                    <div class="inline-flex">
+                                        <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
+                                            Horas ingenieros
+                                        </h2>
+<!--                                        <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">-->
+                                    </div>
+                                    <p class="leading-relaxed text-lg mb-5">
+                                        Los ingenieros ganan horas extras?
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+
+                      <div class="py-8 px-4 lg:w-1/3">
+                        <div class="h-full flex items-start">
+                          <div class="w-12 flex-shrink-0 flex flex-col text-center leading-none">
+                            <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">7</span>
+                            <span class="font-medium text-lg text-gray-800 title-font leading-none">sept 2023</span>
+                          </div>
+                          <div class="flex-grow pl-6">
+                            <div class="inline-flex">
+                              <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
+                                Saber si tiene horas extras el dia anterior
+                              </h2>
+                              <!--                                        <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">-->
+                            </div>
+                            <p class="leading-relaxed text-lg mb-5">
+                              ???
+                            </p>
+                            <p class="leading-relaxed text-lg mb-5">
+                              ???
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="py-8 px-4 lg:w-1/3">
+                        <div class="h-full flex items-start">
+                          <div class="w-12 flex-shrink-0 flex flex-col text-center leading-none">
+                            <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">7</span>
+                            <span class="font-medium text-lg text-gray-800 title-font leading-none">sept 2023</span>
+                          </div>
+                          <div class="flex-grow pl-6">
+                            <div class="inline-flex">
+                              <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
+                                Saber si tiene horas extras por la semana
+                              </h2>
+                              <!--                                        <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">-->
+                            </div>
+                            <p class="leading-relaxed text-lg mb-5">
+                              ???
+                            </p>
+                            <p class="leading-relaxed text-lg mb-5">
+                              ???
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                 </div>
             </section>

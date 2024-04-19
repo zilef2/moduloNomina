@@ -129,18 +129,20 @@ class Myhelp{
     }
 
     public static function CalcularHorasDeCadaSemana(Carbon $startDate,Carbon  $endDate,$Authuser){
-        $vector  = self::HorasDeLasSemanasProximas();
+        $vector  = self::HorasDeLasSemanasProximas(); //calcula primer y ultimo dia de las semanas
         $horasemana[0] = Carbon::now()->weekOfYear;
         foreach ($vector as $vec) {
             $horasemana[$vec['numero_semana']] = (int)Reporte::Where('user_id',$Authuser->id)
                 ->WhereBetween('fecha_ini', [$vec['primer_dia_semana'], $vec['ultimo_dia_semana']])
-                ->sum('horas_trabajadas');
+                ->selectRaw('fecha_ini, (diurnas + nocturnas) as ordinarias')
+                ->get()->sum('ordinarias');
+//                ->sum('horas_trabajadas');
         }
         return $horasemana;
     }
 
-    private static function HorasDeLasSemanasProximas() {
-        $valorParametro = 3;
+    private static function HorasDeLasSemanasProximas() { //calcula primer y ultimo dia de las semanas
+        $valorParametro = 2;
         $valorParametro10 = $valorParametro * 10;
         $vectorSemanas = [];
         // Obtener la fecha actual
@@ -163,6 +165,35 @@ class Myhelp{
             $fechaActual->subWeek();
         }
         return $vectorSemanas;
+    }
+
+    public static function CalcularPendientesQuicena($Authuser) { //calcula primer y ultimo dia de las semanas
+
+        //calcular cuantas horas ha trabajado en esta semana y la pasada
+        $hoy = Carbon::now();
+        $primerDiaSemana = $hoy->startOfWeek();
+        $primerClone = clone $primerDiaSemana;
+        $primerDiaSemanaPasada = $primerClone->subWeek()->startOfWeek();
+        $hoy = Carbon::now();
+        $ultimoDiaSemana = $hoy->endOfWeek();
+//        $diffDias2 = $primerDiaSemanaPasada->diffInDays($ultimoDiaSemana);
+
+        $ArrayOrdinarias =  Reporte::Where('user_id', $Authuser->id)
+            ->WhereBetween('fecha_ini',[$primerDiaSemanaPasada,$ultimoDiaSemana])
+            ->whereTime('fecha_fin','23:59:00')
+            ->selectRaw('DATE(fecha_fin) as fecha_fn, (dominical_nocturno + dominical_extra_nocturno + nocturnas) as horasDiaAnterior')
+            ->pluck('horasDiaAnterior','fecha_fn');
+
+        $ArrayOrdinarias[0] =  Reporte::Where('user_id', $Authuser->id)
+            ->WhereBetween('fecha_ini',[$primerDiaSemana,$ultimoDiaSemana])
+            ->selectRaw('fecha_ini, (diurnas + nocturnas) as ordinarias')
+            ->get()->sum('ordinarias');
+//        dd($ArrayOrdinarias,
+//$primerDiaSemana,
+//$ultimoDiaSemana
+//        );
+
+        return $ArrayOrdinarias;
     }
 
 } ?>

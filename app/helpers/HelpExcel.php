@@ -45,12 +45,14 @@ class HelpExcel
             }
             $currentDate->addDay();
         }
-        foreach ($ArrayDatesFest as $item) {
-            if($item->isWeekday()) $workingDays--;
-            else{
-                if ($item->isSaturday()) $SaturDays--;
+        if($ArrayDatesFest)
+            foreach ($ArrayDatesFest as $item) {
+                if($item->isWeekday())
+                    $workingDays--;
+                else{
+                    if ($item->isSaturday()) $SaturDays--;
+                }
             }
-        }
 
         $elSalario = (int)($empleado->salario);
         $salario_hora = $elSalario / (235);// 30 * 7.8333
