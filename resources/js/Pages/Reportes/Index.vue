@@ -171,6 +171,17 @@
             onFinish: () => null,
         })
     }
+
+const diasSemana = {
+        1:'Lunes',
+        2:'Martes',
+        3:'Miercoles',
+        4:'Jueves',
+        5:'Viernes',
+        6:'Sabado',
+        0:'Domingo'
+    }
+
 </script>
 
 <template>
@@ -242,17 +253,20 @@
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton>
                     </div>
-                    <div  class="flex">
-                    <!--                        solo mes-->
-                    <TextInput v-model="data.params.search"
-                        type="number" min="0" max="12" class="block w-full rounded-lg"
-                        :placeholder="lang().placeholder.searchDates" />
-                    <TextInput v-model="data.params.searchDDay"
-                        type="number" min="0" max="31" class="block w-full rounded-lg"
-                        :placeholder="lang().placeholder.searchDDay" />
-                    <label for="soloval" class="mx-3">Solo validos</label>
-                    <input v-model="data.params.soloValidos" id="soloval" type="checkbox"
-                        class="bg-gray-100 h-7 w-7 mt-2 ml-5" />
+                    <div  class="flex gap-3">
+                        <!-- solo mes-->
+                        <TextInput v-model="data.params.searchHorasD"
+                            type="number" min="0" class="block w-full rounded-lg"
+                            :placeholder="lang().placeholder.searchDates" />
+                        <TextInput v-model="data.params.search"
+                            type="number" min="0" max="12" class="block w-full rounded-lg"
+                            :placeholder="lang().placeholder.searchDates" />
+                        <TextInput v-model="data.params.searchDDay"
+                            type="number" min="0" max="31" class="block w-full rounded-lg"
+                            :placeholder="lang().placeholder.searchDDay" />
+                        <label for="soloval" class="mx-3">Solo validos</label>
+                        <input v-model="data.params.soloValidos" id="soloval" type="checkbox"
+                            class="bg-gray-100 h-7 w-7 mt-2 ml-5" />
                     </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-table">

@@ -10,8 +10,9 @@ import { useForm } from '@inertiajs/vue3';
 import {ref, watchEffect, reactive, onMounted, watch} from 'vue';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
+
 import FestivosColombia from 'festivos-colombia';
-import {weekNumber} from "@/global";
+import {formatTime, TimeTo12Format, TransformTdate, weekNumber} from "@/global";
 
 const props = defineProps({
     show: Boolean,
@@ -34,6 +35,9 @@ let label_diurnas = ref(null)
 const HORAS_ESTANDAR = props.ArrayHorasSemanales.HORAS_ORDINARIAS // 9horitas
 const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - HORAS_ESTANDAR //39
 const LimiteHorasTrabajadas = 23
+
+let LIMITE_ALMUERZO = 8;
+
 let ValorRealalmuerzo = 0 //truco para recuperar las horas de almuerzo, cuando se va a maandar el form
 
 const emit = defineEmits(["close"]);
@@ -66,14 +70,16 @@ const data = reactive({
     },
     Horas1159: props.ArrayOrdinarias.length > 1,
     diaSelected:0,
+    TemporalDiaAnterior:0,
 })
 
 onMounted(() => {
     //TODO: doing: trabajadashooy no deberia ser 5
     data.TrabajadasSemana = props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] > HORAS_SEMANALES_MENOS_ESTANDAR ?
         props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
-        // console.log("=>(Create.vue:72) array.HorasDeCadaSemana", props.HorasDeCadaSemana);
-        // console.log("=>(Create.vue:72) props.HorasDeCadaSemana[0]", props.HorasDeCadaSemana[0]);
+
+        console.log("=>(Create.vue:72) array.HorasDeCadaSemana", props.HorasDeCadaSemana);
+        console.log("=>(Create.vue:72) props.HorasDeCadaSemana[0]", props.HorasDeCadaSemana[0]);
 
     //data.TrabajadasSemana son las horas que hay que restarle a Cuandocomienzaextras
     data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
@@ -112,13 +118,20 @@ const form = useForm({
     dominical_extra_nocturnas: 0
 });
 
-if(props.numberPermissions > 8){
-    let hora = new Date()
-    hora = hora.getHours()
-    form.fecha_ini = '2024-01-03T0'+(hora+2)+':00'
-    form.fecha_fin = '2024-01-03T'+(hora+12)+':00'
+let newdate = (new Date())
+let horahoy = newdate.getHours()
+let diahoy = newdate.get
+let timedate = TransformTdate(7)
+let timedate2 = TransformTdate(16)
+// if(props.numberPermissions > 8){
+    form.fecha_ini = '2024-04-27T07:00'
+    form.fecha_fin = '2024-04-27T15:00'
+
     // form.fecha_fin = '2024-01-04T23:58'
-}
+// }else{
+    // form.fecha_ini = timedate
+    // form.fecha_fin = timedate2
+// }
 // <!--</editor-fold>-->
 
 
@@ -159,13 +172,14 @@ function estaFechaEsFestivo(fecha){
 let TextFestivo = ''
 let Madrugada, Tarde //variables internas para calculo de horas nocturnas
 
+
+//apunto de ser eliminado
 const Reporte11_59 = () => {
     let fin = Date.parse(form.fecha_fin);
     let finDate = new Date(fin);
     const horafin = finDate.getHours()
     const minfin = finDate.getMinutes()
     if(horafin === 23 && minfin === 59){
-    //     form.horas_trabajadas++
         if(form.extra_nocturnas > 0) form.extra_nocturnas++
         else{
             if(form.dominical_nocturnas > 0) form.dominical_nocturnas++
@@ -303,21 +317,46 @@ function setDominical(ini,fin,CuandoEmpiezaExtra,ExtrasManana){//date,date,int,b
             calcularTerminaDomingo(ini,fin,CuandoEmpiezaExtra,ExtrasManana)
         }
     }
+    RestarAlmuarzo()
+}
 
-    //TODO: aqui solo es dominicales
-    // TODO: restar el almuerzo a el valor mayor entre los 8 (dia,noc,extras,domin)
-    if(form.horas_trabajadas > 9){
-        form.horas_trabajadas -= 1;
-        if(form.diurnas > 0 && form.nocturnas <= form.diurnas){
-            form.diurnas -= 1
-            form.almuerzo += ' diurno'
-        }else{
-            if(form.nocturnas > 0 && form.nocturnas > form.diurnas){
-                form.nocturnas -= 1
-                form.almuerzo += ' nocturno'
-            }
-        }
+function RestarAlmuarzo(){
+
+    var fechain_i = new Date(form.fecha_ini)
+    var diaSemana = fechain_i.getDay();
+    if (diaSemana === 6) {
+        LIMITE_ALMUERZO-- //machete aqui
     }
+
+    if(form.horas_trabajadas > LIMITE_ALMUERZO) {
+        form.horas_trabajadas -= 1;
+
+        if(form.diurnas > 0 && form.nocturnas <= form.diurnas) {
+            form.diurnas -= 1
+            form.almuerzo = ' diurno'
+            return true;
+        }
+
+        if(form.nocturnas > 0 && form.nocturnas > form.diurnas){
+            form.nocturnas -= 1
+            form.almuerzo = ' nocturno'
+            return true;
+        }
+
+        if(form.extra_diurnas > 0 && form.extra_diurnas <= form.extra_nocturnas){
+            form.extra_diurnas -= 1
+            form.almuerzo = ' diurno'
+            return true;
+        }
+        if(form.extra_nocturnas > 0 && form.extra_nocturnas > form.extra_diurnas){
+            form.extra_nocturnas -= 1
+            form.almuerzo = ' nocturno'
+            return true;
+        }
+
+    }
+    form.almuerzo = 'No'
+
 }
 
 //# papa = watchEffect
@@ -326,23 +365,23 @@ function calcularHoras(inicio,final){
     let fin = new Date(final)
     let ExtrasManana = false
 
-    let TemporalDiaAnterior = data.HorasDelDiaAnterior59 ? data.HorasDelDiaAnterior59 : 0
+    data.TemporalDiaAnterior = data.HorasDelDiaAnterior59 ? data.HorasDelDiaAnterior59 : 0
     console.log("=>(Create.vue:328) data.HorasDelDiaAnterior59", data.HorasDelDiaAnterior59);
     console.log("=>(Create.vue:328) props.ArrayOrdinarias", props.ArrayOrdinarias);
     let ExtrasPrematuras = HORAS_ESTANDAR
 
     let Dateinii = Date.parse(form.fecha_ini) ?? false;
-    if(Dateinii && Date.parse(form.fecha_fin) ){ // son fechas?
+    if(Dateinii && Date.parse(form.fecha_fin) ){ //??: son fechas?
         let horasInicioome = parseInt(new Date(form.fecha_ini).getHours())
         let horasFinOme = parseInt(new Date(form.fecha_fin).getHours())
         let CuandoEmpiezaExtra = horasInicioome
 
         //aqui estan los errores
-        //TODO: falta agregar el horario de los sabados
+        //TODO:urgente falta agregar el horario de los sabados
 
-        ExtrasPrematuras -= data.TrabajadasSemana
+        ExtrasPrematuras -= (data.TrabajadasSemana-1)//machete aqui
         ExtrasPrematuras -= data.TrabajadasHooy
-        ExtrasPrematuras -= TemporalDiaAnterior
+        ExtrasPrematuras -= data.TemporalDiaAnterior //23:59
         ExtrasPrematuras = ExtrasPrematuras < 0 ? 0 : ExtrasPrematuras
 
         CuandoEmpiezaExtra += ExtrasPrematuras
@@ -357,7 +396,7 @@ function calcularHoras(inicio,final){
             console.log("=>(Create.vue:358) props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]]", props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]]);
             console.log('data.TrabajadasSemana',data.TrabajadasSemana) // si ya cumplio las horas de semana
             console.log('data.TrabajadasHooy',data.TrabajadasHooy) //si reporto hoy
-            console.log('TemporalDiaAnterior',TemporalDiaAnterior) // si reporto ayer
+            console.log('TemporalDiaAnterior',data.TemporalDiaAnterior) // si reporto ayer
             console.log('%cFIN: CuandoEmpiezaExtra', "color:blue;font-family:system-ui;font-size:15px;-webkit-text-stroke: 0.5px black;font-weight:bold")
         }
 
@@ -370,8 +409,8 @@ function calcularHoras(inicio,final){
             form.diurnas = Math.abs(calcularDiurnas(form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra)[1]);
             form.nocturnas = Math.abs(calcularNocturnas(form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra)[1]);
         }else{ //extras
-            form.almuerzo = form.horas_trabajadas + TemporalDiaAnterior > 8 ?  1 : 0;
-            form.almuerzo = form.horas_trabajadas + TemporalDiaAnterior > 16 ? 2 : form.almuerzo;
+            form.almuerzo = form.horas_trabajadas + data.TemporalDiaAnterior > 8 ?  1 : 0;
+            form.almuerzo = form.horas_trabajadas + data.TemporalDiaAnterior > 16 ? 2 : form.almuerzo;
             ValorRealalmuerzo = form.almuerzo
             form.almuerzo += ' horas'
 
@@ -389,7 +428,34 @@ function calcularHoras(inicio,final){
             form.extra_nocturnas = horasExtrasNocturnas[0];
             form.nocturnas = horasExtrasNocturnas[1];
         }
+        // if(data.estado2359){
+        //     if (form.nocturnas < 8 && form.nocturnas >= 0) {
+        //         form.nocturnas++
+        //     } else
+        //       form.extra_nocturnas++
+        // }
+
+
+
+
+
+
+
         setDominical(ini,fin,CuandoEmpiezaExtra,ExtrasManana);
+        if(data.estado2359){
+        // if(horafin === 23 && minfin === 59){
+            if(form.extra_nocturnas > 0) form.extra_nocturnas++
+            else{
+                if(form.dominical_nocturnas > 0) form.dominical_nocturnas++
+                else{
+                    if(form.dominical_extra_nocturnas > 0) form.dominical_extra_nocturnas++
+                    else{
+                        form.nocturnas++
+                    }
+                }
+
+            }
+        }
 
     }
 }
@@ -613,11 +679,17 @@ function calcularNocturnas(Inicio, Fin,CuandoEmpiezaExtra){
 }
 // <!--</editor-fold>-->
 
+
+
+// <!--<editor-fold desc="Watchers">-->
 watchEffect(() => {
     if (props.show) {
         // console.clear()
         if(data.diaSelected){
-            data.HorasDelDiaAnterior59 = props.ArrayOrdinarias[data.diaSelected]
+            data.HorasDelDiaAnterior59 = props.ArrayOrdinarias[data.diaSelected];
+
+            console.log("=>(Create.vue:664) data.diaSelected", data.diaSelected);
+            console.log("=>(Create.vue:664) props.ArrayOrdinarias", props.ArrayOrdinarias);
         }
         form.errors = {}
         let Dateinii = Date.parse(form.fecha_ini);
@@ -657,9 +729,10 @@ watchEffect(() => {
           //si es 11:59 minutos -> agrega una hora
           if(data.estado2359){
               form.horas_trabajadas++
-              if(data.MostrarConsole.watchEffect){
-                  console.log('form.horas_trabajadas',form.horas_trabajadas)
-              }
+             if (form.nocturnas < 8 && form.nocturnas >= 0) {
+                form.nocturnas++
+            } else
+              form.extra_nocturnas++
           }
 
             if(ini > fin){ //jaja no jodas
@@ -724,19 +797,20 @@ watch(() => form.fecha_fin, (newX) => {
     if(HoraFini === '23:59'){
         data.estado2359 = true
 
-        //TODO: funciona paero alfinal??
         if(data.estado2359) {
             form.horas_trabajadas++
-            if (form.nocturnas < 8 && form.nocturnas > 0) {
+            if (form.nocturnas < 8 && form.nocturnas >= 0) {
                 form.nocturnas++
-            } else form.extra_nocturnas++}
+            } else
+              form.extra_nocturnas++
+        }
     }else{
         if(data.estado2359){
-
             data.estado2359 = false
         }
     }
 })
+// <!--</editor-fold>-->
 
 const create = () => {
     data.MensajeError = ''
@@ -747,7 +821,7 @@ const create = () => {
             data.respuestaSeguro = confirm("¿Estás seguro de enviar el formulario?");
           }
           if(data.respuestaSeguro){
-            Reporte11_59();
+            // Reporte11_59();
             form.almuerzo = ValorRealalmuerzo
 
 
@@ -760,7 +834,12 @@ const create = () => {
               onError: () =>{
                 alert(JSON.stringify(form.errors, null, 4));
               },
-              onFinish: () => console.log(form.errors),
+              onFinish: () =>{
+                // console.log(form.errors),
+                //     setTimeout(function() {
+                        location.reload();
+                    // }, 700);
+              }
             })
         }
       }else{
@@ -916,6 +995,18 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                     <p v-if="data.MensajeError !== ''" class="mx-2 text-red-600 text-lg">
                         {{ data.MensajeError }}
                     </p>
+
+
+                    <p v-if="data.TrabajadasSemana" class="mx-2 text-amber-700 bg-amber-400/10 rounded-2xl">
+                      {{ data.TrabajadasSemana-1 }} horas de la semana
+                    </p>
+                    <p v-if="data.TrabajadasHooy" class="mx-2 text-amber-700 bg-amber-400/10 rounded-2xl">
+                      {{ data.TrabajadasHooy }} horas del mismo dia
+                    </p>
+                    <p v-if="data.TemporalDiaAnterior" class="mx-2 text-amber-700 bg-amber-400/10 rounded-2xl">
+                      {{ data.TemporalDiaAnterior }} horas del dia anterior
+                    </p>
+
                 </div>
             </form>
         </Modal>

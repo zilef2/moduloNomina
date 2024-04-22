@@ -121,16 +121,18 @@ export function CuantosFestivosEstaQuincena2(numQuicena,elmes,anio) {
             return 0
         }
         // Clonar la fecha para no modificar el objeto original
-        var clonedDate = new Date(date.getTime());
+        var clonedDate:Date = new Date(date.getTime());
 
         // Configurar el tiempo al inicio del día para evitar problemas con las zonas horarias
         clonedDate.setHours(0, 0, 0, 0);
 
         // Obtener la fecha de inicio del año
-        var startOfYear = new Date(clonedDate.getFullYear(), 0, 1);
+        var startOfYear:Date = new Date(clonedDate.getFullYear(), 0, 1);
 
         // Calcular la diferencia en milisegundos entre la fecha dada y el inicio del año
-        var timeDiff = clonedDate - startOfYear;
+        var timeDiff: any;
+        // @ts-ignore
+        timeDiff = clonedDate - startOfYear;
 
         // Calcular el número de semanas completas y redondear hacia abajo
         var weekNumber = Math.floor(timeDiff / (7 * 24 * 60 * 60 * 1000));
@@ -206,6 +208,29 @@ export function CuantosFestivosEstaQuincena2(numQuicena,elmes,anio) {
 
         return `${hourAndtime}`;
     }
+    export function TransformTdate (number:any = null,dateString = new Date()){
+        let date
+        if(dateString){
+            date = new Date(dateString);
+        }else{
+            date = new Date();
+        }
+        const year = date.getFullYear();
+        const month = ('0' + (date.getMonth() + 1)).slice(-2);
+        const day = ('0' + date.getDate()).slice(-2);
+
+        let hours
+        if(number){
+            hours = number >= 10 ? number : '0'+number;
+        }else{
+            hours = ('0' + date.getHours()+number).slice(-2);
+        }
+        const minutes = number ? '00' : ('0' + date.getMinutes()).slice(-2);
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
+
+
     export function monthName(monthNumber){
         if(monthNumber == 1) return 'Enero';
         if(monthNumber == 2) return 'Febrero';
@@ -221,15 +246,7 @@ export function CuantosFestivosEstaQuincena2(numQuicena,elmes,anio) {
         if(monthNumber == 12) return 'Diciembre';
     }
 
-    export function TransformTdate (dateString){
-        const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = ('0' + (date.getMonth() + 1)).slice(-2);
-        const day = ('0' + date.getDate()).slice(-2);
-        const hours = ('0' + date.getHours()).slice(-2);
-        const minutes = ('0' + date.getMinutes()).slice(-2);
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-    }
+
 
 // fin DATE functions
 

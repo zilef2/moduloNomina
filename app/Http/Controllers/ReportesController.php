@@ -312,10 +312,7 @@ class ReportesController extends Controller
                 $Reportes->extra_diurnas = $request->extra_diurnas;
                 $Reportes->extra_nocturnas = $request->extra_nocturnas;
 
-                $Reportes->dominical_diurno = $request->dominical_diurnas;
-                $Reportes->dominical_nocturno = $request->dominical_nocturnas;
-                $Reportes->dominical_extra_diurno = $request->dominical_extra_diurnas;
-                $Reportes->dominical_extra_nocturno = $request->dominical_extra_nocturnas;
+                $Reportes->dominical_diurno = $request->dominical_diurnas;$Reportes->dominical_nocturno = $request->dominical_nocturnas;$Reportes->dominical_extra_diurno = $request->dominical_extra_diurnas;$Reportes->dominical_extra_nocturno = $request->dominical_extra_nocturnas;
 
                 $Reportes->valido = 0;
                 $Reportes->observaciones = $request->observaciones;

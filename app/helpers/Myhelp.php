@@ -167,16 +167,14 @@ class Myhelp{
         return $vectorSemanas;
     }
 
+    //:? calcular cuantas horas ha trabajado en esta semana y la pasada
     public static function CalcularPendientesQuicena($Authuser) { //calcula primer y ultimo dia de las semanas
-
-        //calcular cuantas horas ha trabajado en esta semana y la pasada
         $hoy = Carbon::now();
         $primerDiaSemana = $hoy->startOfWeek();
         $primerClone = clone $primerDiaSemana;
         $primerDiaSemanaPasada = $primerClone->subWeek()->startOfWeek();
         $hoy = Carbon::now();
-        $ultimoDiaSemana = $hoy->endOfWeek();
-//        $diffDias2 = $primerDiaSemanaPasada->diffInDays($ultimoDiaSemana);
+        $ultimoDiaSemana = $hoy->addWeek()->endOfWeek();
 
         $ArrayOrdinarias =  Reporte::Where('user_id', $Authuser->id)
             ->WhereBetween('fecha_ini',[$primerDiaSemanaPasada,$ultimoDiaSemana])
@@ -188,10 +186,6 @@ class Myhelp{
             ->WhereBetween('fecha_ini',[$primerDiaSemana,$ultimoDiaSemana])
             ->selectRaw('fecha_ini, (diurnas + nocturnas) as ordinarias')
             ->get()->sum('ordinarias');
-//        dd($ArrayOrdinarias,
-//$primerDiaSemana,
-//$ultimoDiaSemana
-//        );
 
         return $ArrayOrdinarias;
     }
