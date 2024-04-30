@@ -9,7 +9,8 @@ class CentroCosto extends Model
 {
     use HasFactory;
     protected $fillable = [
-		'nombre'
+		'nombre',
+		'mano_obra_estimada'
 	];
 
     public function reportes() { return $this->hasMany(Reporte::class); }
@@ -32,4 +33,11 @@ class CentroCosto extends Model
 //		});
         return $result;
 	}
+
+    public function actualizarEstimado(){
+            $a = (double) Reporte::Where('centro_costo_id',$this->id)->sum('horas_trabajadas');
+//            if($this->id == 23) dd($a);
+        $this->mano_obra_estimada =$a;
+        $this->update();
+    }
 }

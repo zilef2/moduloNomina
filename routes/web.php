@@ -66,9 +66,7 @@ Route::middleware('auth', 'verified')->group(function () {
     //19abril2024
     Route::resource('/Servicios', ServiciosController::class);
 });
-
 require __DIR__.'/auth.php';
-
 
 // <editor-fold desc="Artisan">
     Route::get('/exception',function(){

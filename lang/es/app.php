@@ -159,6 +159,8 @@ return [
         'reject' => 'Rechazar'
     ],
     'placeholder' => [
+        'searchCC' => 'Nombre...',
+        'searchHorasD' => 'Diurnas',
         'searchDDay' => 'Dia',
 
         'subsidio_de_transporte_dia' => 'subsidio de transporte por dia',

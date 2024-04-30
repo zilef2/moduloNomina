@@ -291,7 +291,7 @@ data.params.onlySupervis = data.params.onlySupervis === null ? false : data.para
                                     {{ user.numero_contrato }}
                                 </td>
 
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cargo.length === 0 ? 'No tiene cargo' : user.cargo.nombre }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 font-bold">{{ user.cargo.length === 0 ? 'No tiene cargo' : user.cargo.nombre }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.roles.length === 0 ? 'No tiene rol' : user.roles[0].name }}</td>
                                 <!-- <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.created_at }}</td> -->
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.celular }} <span v-if="user.telefono && user.telefono !== user.celular"> / {{ user.telefono }} </span></td>

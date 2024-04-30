@@ -48,7 +48,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
     })
 
     const order = (field) => {
-        if(field != undefined){
+        if(field !== undefined){
             // console.log("🚀 ~ file: Index.vue:54 ~ order ~ field:", field)
             // field = field.substr(2)
             // console.log("🚀 field:", field)
@@ -98,8 +98,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton>
                     </div>
-                    <!-- <TextInput v-model="data.params.search" type="text" class="block w-3/6 md:w-2/6 lg:w-1/6 rounded-lg"
-                        :placeholder="lang().placeholder.search" /> -->
+                    <TextInput v-model="data.params.search" type="text" class="block w-3/6 md:w-2/6 lg:w-1/6 rounded-lg"
+                        :placeholder="lang().placeholder.searchCC" />
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table class="w-full">
@@ -144,6 +144,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (index+1) }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.nombre) }} </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.mano_obra_estimada) }} </td>
                                 <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.cuantoshijos) }} </td>
                                 <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">({{clasegenerica.supervi.split(',').length}}) {{ (clasegenerica.supervi) }} </td>
                             </tr>

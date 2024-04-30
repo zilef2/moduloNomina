@@ -66,6 +66,9 @@ class ReportesController extends Controller
         if ($request->has('searchDDay')) {
             $Reportes->whereDay('fecha_ini', $request->searchDDay);
         }
+        if ($request->has('searchHorasD')) {
+            $Reportes->where('diurnas', $request->searchHorasD);
+        }
 
         if ($request->has(['field', 'order'])) {
                 $Reportes->orderBy($request->field, $request->order);
@@ -82,7 +85,7 @@ class ReportesController extends Controller
 
 
 
-//    validar que no se use mas
+    //    validar que no se use mas
     private function CalcularTituloQuincena($numberPermissions,$Authuser,$horasPersonal) {
         $esteMes = date("m");
         $diaquincena = date("d");
@@ -122,7 +125,6 @@ class ReportesController extends Controller
         }
 
 
-
         $horasemana = Reporte::Where('user_id',$Authuser->id)
             ->WhereBetween('fecha_ini', [$startDate, $endDate])
             ->sum('horas_trabajadas');
@@ -130,9 +132,9 @@ class ReportesController extends Controller
             $Reportes->whereUser_id($Authuser->id);
 
             $nombresTabla =[//0: como se ven //1 como es la BD
-                ["Acciones","#","Centro costo", "valido",   "inicio","fin","horas trabajadas",  'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', "observaciones"],
-                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean
-                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean
+                ["Acciones","#","Centro costo", "valido",   "inicio","fin","horas trabajadas","🍗",  'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', "observaciones"],
+                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas","v_almuerzo", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean
+                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas","v_almuerzo", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean
             ];
 
 
@@ -145,9 +147,9 @@ class ReportesController extends Controller
             $this->Filtros($request,$Reportes);
 
             $nombresTabla =[//0: como se ven //1 como es la BD
-                ["Acciones","#","Centro costo","Trabajador", "valido",   "inicio","fin","horas trabajadas",  'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', "observaciones"],
-                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean
-                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean
+                ["Acciones","#","Centro costo","Trabajador", "Valido",   "Inicio","Fin","Horas trabajadas","🍗",  'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', "observaciones"],
+                ["b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas","v_almuerzo", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean
+                [null,null,null,null,"b_valido","t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas","v_almuerzo", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno',"s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean
             ];
 
             $quincena = [
@@ -249,7 +251,9 @@ class ReportesController extends Controller
 
         return Inertia::render('Reportes/Index', [ //carpeta
             'title'                 =>  $titulo,
-            'filters'               =>  $request->all(['search', 'field', 'order','soloValidos','FiltroUser','searchDDay']),
+            'filters'               =>  $request->all(['search', 'field', 'order',
+                'soloValidos','FiltroUser','searchDDay','searchHorasD'
+            ]),
             'perPage'               =>  (int) $perPage,
             'fromController'        =>  $Reportes->paginate($perPage),
             'breadcrumbs'           =>  [['label' => __('app.label.Reportes'), 'href' => route('Reportes.index')]],

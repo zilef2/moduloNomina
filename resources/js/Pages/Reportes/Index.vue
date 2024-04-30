@@ -91,6 +91,7 @@
 
     const data = reactive({
         params: {
+            searchHorasD: props.filters?.searchHorasD,
             soloValidos: props.filters?.soloValidos,
             FiltroUser: props.filters?.FiltroUser,
 
@@ -247,6 +248,10 @@ const diasSemana = {
                 <!-- paginacion, borrado y buscado -->
                 <div class="flex justify-between p-2">
                     <div class="flex space-x-2">
+<!--                      <span class="my-auto">Registros/pagina</span>-->
+                        <span class="my-auto hidden xl:block">Registros por página</span>
+                          <span class="my-auto hidden md:block lg:block xl:hidden">Reg/página</span>
+                          <span class="my-auto md:hidden">R/pag</span>
                         <SelectInput v-if="filters !== null" v-model="data.params.perPage" :dataSet="data.dataSet" />
                         <DangerButton @click="data.deleteBulkOpen = true" v-show="data.selectedId.length != 0 && can(['delete reporte'])"
                             class="px-3 py-1.5" v-tooltip="lang().tooltip.delete_selected">
@@ -257,7 +262,7 @@ const diasSemana = {
                         <!-- solo mes-->
                         <TextInput v-model="data.params.searchHorasD"
                             type="number" min="0" class="block w-full rounded-lg"
-                            :placeholder="lang().placeholder.searchDates" />
+                            :placeholder="lang().placeholder.searchHorasD" />
                         <TextInput v-model="data.params.search"
                             type="number" min="0" max="12" class="block w-full rounded-lg"
                             :placeholder="lang().placeholder.searchDates" />
@@ -271,7 +276,7 @@ const diasSemana = {
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table class="w-full">
-                        <thead class="uppercase text-sm border-t border-gray-200 dark:border-gray-700">
+                        <thead class="uppercase sticky text-sm border-t border-gray-200 dark:border-gray-700">
                             <tr class="dark:bg-gray-900 text-left">
                                 <th class="px-2 py-4 text-center">
                                     <Checkbox v-model:checked="data.multipleSelect" @change="selectAll" />
@@ -332,6 +337,15 @@ const diasSemana = {
                                     <div v-if="titulo_slug.substr(0,1) === 's'">{{ (clasegenerica[titulo_slug.substr(2)]) }} </div>
                                     <div v-else-if="titulo_slug.substr(0,1) === 'd'">{{ formatDate(clasegenerica[titulo_slug.substr(2)]) }}</div>
                                     <div v-else-if="titulo_slug.substr(0,1) === 't'">{{ formatDate(clasegenerica[titulo_slug.substr(2)],'conLaHora') }}</div>
+                                    <div v-else-if="titulo_slug.substr(0,1) === 'v'">
+                                        <div v-if="clasegenerica[titulo_slug.substr(2)] === 0"> </div>
+                                        <div v-else-if="clasegenerica[titulo_slug.substr(2)] === 1">
+                                            Si
+                                        </div>
+                                        <div v-else-if="clasegenerica[titulo_slug.substr(2)] === 2">
+                                            2
+                                        </div>
+                                    </div>
 
                                     <div v-else-if="titulo_slug.substr(0,1) === 'b'">
                                         <div v-if="clasegenerica[titulo_slug.substr(2)] === 0"> Aun no validada</div>
@@ -350,12 +364,12 @@ const diasSemana = {
                             <tr v-show="props.sumhoras_trabajadas != 0" class="my-2 py-4 border-t border-gray-200 dark:border-gray-900 hover:bg-sky-200 hover:dark:bg-gray-900/20">
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
                                 <td v-show="can(['updateCorregido reporte'])" class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> Totales </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
                                 <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> Totales </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> Trabajadas: {{ props.sumhoras_trabajadas }} </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> {{ props.sumdiurnas ? 'Diurnas: ' + props.sumdiurnas : ''}} </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> {{ props.sumnocturnas ? 'Nocturnas: ' + props.sumnocturnas : ''}} </td>

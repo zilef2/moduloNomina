@@ -25,7 +25,14 @@ class CentroCostoRequest extends FormRequest
     {
         return
         [
-			'nombre' => 'required',
+			'nombre' => 'required|unique:centro_costos,nombre',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'nombre.unique' => 'El nombre ya está en uso.',
         ];
     }
 }

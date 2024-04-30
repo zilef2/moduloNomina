@@ -14,14 +14,28 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Opcodes\LogViewer\Facades\Cache;
 
 class CentroCostosController extends Controller {
 
-    public function MapearClasePP(&$centroCostos, $numberPermissions)
+    public function MapearClasePP(&$centroCostos, $numberPermissions,$request)
     {
         $AUuser = Myhelp::AuthU();
-        $centroCostos = $centroCostos->get()->map(function ($centroCosto) use ($numberPermissions,$AUuser) {
+        $busqueda =false;
+        if ($request->has('search')) {
+            $busqueda =true;
+//            $centroCostos
+//                ->orWhere('nombre', 'LIKE', "%" . $request->search . "%")
+////                ->orWhere('descripcion', 'LIKE', "%" . $request->search . "%")
+//            ;
+        }
+        if ($request->has(['field', 'order'])) {
+            $centroCostos->orderBy($request->field, $request->order);
+        }else{
+            $centroCostos->orderBy('mano_obra_estimada','DESC');
+        }
 
+        $centroCostos = $centroCostos->get()->map(function ($centroCosto) use ($numberPermissions,$AUuser,$busqueda) {
             if ($numberPermissions === 3) {
                 $objetoDelUser = $AUuser->ArrayCentrosID();
                 if (in_array($centroCosto->id,$objetoDelUser)) return null;
@@ -29,22 +43,46 @@ class CentroCostosController extends Controller {
 
             $centroCosto->cuantoshijos = count($centroCosto->users);
             $centroCosto->supervi = implode(',',$centroCosto->ArrayListaSupervisores($centroCosto->id));
+            $centroCosto->supervi1 = $centroCosto->ArrayListaSupervisores($centroCosto->id)[0] ?? '';
+            $centroCosto->supervi2 = $centroCosto->ArrayListaSupervisores($centroCosto->id)[1] ?? '';
+            $centroCosto->supervi3 = $centroCosto->ArrayListaSupervisores($centroCosto->id)[2] ?? '';
             return $centroCosto;
         })->filter();
+
+        if ($busqueda) {
+//            $centroCostos = $centroCostos->Where('supervi1', 'LIKE', "%" . $request->search . "%")
+//            ;
+//            $centroCostos = array_filter($centroCostos, function($centro) use ($request) {
+//                return strpos($centro->supervi1, $request->search) !== false;
+//            });
+            $centroCostos = $centroCostos->filter(function ($centro) use ($request) {
+                return strpos($centro->nombre, $request->search) !== false;
+            });
+            dd($centroCostos);
+        }
+
         // dd($centroCostos);
     }
     public function index(Request $request) {
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'centro costos')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 
+        $cacheKey = 'ultima_llamada_cc_index';
+        $ultimaLlamada = Cache::get($cacheKey);
+        $tiempoActual = now();
+        // Verificar si la función se ha llamado antes y si han pasado al menos 1 minutos
+        if (!$ultimaLlamada || $tiempoActual->diffInMinutes($ultimaLlamada) >= 1) {
+            $centroCostosAll = CentroCosto::all();
+            foreach ($centroCostosAll as $index => $item) {
+                $item->actualizarEstimado();
+            }
+            // Actualizar el tiempo de la última llamada en caché
+            Cache::put($cacheKey, $tiempoActual);
+        }
+
+        //<editor-fold desc="serach, order, mapear y paginar">
         $centroCostos = centroCosto::query();
-        if ($request->has('search')) {
-            $centroCostos->orWhere('nombre', 'LIKE', "%" . $request->search . "%");
-        }
-        if ($request->has(['field', 'order'])) {
-            $centroCostos->orderBy($request->field, $request->order);
-        }
         $perPage = $request->has('perPage') ? $request->perPage : 10;
-        $this->MapearClasePP($centroCostos, $numberPermissions);
+        $this->MapearClasePP($centroCostos, $numberPermissions,$request);
 
         $permissions = Auth()->user()->roles->pluck('name')[0];
         if($permissions === "empleado") { //admin | administrativo
@@ -54,8 +92,8 @@ class CentroCostosController extends Controller {
             ];
         }else{
             $nombresTabla =[//[0]: como se ven //[1] como es la BD
-                ["Acciones","#","nombre","usuarios","Supervisor"],
-                [null,null,"nombre",null,null]
+                ["Acciones","#","nombre","Mano obra estimada","usuarios","Supervisor"],
+                [null,null,"nombre","mano_obra_estimada",null,null]
             ];
         }
 
@@ -68,6 +106,7 @@ class CentroCostosController extends Controller {
             $page,
             ['path' => request()->url()]
         );
+        //</editor-fold>
 
         return Inertia::render('CentroCostos/Index', [ //carpeta
             'title'          =>  __('app.label.CentroCostos'),
@@ -96,7 +135,7 @@ class CentroCostosController extends Controller {
         }
     }
 
-    public function show( $id) {
+    public function show($id) {
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         $Reportes = Reporte::query();
 
@@ -120,7 +159,7 @@ class CentroCostosController extends Controller {
         if($numberPermissions === 1) { //1 : empleado | 2 : administrativo | 3 :supervisor
         }else{ // not empleado
             $titulo = $this->CalcularTituloQuincena($permissions);
-            $Reportes->orderBy('fecha_ini'); $perPage = 15;
+            $Reportes->orderBy('fecha_ini'); $perPage = 25;
 
             $nombresTabla =[//0: como se ven //1 como es la BD
 
@@ -142,14 +181,28 @@ class CentroCostosController extends Controller {
             'breadcrumbs'    =>  [['label' => __('app.label.Reportes'), 'href' => route('Reportes.index')]],
             'nombresTabla'   =>  $nombresTabla,
 
-            'valoresSelect'   =>  $valoresSelect,
-            'showSelect'   =>  $showSelect,
-            'IntegerDefectoSelect'   =>  $IntegerDefectoSelect,
-            'showUsers'   =>  $showUsers,
+            'valoresSelect'         =>  $valoresSelect,
+            'showSelect'            =>  $showSelect,
+            'IntegerDefectoSelect'  =>  $IntegerDefectoSelect,
+            'showUsers'             =>  $showUsers,
             'sumhoras_trabajadas'   =>  $sumhoras_trabajadas,
-
-            //18dic2023 
+            //18dic2023
             'userFiltro'            =>  null,
+
+            //24abril2024
+            'quincena'              =>  0,
+            'horasemana'            =>  0,
+            'horasPersonal'         =>  0,
+            'startDateMostrar'      =>  0,
+            'endDateMostrar'        =>  0,
+            'numberPermissions'     =>  $numberPermissions,
+            'ArrayOrdinarias'       =>  0,
+
+            'sumdiurnas'            =>  0,
+            'sumnocturnas'          =>  0, 'sumextra_diurnas'              =>  0, 'sumextra_nocturnas'            =>  0, 'sumdominical_diurno'           =>  0, 'sumdominical_nocturno'         =>  0, 'sumdominical_extra_diurno'     =>  0, 'sumdominical_extra_nocturno'   =>  0,
+            'horasTrabajadasHoy'    =>  $horasTrabajadasHoy2 ?? [],
+            'HorasDeCadaSemana'     =>  0,
+            'ArrayHorasSemanales'   =>  0,
         ]);
     }
 
