@@ -164,6 +164,7 @@ return [
         'searchCC' => 'Nombre...',
         'searchHorasD' => 'Diurnas',
         'searchDDay' => 'Dia',
+        'searchDDay2' => 'Dia',
 
         'subsidio_de_transporte_dia' => 'subsidio de transporte por dia',
         'salario_minimo' => 'salario minimo',
