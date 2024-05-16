@@ -42,6 +42,7 @@ class ParametrosController extends Controller
                 'porcentaje dominical extra nocturno'
             ],
             [
+                's_HORAS_ORDINARIAS',
                 's_HORAS_NECESARIAS_SEMANA',
                 'o_subsidio_de_transporte_dia',
                 // 'o_subsidio_de_transporte',

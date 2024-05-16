@@ -11,6 +11,7 @@ class Parametro extends Model
 
     protected $fillable = [
 
+        'HORAS_ORDINARIAS',
         'HORAS_NECESARIAS_SEMANA',
 
         'subsidio_de_transporte_dia',
@@ -18,12 +19,10 @@ class Parametro extends Model
         'valor_maximo_subsidio_de_transporte',
 
 
-
         'porcentaje_diurno',
         'porcentaje_nocturno',
         'porcentaje_extra_diurno',
         'porcentaje_extra_nocturno',
-
         'porcentaje_dominical_diurno',
         'porcentaje_dominical_nocturno',
         'porcentaje_dominical_extra_diurno',

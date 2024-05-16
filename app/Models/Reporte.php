@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Reporte extends Model {
@@ -30,10 +31,11 @@ class Reporte extends Model {
         'user_id',
 	];
 
-	public function centrocostos() {
-		return $this->hasOne('App\Models\CentroCosto');
-	}
-	public function users() {
-		return $this->hasOne('App\Models\User');
-	}
+    //TODO: es alrrevez... las relaciones hasone
+//	public function centrocostos() {
+//		return $this->hasOne('App\Models\CentroCosto');
+//	}
+//	public function users():  {
+//		return $this->hasOne(User::class);
+//	}
 }

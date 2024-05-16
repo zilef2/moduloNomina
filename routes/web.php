@@ -8,6 +8,7 @@ use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\ServiciosController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\QRController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route; use Illuminate\Support\Facades\Session; use Inertia\Inertia;
@@ -28,7 +29,6 @@ Route::get('/dashboard', [UserController::class, 'Dashboard'])->middleware(['aut
 Route::get('/setLang/{locale}', function ($locale) { Session::put('locale', $locale); return back(); })->name('setlang');
 
 Route::middleware('auth', 'verified')->group(function () {
-
     //<editor-fold desc="profile - role - permission">
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -65,8 +65,15 @@ Route::middleware('auth', 'verified')->group(function () {
 
     //19abril2024
     Route::resource('/Servicios', ServiciosController::class);
+
+    //yan
+    Route::get('/qrscanner', [QRController::class, 'index'])->name('qrscanner');
+    //16mayo2024
+    Route::put('/eporte_Super_Edit/{id}', [ReportesController::class, 'Reporte_Super_Edit'])->name('Reporte_Super_Edit');
+
 });
 require __DIR__.'/auth.php';
+
 
 // <editor-fold desc="Artisan">
     Route::get('/exception',function(){

@@ -115,7 +115,6 @@ class UserController extends Controller {
                 }
                 else
                     $centrosHoy[$value->nombre] = 0;
-
             }
         }
 

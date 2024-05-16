@@ -25,6 +25,7 @@ const form = useForm({
     subsidio_de_transporte_dia: props.parametros?.subsidio_de_transporte_dia,
     salario_minimo: props.parametros?.salario_minimo,
     HORAS_NECESARIAS_SEMANA: props.parametros?.HORAS_NECESARIAS_SEMANA,
+    HORAS_ORDINARIAS: props.parametros?.HORAS_ORDINARIAS,
 });
 
 const update = () => {
@@ -66,6 +67,14 @@ watchEffect(() => {
                     {{ lang().label.edit }} {{ props.title }}
                 </h2>
                 <div class="my-6 grid grid-cols-2 gap-6">
+                    <div>
+                        <InputLabel for="HORAS_ORDINARIAS" :value="lang().label.HORAS_ORDINARIAS" />
+                        <TextInput id="HORAS_ORDINARIAS" type="number" class="mt-1 block w-full"
+                            v-model="form.HORAS_ORDINARIAS" required
+                            :placeholder="lang().placeholder.HORAS_ORDINARIAS"
+                            :error="form.errors.HORAS_ORDINARIAS" />
+                        <InputError class="mt-2" :message="form.errors.HORAS_ORDINARIAS" />
+                    </div>
                     <div>
                         <InputLabel for="HORAS_NECESARIAS_SEMANA" :value="lang().label.HORAS_NECESARIAS_SEMANA" />
                         <TextInput id="HORAS_NECESARIAS_SEMANA" type="number" class="mt-1 block w-full"

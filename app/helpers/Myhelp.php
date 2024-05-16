@@ -18,7 +18,7 @@ class Myhelp{
         'superadmin' => 10
     ];
 
-    public static function AuthU()
+    public static function AuthU(): \Illuminate\Contracts\Auth\Authenticatable|\Illuminate\Http\RedirectResponse
     {
         $TheUser = Auth::user();
         if($TheUser){

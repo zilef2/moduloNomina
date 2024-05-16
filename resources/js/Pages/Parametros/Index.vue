@@ -42,6 +42,7 @@ const data = reactive({
 })
 
 const form = useForm({
+    HORAS_NECESARIAS_SEMANA: 0,
     subsidio_de_transporte_dia: 0,
     salario_minimo: 0,
     porcentaje_diurno: 0,
@@ -123,7 +124,6 @@ const form = useForm({
                     </table>
                 </div>
             </div>
-
 
 
             <section class="text-gray-600 body-font">

@@ -57,7 +57,7 @@ const form = useForm({
     centro_costo_id: props.IntegerDefectoSelect,
     observaciones: '',
     horas_trabajadas: '',
-    almuerzo: '0',
+    almuerzo: '1',
 
     diurnas: 0,
     nocturnas: 0,

@@ -6,8 +6,9 @@ import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InfoButton from '@/Components/InfoButton.vue';
 import SelectInput from '@/Components/SelectInput.vue';
-import {reactive, watch} from 'vue';
+import {reactive, ref, watch} from 'vue';
 import DangerButton from '@/Components/DangerButton.vue';
+import FilterButtons from '@/Components/tablecomponents/FilterButtons.vue';
 import pkg from 'lodash';
 import {router} from '@inertiajs/vue3';
 import Pagination from '@/Components/Pagination.vue';
@@ -53,6 +54,7 @@ const data = reactive({
         perPage: props.perPage,
         onlySupervis: props.onlySupervis,
     },
+
     selectedId: [],
     multipleSelect: false,
     createOpen: false,
@@ -123,8 +125,12 @@ const select = () => {
 }
 // <!--</editor-fold>-->
 
-
 data.params.onlySupervis = data.params.onlySupervis === null ? false : data.params.onlySupervis;
+
+const checkedValues = ref([]);
+const handleCheckboxChange = (values) => {
+  checkedValues.value = values;
+};
 </script>
 
 <template>
@@ -170,13 +176,6 @@ data.params.onlySupervis = data.params.onlySupervis === null ? false : data.para
                                 @close="data.deleteBulkOpen = false, data.multipleSelect = false, data.selectedId = []"
                                 :selectedId="data.selectedId" :title="props.title"/>
                 </div>
-<!--                <div class="rounded-lg overflow-hidden w-fit gap-8 my-2">-->
-<!--                    <div class="mx-4 pt-1 pb-3 inline-flex">‎-->
-<!--                        <input id="onlySupervis" type="checkbox" v-model="data.params.onlySupervis"-->
-<!--                               class="inline-flex items-center p-3  border-2 border-sky-500 rounded-md font-semibold hover:bg-primary/80 dark:hover:bg-primary/90 focus:bg-primary/80 dark:focus:bg-primary/80 active:bg-primary dark:active:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-primary transition ease-in-out duration-150 disabled:bg-primary/80"/>-->
-<!--                        <label for="onlySupervis" class="mx-2">Mostrar solo supervisores</label>-->
-<!--                    </div>-->
-<!--                </div>-->
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="flex justify-between p-2">
@@ -188,6 +187,12 @@ data.params.onlySupervis = data.params.onlySupervis === null ? false : data.para
                             <TrashIcon class="w-5 h-5"/>
                         </DangerButton>
                     </div>
+<!--                                   @change="selectAll"-->
+<!--                    <FilterButtons v-model="data.params.onlySupervis"-->
+<!--                    />b - {{data.params.onlySupervis}} - a-->
+                     <FilterButtons @update:checked="handleCheckboxChange" />
+                    <div>Estado de los checkboxes: {{ checkedValues }}</div>
+
                     <TextInput v-model="data.params.search" type="text" class="block w-3/6 md:w-2/6 lg:w-1/6 rounded-lg"
                                placeholder="Buscar seguimiento"/>
                 </div>

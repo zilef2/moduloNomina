@@ -123,15 +123,14 @@ let horahoy = newdate.getHours()
 let diahoy = newdate.get
 let timedate = TransformTdate(7)
 let timedate2 = TransformTdate(16)
-// if(props.numberPermissions > 8){
-    form.fecha_ini = '2024-04-27T07:00'
-    form.fecha_fin = '2024-04-27T15:00'
+if(props.numberPermissions > 8){
+    form.fecha_ini = '2024-05-19T07:00'
+    form.fecha_fin = '2024-05-19T16:00'
+}else{
+    form.fecha_ini = timedate
+    form.fecha_fin = timedate2
+}
 
-    // form.fecha_fin = '2024-01-04T23:58'
-// }else{
-    // form.fecha_ini = timedate
-    // form.fecha_fin = timedate2
-// }
 // <!--</editor-fold>-->
 
 
@@ -331,15 +330,19 @@ function RestarAlmuarzo(){
     if(form.horas_trabajadas > LIMITE_ALMUERZO) {
         form.horas_trabajadas -= 1;
 
+        console.log("(F=>RestarAlm) nocturnas", form.nocturnas);
+        console.log("(F=>RestarAlm) diurnas", form.diurnas);
+        console.log("(F=>RestarAlm) extra_diurnas", form.extra_diurnas);
+        console.log("(F=>RestarAlm) extra_nocturnas", form.extra_nocturnas);
+        console.log("=>(Create.vue: F=>RestarAlmuarzo) ", form);
+        console.log("=>(Create.vue: F=>RestarAlmuarzo) ", form);
         if(form.diurnas > 0 && form.nocturnas <= form.diurnas) {
-            form.diurnas -= 1
-            form.almuerzo = ' diurno'
+            form.diurnas -= 1; form.almuerzo = ' diurno'
             return true;
         }
 
         if(form.nocturnas > 0 && form.nocturnas > form.diurnas){
-            form.nocturnas -= 1
-            form.almuerzo = ' nocturno'
+            form.nocturnas -= 1;form.almuerzo = ' nocturno';
             return true;
         }
 
@@ -351,6 +354,25 @@ function RestarAlmuarzo(){
         if(form.extra_nocturnas > 0 && form.extra_nocturnas > form.extra_diurnas){
             form.extra_nocturnas -= 1
             form.almuerzo = ' nocturno'
+            return true;
+        }
+
+        //domini
+        if(form.dominical_diurnas > 0 && form.dominical_nocturnas <= form.dominical_diurnas) {
+            form.dominical_diurnas -= 1; form.almuerzo = ' dominical'
+            return true;
+        }
+        if(form.dominical_nocturnas > 0 && form.dominical_nocturnas > form.dominical_diurnas){
+            form.dominical_nocturnas -= 1;form.almuerzo = ' dominical nocturno';
+            return true;
+        }
+        //dominiextra
+        if(form.dominical_extra_diurnas > 0 && form.dominical_extra_nocturnas <= form.dominical_extra_diurnas) {
+            form.dominical_extra_diurnas -= 1; form.almuerzo = ' dominical extra diurno'
+            return true;
+        }
+        if(form.dominical_extra_nocturnas > 0 && form.dominical_extra_nocturnas > form.dominical_extra_diurnas){
+            form.dominical_extra_nocturnas -= 1;form.almuerzo = ' dominical extra nocturno';
             return true;
         }
 
@@ -376,12 +398,15 @@ function calcularHoras(inicio,final){
         let horasFinOme = parseInt(new Date(form.fecha_fin).getHours())
         let CuandoEmpiezaExtra = horasInicioome
 
-        //aqui estan los errores
-        //TODO:urgente falta agregar el horario de los sabados
-
         ExtrasPrematuras -= (data.TrabajadasSemana-1)//machete aqui
+        let diaSemana = ini.getDay();
+        // Verificar si el día es sábado (6)
+        if (diaSemana === 6) {
+            CuandoEmpiezaExtra -= 1
+        }
+
         ExtrasPrematuras -= data.TrabajadasHooy
-        ExtrasPrematuras -= data.TemporalDiaAnterior //23:59
+        // ExtrasPrematuras -= data.TemporalDiaAnterior //23:59
         ExtrasPrematuras = ExtrasPrematuras < 0 ? 0 : ExtrasPrematuras
 
         CuandoEmpiezaExtra += ExtrasPrematuras
@@ -998,15 +1023,14 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
 
 
                     <p v-if="data.TrabajadasSemana" class="mx-2 text-amber-700 bg-amber-400/10 rounded-2xl">
-                      {{ data.TrabajadasSemana-1 }} horas de la semana
+                        <small v-if="numberPermissions > 8">{{ data.TrabajadasSemana - 1 }}</small> | Se completó las horas de la semana
                     </p>
                     <p v-if="data.TrabajadasHooy" class="mx-2 text-amber-700 bg-amber-400/10 rounded-2xl">
-                      {{ data.TrabajadasHooy }} horas del mismo dia
+                        <small v-if="numberPermissions > 8">{{ data.TrabajadasHooy }}</small> | Ya hay un reporte hoy
                     </p>
                     <p v-if="data.TemporalDiaAnterior" class="mx-2 text-amber-700 bg-amber-400/10 rounded-2xl">
-                      {{ data.TemporalDiaAnterior }} horas del dia anterior
+                        <small v-if="numberPermissions > 8">{{ data.TemporalDiaAnterior }}</small>
                     </p>
-
                 </div>
             </form>
         </Modal>

@@ -18,6 +18,7 @@ const data = reactive({
         perPage: props.filters?.perPage,
 
         soloValidos: props.filters?.soloValidos,
+        soloQuincena: props.filters?.soloQuincena,
         FiltroUser: props.filters?.FiltroUser,
 
     },
@@ -38,6 +39,7 @@ watchEffect(() => {
     data.params.order = props.filters?.order
     data.params.perPage = props.filters?.perPage
     data.params.soloValidos = props.filters?.soloValidos
+    data.params.soloQuincena = props.filters?.soloQuincena
     data.params.FiltroUser = props.filters?.FiltroUser
 })
 </script>
@@ -58,19 +60,16 @@ watchEffect(() => {
                     :disabled="link.url == null"></button>
             </li>
         </ul>
-<!--        <ul-->
-<!--            class="flex justify-center items-center rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">-->
-<!--            <li>-->
-<!--                <button v-on:click="goto(links.prev_page_url)" class="px-4 py-2" v-html="'&laquo;'"-->
-<!--                    :disabled="links.prev_page_url == null"></button>-->
-<!--                       </li>-->
-<!--            <li>-->
-<!--                <p class="px-4 py-2 bg-primary text-white" v-html="links.current_page"></p>-->
-<!--                </li>-->
-<!--            <li>-->
-<!--                <button v-on:click="goto(links.next_page_url)" class="px-4 py-2" v-html="'&raquo;'"-->
-<!--                    :disabled="links.next_page_url == null"></button>-->
-<!--                    </li>-->
-<!--        </ul>-->
+        <ul
+            class="flex lg:hidden justify-center items-center rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+            <li>
+                <button v-on:click="goto(links.prev_page_url)" class="px-4 py-2" v-html="'&laquo;'"
+                    :disabled="links.prev_page_url == null"></button>
+                       </li>
+            <li>
+                <p class="px-4 py-2 bg-primary text-white" v-html="links.current_page"></p>
+                </li>
+            <li><button v-on:click="goto(links.next_page_url)" class="px-4 py-2" v-html="'&raquo;'" :disabled="links.next_page_url == null"></button></li>
+        </ul>
     </div>
 </template>

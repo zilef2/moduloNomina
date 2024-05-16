@@ -5,7 +5,7 @@
         import TextInput from '@/Components/TextInput.vue';
         import PrimaryButton from '@/Components/PrimaryButton.vue';
         import SelectInput from '@/Components/SelectInput.vue';
-        import { reactive, watch } from 'vue';
+    import {reactive, ref, watch} from 'vue';
         import DangerButton from '@/Components/DangerButton.vue';
         import pkg from 'lodash';
         import { router,usePage,useForm } from '@inertiajs/vue3';
@@ -31,6 +31,10 @@
     import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
     import InputError from "@/Components/InputError.vue";
     import InputLabel from "@/Components/InputLabel.vue";
+    import FilterButtons from "@/Components/tablecomponents/FilterButtons.vue";
+    import Reporte_Super_Edit from '@/Pages/Reportes/Reporte_Super_Edit.vue';
+
+
     ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
     const { _, debounce, pickBy } = pkg
@@ -91,8 +95,11 @@
 
     const data = reactive({
         params: {
+            searchQuincena: props.filters?.searchQuincena,
+            searchIncongruencias: props.filters?.searchIncongruencias,
             searchHorasD: props.filters?.searchHorasD,
             soloValidos: props.filters?.soloValidos,
+            soloQuincena: props.filters?.soloQuincena,
             FiltroUser: props.filters?.FiltroUser,
 
             search: props.filters?.search,
@@ -113,6 +120,22 @@
         generico: null,
         nope: null,
         dataSet: usePage().props.app.perpage,
+        DiasDeLaSemana: [
+            {value:1, label:'Enero'},
+            {label:'Febrero', value:2},
+            {label:'Marzo', value:3},
+            {label:'Abril', value:4},
+            {label:'Mayo', value:5},
+            {label:'Junio', value:6},
+            {label:'Julio', value:7},
+            {label:'Agosto', value:8},
+            {label:'Septiembre', value:9},
+            {label:'Octubre', value:10},
+            {label:'Noviembre', value:11},
+            {label:'Diciembre', value:12},
+        ],
+        Reporte_Super_EditOpen: false,
+
     })
 
 
@@ -182,32 +205,40 @@ const diasSemana = {
         6:'Sabado',
         0:'Domingo'
     }
-
+const checkedValues = ref([]);
+const handleCheckboxChange = (values) => {
+  checkedValues.value = values;
+    data.params.soloValidos = values[0]
+    data.params.soloQuincena = values[1]
+    data.params.searchIncongruencias = values[2]
+    data.params.searchQuincena = values[3]
+};
 </script>
 
 <template>
     <Head :title="props.title"></Head>
     <AuthenticatedLayout>
-
         <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />
-        <div class="space-y-4">
+        <div class="space-y-1">
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">
-                    <div class="mt-4 inline-flex">
-                        <PrimaryButton v-if="can(['create reporte'])" class="rounded-md mx-2 h-10 mt-6" @click="data.createOpen = true">
+                    <div class="mt-2 inline-flex">
+                        <PrimaryButton v-if="can(['create reporte'])" class="rounded-md mx-2 h-8 mt-2" @click="data.createOpen = true">
                             {{ lang().button.add }}
                         </PrimaryButton>
-                        <PrimaryButton v-if="can(['isAdmin'])" class="rounded-md mx-2 h-10 mt-6" @click="data.createMassOpen = true">
+                        <PrimaryButton v-if="can(['isAdmin'])" class="rounded-md mx-2 h-8 mt-2" @click="data.createMassOpen = true">
                             {{ lang().button.add }} Masivamente
                         </PrimaryButton>
 
-                        <div v-if="props.userFiltro && props.userFiltro.length > 0" v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro" class="mx-4">
-                            <InputLabel for="centro_costo_id" value="Filtrar por trabajador"/>
+                        <div v-if="props.userFiltro && props.userFiltro.length > 0" v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro"
+                             class="mx-4 -mt-3">
+                            <InputLabel for="centro_costo_id" value="Filtrar por trabajador" />
                             <SelectInput v-model="data.params.FiltroUser" :dataSet="props.userFiltro"
                                          class="mt-1 block w-full"/>
                         </div>
 
-                        <div v-else v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro" class="mx-4">
+                        <div v-else v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro"
+                             class="mx-4">
                           <p class="pt-1 mt-6 font-extrabold">Sin reportes</p>
                         </div>
                     </div>
@@ -231,9 +262,13 @@ const diasSemana = {
                         :valoresSelect="props.valoresSelect" :showUsers="props.showUsers" :correccionUsuario="false" />
 
                     <!-- solo el usuario puede corregir sus propios reportes -->
-                    <!-- <Edit :show="data.editCorregirOpen" @close="data.editCorregirOpen = false" :Reporte="data.generico"
+                    <Edit :show="data.editCorregirOpen" @close="data.editCorregirOpen = false" :Reporte="data.generico"
                         :title="props.title" :valoresSelect="props.valoresSelect" :showUsers="props.showUsers"
-                        :correccionUsuario="true" /> -->
+                        :correccionUsuario="true" />
+
+                    <Reporte_Super_Edit :show="data.Reporte_Super_EditOpen" @close="data.Reporte_Super_EditOpen = false" :Reporte="data.generico" :title="props.title"
+                        :valoresSelect="props.valoresSelect" :showUsers="props.showUsers" :correccionUsuario="false" />
+
 
                     <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :Reporte="data.generico" v-show="can(['delete reporte'])"
                         :title="props.title" />
@@ -261,17 +296,28 @@ const diasSemana = {
                     <div  class="flex gap-3">
                         <!-- solo mes-->
                         <TextInput v-model="data.params.searchHorasD"
-                            type="number" min="0" class="block w-full rounded-lg"
+                            type="number" min="0" class="block w-2/3 md:w-full rounded-lg"
                             :placeholder="lang().placeholder.searchHorasD" />
                         <TextInput v-model="data.params.search"
-                            type="number" min="0" max="12" class="block w-full rounded-lg"
+                            type="number" min="0" max="12" class="block w-2/3 md:w-full rounded-lg"
                             :placeholder="lang().placeholder.searchDates" />
+<!--                        <SelectInput v-model="data.params.search" :dataSet="data.DiasDeLaSemana" />-->
                         <TextInput v-model="data.params.searchDDay"
-                            type="number" min="0" max="31" class="block w-full rounded-lg"
+                            type="number" min="0" max="31" class="block w-2/3 md:w-full rounded-lg"
                             :placeholder="lang().placeholder.searchDDay" />
-                        <label for="soloval" class="mx-3">Solo validos</label>
-                        <input v-model="data.params.soloValidos" id="soloval" type="checkbox"
-                            class="bg-gray-100 h-7 w-7 mt-2 ml-5" />
+                        <TextInput v-model="data.params.searchQuincena"
+                            type="number" min="0" max="31" class="block w-2/3 md:w-full rounded-lg"
+                            :placeholder="lang().placeholder.searchQuincena" />
+<!--                        <label for="soloval" class="hidden md:block mx-1 my-auto">Solo validos</label>-->
+<!--                        <label for="soloval" class="mx-1 md:hidden my-auto">Val</label>-->
+<!--                        <input v-model="data.params.soloValidos" id="soloval" type="checkbox"-->
+<!--                            class="bg-gray-100 h-6 w-6 mt-2 ml-3" />-->
+<!--                        <label for="soloval" class="hidden md:block mx-1 my-auto">Quincena actual</label>-->
+<!--                        <label for="soloval" class="mx-1 md:hidden my-auto">Q</label>-->
+<!--                        <input v-model="data.params.soloQuincena" id="soloval" type="checkbox"-->
+<!--                            class="bg-gray-100 h-6 w-6 mt-2 ml-3" />-->
+
+                        <FilterButtons @update:checked="handleCheckboxChange" />
                     </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
@@ -308,19 +354,24 @@ const diasSemana = {
                                                     class="px-2 py-1.5 rounded-sm" v-tooltip="lang().tooltip.edit">
                                                     <PencilIcon class="w-6 h-6" />
                                                 </InfoButton>
-                                                <SuccessButton v-if="can(['update reporte'])" type="button" class="mx-1 w-12 h-10"
+                                                <SuccessButton v-if="can(['update reporte'])" type="button" class="mx-1 w-12 h-10 rounded-lg-r"
                                                     :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                                                     @click=" (data.generico = clasegenerica),(updateThisReporte(true))"
                                                     v-tooltip="'Aprobar'">
                                                     <CheckIcon class="w-6 h-6" />
                                                 </SuccessButton>
                                             </form>
-                                            <!-- <InfoButton v-if="(can(['delete reporte'])) && (clasegenerica.valido === 2)"
-                                                type="button"
-                                                @click="(data.editCorregirOpen = true), (data.generico = clasegenerica)"
-                                                class="px-2 py-1.5 rounded-lg" v-tooltip="'Corregir'">
-                                                <DocumentCheckIcon class="w-6 h-6" />
-                                            </InfoButton> -->
+<!--                                            <InfoButton v-if="(can(['isSuper']))"-->
+<!--                                                type="button"-->
+<!--                                                @click="(data.editCorregirOpen = true), (data.generico = clasegenerica)"-->
+<!--                                                class="px-2 py-1.5 rounded-l-md" v-tooltip="'Corregir'">-->
+<!--                                                <DocumentCheckIcon class="w-6 h-6" />-->
+<!--                                            </InfoButton>-->
+                                            <InfoButton v-if="can(['isSuper'])" type="button"
+                                                @click="(data.Reporte_Super_EditOpen = true), (data.generico = clasegenerica)"
+                                                class="px-2 py-1.5 rounded-sm" v-tooltip="Solosuper">
+                                                <PencilIcon class="w-5 h-5" />
+                                            </InfoButton>
                                             <DangerButton v-if="(can(['delete reporte']))" type="button"
                                                 @click="(data.deleteOpen = true), (data.generico = clasegenerica)"
                                                 class="px-2 py-1.5 rounded-sm" v-tooltip="lang().tooltip.delete">
@@ -369,7 +420,7 @@ const diasSemana = {
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> Totales </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3"> Total Mes </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> Trabajadas: {{ props.sumhoras_trabajadas }} </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> {{ props.sumdiurnas ? 'Diurnas: ' + props.sumdiurnas : ''}} </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> {{ props.sumnocturnas ? 'Nocturnas: ' + props.sumnocturnas : ''}} </td>

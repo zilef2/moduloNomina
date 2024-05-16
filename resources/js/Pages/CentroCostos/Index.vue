@@ -15,9 +15,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
     import Pagination from '@/Components/Pagination.vue';
     import { ChevronUpDownIcon, PencilIcon,EyeIcon, TrashIcon } from '@heroicons/vue/24/solid';
-    import {number_format} from '@/global.ts';
+    import {formatPesosCol} from '@/global.ts';
 
-    import Checkbox from '@/Components/Checkbox.vue';
     import InfoButton from '@/Components/InfoButton.vue';
 
     const { _, debounce, pickBy } = pkg
@@ -49,11 +48,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
     const order = (field) => {
         if(field !== undefined){
-            // console.log("🚀 ~ file: Index.vue:54 ~ order ~ field:", field)
-            // field = field.substr(2)
-            // console.log("🚀 field:", field)
             data.params.field = field.replace(/ /g, "_")
-
             data.params.order = data.params.order === "asc" ? "desc" : "asc"
         }
     }
@@ -144,7 +139,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (index+1) }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.nombre) }} </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.mano_obra_estimada) }} </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ formatPesosCol(clasegenerica.mano_obra_estimada) }} </td>
                                 <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.cuantoshijos) }} </td>
                                 <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">({{clasegenerica.supervi.split(',').length}}) {{ (clasegenerica.supervi) }} </td>
                             </tr>

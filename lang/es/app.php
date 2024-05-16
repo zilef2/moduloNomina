@@ -128,6 +128,7 @@ return [
         'email_verification' => 'Email Verification',
         'password_forgot' => 'Forgotten password?',
         'of' => 'de',
+        'HORAS_ORDINARIAS' => 'Horas ordinarias del día',
     ],
     'button' => [
         'Recontratar' => 'Recontratar',
@@ -159,6 +160,7 @@ return [
         'reject' => 'Rechazar'
     ],
     'placeholder' => [
+        'searchQuincena' => 'Superior dia',
         'searchCC' => 'Nombre...',
         'searchHorasD' => 'Diurnas',
         'searchDDay' => 'Dia',

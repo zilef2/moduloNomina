@@ -9,7 +9,7 @@
  monthName
  TransformTdate
 
- --MATH
+ --MATHfunctionsome
 
  number_format
  CalcularEdad
@@ -252,7 +252,19 @@ export function CuantosFestivosEstaQuincena2(numQuicena,elmes,anio) {
 
 
 
-// MATH
+// MATHfunctionsome
+
+    export function formatPesosCol(number):string{
+        number = Math.round(number);
+        const formattedNumber = number.toLocaleString('en-US', {
+            minimumFractionDigits: 0, // Mínimo de dígitos decimales (en este caso, 0)
+            maximumFractionDigits: 0 // Máximo de dígitos decimales (en este caso, 0)
+        });
+
+        // Reemplazar la coma por un punto como separador decimal
+        return '$ ' + formattedNumber;
+        // return '$ ' + number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+    }
     export function CalcularAvg(TheArray,NameValue = '',isTime = false) {
         let sum = 0
         if(NameValue === ''){

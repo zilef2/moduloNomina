@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\CentroCosto;
 use App\Http\Requests\CentroCostoRequest;
+use App\Models\Parametro;
 use App\Models\Reporte;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -69,15 +70,19 @@ class CentroCostosController extends Controller {
         $cacheKey = 'ultima_llamada_cc_index';
         $ultimaLlamada = Cache::get($cacheKey);
         $tiempoActual = now();
-        // Verificar si la función se ha llamado antes y si han pasado al menos 1 minutos
-        if (!$ultimaLlamada || $tiempoActual->diffInMinutes($ultimaLlamada) >= 1) {
+        // Verificar si la función se ha llamado antes y si han pasado al menos 2 minutos
+//        if (!$ultimaLlamada || $tiempoActual->diffInMinutes($ultimaLlamada) >= 2) {
             $centroCostosAll = CentroCosto::all();
-            foreach ($centroCostosAll as $index => $item) {
-                $item->actualizarEstimado();
-            }
+//            if (!$ultimaLlamada || $tiempoActual->diffInMinutes($ultimaLlamada) >= 20) {
+                session(['parametros' => Parametro::Find(1)]);
+
+                foreach ($centroCostosAll as $item) {
+                    $item->actualizarEstimado();
+                }
+//            }
             // Actualizar el tiempo de la última llamada en caché
             Cache::put($cacheKey, $tiempoActual);
-        }
+//        }
 
         //<editor-fold desc="serach, order, mapear y paginar">
         $centroCostos = centroCosto::query();
