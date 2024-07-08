@@ -1,242 +1,12 @@
 /*
 
-
-TERMINA_LUNES_O_DOMINGO
-calcularTerminaLunes
-calcularTerminaDomingo
-
+calcularDiurnas
+calcularNocturnas
+*/
 //FIN INDEX
 
-
-export function estaFechaEsFestivo(
-    fecha,dataMostrarConsole:boolean,FestivosColombia
-){
-    let dateFestivos,dateArr,daysfestivo,monthFestivo,result:boolean = false;
-    const BreakException: {} = {};
-    let dayEvaluado: number = Math.floor(fecha.getDate());
-    let MonthEvaluado: number = (fecha.getMonth());
-
-    if(dataMostrarConsole.EsFestivo){
-        console.log('MonthEvaluado',MonthEvaluado)
-        console.log('dayEvaluado',dayEvaluado)
-        console.log('PARAMETER: fecha',fecha)
-    }
-    try{
-        let holidaysYear = FestivosColombia.getHolidaysByYear(fecha.getFullYear());
-
-        holidaysYear.forEach(element => {
-            dateArr = element.date.split('/');
-            dateFestivos = new Date(dateArr[2], dateArr[1] - 1, dateArr[0]);
-            daysfestivo = Math.floor(dateFestivos.getDate());
-            monthFestivo = (dateFestivos.getMonth());
-
-            if(daysfestivo === dayEvaluado && monthFestivo === MonthEvaluado) {
-                result = true;
-                throw BreakException
-            }
-        });
-    } catch (e) {
-        if (e !== BreakException) throw e;
-    }
-
-    return result
-}
-
-
-
-
-//</editor-fold>
-
-
-
-//<editor-fold desc="TERMINA_LUNES_O_DOMINGO">
-export function calcularTerminaLunes(fin,CuandoEmpiezaExtra,ExtrasManana,form){
-    form.dominical_diurnas = form.diurnas;
-    form.dominical_extra_diurnas = form.extra_diurnas;
-    const HoraTermino = parseInt(fin.getHours())
-
-    if(HoraTermino <= 6){//termino madrugada
-        form.diurnas = 0
-        form.extra_diurnas = 0
-        if(form.nocturnas === 0){
-            form.dominical_nocturnas = form.nocturnas - HoraTermino;
-            form.nocturnas = HoraTermino;
-        }else{
-            form.dominical_extra_nocturnas = form.extra_nocturnas - HoraTermino;
-            form.extra_nocturnas = HoraTermino
-        }
-    }else{// termino de dia
-        if(form.nocturnas === 0){//hay extra
-            form.dominical_extra_nocturnas = Tarde;
-            form.extra_nocturnas = Madrugada;
-        }else{
-            form.dominical_nocturnas = Tarde;
-            form.nocturnas = Madrugada - form.extra_nocturnas
-        }
-        const horasDemas = Math.abs(HoraTermino - 6);
-        if(form.diurnas == 0){
-            form.dominical_extra_diurnas = form.extra_diurnas - horasDemas;
-            form.extra_diurnas = horasDemas
-        }else{
-            form.dominical_diurnas = form.diurnas - horasDemas;
-            form.diurnas = horasDemas;
-        }
-    }
-}
-
-export function calcularTerminaDomingo(ini,fin,CuandoEmpiezaExtra,ExtrasManana,form){
-    const HoraIni = parseInt(ini.getHours())
-    const HoraTermino = parseInt(fin.getHours())
-    if(CuandoEmpiezaExtra !== null){
-        if(CuandoEmpiezaExtra < 6){
-            form.dominical_extra_nocturnas = Madrugada - CuandoEmpiezaExtra //Siempre Madrugada > CuandoEmpiezaExtra
-            form.extra_nocturnas -= form.dominical_extra_nocturnas
-            form.dominical_nocturnas = CuandoEmpiezaExtra
-            console.log("form.dominical_nocturnas", form.dominical_nocturnas);
-            form.nocturnas -= CuandoEmpiezaExtra
-            // ------------- las de dia -------------
-            form.dominical_diurnas = 0
-            form.dominical_extra_diurnas = HoraTermino > 6 ? HoraTermino - 6 : 0
-            // form.diurnas
-            form.extra_diurnas -= form.dominical_extra_diurnas
-        }else{//extras > 6
-            if(ExtrasManana){//extra empiezan el domingo luego de 6
-                // form.dominical_extra_nocturnas
-                // form.extra_nocturnas
-                form.dominical_nocturnas = Madrugada
-                form.nocturnas = Tarde
-                // ------------- las de dia -------------
-                form.dominical_diurnas = CuandoEmpiezaExtra - 6
-                form.dominical_extra_diurnas = HoraTermino - CuandoEmpiezaExtra
-                form.diurnas = 0
-                form.extra_diurnas = 0
-            }else{ // extras empezaron el dia anterior
-                form.dominical_extra_nocturnas = Madrugada
-                form.extra_nocturnas -= Madrugada
-                form.dominical_nocturnas = 0
-                // form.nocturnas
-                // ------------- las de dia -------------
-                form.dominical_diurnas = 0
-                if(HoraTermino > 6){
-                    form.dominical_extra_diurnas = HoraTermino - 6
-                    // form.diurnas = 0
-                    form.extra_diurnas -= form.dominical_extra_diurnas
-                }
-            }
-        }
-    }else{//sin extras
-        form.dominical_nocturnas = Madrugada
-        form.nocturnas -= Madrugada
-
-        if(HoraIni >= 21){
-            form.dominical_diurnas = parseInt(form.diurnas)
-            form.diurnas = 0;
-        }else{
-            form.diurnas = 21 - HoraIni;
-            form.dominical_diurnas = HoraTermino > 6 ? HoraTermino - 6 : 0
-        }
-    }
-}
-//</editor-fold>
-
 //<editor-fold desc="CALCULAR">
-//# papa = watchEffect
-export function calcularHoras(data,form,inicio,final){
-    let ini = new Date(inicio)
-    let fin = new Date(final)
-    let ExtrasManana = false
-
-    data.TemporalDiaAnterior = data.HorasDelDiaAnterior59 ? data.HorasDelDiaAnterior59 : 0 //7jul: esta desactivado
-    let ExtrasPrematuras = HORAS_ESTANDAR
-
-    let Dateinii = Date.parse(form.fecha_ini) ?? false;
-    if(Dateinii && Date.parse(form.fecha_fin) ){ //??: son fechas?
-        let horasInicioome = parseInt(new Date(form.fecha_ini).getHours())
-        let horasFinOme = parseInt(new Date(form.fecha_fin).getHours())
-        let CuandoEmpiezaExtra = horasInicioome
-
-        ExtrasPrematuras -= (data.TrabajadasSemana-1)//machete aqui
-        let diaSemana = ini.getDay();
-        // Verificar si el día es sábado (6)
-        if (diaSemana === 6) {
-            CuandoEmpiezaExtra -= 1
-        }
-
-        ExtrasPrematuras -= data.TrabajadasHooy
-        // ExtrasPrematuras -= data.TemporalDiaAnterior //23:59
-        ExtrasPrematuras = ExtrasPrematuras < 0 ? 0 : ExtrasPrematuras
-
-        CuandoEmpiezaExtra += ExtrasPrematuras
-        CuandoEmpiezaExtra = CuandoEmpiezaExtra < horasInicioome ? horasInicioome : CuandoEmpiezaExtra
-
-
-        if(data.MostrarConsole.CuandoEiezaExtra){
-            console.log('%cPRIMERO: CuandoEmpiezaExtra', "color:red;font-family:system-ui;font-size:1rem;-webkit-text-stroke: 0.5px black;font-weight:bold")
-            console.log('CuandoEmpiezaExtra',CuandoEmpiezaExtra)
-            console.log('extras?',CuandoEmpiezaExtra < horasFinOme)
-            console.log('ExtrasPrematuras',ExtrasPrematuras)
-            console.log("SEMANA DEL AÑO:: HorasDeCadaSemana[props.HorasDeCadaSemana[0]]", props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]]);
-
-            console.log('data.TrabajadasSemana',data.TrabajadasSemana) // si ya cumplio las horas de semana
-            console.log('data.TrabajadasHooy',data.TrabajadasHooy) //si reporto hoy
-            console.log('TemporalDiaAnterior',data.TemporalDiaAnterior) // si reporto ayer
-            console.log('%cFIN: CuandoEmpiezaExtra', "color:blue;font-family:system-ui;font-size:15px;-webkit-text-stroke: 0.5px black;font-weight:bold")
-        }
-
-
-        if(CuandoEmpiezaExtra >= horasFinOme){
-            if(data.MostrarConsole.dia)
-                console.log(CuandoEmpiezaExtra,horasFinOme);
-
-            form.almuerzo = 'No';
-            form.diurnas = Math.abs(calcularDiurnas(form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra)[1]);
-            form.nocturnas = Math.abs(calcularNocturnas(form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra)[1]);
-        }else{ //extras
-            form.almuerzo = form.horas_trabajadas + data.TemporalDiaAnterior > 8 ?  1 : 0;
-            form.almuerzo = form.horas_trabajadas + data.TemporalDiaAnterior > 16 ? 2 : form.almuerzo;
-            ValorRealalmuerzo = form.almuerzo
-            form.almuerzo += ' horas'
-
-            if(CuandoEmpiezaExtra >= 24){
-                CuandoEmpiezaExtra = 24 //version horasmismodia
-                // CuandoEmpiezaExtra -= 24 //version diaAyB
-                ExtrasManana = true
-            }
-
-            let horasExtrasDiurnas = (calcularDiurnas(form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra));
-            form.extra_diurnas = horasExtrasDiurnas[0];
-            form.diurnas = horasExtrasDiurnas[1];
-
-            let horasExtrasNocturnas = (calcularNocturnas(form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra));
-            form.extra_nocturnas = horasExtrasNocturnas[0];
-            form.nocturnas = horasExtrasNocturnas[1];
-        }
-        // if(data.estado2359){
-        //     if (form.nocturnas < 8 && form.nocturnas >= 0) {
-        //         form.nocturnas++
-        //     } else
-        //       form.extra_nocturnas++
-        // }
-
-
-        setDominical(ini,fin,CuandoEmpiezaExtra,ExtrasManana);
-        if(data.estado2359){
-        // if(horafin === 23 && minfin === 59){
-            if(form.extra_nocturnas > 0) form.extra_nocturnas++
-            else{
-                if(form.dominical_nocturnas > 0) form.dominical_nocturnas++
-                else{
-                    if(form.dominical_extra_nocturnas > 0) form.dominical_extra_nocturnas++
-                    else{
-                        form.nocturnas++
-                    }
-                }
-
-            }
-        }
-
-    }
-}
+import {calcularTerminaDomingo, calcularTerminaLunes, estaFechaEsFestivo} from "./HelpingCreate";
 
 export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
     const horasInicio = new Date(Inicio).getHours();
@@ -340,8 +110,8 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
     const DiaInicio = new Date(Inicio).getDate();
     const DiaFin = new Date(Fin).getDate();
 
-    Madrugada = 0
-    Tarde = 0
+    let Madrugada:number = 0
+    let Tarde:number = 0
     if(DiaInicio === DiaFin){
         if(horasInicio < 6 && horasFin <= 6){//solo de noche
             Madrugada = horasFin - horasInicio;
@@ -391,14 +161,14 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
         }
     }
 
-    let HorasNoc = Madrugada + Tarde;
+    let HorasNoc:number = Madrugada + Tarde;
     if(data.MostrarConsole.noche) {
         console.log("PRIMERO NOCHE 🚀");
         console.log("Madrugada & tarde🚀", Madrugada,Tarde+' = '+(HorasNoc));
         console.log("horasInicio🚀", horasInicio);
         console.log("horasFin🚀", horasFin);
     }
-    let extra = 0, ordinarias = 0;
+    let extra:number = 0, ordinarias = 0;
 
     // --------------- calculo extra ---------------
     if (CuandoEmpiezaExtra === null || typeof CuandoEmpiezaExtra === 'undefined' || CuandoEmpiezaExtra > 23) {
@@ -458,4 +228,111 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
 //</editor-fold>
 
 
+function RestarAlmuarzo(form){
+    let LIMITE_ALMUERZO:number = 8
+    var fechain_i = new Date(form.fecha_ini)
+    var diaSemana = fechain_i.getDay();
+    if (diaSemana === 6) {
+        LIMITE_ALMUERZO--
+    }
 
+    if(form.horas_trabajadas > LIMITE_ALMUERZO) {
+        form.horas_trabajadas -= 1;
+
+        console.log("(F=>RestarAlm) nocturnas", form.nocturnas);
+        console.log("(F=>RestarAlm) diurnas", form.diurnas);
+        console.log("(F=>RestarAlm) extra_diurnas", form.extra_diurnas);
+        console.log("(F=>RestarAlm) extra_nocturnas", form.extra_nocturnas);
+
+        //JessicaDebeRevisar: a que hora se debe quitar la hora de almuerzo
+        if(form.extra_nocturnas > 0 && form.extra_nocturnas > form.extra_diurnas){
+            form.extra_nocturnas -= 1
+            form.almuerzo = ' nocturno'
+            console.log('aqui')
+            return true;
+        }
+        if(form.extra_diurnas > 0){
+            form.extra_diurnas -= 1
+            form.almuerzo = ' diurno'
+            console.log('aquiiii2')
+            return true;
+        }
+        if(form.nocturnas > 0 && form.nocturnas > form.diurnas){
+            form.nocturnas -= 1;form.almuerzo = ' nocturno';
+            console.log('aquiiii3')
+            return true;
+        }
+
+        if(form.diurnas > 0) {
+            form.diurnas -= 1; form.almuerzo = ' diurno'
+            console.log('aquiiii4')
+            return true;
+        }
+
+
+        //domini
+        //dominiextra
+        if(form.dominical_extra_nocturnas > 0 && form.dominical_extra_nocturnas > form.dominical_extra_diurnas){
+            form.dominical_extra_nocturnas -= 1;form.almuerzo = ' dominical extra nocturno';
+            return true;
+        }
+        if(form.dominical_extra_diurnas > 0) {
+            form.dominical_extra_diurnas -= 1; form.almuerzo = ' dominical extra diurno'
+            return true;
+        }
+        if(form.dominical_nocturnas > 0 && form.dominical_nocturnas > form.dominical_diurnas){
+            form.dominical_nocturnas -= 1;form.almuerzo = ' dominical nocturno';
+            return true;
+        }
+        if(form.dominical_diurnas > 0) {
+            form.dominical_diurnas -= 1; form.almuerzo = ' dominical'
+            return true;
+        }
+
+
+    }
+    form.almuerzo = 'No'
+
+}
+
+
+export function setDominical(data,form,ini,fin,CuandoEmpiezaExtra,ExtrasManana,FestivosColombia,message){//date,date,int,bool
+    let esFestivo = estaFechaEsFestivo(new Date(ini),data.MostrarConsole,FestivosColombia);
+    let esFestivo2 = estaFechaEsFestivo(new Date(fin),data.MostrarConsole,FestivosColombia);
+
+    if(ini.getDay() === 0 || fin.getDay() === 0){
+        form.dominicales = 'si'
+        message.TextFestivo = 'Dominical'
+
+        if(esFestivo || esFestivo2) message.TextFestivo += ' y festivo';
+    }else{
+        if(esFestivo || esFestivo2){
+            form.dominicales = 'si'
+            message.TextFestivo = 'Festivo'
+        }else{
+            form.dominicales = 'no'
+        }
+    }
+
+    if((ini.getDay() === 0 && fin.getDay() === 0) || (esFestivo || esFestivo2)){
+        form.dominical_diurnas = form.diurnas;
+        form.diurnas = 0
+        form.dominical_nocturnas = form.nocturnas;
+        console.log("=>(Create.vue:308) form.nocturnas", form.nocturnas);
+        form.nocturnas = 0
+        form.dominical_extra_diurnas = form.extra_diurnas;
+        form.extra_diurnas = 0
+        form.dominical_extra_nocturnas = form.extra_nocturnas;
+        form.extra_nocturnas = 0
+            console.log('aquiEntra')
+    }else{
+        if(ini.getDay() === 0 || esFestivo){//    termina lunes
+            calcularTerminaLunes(fin,CuandoEmpiezaExtra,ExtrasManana,form)
+        }
+
+        if( fin.getDay() === 0 || esFestivo2){ //termina domingo
+            calcularTerminaDomingo(ini,fin,CuandoEmpiezaExtra,ExtrasManana,form)
+        }
+    }
+    RestarAlmuarzo(form)
+}

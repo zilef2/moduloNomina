@@ -14,12 +14,11 @@ import vSelect from "vue-select"; import "vue-select/dist/vue-select.css"; impor
 
 
 import FestivosColombia from 'festivos-colombia';
-import {formatTime, TimeTo12Format, TransformTdate, weekNumber} from "@/global";
+import {TransformTdate, weekNumber} from "@/global";
 import {
-    estaFechaEsFestivo,calcularTerminaLunes,calcularTerminaDomingo,
-    calcularHoras
+    estaFechaEsFestivo, calcularTerminaLunes,
+    calcularTerminaDomingo, calcularHoras
 } from "@/CreateReporte/HelpingCreate";
-
 
 
 const props = defineProps({
@@ -31,20 +30,18 @@ const props = defineProps({
     startDateMostrar: String,
     endDateMostrar: String,
     numberPermissions: Number,
-    ArrayOrdinarias: Array, //las ordinarias de esta semana y la pasada
+    ArrayOrdinarias: Object, //[] //las ordinarias de esta semana y la pasada
     //tambien tiene las de ayer si terminaron en 11:59pm
 
-    horasTrabajadasHoy: Array, //es por si reportaron el mismo dia
-    HorasDeCadaSemana: Array,
-    ArrayHorasSemanales: Array,
+    horasTrabajadasHoy: Object, //[]  es por si reportaron el mismo dia
+    HorasDeCadaSemana: Object,//[]
+    ArrayHorasSemanales: Object,//[]
 })
 let label_diurnas = ref(null)
 
-// <!--<editor-fold desc="onMounted - Data - const - useForm">-->
 const HORAS_ESTANDAR = props.ArrayHorasSemanales.HORAS_ORDINARIAS // 9horitas
-const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - HORAS_ESTANDAR //39
+const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - HORAS_ESTANDAR //notes: 7jul = 40
 const LimiteHorasTrabajadas = 23
-let LIMITE_ALMUERZO = 8;
 
 let ValorRealalmuerzo = 0 //truco para recuperar las horas de almuerzo, cuando se va a maandar el form
 
@@ -69,8 +66,7 @@ const data = reactive({
         terminaLunes:false,
         EsFestivo:false,
 
-        MostrarTrabajadaSemConso:false,
-        TrabajadasSemaConsole:false,
+        MostrarTrabajadaSemana:false,
     },
     const:{
         //39 =>
@@ -84,6 +80,7 @@ const data = reactive({
 const message = reactive({
     TextFestivo:''
 })
+// <!--<editor-fold desc="onMounted - useForm">-->
 
 onMounted(() => {
     data.TrabajadasSemana = props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] > HORAS_SEMANALES_MENOS_ESTANDAR ?
@@ -95,10 +92,6 @@ onMounted(() => {
         form.centro_costo_id = localStorage.getItem('centroCostoId')
     }
 
-    if(data.MostrarConsole.TrabajadasSemaConsole){
-        console.log("TrabajadasSemaConsole data.TrabajadasSemana", data.TrabajadasSemana);
-        console.log("TrabajadasSemaConsole props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]]", props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]]);
-    }
 });
 
 const form = useForm({
@@ -126,30 +119,23 @@ const form = useForm({
     dominical_extra_nocturnas: 0
 });
 
+
 let newdate = (new Date())
 let horahoy = newdate.getHours()
-let diahoy = newdate.get
 let timedate = TransformTdate(7)
 let timedate2 = TransformTdate(16)
-// if(props.numberPermissions > 8){ //nouuu
-//     form.fecha_ini = '2024-04-21T00:00'
-//     form.fecha_fin = '2024-04-21T04:00'
-    form.fecha_ini = '2024-07-14T05:00'
-    form.fecha_fin = '2024-07-14T07:00'
-// }else{
-//     form.fecha_ini = timedate
-//     form.fecha_fin = timedate2
-// }
-
+if(props.numberPermissions > 8){ //temporaly commented
+    form.fecha_ini = '2024-07-07T00:00'
+    form.fecha_fin = '2024-07-07T06:00'
+    // form.fecha_ini = '2024-07-14T05:00'; form.fecha_fin = '2024-07-14T19:00'
+}else{
+    form.fecha_ini = timedate
+    form.fecha_fin = timedate2
+}
 // <!--</editor-fold>-->
 
 
 // <!--<editor-fold desc="Calcular">-->
-
-
-
-let Madrugada, Tarde //variables internas para calculo de horas nocturnas
-
 
 //apunto de ser eliminado
 const Reporte11_59 = () => {
@@ -172,110 +158,6 @@ const Reporte11_59 = () => {
     }
 }
 
-function setDominical(ini,fin,CuandoEmpiezaExtra,ExtrasManana){//date,date,int,bool
-    var esFestivo = estaFechaEsFestivo(new Date(ini),data.MostrarConsole,FestivosColombia);
-    var esFestivo2 = estaFechaEsFestivo(new Date(fin),data.MostrarConsole,FestivosColombia);
-
-    if(ini.getDay() === 0 || fin.getDay() === 0){
-        form.dominicales = 'si'
-        message.TextFestivo = 'Dominical'
-
-        if(esFestivo || esFestivo2) message.TextFestivo += ' y festivo';
-    }else{
-        if(esFestivo || esFestivo2){
-            form.dominicales = 'si'
-            message.TextFestivo = 'Festivo'
-        }else{
-            form.dominicales = 'no'
-        }
-    }
-
-    if((ini.getDay() === 0 && fin.getDay() === 0) || (esFestivo || esFestivo2)){
-        //     console.log('aquiEntra')
-        // form.dominical_diurnas = form.diurnas;
-        // form.diurnas = 0
-        // form.dominical_nocturnas = form.nocturnas;
-        // console.log("=>(Create.vue:308) form.nocturnas", form.nocturnas);
-        // form.nocturnas = 0
-        // form.dominical_extra_diurnas = form.extra_diurnas;
-        // form.extra_diurnas = 0
-        // form.dominical_extra_nocturnas = form.extra_nocturnas;
-        // form.extra_nocturnas = 0
-        //     console.log('aquiEntra')
-    }else{
-        if(ini.getDay() === 0 || esFestivo){//    termina lunes
-            calcularTerminaLunes(fin,CuandoEmpiezaExtra,ExtrasManana,form)
-        }
-
-        if( fin.getDay() === 0 || esFestivo2){ //termina domingo
-            calcularTerminaDomingo(ini,fin,CuandoEmpiezaExtra,ExtrasManana,form)
-        }
-    }
-    RestarAlmuarzo()
-}
-
-function RestarAlmuarzo(){
-
-    var fechain_i = new Date(form.fecha_ini)
-    var diaSemana = fechain_i.getDay();
-    if (diaSemana === 6) {
-        LIMITE_ALMUERZO--
-    }
-
-    if(form.horas_trabajadas > LIMITE_ALMUERZO) {
-        form.horas_trabajadas -= 1;
-
-        console.log("(F=>RestarAlm) nocturnas", form.nocturnas);
-        console.log("(F=>RestarAlm) diurnas", form.diurnas);
-        console.log("(F=>RestarAlm) extra_diurnas", form.extra_diurnas);
-        console.log("(F=>RestarAlm) extra_nocturnas", form.extra_nocturnas);
-        console.log("=>(Create.vue: F=>RestarAlmuarzo) ", form);
-        console.log("=>(Create.vue: F=>RestarAlmuarzo) ", form);
-        if(form.diurnas > 0 && form.nocturnas <= form.diurnas) {
-            form.diurnas -= 1; form.almuerzo = ' diurno'
-            return true;
-        }
-
-        if(form.nocturnas > 0 && form.nocturnas > form.diurnas){
-            form.nocturnas -= 1;form.almuerzo = ' nocturno';
-            return true;
-        }
-
-        if(form.extra_diurnas > 0 && form.extra_diurnas <= form.extra_nocturnas){
-            form.extra_diurnas -= 1
-            form.almuerzo = ' diurno'
-            return true;
-        }
-        if(form.extra_nocturnas > 0 && form.extra_nocturnas > form.extra_diurnas){
-            form.extra_nocturnas -= 1
-            form.almuerzo = ' nocturno'
-            return true;
-        }
-
-        //domini
-        if(form.dominical_diurnas > 0 && form.dominical_nocturnas <= form.dominical_diurnas) {
-            form.dominical_diurnas -= 1; form.almuerzo = ' dominical'
-            return true;
-        }
-        if(form.dominical_nocturnas > 0 && form.dominical_nocturnas > form.dominical_diurnas){
-            form.dominical_nocturnas -= 1;form.almuerzo = ' dominical nocturno';
-            return true;
-        }
-        //dominiextra
-        if(form.dominical_extra_diurnas > 0 && form.dominical_extra_nocturnas <= form.dominical_extra_diurnas) {
-            form.dominical_extra_diurnas -= 1; form.almuerzo = ' dominical extra diurno'
-            return true;
-        }
-        if(form.dominical_extra_nocturnas > 0 && form.dominical_extra_nocturnas > form.dominical_extra_diurnas){
-            form.dominical_extra_nocturnas -= 1;form.almuerzo = ' dominical extra nocturno';
-            return true;
-        }
-
-    }
-    form.almuerzo = 'No'
-
-}
-
 // <!--</editor-fold>-->
 
 
@@ -295,7 +177,7 @@ watchEffect(() => {
         if(Dateinii && Date.parse(form.fecha_fin) ){ // son fechas?
             data.diaini = parseInt(new Date(form.fecha_ini).getDate())
             data.TrabajadasHooy = (props.horasTrabajadasHoy[data.diaini]) ?? 0
-            data.TrabajadasHooy = parseInt(data.TrabajadasHooy) ?? 0
+            data.TrabajadasHooy = parseInt(data.TrabajadasHooy)
 
 
             let ini = Date.parse(form.fecha_ini);
@@ -303,13 +185,12 @@ watchEffect(() => {
 
             let WeekN = weekNumber(new Date(form.fecha_ini))
               // 39 => 48 - 9
-            data.TrabajadasSemana =
-                props.HorasDeCadaSemana[WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
+            data.TrabajadasSemana = props.HorasDeCadaSemana[WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
                     props.HorasDeCadaSemana[WeekN] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
 
             data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
 
-            if(data.MostrarTrabajadaSemConso) console.log(data.TrabajadasSemana)
+            if(data.MostrarTrabajadaSemana) console.log(data.TrabajadasSemana)
 
             form.horas_trabajadas = 0
             form.almuerzo = 0
@@ -358,13 +239,18 @@ watchEffect(() => {
                             horas < LimiteHorasTrabajadas
                             Diainicio == dia final
                         */
-                        calcularHoras(ini,fin);
+                        calcularHoras(
+                            data,form,props,
+                            ini,fin,
+                            HORAS_ESTANDAR,ValorRealalmuerzo
+                            ,FestivosColombia,message);
                     }
                 }
             }
         }
     }
 })
+
 
 watch(() => form.centro_costo_id, (newX) => {
     localStorage.setItem('centroCostoId',newX)

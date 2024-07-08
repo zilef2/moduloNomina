@@ -11,7 +11,7 @@ class SendZipFile extends Command {
     protected $signature = 'send:zip';
     protected $description = 'Enviar archivo ZIP por correo diariamente';
 
-    public function handle() {
+    public function handle(): int{
         try {
             $zip = new ZipArchive;
             $zipFileName = public_path(env('APP_NAME') . 'BD.zip');
@@ -21,7 +21,7 @@ class SendZipFile extends Command {
 
                 $directory = storage_path('app/' . env('APP_NAME') . '_06oct2023');
                 $pattern = '2023*';
-                
+
                 $matchingFiles = glob($directory . DIRECTORY_SEPARATOR . $pattern);
                 $archivosEncontrados = count($matchingFiles);
                 $this->info('directory ' . $directory . ' | Archivos encontrados: '.$archivosEncontrados);
@@ -55,7 +55,6 @@ class SendZipFile extends Command {
                 } else {
                     $this->error('Carpeta del backup no encontrada');
                     return 0;
-
                 }
                 $zip->close();
 

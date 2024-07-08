@@ -9,6 +9,7 @@ use App\Http\Controllers\ServiciosController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\QRController;
+use Carbon\Carbon;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route; use Illuminate\Support\Facades\Session; use Inertia\Inertia;
@@ -71,14 +72,18 @@ Route::middleware('auth', 'verified')->group(function () {
     //16mayo2024
     Route::put('/eporte_Super_Edit/{id}', [ReportesController::class, 'Reporte_Super_Edit'])->name('Reporte_Super_Edit');
     Route::get('/CentroCostoTable/{id}', [\App\Http\Controllers\CentroTableController::class, 'table'])->name('CentroCostos.table');
+    Route::get('/DescompresionDespliegue/{esAmbientePruebas}', [\App\Http\Controllers\ZipController::class, 'DescompresionDespliegue']);
 
-});
+});//fin verified
 require __DIR__.'/auth.php';
-
 
 // <editor-fold desc="Artisan">
     Route::get('/exception',function(){
-        throw new Exception('Probando excepciones y enrutamiento. La prueba ha concluido exitosamente.');
+        $ReportesDeHoy = \App\Models\Reporte::Where('fecha_ini',\Carbon\Carbon::today())->first();
+        if($ReportesDeHoy){
+            throw new Exception('Reportes de hoy: '.$ReportesDeHoy->horas_trabajadas);
+        }
+        throw new Exception('Probandof excepciones y enrutamiento. La prueba ha concluido exitosamente.');
     });
 
     Route::get('/clear-c', function () {

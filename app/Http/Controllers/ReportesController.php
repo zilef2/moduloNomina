@@ -265,6 +265,7 @@ class ReportesController extends Controller{
         //suma de horas ordinarias[0] &
         $ArrayOrdinarias = Myhelp::CalcularPendientesQuicena($Authuser);
         $HorasDeCadaSemana = Myhelp::CalcularHorasDeCadaSemana($startDate, $endDate,$Authuser);
+//        dd($HorasDeCadaSemana);
 
 
         //20ene2024

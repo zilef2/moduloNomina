@@ -25,7 +25,7 @@
     import DeleteBulk from "@/Pages/Reportes/DeleteBulk.vue";
 
 
-    import {formatDate, number_format, monthName} from '@/global.ts';
+    import {formatDate, number_format} from '@/global.ts';
 
     import { Bar } from 'vue-chartjs'
     import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
@@ -291,8 +291,8 @@ const handleCheckboxChange = (values) => {
                     <div class="flex space-x-2">
 <!--                      <span class="my-auto">Registros/pagina</span>-->
                         <span class="my-auto hidden xl:block">Registros por página</span>
-                          <span class="my-auto hidden md:block lg:block xl:hidden">Reg/página</span>
-                          <span class="my-auto md:hidden">R/pag</span>
+                          <span class="my-auto hidden md:block lg:block xl:hidden">Reg/pág</span>
+                          <span class="my-auto md:hidden">R</span>
                         <SelectInput v-if="filters !== null" v-model="data.params.perPage" :dataSet="data.dataSet" />
 
 

@@ -128,8 +128,9 @@ class Myhelp{
         return '';
     }
 
-    public static function CalcularHorasDeCadaSemana(Carbon $startDate,Carbon  $endDate,$Authuser){
-        $vector  = self::HorasDeLasSemanasProximas(); //calcula primer y ultimo dia de las semanas
+    public static function CalcularHorasDeCadaSemana(Carbon $startDate,Carbon  $endDate,$Authuser): array
+    {
+        $vector  = self::HorasDeLasSemanasProximas(20); //calcula primer y ultimo dia de las x proximas semanas
         $horasemana[0] = Carbon::now()->weekOfYear;
         foreach ($vector as $vec) {
             $horasemana[$vec['numero_semana']] = (int)Reporte::Where('user_id',$Authuser->id)
@@ -141,14 +142,11 @@ class Myhelp{
         return $horasemana;
     }
 
-    private static function HorasDeLasSemanasProximas() { //calcula primer y ultimo dia de las semanas
-        $valorParametro = 2;
-        $valorParametro10 = $valorParametro * 10;
+    private static function HorasDeLasSemanasProximas($ProximasSemanas) { //calcula primer y ultimo dia de las semanas
         $vectorSemanas = [];
-        // Obtener la fecha actual
-        $fechaActual = Carbon::now()->addMonths($valorParametro);
+        $fechaActual = Carbon::now()->addMonths(2);
 
-        for ($i = 0; $i < $valorParametro10; $i++) {
+        for ($i = 0; $i < $ProximasSemanas; $i++) {
             // Calcular el primer día de la semana
             $primerDiaSemana = $fechaActual->startOfWeek();
             $ultimoDiaSemana = clone $primerDiaSemana;
