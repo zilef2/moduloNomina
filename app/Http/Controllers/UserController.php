@@ -75,7 +75,8 @@ class UserController extends Controller {
                     'Mes actual' => Reporte::WhereIn('centro_costo_id',$centroMio)->whereIn('valido',[0,2])->where('fecha_ini','>', Carbon::today()->startOfMonth())->get()->count(),
                 ];
 
-            }else{
+            }
+            else{
                 $ultimos5dias = [
                     'Mes pasado' => Reporte::whereValido(1)->where('fecha_ini','<', Carbon::today()->addMonth(-1))->get()->count(),
 
@@ -275,6 +276,7 @@ class UserController extends Controller {
                 'fecha_de_ingreso' => $request->fecha_de_ingreso,
                 'sexo' => $request->sexo,
                 'salario' => $request->salario,
+                'numero_contrato' => $request->numero_contrato,
 
 //                'centro_costo_id' => $elCentroId,
             ]);
@@ -288,6 +290,7 @@ class UserController extends Controller {
     }
 
     public function show($id) { } public function edit($id) { }
+
     public function update(Request $request, $id) {
         Myhelp::EscribirEnLog($this, 'users');
         DB::beginTransaction();
@@ -301,13 +304,12 @@ class UserController extends Controller {
                         $cents[] = $centroids;
                 }
                 $user->centros()->sync($cents);
-
             }else{
                 //1-2))update normalito
                 $user->update([
                     'name'      => $request->name,
                     'email'     => $request->email,
-                    // 'password'  => $request->password ? Hash::make($request->password) : $user->password,
+                    'numero_contrato'     => $request->numero_contrato,
                     'cargo_id' => $request->cargo,
                     'cedula'=> $request->cedula,
                     'telefono' => $request->telefono,
@@ -326,18 +328,13 @@ class UserController extends Controller {
             return back()->with('error', __('app.label.updated_error', ['name' => $user->name]) . $th->getMessage());
         }
     }
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
+
     public function destroy(User $user) {
         Myhelp::EscribirEnLog($this, 'users');
         try {
             $susReportes = $user->reportes()->get();
             $countReportes = count($susReportes);
-            if($countReportes < 20){
+//            if($countReportes < 20){
 
                 foreach ($susReportes as $index => $reporte) {
                     $reporte->delete();
@@ -346,11 +343,11 @@ class UserController extends Controller {
                 $mensajeSucces = __('app.label.deleted_successfully', ['name' => $user->name]);
                 Myhelp::EscribirEnLog($this, 'users',$mensajeSucces);
                 return back()->with('success',$mensajeSucces);
-            }else{
-                $mensajeLog = 'Se intentó eliminar demasiados reportes';
-                Myhelp::EscribirEnLog($this, 'users',$mensajeLog);
-                return back()->with('warning',$mensajeLog);
-            }
+//            }else{
+//                $mensajeLog = 'Se intentó eliminar demasiados reportes';
+//                Myhelp::EscribirEnLog($this, 'users',$mensajeLog);
+//                return back()->with('warning',$mensajeLog);
+//            }
         } catch (\Throwable $th) {
             $mensajeLog = $th->getMessage() . ' - File:'.$th->getFile(). ' - LINE:'.$th->getLine();
             Myhelp::EscribirEnLog($this, 'DELETE users',$mensajeLog);
@@ -492,7 +489,6 @@ class UserController extends Controller {
         }
     }
 
-
     //exportar el formato unico de ECnomina
     public function export(Request $request) {
         Myhelp::EscribirEnLog($this, 'users export');
@@ -504,7 +500,7 @@ class UserController extends Controller {
         $NumReportesIniFin = $this->CalcularIniFinQuincena($quincena,$month,$year);
         $NumeroDiasFestivos = (int)($request->NumeroDiasFestivos);
         if($NumReportesIniFin['NumReportes'] > 0){
-            return Excel::download(new UsersExport( $NumReportesIniFin['ini'],$NumReportesIniFin['fin'], $NumeroDiasFestivos,$ArrayDatesFest),
+            return Excel::download(new UsersExport($NumReportesIniFin['ini'],$NumReportesIniFin['fin'], $NumeroDiasFestivos,$ArrayDatesFest),
                     "".$year.'Quincena'.$quincena.'DelMes'.$month.".xlsx"
             );
         }else{

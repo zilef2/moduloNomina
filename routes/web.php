@@ -70,6 +70,7 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::get('/qrscanner', [QRController::class, 'index'])->name('qrscanner');
     //16mayo2024
     Route::put('/eporte_Super_Edit/{id}', [ReportesController::class, 'Reporte_Super_Edit'])->name('Reporte_Super_Edit');
+    Route::get('/CentroCostoTable/{id}', [\App\Http\Controllers\CentroTableController::class, 'table'])->name('CentroCostos.table');
 
 });
 require __DIR__.'/auth.php';

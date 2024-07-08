@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CentroCostoRequest extends FormRequest
+class UpdateCostoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,18 +21,30 @@ class CentroCostoRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
-    {
-        return
-        [
-			'nombre' => 'required|unique:centro_costos,nombre',
+    public function rules(){
+        return [
+            'nombre' => 'required',
         ];
     }
+//       public function rules()
+//    {
+//        $costoId = $this->route('CentroCostos.update');
+//        return [
+//            'nombre' => 'required|unique:centro_costos,nombre,' . $costoId,
+//        ];
+//    }
 
-    public function messages()
-    {
+//    public function messages()
+//    {
+//        return [
+//            'nombre.required' => 'Debe digitar el centro de costo',
+//            'nombre.unique' => 'El nombre ya está en uso.2',
+//        ];
+//    }
+
+    public function messages(){
         return [
-            'nombre.unique' => 'El nombre ya está en uso.',
+            'nombre.required' => 'Debe digitar el centro de costo',
         ];
     }
 }

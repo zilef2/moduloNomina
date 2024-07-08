@@ -37,7 +37,6 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
         $dominical_extra_diurno = intval($reportes->sum('dominical_extra_diurno')) * doubleval($salario_hora) * $paramBD->porcentaje_dominical_extra_diurno;
         $dominical_extra_nocturno = intval($reportes->sum('dominical_extra_nocturno')) * doubleval($salario_hora) * $paramBD->porcentaje_dominical_extra_nocturno;
 
-
         return [
             intval($reportes->sum('extra_diurnas')) +
             intval($reportes->sum('extra_nocturnas')) +
@@ -64,16 +63,18 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
         }
     }
 
-
     /**
     * @return \Illuminate\Support\Collection
     */
     public function collection() {
         //traer todos los empleado
-        $users = User::Select('id','name','cedula','cargo_id','salario')->WhereHas("roles", function($q){
-            $q->Where("name", "empleado");
-            $q->orWhere("name", "supervisor");
-        })->get();
+        $users = User::Select('id','name','numero_contrato','cedula','cargo_id','salario')
+            ->WhereHas("roles", function($q){
+                $q->Where("name", "empleado");
+                $q->orWhere("name", "supervisor");
+            })
+        ->get();
+
         $paramBD = Parametro::find(1);
         $mensajeSigo = [
             '', //0
@@ -91,15 +92,13 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
         ];
 
         $this->unsetAllunnesesary($users);
+        $result = collect();
         foreach ($users as $key => $empleado) {
-
-            $empleado->Contrato = $empleado->cedula;
-
-            HelpExcel::cumplioQuincena(
-                $users,$key,$this->ini,$this->fin,
+            HelpExcel::cumplioQuincena($users,$key,$this->ini,$this->fin,
                 $empleado,$reportes, $salario_hora,
                 $salario_quincena, $cumplioQuicena,$paramBD,
                 $this->NumeroDiasFestivos,session('datesFest'),'siigo');
+
             $ArrayExtrasyDominicales = $this->CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, $H_diurno, $nocturnas, $extra_diurnas, $extra_nocturnas, $dominical_diurno, $dominical_nocturno, $dominical_extra_diurno, $dominical_extra_nocturno);
             // $Num_extra_diurnas = $ArrayExtrasyDominicales[1]; $Num_extra_nocturnas = $ArrayExtrasyDominicales[2]; $Num_dominical_diurno = $ArrayExtrasyDominicales[3]; $Num_dominical_nocturno = $ArrayExtrasyDominicales[4]; $Num_dominical_extra_diurno = $ArrayExtrasyDominicales[5]; $Num_dominical_extra_nocturno = $ArrayExtrasyDominicales[6];
             $ArrayExtrasyDominicales[7] = intval($reportes->sum('nocturnas'));
@@ -112,32 +111,44 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
                     if($Novedad != 0){
                         $nuevoReporte = clone $empleado;
                         $nuevoReporte->Quenov = $mensajeSigo[$i];
+                        $nuevoReporte->tiponov = 'Horas';
                         $nuevoReporte->diasValornovedad = $ArrayExtrasyDominicales[$i];
-                        $users->splice(($key+1),0,[$nuevoReporte]);
+                        $nuevoReporte->fechaininov = '';
+                        $nuevoReporte->fechafinnov = '';
+                        $result->push($nuevoReporte);
+//                        dd(
+//                            $result[0]->attributesToArray(),
+//                            $result[1]->attributesToArray(),
+//                            $result[2]->attributesToArray(),
+//                            $result[3]->attributesToArray(),
+//                        );
+//                        $users->splice(($key+1),0,[$nuevoReporte]);
+//                    if(15675718 == $nuevoReporte->cedula && $Novedad == 2) dd($ArrayExtrasyDominicales,$nuevoReporte->attributesToArray(),$Novedad);
+
                     }else{
                         $empleado->Quenov = $mensajeSigo[$i];
                         $empleado->tiponov = 'Horas';
                         $empleado->diasValornovedad = $ArrayExtrasyDominicales[$i];
                         $empleado->fechaininov = '';
                         $empleado->fechafinnov = '';
-
+                        $result->push($empleado);
                     }
                     $Novedad++;//novedades de un usuarios
                 }
             }
-
+//            if(15675718 == $empleado->cedula)
+//            dd($Novedad);
             if($Novedad === 0){ //Sin novedades
-                unset($users[$key]);
-//                $empleado->Quenov = '';
-//                $empleado->tiponov = '';
-//                $empleado->diasValornovedad = '';
-//                $empleado->fechaininov = '';
-//                $empleado->fechafinnov = '';
+                $users->forget($key);
             }
         }
 
-        // dd($users);
-        return $users;
+//         dd($users);
+//        dd($users[0]->attributesToArray());
+//        dd($asd);
+        return $result->filter(function ($resu) {
+            return $resu->Quenov != '';
+        });
     }
 
     public function headings() :array {

@@ -29,6 +29,7 @@ const form = useForm({
     celular: '',
     fecha_de_ingreso: '',
     sexo: 0,
+    numero_contrato: 0,
     // salario: '',
 
     // email: 'ajelosept@gmail.com',
@@ -64,21 +65,7 @@ const validateFormSupervisor = () => {
     return valid
 }
 
-const create = () => {
-    if(form.role === 'supervisor' && form.centroid === 0){
-        validateFormSupervisor()
-    }else{
-        form.post(route('user.store'), {
-            preserveScroll: true,
-            onSuccess: () => {
-                emit("close")
-                form.reset()
-            },
-            onError: () => null,
-            onFinish: () => null,
-        })
-    }
-}
+
 
 watchEffect(() => {
     if (props.show) {
@@ -98,7 +85,21 @@ const roles = props.roles?.map(role => ({
 const cargos = props.cargos?.map(cargo => ({ label: cargo.nombre, value: cargo.id }))
 const centros = props.centros?.map(centro => ({ label: centro.nombre, value: centro.id }))
 
-
+const create = () => {
+    if(form.role === 'supervisor' && form.centroid === 0){
+        validateFormSupervisor()
+    }else{
+        form.post(route('user.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                emit("close")
+                form.reset()
+            },
+            onError: () => null,
+            onFinish: () => null,
+        })
+    }
+}
 </script>
 
 <template>
@@ -118,11 +119,18 @@ const centros = props.centros?.map(centro => ({ label: centro.nombre, value: cen
                             :placeholder="lang().placeholder.name" :error="form.errors.name" />
                         <InputError class="mt-2" :message="form.errors.name" />
                     </div>
+
                     <div>
                         <InputLabel for="cedula" :value="lang().label.cedula" />
                         <TextInput id="cedula" type="text" class="mt-1 block w-full" v-model="form.cedula" required
                             :placeholder="lang().placeholder.cedula" :error="form.errors.cedula" />
                         <InputError class="mt-2" :message="form.errors.cedula" />
+                    </div>
+                    <div>
+                        <InputLabel for="numero_contrato" :value="lang().label.numero_contrato" />
+                        <TextInput id="numero_contrato" type="text" class="mt-1 block w-full" v-model="form.numero_contrato" required
+                            :placeholder="lang().placeholder.numero_contrato" :error="form.errors.numero_contrato" />
+                        <InputError class="mt-2" :message="form.errors.numero_contrato" />
                     </div>
                     <div>
                         <InputLabel for="email" :value="lang().label.email" />
@@ -136,7 +144,8 @@ const centros = props.centros?.map(centro => ({ label: centro.nombre, value: cen
 
                         <div>
                             <InputLabel for="role" :value="lang().label.role" />
-                            <SelectInput id="role" class="mt-1 block w-full" v-model="form.role" required :dataSet="roles">
+                            <SelectInput id="role" class="mt-1 block w-full" required
+                                 v-model="form.role" :dataSet="roles">
                             </SelectInput>
                             <InputError class="mt-2" :message="form.errors.role" />
                         </div>

@@ -23,6 +23,11 @@ return [
         'downUsers' => 'Exportar us',
 
         //centro y reportes
+        'mano_obra_estimada' => 'Mano obra estimada',
+		'activo' => 'Activo',
+		'descripcion' => 'Descripción',
+		'clasificacion' => 'Clasificación',
+		'ValidoParaFacturar' => 'Valido para Facturar',
 
         'centro' => 'Centro de Costos',
         'CentroCostos' => 'Centro Costos',
@@ -60,13 +65,14 @@ return [
         'horacomida' => 'hora de comida',
 
         //users
+        'numero_contrato' => 'Numero contrato',
+        'supervisores' => 'Supervisores',
         'cargo' => 'Cargo',
         'cedula' => 'Cédula',
         'salario_hora' => 'Salario hora',
         'quincena' => 'Quincena',
         'celular' => 'Celular',
         'fecha_de_ingreso' => 'Fecha de ingreso',
-        'salario' => 'Salario',
         'telefono' => 'Teléfono',
         'sexo' => 'Sexo',
         'salario' => 'Salario',
@@ -160,6 +166,7 @@ return [
         'reject' => 'Rechazar'
     ],
     'placeholder' => [
+        'searchSupervisorCC' => 'Buscar supervisores...',
         'searchQuincena' => 'Superior dia',
         'searchCC' => 'Nombre...',
         'searchHorasD' => 'Diurnas',
@@ -185,6 +192,7 @@ return [
         'observaciones' => 'observaciones',
     ],
     'tooltip' => [
+        'Reporte' => 'Reporte',
         'see' => 'Ver',
         'seeReport' => 'Ver reporte',
         'edit' => 'Editar',

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\helpers\Myhelp;
+use App\helpers\MyhelpQuincena;
 use App\Http\Controllers\Controller;
 
+use App\Http\Requests\UpdateCostoRequest;
 use App\Models\CentroCosto;
 use App\Http\Requests\CentroCostoRequest;
 use App\Models\Parametro;
@@ -14,13 +16,14 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Opcodes\LogViewer\Facades\Cache;
+use Stevebauman\Location\Commands\Update;
 
 class CentroCostosController extends Controller {
 
-    public function MapearClasePP(&$centroCostos, $numberPermissions,$request)
-    {
+    public function MapearClasePP(&$centroCostos, $numberPermissions,$request){
         $AUuser = Myhelp::AuthU();
         $busqueda =false;
         if ($request->has('search')) {
@@ -30,10 +33,16 @@ class CentroCostosController extends Controller {
 ////                ->orWhere('descripcion', 'LIKE', "%" . $request->search . "%")
 //            ;
         }
+        $searchSCC = $request->has('searchSCC');
+
+
         if ($request->has(['field', 'order'])) {
             $centroCostos->orderBy($request->field, $request->order);
         }else{
-            $centroCostos->orderBy('mano_obra_estimada','DESC');
+            $centroCostos
+                ->orderBy('activo','DESC')
+                ->orderBy('mano_obra_estimada','DESC')
+            ;
         }
 
         $centroCostos = $centroCostos->get()->map(function ($centroCosto) use ($numberPermissions,$AUuser,$busqueda) {
@@ -43,6 +52,7 @@ class CentroCostosController extends Controller {
             }
 
             $centroCosto->cuantoshijos = count($centroCosto->users);
+            $centroCosto->todos = $centroCosto->ArraySupervIDs($centroCosto->id);
             $centroCosto->supervi = implode(',',$centroCosto->ArrayListaSupervisores($centroCosto->id));
             $centroCosto->supervi1 = $centroCosto->ArrayListaSupervisores($centroCosto->id)[0] ?? '';
             $centroCosto->supervi2 = $centroCosto->ArrayListaSupervisores($centroCosto->id)[1] ?? '';
@@ -51,38 +61,43 @@ class CentroCostosController extends Controller {
         })->filter();
 
         if ($busqueda) {
-//            $centroCostos = $centroCostos->Where('supervi1', 'LIKE', "%" . $request->search . "%")
-//            ;
-//            $centroCostos = array_filter($centroCostos, function($centro) use ($request) {
-//                return strpos($centro->supervi1, $request->search) !== false;
-//            });
             $centroCostos = $centroCostos->filter(function ($centro) use ($request) {
-                return strpos($centro->nombre, $request->search) !== false;
+                return str_contains($centro->nombre, $request->search);
             });
-            dd($centroCostos);
         }
-
-        // dd($centroCostos);
+        if ($searchSCC) {
+             $PosiblesSupervisores = User::UsersWithRol('supervisor')
+                ->Where('name','like',"%".$request->searchSCC."%")
+                ->get();
+            $centroCostos = $centroCostos->filter(function ($centro) use ($PosiblesSupervisores) {
+                $ArrrayCentrosids = $centro->ArraySupervisores($centro->id,$PosiblesSupervisores);
+                foreach ($ArrrayCentrosids as $index => $Centroid) {
+                    if(in_array($centro->id,$Centroid))return true;
+                }
+                return false;
+            });
+        }
     }
-    public function index(Request $request) {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'centro costos')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 
+    private function ActualizarPresupuesto($frecuencia){
         $cacheKey = 'ultima_llamada_cc_index';
         $ultimaLlamada = Cache::get($cacheKey);
         $tiempoActual = now();
-        // Verificar si la función se ha llamado antes y si han pasado al menos 2 minutos
-//        if (!$ultimaLlamada || $tiempoActual->diffInMinutes($ultimaLlamada) >= 2) {
-            $centroCostosAll = CentroCosto::all();
-//            if (!$ultimaLlamada || $tiempoActual->diffInMinutes($ultimaLlamada) >= 20) {
-                session(['parametros' => Parametro::Find(1)]);
+        $centroCostosAll = CentroCosto::all();
+        if (!$ultimaLlamada || $tiempoActual->diffInMinutes($ultimaLlamada) >= ($frecuencia*60)) {
+            session(['parametros' => Parametro::Find(1)]);
 
-                foreach ($centroCostosAll as $item) {
-                    $item->actualizarEstimado();
-                }
-//            }
-            // Actualizar el tiempo de la última llamada en caché
-            Cache::put($cacheKey, $tiempoActual);
-//        }
+            foreach ($centroCostosAll as $item) {
+                $item->actualizarEstimado();
+            }
+        }
+        // Actualizar el tiempo de la última llamada en caché
+        Cache::put($cacheKey, $tiempoActual);
+    }
+
+    public function index(Request $request) {
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'centro costos')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $this->ActualizarPresupuesto(6);//horas
 
         //<editor-fold desc="serach, order, mapear y paginar">
         $centroCostos = centroCosto::query();
@@ -97,8 +112,8 @@ class CentroCostosController extends Controller {
             ];
         }else{
             $nombresTabla =[//[0]: como se ven //[1] como es la BD
-                ["Acciones","#","nombre","Mano obra estimada","usuarios","Supervisor"],
-                [null,null,"nombre","mano_obra_estimada",null,null]
+                ["Acciones","#","nombre","Mano obra estimada","usuarios","Supervisor",  'activo', 'descripcion', 'clasificacion'],
+                [null,null,"nombre","mano_obra_estimada",null,null,'activo', 'descripcion', 'clasificacion']
             ];
         }
 
@@ -113,6 +128,10 @@ class CentroCostosController extends Controller {
         );
         //</editor-fold>
 
+        $listaSupervisores = User::whereHas("roles", function($q){
+            $q->where("name", "supervisor");
+        })->get();
+
         return Inertia::render('CentroCostos/Index', [ //carpeta
             'title'          =>  __('app.label.CentroCostos'),
             'filters'        =>  $request->all(['search', 'field', 'order']),
@@ -120,6 +139,7 @@ class CentroCostosController extends Controller {
             'fromController' =>  $paginated,
             'breadcrumbs'    =>  [['label' => __('app.label.CentroCostos'), 'href' => route('CentroCostos.index')]],
             'nombresTabla'   =>  $nombresTabla,
+            'listaSupervisores'   =>  $listaSupervisores,
         ]);
     }
 
@@ -130,8 +150,16 @@ class CentroCostosController extends Controller {
         DB::beginTransaction();
         try {
             $centroCostos = new centroCosto;
-            $centroCostos->nombre = $request->nombre;
+//            $centroCostos->nombre = $request->nombre;
+//            $request->merge(['tipo_gasto_id' => $request->tipo_gasto['id']]);
+            $request->merge(['ValidoParaFacturar' => 1]);
+            $centroCostos->fill($request->all());
+
             $centroCostos->save();
+            if($request->selectedUsers) {
+                $centroCostos->users()->sync($request->selectedUsers);
+            }
+
             DB::commit();
             return back()->with('success', __('app.label.created_successfully', ['name' => $centroCostos->nombre]));
         } catch (\Throwable $th) {
@@ -163,7 +191,7 @@ class CentroCostosController extends Controller {
 
         if($numberPermissions === 1) { //1 : empleado | 2 : administrativo | 3 :supervisor
         }else{ // not empleado
-            $titulo = $this->CalcularTituloQuincena($permissions);
+            $titulo = MyhelpQuincena::CalcularTituloQuincena($permissions);
             $Reportes->orderBy('fecha_ini'); $perPage = 25;
 
             $nombresTabla =[//0: como se ven //1 como es la BD
@@ -211,32 +239,7 @@ class CentroCostosController extends Controller {
         ]);
     }
 
-    public function CalcularTituloQuincena($permissions) {
-        $esteMes = date("m");
-        $diaquincena = date("d");
-        if($permissions === "empleado") { //NO admin | administrativo
-            $userid = Auth::user()->id;
-            if($diaquincena <= 15){
-                $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','<=',15)
-                    ->where('user_id',$userid)
-                    ->sum('horas_trabajadas');
-            }else{
-                $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','>',15)
-                    ->where('user_id',$userid)
-                    ->sum('horas_trabajadas');
-            }
-        }else{
-            if($diaquincena <= 15){
-                $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','<=',15)
-                    ->sum('horas_trabajadas');
-            }else{
-                $horasTrabajadas = Reporte::WhereMonth('fecha_ini',$esteMes)->WhereDay('fecha_ini','>',15)
-                    ->sum('horas_trabajadas');
-            }
-        }
 
-        return 'Horas trabajadas quincena: '.$horasTrabajadas;
-    }
 
 
     public function edit($id) {
@@ -245,19 +248,43 @@ class CentroCostosController extends Controller {
         return Inertia::render('centroCostos.edit',['centroCostos'=>$centroCostos]);
     }
 
-    public function update(CentroCostoRequest $request, $id) {
+    public function update(Request $request, $id) {
+         $validatedData = $request->validate([
+             'nombre' => [
+                 'required',
+                 Rule::unique('centro_costos', 'nombre')->ignore((int)$id),
+             ],
+         ], [
+             'nombre.unique' => 'El nombre ya está en uso.',
+         ]);
          DB::beginTransaction();
-         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+         Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| '));
 
         try {
-            $centroCostos = centroCosto::findOrFail($id);
-            $centroCostos->nombre = $request->input('nombre');
-            $centroCostos->save();
+            $centroCosto = centroCosto::findOrFail($id);
+//            $centroCosto->nombre = $request->input('nombre');
+
+            $centroCosto->nombre = $request->nombre;
+            $centroCosto->activo = $request->activo;
+            $centroCosto->descripcion = $request->descripcion;
+            $centroCosto->clasificacion = $request->clasificacion;
+
+            $centroCosto->save();
+            $IDsSeleccionados = [];
+            foreach ($request->listaSupervisores as $index => $supervisor) {
+                if(isset($request->selectedUsers[$index]) && $request->selectedUsers[$index]){
+                    $IDsSeleccionados[] = $supervisor['id'];
+                }
+            }
+            $centroCosto->users()->sync($IDsSeleccionados);
+
             DB::commit();
-            return back()->with('success', __('app.label.created_successfully', ['name' => $centroCostos->nombre]));
+            return back()->with('success', __('app.label.updated_successfully', ['name' => $centroCosto->nombre]));
         } catch (\Throwable $th) {
+            $mensajeErrorTH = $th->getMessage() . ' L:' . $th->getLine() . ' Ubi:' . $th->getFile();
             DB::rollback();
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.centroCostos')]) . $th->getMessage());
+            Myhelp::EscribirEnLog($this, ' UPDATE centro costos', $mensajeErrorTH,false,1);
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.centroCostos')]) . $mensajeErrorTH);
         }
     }
 
@@ -286,4 +313,6 @@ class CentroCostosController extends Controller {
             return back()->with('error', __('app.label.deleted_error', ['name' => __('app.label.centroCostos')]) . $th->getMessage());
         }
     }
+
+
 }

@@ -9,6 +9,7 @@ const sidebarOpened = ref(false);
 const emit = defineEmits(['close', 'open']);
 </script>
 
+
 <template>
     <div class="flex w-full overflow-hidden">
         <SideBarVue :open="sidebarOpened" @close="sidebarOpened = false" />

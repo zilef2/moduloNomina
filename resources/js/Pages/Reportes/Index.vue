@@ -211,8 +211,14 @@ const handleCheckboxChange = (values) => {
     data.params.soloValidos = values[0]
     data.params.soloQuincena = values[1]
     data.params.searchIncongruencias = values[2]
-    data.params.searchQuincena = values[3]
+    data.params.searchSiigo = values[3]
+    data.params.searchQuincena = values[4]
 };
+
+// props.userFiltro.unshift({
+//     id:0,
+//     name:' - '
+// })
 </script>
 
 <template>
@@ -288,26 +294,32 @@ const handleCheckboxChange = (values) => {
                           <span class="my-auto hidden md:block lg:block xl:hidden">Reg/página</span>
                           <span class="my-auto md:hidden">R/pag</span>
                         <SelectInput v-if="filters !== null" v-model="data.params.perPage" :dataSet="data.dataSet" />
-                        <DangerButton @click="data.deleteBulkOpen = true" v-show="data.selectedId.length != 0 && can(['delete reporte'])"
+
+
+<!--                        los empleados pueden borrar reportes, pero no actualizarlos (ni borrarlos en masa-->
+                        <DangerButton @click="data.deleteBulkOpen = true" v-show="data.selectedId.length != 0 && can(['update reporte'])"
                             class="px-3 py-1.5" v-tooltip="lang().tooltip.delete_selected">
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton>
                     </div>
                     <div  class="flex gap-3">
-                        <!-- solo mes-->
-                        <TextInput v-model="data.params.searchHorasD"
+                        <!-- ELFILTRO = horas diurnas-->
+                        <TextInput v-model="data.params.searchHorasD" v-show="props.numberPermissions > 1"
                             type="number" min="0" class="block w-2/3 md:w-full rounded-lg"
                             :placeholder="lang().placeholder.searchHorasD" />
-                        <TextInput v-model="data.params.search"
+                        <!-- ELFILTRO = numero del mes-->
+                        <TextInput v-model="data.params.search" v-show="props.numberPermissions > 1"
                             type="number" min="0" max="12" class="block w-2/3 md:w-full rounded-lg"
                             :placeholder="lang().placeholder.searchDates" />
 <!--                        <SelectInput v-model="data.params.search" :dataSet="data.DiasDeLaSemana" />-->
-                        <TextInput v-model="data.params.searchDDay"
+<!--                        e1 adminis2 su e ing 3-->
+                        <!-- ELFILTRO = numero del dia-->
+                        <TextInput v-model="data.params.searchDDay" v-show="props.numberPermissions > 1"
                             type="number" min="0" max="31" class="block w-2/3 md:w-full rounded-lg"
                             :placeholder="lang().placeholder.searchDDay" />
-                        <TextInput v-model="data.params.searchQuincena"
-                            type="number" min="0" max="31" class="block w-2/3 md:w-full rounded-lg"
-                            :placeholder="lang().placeholder.searchQuincena" />
+<!--                        <TextInput v-model="data.params.searchQuincena"-->
+<!--                            type="number" min="0" max="31" class="block w-2/3 md:w-full rounded-lg"-->
+<!--                            :placeholder="lang().placeholder.searchQuincena" />-->
 <!--                        <label for="soloval" class="hidden md:block mx-1 my-auto">Solo validos</label>-->
 <!--                        <label for="soloval" class="mx-1 md:hidden my-auto">Val</label>-->
 <!--                        <input v-model="data.params.soloValidos" id="soloval" type="checkbox"-->
@@ -317,7 +329,7 @@ const handleCheckboxChange = (values) => {
 <!--                        <input v-model="data.params.soloQuincena" id="soloval" type="checkbox"-->
 <!--                            class="bg-gray-100 h-6 w-6 mt-2 ml-3" />-->
 
-                        <FilterButtons @update:checked="handleCheckboxChange" />
+                        <FilterButtons @update:checked="handleCheckboxChange" :numberPermissions="props.numberPermissions" />
                     </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
@@ -339,7 +351,9 @@ const handleCheckboxChange = (values) => {
                         </thead>
                         <tbody>
                             <tr v-for="(clasegenerica, index) in fromController.data" :key="index"
-                                class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
+                                class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20"
+                                :class="{ 'bg-gray-200/75 dark:bg-sky-600': index % 2 === 0 }"
+                                >
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
                                     <input type="checkbox" @change="select" :value="clasegenerica.id"
                                         v-model="data.selectedId"
@@ -369,8 +383,8 @@ const handleCheckboxChange = (values) => {
 <!--                                            </InfoButton>-->
                                             <InfoButton v-if="can(['isSuper'])" type="button"
                                                 @click="(data.Reporte_Super_EditOpen = true), (data.generico = clasegenerica)"
-                                                class="px-2 py-1.5 rounded-sm" v-tooltip="Solosuper">
-                                                <PencilIcon class="w-5 h-5" />
+                                                class="px-2 py-1.5 rounded-sm" v-tooltip="'Edit super'">
+                                                <DocumentCheckIcon class="w-5 h-5" />
                                             </InfoButton>
                                             <DangerButton v-if="(can(['delete reporte']))" type="button"
                                                 @click="(data.deleteOpen = true), (data.generico = clasegenerica)"
@@ -397,7 +411,6 @@ const handleCheckboxChange = (values) => {
                                             2
                                         </div>
                                     </div>
-
                                     <div v-else-if="titulo_slug.substr(0,1) === 'b'">
                                         <div v-if="clasegenerica[titulo_slug.substr(2)] === 0"> Aun no validada</div>
                                         <div v-else-if="clasegenerica[titulo_slug.substr(2)] === 1">
@@ -412,6 +425,7 @@ const handleCheckboxChange = (values) => {
                                     <div v-else-if="titulo_slug.substr(0,1) == 'm'">{{ number_format(clasegenerica[titulo_slug.substr(2)],0,1) }}</div>
                                 </td>
                             </tr>
+<!--                            totales-->
                             <tr v-show="props.sumhoras_trabajadas != 0" class="my-2 py-4 border-t border-gray-200 dark:border-gray-900 hover:bg-sky-200 hover:dark:bg-gray-900/20">
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>
                                 <td v-show="can(['updateCorregido reporte'])" class="whitespace-nowrap py-4 px-2 sm:py-3"> </td>

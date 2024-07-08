@@ -113,7 +113,7 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
         $H_diurno = 0;$nocturnas = 0;$extra_diurnas = 0;$extra_nocturnas = 0;$dominical_diurno = 0;$dominical_nocturno = 0;$dominical_extra_diurno = 0;$dominical_extra_nocturno = 0;
         $paramBD = Parametro::find(1);
         //traer todos los empleado
-        $usersEmpleados = User::Select('id','name', 'cedula', 'cargo_id', 'salario')->WhereHas("roles", function ($q) {
+        $usersEmpleados = User::Select('id','name','numero_contrato', 'cedula', 'cargo_id', 'salario')->WhereHas("roles", function ($q) {
             $q->Where("name", "empleado");
             $q->orWhere("name", "supervisor");
         })->get();
@@ -200,7 +200,7 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
 
         //<editor-fold desc="administrativos e ingenieros no ganan extras">
         //WhereNotIn('id',[2,1])
-        $usersAdministrativos = User::Select('id', 'name', 'cedula', 'cargo_id', 'salario')->WhereNotIn('id',[2,1])
+        $usersAdministrativos = User::Select('id', 'name','numero_contrato', 'cedula', 'cargo_id', 'salario')->WhereNotIn('id',[2,1])
             ->WhereHas("roles", function ($q) {
                 $q->Where("name", "administrativo");
                 $q->orWhere("name", "ingeniero");
@@ -265,6 +265,7 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
         return [
             // 'Año',
             // 'Quincena',
+            'Numero contrato',
             'Cedula',
             'Quincena Completa',
             'Num reportes',

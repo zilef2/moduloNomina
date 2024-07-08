@@ -181,20 +181,20 @@ data.params.onlySupervis = data.params.onlySupervis === null ? false : data.para
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table class="w-full">
-                        <thead class="uppercase text-xs border-t border-gray-300 dark:border-gray-50">
-                            <tr class="dark:bg-gray-900/50 text-left">
-                                <th class="px-2 py-4 text-center cursor-pointer"> - </th>
-                                <th v-on:click="toggleColumn(0)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">#</th>
-                                <th v-on:click="toggleColumn(1)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">Nombre</th>
-                                <th v-on:click="toggleColumn(2)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">Identificacion</th>
-                                <th v-on:click="toggleColumn(3)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">Numero de contrato</th>
-                                <th v-on:click="toggleColumn(4)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">ocultar</th>
-                                <th v-on:click="toggleColumn(5)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">ocultar</th>
-                                <th v-on:click="toggleColumn(6)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">ocultar</th>
-                                <th v-on:click="toggleColumn(6)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">ocultar</th>
-                                <th v-on:click="toggleColumn(6)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">ocultar</th>
-                            </tr>
-                        </thead>
+<!--                        <thead class="uppercase text-xs border-t border-gray-300 dark:border-gray-50">-->
+<!--                            <tr class="dark:bg-gray-900/50 text-left">-->
+<!--                                <th class="px-2 py-4 text-center cursor-pointer"> - </th>-->
+<!--                                <th v-on:click="toggleColumn(0)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">#</th>-->
+<!--                                <th v-on:click="toggleColumn(1)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">Nombre</th>-->
+<!--                                <th v-on:click="toggleColumn(2)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">Identificacion</th>-->
+<!--                                <th v-on:click="toggleColumn(3)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">Numero de contrato</th>-->
+<!--                                <th v-on:click="toggleColumn(4)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">ocultar</th>-->
+<!--                                <th v-on:click="toggleColumn(5)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">ocultar</th>-->
+<!--                                <th v-on:click="toggleColumn(6)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">ocultar</th>-->
+<!--                                <th v-on:click="toggleColumn(6)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">ocultar</th>-->
+<!--                                <th v-on:click="toggleColumn(6)" class="px-2 py-4 text-center text-xs text-gray-300 cursor-pointer">ocultar</th>-->
+<!--                            </tr>-->
+<!--                        </thead>-->
                         <thead class="uppercase text-sm border-t border-gray-200 dark:border-gray-700">
                             <tr class="dark:bg-gray-900/50 text-left">
                                 <th class="px-2 py-4 text-center">
@@ -244,8 +244,8 @@ data.params.onlySupervis = data.params.onlySupervis === null ? false : data.para
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
                                 </th>
-                                <th class="px-2 py-4 cursor-pointer" v-on:click="order('centro_costo_id')">
-                                    <div class="flex justify-between items-center">
+                                <th class="px-2 py-4 w-20 cursor-pointer" v-on:click="order('centro_costo_id')">
+                                    <div class="flex w-20 justify-between items-center">
                                         <span>{{ lang().label.centro_costo }}</span>
                                         <ChevronUpDownIcon class="w-4 h-4" />
                                     </div>
@@ -296,7 +296,7 @@ data.params.onlySupervis = data.params.onlySupervis === null ? false : data.para
                                 <!-- <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.created_at }}</td> -->
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.celular }} <span v-if="user.telefono && user.telefono !== user.celular"> / {{ user.telefono }} </span></td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.fecha_de_ingreso }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.cc }}</td>
+                                <td class="w-2 py-4 px-2 sm:py-3 truncate"><div class="min-w-[20px] max-w-[300px] py-4 px-2 sm:py-3 truncate">{{ user.cc }}</div></td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ number_format(user.salario,0,1) }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.updated_at }}</td>
                                 <td class="whitespace-nowrap p-4 sm:p-3">

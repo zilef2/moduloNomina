@@ -34,6 +34,7 @@ const form = useForm({
     salario: '',
     role:  '',
     cargo:  '',
+    numero_contrato:  '',
 });
 
 
@@ -74,7 +75,7 @@ watchEffect(() => {
             form.role = props.user?.roles == 0 ? '' : props.user?.roles[0].name
             form.cargo = props.user?.cargo_id == 0 ? '' : props.user?.cargo.id
 
-
+            form.numero_contrato = props.user?.numero_contrato
 
             data.AutoActualizarse = false
         }
@@ -111,6 +112,12 @@ const centros = props.centros?.map(centro => ({ label: centro.nombre, value: cen
                         <TextInput id="cedula" type="text" class="mt-1 block w-full" v-model="form.cedula" required
                             :placeholder="lang().placeholder.cedula" :error="form.errors.cedula" />
                         <InputError class="mt-2" :message="form.errors.cedula" />
+                    </div>
+                    <div>
+                        <InputLabel for="numero_contrato" :value="lang().label.numero_contrato" />
+                        <TextInput id="numero_contrato" type="text" class="mt-1 block w-full" v-model="form.numero_contrato" required
+                            :placeholder="lang().placeholder.numero_contrato" :error="form.errors.numero_contrato" />
+                        <InputError class="mt-2" :message="form.errors.numero_contrato" />
                     </div>
                     <div>
                         <InputLabel for="email" :value="lang().label.email" />

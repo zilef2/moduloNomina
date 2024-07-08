@@ -91,7 +91,8 @@ const update = () => {
     }else{
         form.valido = 2;
     }
-    //! todo
+
+    // poner 48 en parametros
     if(form.horas_trabajadas <= 48){
         form.put(route('Reportes.update', props.Reporte?.id), {
             preserveScroll: true,

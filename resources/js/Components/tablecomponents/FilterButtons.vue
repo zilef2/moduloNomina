@@ -1,6 +1,10 @@
 <script setup>
 import {computed, ref} from 'vue';
 
+const props = defineProps({
+    numberPermissions:Number
+})
+
 const emit = defineEmits(['update:checked']);
 
 const checkedValues = ref([false, false,false]);
@@ -27,12 +31,21 @@ const handleChange = () => {
             </label>
         <div class="tooltip">Esta quincena</div>
       </li>
-      <li class="icon-content">
+      <li class="icon-content" v-show="props.numberPermissions > 1">
           <label class="container">
             <input type="checkbox" v-model="checkedValues[2]" @change="handleChange" class="bg-red-300">
             <div class="checkmark"></div>
             </label>
-        <div class="tooltip">No concuerdan</div>
+<!--        <div class="tooltip">Siigo</div>-->
+        <div class="tooltip">(HD + HN) No son las H trabajadas</div>
+      </li>
+      <li class="icon-content" v-show="props.numberPermissions > 1">
+          <label class="container">
+            <input type="checkbox" v-model="checkedValues[3]" @change="handleChange" class="bg-red-300">
+            <div class="checkmark"></div>
+            </label>
+        <div class="tooltip">Siigo (solo extras)</div>
+<!--        <div class="tooltip">(HD + HN) No son las H trabajadas</div>-->
       </li>
     </ul>
 </template>
@@ -137,7 +150,8 @@ ul {
 }
 .example-2 .icon-content .tooltip {
   position: absolute;
-  top: -40px;
+  width: 130px;
+  top: -60px;
   left: 50%;
   transform: translateX(-50%);
   color: #fff;

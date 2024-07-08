@@ -35,7 +35,11 @@ class Reporte extends Model {
 //	public function centrocostos() {
 //		return $this->hasOne('App\Models\CentroCosto');
 //	}
-//	public function users():  {
-//		return $this->hasOne(User::class);
-//	}
+	public function user()  {
+		return $this->belongsTo(User::class);
+	}
+
+    public function nameUser(){
+        return $this->user->name;
+    }
 }

@@ -34,32 +34,6 @@
 //FROM others projects
 import FestivosColombia from 'festivos-colombia';
 
-    export function estaFechaEsFestivo(fecha){
-
-        let holidays = FestivosColombia.getHolidaysByYear(fecha.getFullYear());
-
-        let dateFestivos,dateArr,daysfestivo,monthFestivo,result = false;
-        var BreakException = {};
-        let dayEvaluado = Math.floor(fecha.getDate());
-        let MonthEvaluado = (fecha.getMonth());
-        try{
-            holidays.forEach(element => {
-                dateArr = element.date.split('/');
-                dateFestivos = new Date(dateArr[2], dateArr[1] - 1, dateArr[0]);
-                daysfestivo = Math.floor(dateFestivos.getDate());
-                monthFestivo = (dateFestivos.getMonth());
-
-                if(daysfestivo === dayEvaluado && monthFestivo === MonthEvaluado) {
-                    result = true;
-                    throw BreakException
-                }
-            });
-        } catch (e) {
-            // if (e !== BreakException) throw e;
-        }
-
-        return result
-    }
 export function CuantosFestivosEstaQuincena2(numQuicena,elmes,anio) {
     let dateFestivos, dateArr, monthFestivo,arrayFechas=[];
 

@@ -13,6 +13,7 @@ const data = reactive({
     params: {
         search: props.filters?.search,
         searchDDay: props.filters?.searchDDay,
+        searchSCC: props.filters?.searchSCC,
         field: props.filters?.field,
         order: props.filters?.order,
         perPage: props.filters?.perPage,
@@ -35,6 +36,7 @@ const goto = (link) => {
 
 watchEffect(() => {
     data.params.search = props.filters?.search
+    data.params.searchSCC = props.filters?.searchSCC
     data.params.field = props.filters?.field
     data.params.order = props.filters?.order
     data.params.perPage = props.filters?.perPage

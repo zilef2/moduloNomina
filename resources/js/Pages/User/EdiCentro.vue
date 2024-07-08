@@ -6,7 +6,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import SelectInput from '@/Components/SelectInput.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { useForm } from '@inertiajs/vue3';
+import {useForm} from '@inertiajs/vue3';
 import {watchEffect, reactive, watch, onMounted} from 'vue';
 
 const props = defineProps({
@@ -19,20 +19,20 @@ const props = defineProps({
 
 const emit = defineEmits(["close"]);
 const data = reactive({
-    numberCentro:1,
-    primeraVez:true,
-    mensajeError:'',
+    numberCentro: 1,
+    primeraVez: true,
+    mensajeError: '',
 })
 
 const form = useForm({
     centroids: [],
 });
 
-onMounted(()=>{
+onMounted(() => {
 })
 
 watch(() => data.numberCentro, (newX) => {
-    if(data.numberCentro > props.centros.length){
+    if (data.numberCentro > props.centros.length) {
         data.numberCentro = 0
     }
     for (let i = 0; i < data.centroids; i++) {
@@ -45,19 +45,19 @@ watch(() => form.centroids, (newX) => {
 watchEffect(() => {
     if (props.show) {
         form.errors = {}
-        if(data.primeraVez){
+        if (data.primeraVez) {
             data.primeraVez = false
         }
         form.errors = {}
-    }else{
+    } else {
         data.primeraVez = true
     }
 
 })
 
-const validarUpdate =() =>{
+const validarUpdate = () => {
     let valido = true;
-    if(data.numberCentro > 0){
+    if (data.numberCentro > 0) {
         form.centroids.forEach(element => {
             valido = element !== null
         });
@@ -70,8 +70,8 @@ const update = () => {
     form.centroids.map(centroid => parseInt(centroid))
     form.centroids.filter(centroid => centroid != null)
     let valido = validarUpdate()
-valido = true
-    if(valido) {
+    valido = true
+    if (valido) {
         data.mensajeError = ''
         form.put(route('user.update', props.user?.id), {
             preserveScroll: true,
@@ -87,14 +87,13 @@ valido = true
                 data.primeraVez = true
             },
         })
-    }else{
+    } else {
         data.mensajeError = 'Falta informacion'
     }
 
 }
 
-const centros = props.centros?.map(centro => ({ label: centro.nombre, value: centro.id }))
-
+const centros = props.centros?.map(centro => ({label: centro.nombre, value: centro.id}))
 </script>
 
 <template>
@@ -104,20 +103,22 @@ const centros = props.centros?.map(centro => ({ label: centro.nombre, value: cen
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     Centros de costos de {{ props.user.name }}
                 </h2>
-                <p>Recuerde que hay como maximo {{centros.length}} centros de costos</p>
+                <p>Recuerde que hay como maximo {{ centros.length }} centros de costos</p>
                 <p v-if="data.mensajeError !== ''" class="text-red-600 text-lg my-4">{{ data.mensajeError }}</p>
                 <div class="my-6 space-y-4">
 
                     <div class="grid grid-cols-2 gap-6">
 
                         <div>
-                            <InputLabel for="role" :value="'Número de centros'" />
-                            <TextInput autocomplete="off" id="cedula" type="number" class="mt-1 block w-full" v-model="data.numberCentro" required
-                                       :placeholder="'Número de centros'" min="1" :max="centros.length" />
+                            <InputLabel for="role" :value="'Número de centros'"/>
+                            <TextInput autocomplete="off" id="cedula" type="number" class="mt-1 block w-full"
+                                       v-model="data.numberCentro" required
+                                       :placeholder="'Número de centros'" min="1" :max="centros.length"/>
                         </div>
                         <div v-for="index in parseInt(data.numberCentro)" :key="index">
-                            <InputLabel for="centro" :value="lang().label.centro" />
-                            <SelectInput id="centro" class="mt-1 block w-full" v-model="form.centroids[index]"  :dataSet="centros">
+                            <InputLabel for="centro" :value="lang().label.centro"/>
+                            <SelectInput id="centro" class="mt-1 block w-full" v-model="form.centroids[index]"
+                                         :dataSet="centros">
                             </SelectInput>
                         </div>
                     </div>
@@ -126,7 +127,7 @@ const centros = props.centros?.map(centro => ({ label: centro.nombre, value: cen
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
                     </SecondaryButton>
                     <PrimaryButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
-                        @click="update">
+                                   @click="update">
                         {{ form.processing ? lang().button.save + '...' : lang().button.save }}
                     </PrimaryButton>
                 </div>

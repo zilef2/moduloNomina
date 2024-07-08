@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\File;
 
 class CopyUserPages extends Command
 {
+    /*
+     * Archivos necesario para este modulo de copias
+     * app/Http/Controllers/genericController
+     * resources/js/Pages/generic
+     */
     protected $signature = 'copy:u {folderName} {depende?}';
     protected $description = 'Copia la carpeta designada a una ubicación específica';
 
@@ -44,6 +49,11 @@ class CopyUserPages extends Command
         $sourcePath = base_path('app/Http/Controllers/'.$plantillaActual.'Controller.php');
         $destinationPath = base_path("app/Http/Controllers/".$folderMayus."Controller.php");
 
+        if (!File::exists($sourcePath)) {
+            $this->warn("La carpeta '{$sourcePath}' no existe");
+            return false;
+        }
+
         if (File::exists($destinationPath)) {
             $this->warn("La carpeta de destino '{$destinationPath}' ya existe.");
             return false;
@@ -53,6 +63,7 @@ class CopyUserPages extends Command
         $this->info("info:  ".$destinationPath);
 
         return true;
+
     }
 
     private function MakeVuePages($plantillaActual){
@@ -60,6 +71,11 @@ class CopyUserPages extends Command
 
         $sourcePath = base_path('resources/js/Pages/'.$plantillaActual);
         $destinationPath = base_path("resources/js/Pages/{$folderName}");
+
+        if (!File::exists($sourcePath)) {
+            $this->warn("La carpeta '{$sourcePath}' no existe");
+            return false;
+        }
 
         if (File::exists($destinationPath)) {
             $this->warn("La carpeta de destino '{$folderName}' ya existe.");

@@ -16,7 +16,8 @@
     "colombian-holidays": "^4.1.1",
     "festivos-colombia": "^0.0.1",
     "floating-vue": "^2.0.0-beta.20",
-    "vue-chartjs": "^5.2.0"
+    "vue-chartjs": "^5.2.0",
+    "vue-select": "^4.0.0-beta.6"
   },
   "devDependencies": {
     "@inertiajs/vue3": "^1.0.0",

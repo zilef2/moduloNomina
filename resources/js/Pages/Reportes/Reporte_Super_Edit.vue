@@ -102,6 +102,14 @@ watchEffect(() => {
         if (form.fecha_fin === '') form.fecha_fin = TransformTdate(props.Reporte?.fecha_fin)
         form.diurnas = props.Reporte?.diurnas
         form.nocturnas = props.Reporte?.nocturnas
+        form.extra_diurnas = props.Reporte?.extra_diurnas
+        form.extra_nocturnas = props.Reporte?.extra_nocturnas
+
+        form.dominical_diurnas = props.Reporte?.dominical_diurno
+        form.dominical_nocturnas = props.Reporte?.dominical_nocturno
+        form.dominical_extra_diurnas = props.Reporte?.dominical_extra_diurno
+        form.dominical_extra_nocturnas = props.Reporte?.dominical_extra_nocturno
+
         form.centro_costo_id = props.Reporte?.centro_costo_id
         form.fecha_ini = props.Reporte?.fecha_ini
         form.fecha_fin = props.Reporte?.fecha_fin
@@ -110,7 +118,6 @@ watchEffect(() => {
         form.almuerzo = props.Reporte?.almuerzo
     }
 })
-
 const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
 </script>
 
