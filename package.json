@@ -8,6 +8,7 @@
     "watch": "vite build --watch"
   },
   "dependencies": {
+    "@babel/traverse": "^7.24.7",
     "@headlessui/vue": "^1.7.9",
     "@heroicons/vue": "^2.0.15",
     "@vuepic/vue-datepicker": "^4.2.2",
