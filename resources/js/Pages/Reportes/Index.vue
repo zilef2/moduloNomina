@@ -33,7 +33,7 @@
     import InputLabel from "@/Components/InputLabel.vue";
     import FilterButtons from "@/Components/tablecomponents/FilterButtons.vue";
     import Reporte_Super_Edit from '@/Pages/Reportes/Reporte_Super_Edit.vue';
-
+    import vSelect from "vue-select"; import "vue-select/dist/vue-select.css";
 
     ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
@@ -238,10 +238,11 @@ const handleCheckboxChange = (values) => {
 
                         <div v-if="props.userFiltro && props.userFiltro.length > 0" v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro"
                              class="mx-4 -mt-3">
-                            <InputLabel for="centro_costo_id" value="Filtrar por trabajador" />
+                            <InputLabel for="trabajador" value="Filtrar por trabajador" />
                             <SelectInput v-model="data.params.FiltroUser" :dataSet="props.userFiltro"
                                          class="mt-1 block w-full"/>
                         </div>
+
 
                         <div v-else v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro"
                              class="mx-4">
@@ -302,6 +303,15 @@ const handleCheckboxChange = (values) => {
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton>
                     </div>
+                    <div v-if="props.userFiltro && props.userFiltro.length > 0" v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro"
+                             class="mx-4">
+                            <InputLabel for="trabajador" value="Filtrar por trabajador" />
+                            <v-select
+                                v-model="data.params.FiltroUser"
+                                :options="props.userFiltro" :reduce="element => element.value" label="label"
+                                required class="dark:bg-gray-400 xs:hidden lg:min-w-[240px]"
+                            ></v-select>
+                        </div>
                     <div  class="flex gap-3">
                         <!-- ELFILTRO = horas diurnas-->
                         <TextInput v-model="data.params.searchHorasD" v-show="props.numberPermissions > 1"
@@ -341,7 +351,7 @@ const handleCheckboxChange = (values) => {
                                 </th>
                                 <th v-for="(titulos, indiceN) in nombresTabla[0]" :key="indiceN"
                                     v-on:click="order(nombresTabla[2][indiceN])"
-                                    class="px-2 py-4 cursor-pointer hover:bg-sky-50 dark:hover:bg-sky-800">
+                                    class="px-2 py-4 cursor-pointer hover:bg-sky-50 dark:hover:bg-gray-800">
                                     <div class="flex justify-between items-center">
                                         <span>{{ titulos }}</span>
                                         <ChevronUpDownIcon v-if="nombresTabla[2][indiceN] !== null" class="w-4 h-4" />
@@ -351,13 +361,14 @@ const handleCheckboxChange = (values) => {
                         </thead>
                         <tbody>
                             <tr v-for="(clasegenerica, index) in fromController.data" :key="index"
-                                class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20"
-                                :class="{ 'bg-gray-200/75 dark:bg-sky-600': index % 2 === 0 }"
+                                class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-indigo-600"
+                                :class="{ 'bg-gray-200/75 dark:bg-gray-600': index % 2 === 0 }"
                                 >
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
                                     <input type="checkbox" @change="select" :value="clasegenerica.id"
                                         v-model="data.selectedId"
-                                        class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary dark:text-primary shadow-sm focus:ring-primary/80 dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-primary dark:checked:border-primary" />
+                                        class="rounded dark:bg-gray-900 border-gray-300 shadow-sm focus:ring-primary/80
+                                         dark:border-gray-700 text-primary dark:text-primary dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-amber-500 dark:checked:border-amber-500" />
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     <div class="flex justify-start items-center">
@@ -486,3 +497,22 @@ const handleCheckboxChange = (values) => {
 
     </div>
 </AuthenticatedLayout></template>
+<!--<style scoped>-->
+<!--&gt;>> {-->
+  //--vs-controls-color: #664cc3;
+  //--vs-border-color: #664cc3;
+  //
+  //--vs-dropdown-bg: #282c34;
+  //--vs-dropdown-color: #cc99cd;
+  //--vs-dropdown-option-color: #cc99cd;
+  //
+  //--vs-selected-bg: #664cc3;
+  //--vs-selected-color: #eeeeee;
+  //
+  //--vs-search-input-color: #eeeeee;
+  //
+  //  --vs-dropdown-z-index: 1000;
+  //--vs-dropdown-option--active-bg: #664cc3;
+  //--vs-dropdown-option--active-color: #eeeeee;
+<!--}-->
+<!--</style>-->

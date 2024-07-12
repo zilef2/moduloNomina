@@ -153,7 +153,7 @@ export function calcularTerminaDomingo(ini,fin,CuandoEmpiezaExtra,ExtrasManana,f
 //<editor-fold desc="CALCULAR">
 
 //# papa = watchEffect
-export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,ValorRealalmuerzo,FestivosColombia,message){
+export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,FestivosColombia,message){
     let ini = new Date(inicio)
     let fin = new Date(final)
     let ExtrasManana = false
@@ -173,14 +173,13 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,ValorR
             CuandoEmpiezaExtra -= 1
         }
 
-        if(data.TrabajadasSemana - 1 == 0)
+        if(data.TrabajadasSemana == 0)
             ExtrasPrematuras -= data.TrabajadasHooy
         // ExtrasPrematuras -= data.TemporalDiaAnterior //23:59
         ExtrasPrematuras = ExtrasPrematuras < 0 ? 0 : ExtrasPrematuras
 
         CuandoEmpiezaExtra += ExtrasPrematuras
         CuandoEmpiezaExtra = CuandoEmpiezaExtra < horasInicioome ? horasInicioome : CuandoEmpiezaExtra
-
 
         if(data.MostrarConsole.CuandoEiezaExtra){
             console.log('%cPRIMERO: CuandoEmpiezaExtra', "color:red;font-family:system-ui;font-size:1rem;-webkit-text-stroke: 0.5px black;font-weight:bold")
@@ -195,7 +194,6 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,ValorR
             console.log('%cFIN: CuandoEmpiezaExtra', "color:blue;font-family:system-ui;font-size:15px;-webkit-text-stroke: 0.5px black;font-weight:bold")
         }
 
-
         if(CuandoEmpiezaExtra >= horasFinOme){
             if(data.MostrarConsole.dia)
                 console.log(CuandoEmpiezaExtra,horasFinOme);
@@ -206,7 +204,7 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,ValorR
         }else{ //extras
             form.almuerzo = form.horas_trabajadas + data.TemporalDiaAnterior > 8 ?  1 : 0;
             form.almuerzo = form.horas_trabajadas + data.TemporalDiaAnterior > 16 ? 2 : form.almuerzo;
-            ValorRealalmuerzo = form.almuerzo
+            data.ValorRealalmuerzo = form.almuerzo
             form.almuerzo += ' horas'
 
             if(CuandoEmpiezaExtra >= 24){
@@ -243,10 +241,8 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,ValorR
                         form.nocturnas++
                     }
                 }
-
             }
         }
-
     }
 }
 //</editor-fold>

@@ -9,8 +9,8 @@ import SelectInput from '@/Components/SelectInput.vue';
 import { useForm } from '@inertiajs/vue3';
 import {ref, watchEffect, reactive, onMounted, watch} from 'vue';
 import VueDatePicker from '@vuepic/vue-datepicker';
-import '@vuepic/vue-datepicker/dist/main.css'
-import vSelect from "vue-select"; import "vue-select/dist/vue-select.css"; import '@vuepic/vue-datepicker/dist/main.css';
+import '@vuepic/vue-datepicker/dist/main.css'; import '@vuepic/vue-datepicker/dist/main.css';
+import vSelect from "vue-select"; import "vue-select/dist/vue-select.css";
 
 
 import FestivosColombia from 'festivos-colombia';
@@ -43,7 +43,6 @@ const HORAS_ESTANDAR = props.ArrayHorasSemanales.HORAS_ORDINARIAS // 9horitas
 const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - HORAS_ESTANDAR //notes: 7jul = 40
 const LimiteHorasTrabajadas = 23
 
-let ValorRealalmuerzo = 0 //truco para recuperar las horas de almuerzo, cuando se va a maandar el form
 
 const emit = defineEmits(["close"]);
 const data = reactive({
@@ -58,7 +57,7 @@ const data = reactive({
         watchEffect:false,
         CuandoEiezaExtra:false,
         dia:false,
-        noche:false,
+        noche:true,
         extradia:false,
         extranoche:false,
         dominicales:false,
@@ -67,6 +66,7 @@ const data = reactive({
         EsFestivo:false,
 
         MostrarTrabajadaSemana:false,
+        ValorRealalmuerzo: 0,
     },
     const:{
         //39 =>
@@ -85,13 +85,14 @@ const message = reactive({
 onMounted(() => {
     data.TrabajadasSemana = props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] > HORAS_SEMANALES_MENOS_ESTANDAR ?
         props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
+    console.log("=>(Create.vue:88) props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]]", props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] );
+    console.log("=>(Create.vue:88)  HORAS_SEMANALES_MENOS_ESTANDAR",  HORAS_SEMANALES_MENOS_ESTANDAR);
 
     //data.TrabajadasSemana son las horas que hay que restarle a Cuandocomienzaextras
     data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
     if(localStorage.getItem('centroCostoId')){
         form.centro_costo_id = localStorage.getItem('centroCostoId')
     }
-
 });
 
 const form = useForm({
@@ -125,8 +126,8 @@ let horahoy = newdate.getHours()
 let timedate = TransformTdate(7)
 let timedate2 = TransformTdate(16)
 if(props.numberPermissions > 8){ //temporaly commented
-    form.fecha_ini = '2024-07-07T00:00'
-    form.fecha_fin = '2024-07-07T06:00'
+    form.fecha_ini = '2024-07-08T00:00'
+    form.fecha_fin = '2024-07-08T02:00'
     // form.fecha_ini = '2024-07-14T05:00'; form.fecha_fin = '2024-07-14T19:00'
 }else{
     form.fecha_ini = timedate
@@ -162,7 +163,6 @@ const Reporte11_59 = () => {
 
 
 
-// <!--<editor-fold desc="Watchers">-->
 watchEffect(() => {
     if (props.show) {
         // console.clear()
@@ -242,7 +242,7 @@ watchEffect(() => {
                         calcularHoras(
                             data,form,props,
                             ini,fin,
-                            HORAS_ESTANDAR,ValorRealalmuerzo
+                            HORAS_ESTANDAR
                             ,FestivosColombia,message);
                     }
                 }
@@ -251,6 +251,7 @@ watchEffect(() => {
     }
 })
 
+// <!--<editor-fold desc="Watchers">-->
 
 watch(() => form.centro_costo_id, (newX) => {
     localStorage.setItem('centroCostoId',newX)
@@ -307,7 +308,7 @@ const create = () => {
           }
           if(data.respuestaSeguro){
             // Reporte11_59();
-            form.almuerzo = ValorRealalmuerzo
+            form.almuerzo = data.ValorRealalmuerzo
 
 
             form.post(route('Reportes.store'), {
@@ -336,7 +337,6 @@ const create = () => {
 }
 
 const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
-
 </script>
 
 <template>
@@ -486,21 +486,19 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                        class="mx-2">Horas extra de la semana</p>
 
                     <p v-if="data.HorasDelDiaAnterior59" class="mx-2">Dia anterior (11:59 p.m.)</p>
-<!--                    <p v-if="data.TrabajadasSemana > 0" class="mx-2"> Horas extra (semana)</p>-->
                     <p v-if="data.MensajeError !== ''" class="mx-2 text-red-600 text-lg">
                         {{ data.MensajeError }}
                     </p>
 
-
-                    <p v-if="data.TrabajadasSemana" class="mx-2 text-amber-700 bg-amber-400/10 rounded-2xl">
-                        <small v-if="numberPermissions > 8">{{ data.TrabajadasSemana - 1 }}</small> | Se completó las horas de la semana
+                    <p v-if="data.TrabajadasSemana" class="mx-2 px-1 text-sky-700 bg-sky-400/10 dark:text-white">
+                        <small>{{ data.TrabajadasSemana}} </small> horas de la semana
                     </p>
-                    <p v-if="data.TrabajadasHooy" class="mx-2 text-amber-700 bg-amber-400/10 rounded-2xl">
-                        <small v-if="numberPermissions > 8">{{ data.TrabajadasHooy }}</small> | Ya hay un reporte hoy
+                    <p v-if="data.TrabajadasHooy" class="mx-2 px-1 text-sky-700 bg-sky-400/10 dark:text-white">
+                        <small>{{ data.TrabajadasHooy }} </small> horas de hoy
                     </p>
-                    <p v-if="data.TemporalDiaAnterior" class="mx-2 text-amber-700 bg-amber-400/10 rounded-2xl">
-                        <small v-if="numberPermissions > 8">{{ data.TemporalDiaAnterior }}</small>
-                    </p>
+<!--                    <p v-if="data.TemporalDiaAnterior" class="mx-2 text-amber-700 bg-amber-400/10 rounded-2xl">-->
+<!--                        <small v-if="numberPermissions > 8">{{ data.TemporalDiaAnterior }}</small>-->
+<!--                    </p>-->
                 </div>
             </form>
         </Modal>

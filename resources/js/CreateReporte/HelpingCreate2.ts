@@ -187,6 +187,7 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
         }else{//extras empiezan en la madrugada
             if(CuandoEmpiezaExtra <= 6){
                 ordinarias = Madrugada + Tarde
+                ordinarias = ordinarias > CuandoEmpiezaExtra ? CuandoEmpiezaExtra : ordinarias
                 // ordinarias = CuandoEmpiezaExtra + Tarde
                 extra = Madrugada >= CuandoEmpiezaExtra ? Madrugada - CuandoEmpiezaExtra : 0
 

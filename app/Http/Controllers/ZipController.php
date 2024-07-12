@@ -17,8 +17,10 @@ class ZipController extends Controller
 
             if($esAmbientePruebas){
                 $extractTo = '/home/wwecno/pruebas';
+                $mensajeAmbiente = ' <br><b>Ambiente de pruebas</b>';
             }else{
                 $extractTo = '/home/wwecno/repo/modnom';
+                $mensajeAmbiente = ' <br><b>Ambiente de produccion</b>';
             }
             $zipFile = $extractTo.'/moduloNomina.zip';
 
@@ -26,12 +28,12 @@ class ZipController extends Controller
             if ($zip->open($zipFile) === TRUE) {
                 $zip->extractTo($extractTo);
                 $zip->close();
-                return $extensionActiva. ' Descompresión exitosa';
+                return $extensionActiva. ' <br>Descompresión exitosa<br>'.$mensajeAmbiente;
             } else {
                 return $extensionActiva. ' Falló la apertura del archivo zip';
             }
         } else {
-            return 'Zip extension is not loaded.';
+            return '<h1>Zip extension is not loaded.</h1>';
         }
     }
 }
