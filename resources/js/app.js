@@ -16,6 +16,7 @@ const appName = window.document.getElementsByTagName('title')[0]?.innerText || '
 // window.number_format = number_format;
 // window.monthName = monthName;
 
+
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),

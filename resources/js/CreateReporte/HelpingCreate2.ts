@@ -229,44 +229,51 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
 //</editor-fold>
 
 
-function RestarAlmuarzo(form){
+//PRIVATE FUNCTION
+function RestarAlmuarzo(form,data){
     let LIMITE_ALMUERZO:number = 8
     var fechain_i = new Date(form.fecha_ini)
     var diaSemana = fechain_i.getDay();
     if (diaSemana === 6) {
-        LIMITE_ALMUERZO--
+        LIMITE_ALMUERZO-- //todo: machete.. deberia venir de las horas semanales
     }
+
+    form.almuerzo = Math.floor((form.horas_trabajadas) / 8)
+    console.log("=>(HelpingCreate.ts:209) form.almuerzo", form.almuerzo);
+    data.ValorRealalmuerzo = form.almuerzo
+    form.almuerzo += ' horas'
 
     if(form.horas_trabajadas > LIMITE_ALMUERZO) {
         form.horas_trabajadas -= 1;
 
-        console.log("(F=>RestarAlm) nocturnas", form.nocturnas);
-        console.log("(F=>RestarAlm) diurnas", form.diurnas);
-        console.log("(F=>RestarAlm) extra_diurnas", form.extra_diurnas);
-        console.log("(F=>RestarAlm) extra_nocturnas", form.extra_nocturnas);
+        console.log("(F=>) LIMITE_ALMUERZO", LIMITE_ALMUERZO);
+        console.log("(F=>estarAlmuarzo) nocturnas", form.nocturnas);
+        console.log("(F=>estarAlmuarzo) diurnas", form.diurnas);
+        console.log("(F=>estarAlmuarzo) extra_diurnas", form.extra_diurnas);
+        console.log("(F=>estarAlmuarzo) extra_nocturnas", form.extra_nocturnas);
 
         //JessicaDebeRevisar: a que hora se debe quitar la hora de almuerzo
         if(form.extra_nocturnas > 0 && form.extra_nocturnas > form.extra_diurnas){
             form.extra_nocturnas -= 1
             form.almuerzo = ' nocturno'
-            console.log('aqui')
+            console.log('F=> estarAlmuarzo 1|')
             return true;
         }
         if(form.extra_diurnas > 0){
             form.extra_diurnas -= 1
             form.almuerzo = ' diurno'
-            console.log('aquiiii2')
+            console.log('F=> estarAlmuarzo 2|')
             return true;
         }
         if(form.nocturnas > 0 && form.nocturnas > form.diurnas){
             form.nocturnas -= 1;form.almuerzo = ' nocturno';
-            console.log('aquiiii3')
+            console.log('F=> estarAlmuarzo 3|')
             return true;
         }
 
         if(form.diurnas > 0) {
             form.diurnas -= 1; form.almuerzo = ' diurno'
-            console.log('aquiiii4')
+            console.log('F=> estarAlmuarzo 4|')
             return true;
         }
 
@@ -335,5 +342,5 @@ export function setDominical(data,form,ini,fin,CuandoEmpiezaExtra,ExtrasManana,F
             calcularTerminaDomingo(ini,fin,CuandoEmpiezaExtra,ExtrasManana,form)
         }
     }
-    RestarAlmuarzo(form)
+    // RestarAlmuarzo(form)
 }

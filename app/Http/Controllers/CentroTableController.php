@@ -30,9 +30,19 @@ class CentroTableController extends Controller
     }
 
 
-    private function TheQuery($id){
-        $esteMes = date("m");
-        $diaquincena = date("d");
+    private function TheQuery($id,$request){
+        if($request->fecha_ini && $request->quincena){
+            $esteMes = $request->fecha_ini;
+            $diaquincena = $request->quincena;
+            $esteMes['month'] = intval($esteMes['month']) + 1;
+
+        }else{
+            $esteMes = [
+                'month' => date("m"),
+                'year' => date("Y")
+            ];
+            $diaquincena = date("d");
+        }
 
         $elSelect = [
             'user_id',
@@ -48,17 +58,22 @@ class CentroTableController extends Controller
             DB::raw('SUM(dominical_extra_diurno) as dominical_extra_diurno'),
             DB::raw('SUM(dominical_extra_nocturno) as dominical_extra_nocturno'),
         ];
-        if($diaquincena <= 15){
+        if($diaquincena == 1){
             $centroCostos = Reporte::select($elSelect)
-                ->whereMonth('fecha_ini', $esteMes)
+                ->whereYear('fecha_ini', $esteMes['year'])
+                ->whereMonth('fecha_ini', $esteMes['month'])
                 ->whereDay('fecha_ini', '<=', 15)
                 ->where('centro_costo_id', $id)
                 ->groupBy('user_id')
                 ->get();
+//            dd(
+//                $centroCostos[0]->attributesToArray()
+//            );
         }else{
             $centroCostos = Reporte::select($elSelect)
-                ->whereMonth('fecha_ini', $esteMes)
-                ->whereDay('fecha_ini', '<', 15) //cambiar esto por debug >
+                ->whereYear('fecha_ini', $esteMes['year'])
+                ->whereMonth('fecha_ini', $esteMes['month'])
+                ->whereDay('fecha_ini', '>', 15)
                 ->where('centro_costo_id', $id)
                 ->groupBy('user_id')
                 ->get();
@@ -68,7 +83,6 @@ class CentroTableController extends Controller
             return $reporteu;
         })->filter();
 
-//        dd($centroCostos);
         $page = request('page', 1); // Current page number
 //        $perPage = $request->has('perPage') ? $request->perPage : 10;
         $perPage = 10;
@@ -81,7 +95,7 @@ class CentroTableController extends Controller
             ['path' => request()->url()]
         );
 
-        return [$centroCostos, $perPage, $paginated];
+        return [$perPage, $paginated];
     }
 
 
@@ -94,9 +108,10 @@ class CentroTableController extends Controller
 
         $nombresTabla = $this->noumbresTabla($numberPermissions);
 
-        [$centroCostos, $perPage, $paginated] = $this->TheQuery($id);
+        [$perPage, $paginated] = $this->TheQuery($id,$request);
 
         return Inertia::render('CentroCostos/table', [ //carpeta
+            'elIDD' => $id,
             'title' => __('app.label.CentroCostos'),
 //            'filters'        =>  $request->all(['search', 'field', 'order']),
             'perPage' => (int)$perPage,

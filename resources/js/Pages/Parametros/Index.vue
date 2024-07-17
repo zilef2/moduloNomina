@@ -21,6 +21,8 @@ import { number_format, formatDate, monthName } from '@/global.ts';
 import Create from '@/Pages/Parametros/Create.vue';
 import Edit from '@/Pages/Parametros/Edit.vue';
 import Delete from '@/Pages/Parametros/Delete.vue';
+import Requerimientos from "@/Pages/Parametros/Requerimientos.vue";
+import RequerimientosPendientes from "@/Pages/Parametros/RequerimientosPendientes.vue";
 
 const { _, debounce, pickBy } = pkg
 
@@ -62,7 +64,7 @@ const form = useForm({
     <AuthenticatedLayout>
         <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />
         Ultima actualización: {{ formatDate(fromController[0]['updated_at']) }}
-        <div class="space-y-4">
+        <section class="space-y-4">
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">
                     <Edit :show="data.editOpen" @close="data.editOpen = false" :title="props.title"
@@ -79,7 +81,7 @@ const form = useForm({
                                 </th> -->
                                 <!-- <th class="px-2 py-4 text-center"> <td> - </td> </th> -->
                                 <th v-for="(titulos, indiceN) in nombresTabla[0]" :key="indiceN"
-                                    class="px-5 py-4 cursor-pointer hover:bg-sky-50 dark:hover:bg-sky-800">
+                                    class="px-5 py-4 hover:bg-sky-50 dark:hover:bg-sky-800">
                                     <div class="flex justify-between items-center">
                                         <span>{{ titulos }}</span>
                                     </div>
@@ -129,7 +131,7 @@ const form = useForm({
             <section class="text-gray-600 body-font">
                 <div class="container px-5 py-8 mx-auto">
                     <div class="text-center my-8">
-                        <h2 class="tracking-widest text-2xl title-font font-medium text-black dark:text-white mb-1">
+                        <h2 class="text-2xl title-font font-medium text-black dark:text-white mb-1">
                             Parametros del aplicativo
                         </h2>
                     </div>
@@ -138,7 +140,7 @@ const form = useForm({
                             <div class="h-full flex items-start">
                                 <div class="w-12 flex-shrink-0 flex flex-col text-center leading-none">
                                     <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">9</span>
-                                    <span class="font-medium text-lg text-gray-800 title-font leading-none">nov 2023</span>
+                                    <span class="font-medium text-lg text-gray-800 title-font">nov 2023</span>
                                 </div>
                                 <div class="flex-grow pl-6">
                                     <div class="inline-flex">
@@ -266,8 +268,8 @@ const form = useForm({
                       <div class="py-8 px-4 lg:w-1/3">
                         <div class="h-full flex items-start">
                           <div class="w-12 flex-shrink-0 flex flex-col text-center leading-none">
-                            <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">7</span>
-                            <span class="font-medium text-lg text-gray-800 title-font leading-none">sept 2023</span>
+                            <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">15</span>
+                            <span class="font-medium text-lg text-gray-800 title-font leading-none">jul 2024</span>
                           </div>
                           <div class="flex-grow pl-6">
                             <div class="inline-flex">
@@ -276,11 +278,8 @@ const form = useForm({
                               </h2>
                               <!--                                        <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">-->
                             </div>
-                            <p class="leading-relaxed text-lg mb-5">
-                              ???
-                            </p>
-                            <p class="leading-relaxed text-lg mb-5">
-                              ???
+                            <p class="leading-relaxed text-lg mb-5 text-red-600">
+                                Aun sin correo enviado
                             </p>
                           </div>
                         </div>
@@ -294,15 +293,12 @@ const form = useForm({
                           <div class="flex-grow pl-6">
                             <div class="inline-flex">
                               <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
-                                Saber si tiene horas extras por la semana
+                                Horas extras por la semana
                               </h2>
                               <!--                                        <input type="checkbox" name="" id="" class="m-2 p-4 inline-flex">-->
                             </div>
-                            <p class="leading-relaxed text-lg mb-5">
-                              ???
-                            </p>
-                            <p class="leading-relaxed text-lg mb-5">
-                              ???
+                            <p class="leading-relaxed text-lg mb-5 text-red-600">
+                              Aun sin correo enviado
                             </p>
                           </div>
                         </div>
@@ -311,5 +307,8 @@ const form = useForm({
                 </div>
             </section>
 
-    </div>
-</AuthenticatedLayout></template>
+            <Requerimientos/>
+            <RequerimientosPendientes/>
+        </section>
+    </AuthenticatedLayout>
+</template>

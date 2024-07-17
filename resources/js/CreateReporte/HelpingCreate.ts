@@ -170,7 +170,7 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
         ExtrasPrematuras -= (data.TrabajadasSemana-1)//machete aqui
         let diaSemana = ini.getDay();
         if (diaSemana === 6) {
-            CuandoEmpiezaExtra -= 1
+            CuandoEmpiezaExtra -= 1 //TODO: machetaso, deberia venir de las horas semanales
         }
 
         if(data.TrabajadasSemana == 0)
@@ -195,17 +195,20 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
         }
 
         if(CuandoEmpiezaExtra >= horasFinOme){
-            if(data.MostrarConsole.dia)
-                console.log(CuandoEmpiezaExtra,horasFinOme);
+            if(data.MostrarConsole.CuandoEiezaExtra){
+                console.log('horasFinOme',horasFinOme);
+                console.log('CuandoEmpiezaExtra',CuandoEmpiezaExtra);
+                console.log('horasFinOme',horasFinOme);
+            }
 
-            form.almuerzo = 'No';
             form.diurnas = Math.abs(calcularDiurnas(data,form,form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra)[1]);
             form.nocturnas = Math.abs(calcularNocturnas(data,form,form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra)[1]);
         }else{ //extras
-            form.almuerzo = form.horas_trabajadas + data.TemporalDiaAnterior > 8 ?  1 : 0;
-            form.almuerzo = form.horas_trabajadas + data.TemporalDiaAnterior > 16 ? 2 : form.almuerzo;
-            data.ValorRealalmuerzo = form.almuerzo
-            form.almuerzo += ' horas'
+
+            // form.almuerzo = form.horas_trabajadas > 16 ? 2 : form.almuerzo;
+            // form.almuerzo = form.horas_trabajadas + data.TemporalDiaAnterior > 8 ?  1 : 0;
+            // form.almuerzo = form.horas_trabajadas + data.TemporalDiaAnterior > 16 ? 2 : form.almuerzo;
+
 
             if(CuandoEmpiezaExtra >= 24){
                 CuandoEmpiezaExtra = 24 //version horasmismodia

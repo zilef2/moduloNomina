@@ -8,9 +8,9 @@ use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\ServiciosController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CentroTableController;
+use App\Http\Controllers\ZipController;
 use App\Http\Controllers\QRController;
-use Carbon\Carbon;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route; use Illuminate\Support\Facades\Session; use Inertia\Inertia;
 // use Stevebauman\Location\Facades\Location;
@@ -71,8 +71,8 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::get('/qrscanner', [QRController::class, 'index'])->name('qrscanner');
     //16mayo2024
     Route::put('/eporte_Super_Edit/{id}', [ReportesController::class, 'Reporte_Super_Edit'])->name('Reporte_Super_Edit');
-    Route::get('/CentroCostoTable/{id}', [\App\Http\Controllers\CentroTableController::class, 'table'])->name('CentroCostos.table');
-    Route::get('/DescompresionDespliegue/{esAmbientePruebas}', [\App\Http\Controllers\ZipController::class, 'DescompresionDespliegue']);
+    Route::get('/CentroCostoTable/{id}', [CentroTableController::class, 'table'])->name('CentroCostos.table');
+    Route::get('/DescompresionDespliegue/{esAmbientePruebas}', [ZipController::class, 'DescompresionDespliegue']);
 
 });//fin verified
 require __DIR__.'/auth.php';

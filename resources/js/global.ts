@@ -219,6 +219,58 @@ export function CuantosFestivosEstaQuincena2(numQuicena,elmes,anio) {
         if(monthNumber == 11) return 'Noviembre';
         if(monthNumber == 12) return 'Diciembre';
     }
+    export function allMonthName():{id:number,name:string}[]{
+        return [
+        {
+            'id':1,
+            'name':'Enero'
+        },
+        {
+            'id':1,
+            'name':'Febrero'
+        },
+        {
+            'id':1,
+            'name':'Marzo'
+        },
+        {
+            'id':1,
+            'name':'Abril'
+        },
+        {
+            'id':1,
+            'name':'Mayo'
+        },
+        {
+            'id':1,
+            'name':'Junio'
+        },
+        {
+            'id':1,
+            'name':'Julio'
+        },
+        {
+            'id':1,
+            'name':'Agosto'
+        },
+        {
+            'id':1,
+            'name':'Septiembre'
+        },
+        {
+            'id':1,
+            'name':'Octubre'
+        },
+        {
+            'id':1,
+            'name':'Noviembre'
+        },
+        {
+            'id':1,
+            'name':'Diciembre'
+        },
+        ]
+    }
 
 
 

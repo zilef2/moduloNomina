@@ -47,7 +47,7 @@ const LimiteHorasTrabajadas = 23
 const emit = defineEmits(["close"]);
 const data = reactive({
     respuestaSeguro:'',
-    startTime: { hours: 7, minutes: 0 },
+    startTime: { hours: 7, minutes: 0 }, //valor que por defecto, viene la hora inicial cuando se abre el formulario
     estado2359:false,
     TrabajadasHooy:0,
     TrabajadasSemana:0,
@@ -55,9 +55,9 @@ const data = reactive({
     MensajeError:'',
     MostrarConsole:{
         watchEffect:false,
-        CuandoEiezaExtra:false,
+        CuandoEiezaExtra:true,
         dia:false,
-        noche:true,
+        noche:false,
         extradia:false,
         extranoche:false,
         dominicales:false,
@@ -126,8 +126,8 @@ let horahoy = newdate.getHours()
 let timedate = TransformTdate(7)
 let timedate2 = TransformTdate(16)
 if(props.numberPermissions > 8){ //temporaly commented
-    form.fecha_ini = '2024-07-08T00:00'
-    form.fecha_fin = '2024-07-08T02:00'
+    form.fecha_ini = '2024-07-18T07:00'
+    form.fecha_fin = '2024-07-18T17:00'
     // form.fecha_ini = '2024-07-14T05:00'; form.fecha_fin = '2024-07-14T19:00'
 }else{
     form.fecha_ini = timedate

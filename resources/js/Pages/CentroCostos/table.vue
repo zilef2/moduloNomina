@@ -1,26 +1,19 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-    import Breadcrumb from '@/Components/Breadcrumb.vue';
-    import TextInput from '@/Components/TextInput.vue';
-    import PrimaryButton from '@/Components/PrimaryButton.vue';
-    import SelectInput from '@/Components/SelectInput.vue';
 import {onMounted, reactive, watch} from 'vue';
-    import DangerButton from '@/Components/DangerButton.vue';
     import pkg from 'lodash';
     import { Head,router,usePage,Link } from '@inertiajs/vue3';
-
-    import Create from '@/Pages/CentroCostos/Create.vue';
-    import Edit from '@/Pages/CentroCostos/Edit.vue';
-    import Delete from '@/Pages/CentroCostos/Delete.vue';
-
-    import Pagination from '@/Components/Pagination.vue';
     import { ChevronUpDownIcon, PencilIcon,EyeIcon,DocumentIcon, TrashIcon } from '@heroicons/vue/24/solid';
-    import {formatPesosCol} from '@/global.ts';
+import {allMonthName, formatPesosCol, monthName} from '@/global.ts';
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css'
 
-    import InfoButton from '@/Components/InfoButton.vue';
+import vSelect from "vue-select"; import "vue-select/dist/vue-select.css";
+
 
     const { _, debounce, pickBy } = pkg
     const props = defineProps({
+        elIDD: Number,
         title: String,
         filters: Object,
         fromController: Object,
@@ -31,12 +24,10 @@ import {onMounted, reactive, watch} from 'vue';
 
     const data = reactive({
         params: {
-            search: props.filters?.search,
-            field: props.filters?.field,
-            order: props.filters?.order,
-            perPage: props.perPage,
-            thisQuincena: props.thisQuincena,
+            fecha_ini: props?.fecha_ini,
+            quincena: props?.quincena,
         },
+        elID:props.elIDD,
         selectedId: [],
         dataSet: usePage().props.app.perpage,
         thoras_trabajadas: 0,
@@ -51,19 +42,9 @@ import {onMounted, reactive, watch} from 'vue';
     })
 
     onMounted(() => {
-        props.fromController.data.forEach(element => {
+        aSumarHoras()
 
-            data.thoras_trabajadas += parseInt(element.horas_trabajadas)
-            console.log("=>(table.vue:56) element", element);
-            data.tdiurnas += parseInt(element.diurnas)
-            data.tnocturnas += parseInt(element.nocturnas)
-            data.textra_diurnas += parseInt(element.extra_diurnas)
-            data.textra_nocturnas += parseInt(element.extra_nocturnas)
-            data.tdominical_diurno += parseInt(element.dominical_diurno)
-            data.tdominical_nocturno += parseInt(element.dominical_nocturno)
-            data.tdominical_extra_diurno += parseInt(element.dominical_extra_diurno)
-            data.tdominical_extra_nocturno += parseInt(element.dominical_extra_nocturno)
-        });
+      if(!data.params.quincena) data.params.quincena = 1
     });
 
     const order = (field) => {
@@ -73,45 +54,88 @@ import {onMounted, reactive, watch} from 'vue';
         }
     }
 
-    // watch(() => _.cloneDeep(data.params), debounce(() => {
-    //     let params = pickBy(data.params)
-    //     router.get(route("CentroCostos.index"), params, {
-    //         replace: true,
-    //         preserveState: true,
-    //         preserveScroll: true,
-    //     })
-    // }, 150))
+    const aSumarHoras = ()=>{
+      data.thoras_trabajadas = 0
+      data.tdiurnas = 0
+      data.tnocturnas = 0
+      data.textra_diurnas = 0
+      data.textra_nocturnas = 0
+      data.tdominical_diurno = 0
+      data.tdominical_nocturno = 0
+      data.tdominical_extra_diurno = 0
+      data.tdominical_extra_nocturno = 0
 
+      setTimeout(()=> {
+      if(props.fromController.data){
+        props.fromController.data.forEach(element => {
+            data.thoras_trabajadas += parseInt(element.horas_trabajadas)
+          console.log("=>(table.vue:47) data.thoras_trabajadas", data.thoras_trabajadas);
+            data.tdiurnas += parseInt(element.diurnas)
+            data.tnocturnas += parseInt(element.nocturnas)
+            data.textra_diurnas += parseInt(element.extra_diurnas)
+            data.textra_nocturnas += parseInt(element.extra_nocturnas)
+            data.tdominical_diurno += parseInt(element.dominical_diurno)
+            data.tdominical_nocturno += parseInt(element.dominical_nocturno)
+            data.tdominical_extra_diurno += parseInt(element.dominical_extra_diurno)
+            data.tdominical_extra_nocturno += parseInt(element.dominical_extra_nocturno)
+        });
+      }else{
+        aSumarHoras()
+      }
+      },500)
+    }
 
+    watch(() => _.cloneDeep(data.params), debounce(() => {
+        let params = pickBy(data.params)
+        router.get(route("CentroCostos.table" , data.elID), params, {
+            replace: true,
+            preserveState: true,
+            preserveScroll: true,
+            onSuccess: () => {
+
+                aSumarHoras()
+            },
+        })
+    }, 200))
+
+  let Quicenas = [1,2];
 </script>
 
 <template>
     <Head :title="props.title"></Head>
     <AuthenticatedLayout>
 <!--        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />-->
-        <div class="space-y-4">
-            <div class="px-4 sm:px-0">
-                <div class="rounded-lg overflow-hidden w-fit">
-                    <h2> Esta quincena </h2>
-<!--                    todo: aquiiii props.thisQuincena-->
+        <section class="flex text-gray-600 body-font relative text-center mx-auto">
+         <div class="px-5 py-4">
+            <div class="flex flex-col text-center w-full mb-12 mx-auto">
+                <div class="px-4 sm:px-0 mx-auto">
+                    <div class="mb-1 overflow-hidden w-fit justify-center mt-8">
+                        <h1 class="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">
+                            Reporte de centros de costos
+                        </h1>
+                        <h3 v-show="data.params.quincena"> Seleccione quincena y mes </h3>
 
-<!--                    <PrimaryButton v-if="can(['create centroCostos'])" class="rounded-none" @click="data.createOpen = true">-->
-<!--                        {{ lang().button.add }}-->
-<!--                    </PrimaryButton>-->
-<!--                    <Create :show="data.createOpen" @close="data.createOpen = false"-->
-<!--                            :listaSupervisores="props.listaSupervisores" :title="props.title" />-->
-<!--                    <Edit :show="data.editOpen" @close="data.editOpen=false"-->
-<!--                          :listaSupervisores="props.listaSupervisores"-->
-<!--                          :CentroCosto="data.generico"-->
-<!--                        :title="props.title" />-->
-<!--                    <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :CentroCosto="data.generico"-->
-<!--                        :title="props.title" />-->
-<!--                    input de fecha-->
+                    </div>
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="flex justify-between p-2">
-                    <div class="flex space-x-2">
+                    <div class="flex text-center rounded-xl justify-center mx-auto">
+                      <div class="grid grid-cols-2 gap-4 px-2 hover:shadow-xl">
+                            <label for="quincena" class="text-lg -mb-2 font-bold">Quicena</label>
+                            <label for="fecha_ini" class="text-lg -mb-2 font-bold">Mes</label>
+                            <v-select v-model="data.params.quincena" :value="1" :options="Quicenas" class="text-lg"></v-select>
+<!--                            <v-select-->
+<!--                                v-model="data.params.FiltroUser"-->
+<!--                                :options="props.userFiltro" :reduce="element => element.value" label="label"-->
+<!--                                required class="dark:bg-gray-400 xs:hidden lg:min-w-[240px]"-->
+<!--                            ></v-select>-->
+
+                            <VueDatePicker month-picker auto-apply :teleport="true" id="fecha_ini"
+                                           type="date" v-model="data.params.fecha_ini" required
+                                           :placeholder="lang().placeholder.fecha_ini"
+                                            class="block w-full border-0 bg-transparent -mt-2"/>
+                        </div>
 <!--                        <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet" />-->
 <!--                        <DangerButton @click="data.deleteBulkOpen = true" v-show="data.selectedId.length != 0"-->
 <!--                            class="px-3 py-1.5" v-tooltip="lang().tooltip.delete_selected">-->
@@ -173,7 +197,7 @@ import {onMounted, reactive, watch} from 'vue';
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.dominical_extra_diurno) }} </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.dominical_extra_nocturno) }} </td>
                             </tr>
-                            <tr class="border-t border-gray-200 bg-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
+                            <tr class="border-t border-amber-600 bg-gray-400 dark:border-gray-700 hover:bg-gray-300 hover:dark:bg-gray-900/20">
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 font-bold"> Total </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (data.thoras_trabajadas) }} </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (data.tdiurnas) }} </td>
@@ -193,5 +217,6 @@ import {onMounted, reactive, watch} from 'vue';
 <!--                </div>-->
             </div>
         </div>
+        </section>
     </AuthenticatedLayout>
 </template>
