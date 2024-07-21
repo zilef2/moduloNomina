@@ -66,6 +66,7 @@ const data = reactive({
         EsFestivo:false,
 
         MostrarTrabajadaSemana:false,
+        MostrarAlmuersini:false,
         ValorRealalmuerzo: 0,
     },
     const:{
@@ -85,8 +86,12 @@ const message = reactive({
 onMounted(() => {
     data.TrabajadasSemana = props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] > HORAS_SEMANALES_MENOS_ESTANDAR ?
         props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
-    console.log("=>(Create.vue:88) props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]]", props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] );
-    console.log("=>(Create.vue:88)  HORAS_SEMANALES_MENOS_ESTANDAR",  HORAS_SEMANALES_MENOS_ESTANDAR);
+    console.clear()
+    console.log("data.TrabajadasSemana",  data.TrabajadasSemana);
+    console.log("trabajado semanal",  props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]]);
+    console.log("HSME",  HORAS_SEMANALES_MENOS_ESTANDAR);
+    console.log("HORAS_ESTANDAR",  HORAS_ESTANDAR);
+    ;
 
     //data.TrabajadasSemana son las horas que hay que restarle a Cuandocomienzaextras
     data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
@@ -126,8 +131,8 @@ let horahoy = newdate.getHours()
 let timedate = TransformTdate(7)
 let timedate2 = TransformTdate(16)
 if(props.numberPermissions > 8){ //temporaly commented
-    form.fecha_ini = '2024-07-18T07:00'
-    form.fecha_fin = '2024-07-18T17:00'
+    form.fecha_ini = '2024-07-13T07:00'
+    form.fecha_fin = '2024-07-13T15:00'
     // form.fecha_ini = '2024-07-14T05:00'; form.fecha_fin = '2024-07-14T19:00'
 }else{
     form.fecha_ini = timedate
@@ -184,13 +189,14 @@ watchEffect(() => {
             let fin = Date.parse(form.fecha_fin);
 
             let WeekN = weekNumber(new Date(form.fecha_ini))
-              // 39 => 48 - 9
+              // 38 => 46 - 8
+                console.log("=>(Create.vue:194) props.HorasDeCadaSemana[WeekN]", props.HorasDeCadaSemana);
+                console.log("=>(Create.vue:194) props.WeekN[WeekN]", WeekN);
+                console.log("=>(Create.vue:195) HORAS_SEMANALES_MENOS_ESTANDAR", HORAS_SEMANALES_MENOS_ESTANDAR);
             data.TrabajadasSemana = props.HorasDeCadaSemana[WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
                     props.HorasDeCadaSemana[WeekN] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
 
             data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
-
-            if(data.MostrarTrabajadaSemana) console.log(data.TrabajadasSemana)
 
             form.horas_trabajadas = 0
             form.almuerzo = 0
@@ -215,7 +221,7 @@ watchEffect(() => {
               form.extra_nocturnas++
           }
 
-            if(ini > fin){ //jaja no jodas
+            if(ini > fin){
                 form.errors.horas_trabajadas = 'La fecha inicial no debe ser posterior a la final'
             }else{
                 if(form.horas_trabajadas >= LimiteHorasTrabajadas){
@@ -337,6 +343,33 @@ const create = () => {
 }
 
 const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
+
+const formatini = (date) => {
+  const day = date.getDate();
+  // const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  const month = date.toLocaleString('es-CO', { month: 'long', timeZone: 'America/Bogota' });
+
+  let hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // El '0' se debe mostrar como '12'
+  hours = hours.toString().padStart(2, '0');
+
+  return `${day}/${month}/${year}  ${hours}:${minutes} ${ampm}`;
+}
+
+const formatfin = (date) => {
+  // const month = date.toLocaleString('default', { month: 'long', timeZone: 'America/Bogota' });
+  let hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // El '0' se debe mostrar como '12'
+  hours = hours.toString().padStart(2, '0');
+    return `${hours}:${minutes} ${ampm}`;
+}
 </script>
 
 <template>
@@ -361,14 +394,14 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                 <div class="my-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <InputLabel for="fecha_ini" :value="lang().label.fecha_ini" />
-                        <VueDatePicker :start-time="data.startTime" :is-24="false" :day-names="daynames" auto-apply  :enable-time-picker="true"
+                        <VueDatePicker :format="formatini" :start-time="data.startTime" :is-24="false" :day-names="daynames" auto-apply  :enable-time-picker="true"
                             id="fecha_ini" type="date" class="mt-1 block w-full" v-model="form.fecha_ini" required
                             :placeholder="lang().placeholder.fecha_ini" :error="form.errors.fecha_ini" />
                         <InputError class="mt-2" :message="form.errors.fecha_ini" />
                     </div>
                     <div>
                         <InputLabel for="fecha_fin" :value="lang().label.fecha_fin" />
-                        <VueDatePicker :is-24="false" :day-names="daynames" auto-apply :flow="['calendar', 'time']" :enable-time-picker="true" :teleport="true"
+                        <VueDatePicker :format="formatfin" :is-24="false" :day-names="daynames" auto-apply :flow="['calendar', 'time']" :enable-time-picker="true" :teleport="true"
                             id="fecha_fin" type="date" class="mt-1 block w-full" v-model="form.fecha_fin" required
                             :placeholder="lang().placeholder.fecha_fin" :error="form.errors.fecha_fin" />
                         <InputError class="mt-2" :message="form.errors.fecha_fin" />

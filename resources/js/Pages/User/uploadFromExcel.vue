@@ -2,12 +2,9 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
-
-import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SelectInput from '@/Components/SelectInput.vue';
 import { reactive, watch, watchEffect,onMounted } from 'vue';
-import DangerButton from '@/Components/DangerButton.vue';
 import pkg from 'lodash';
 import { useForm, router } from '@inertiajs/vue3';
 
@@ -15,7 +12,6 @@ import { BookOpenIcon, ArrowUpCircleIcon, ArrowDownCircleIcon } from '@heroicons
 
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
-import FestivosColombia from 'festivos-colombia';
 import { CuantosFestivosEstaQuincena2 } from '@/global'
 
 
@@ -113,8 +109,8 @@ watch(() => form.fecha_ini, (newX) => {
 
 watch(() => form2.fecha_ini_sigo,
     (newX) => {
-      data.paramsSigo.year = form2.fecha_ini_sigo.year
-      data.paramsSigo.month = form2.fecha_ini_sigo.month
+      data.paramsSigo.year = newX.year
+      data.paramsSigo.month = newX.month
       data.paramsSigo.quincena = form2.quincena_sigo
       data.paramsSigo.arrayFestivos = -1
 })
@@ -241,8 +237,8 @@ data.tiposSiigo = [
                                                 </div>
                                             </div>
 
-                                            <PrimaryButton v-show="can(['create user'])" v-if="form.fecha_ini && props.NumReportes > 0 && props.haySinsalario == false"
-                                                :disabled="form.fecha_ini == null"
+                                            <PrimaryButton v-show="can(['create user'])" v-if="form.fecha_ini && props.NumReportes > 0 && props.haySinsalario === false"
+                                                :disabled="!form.fecha_ini"
                                                 class="rounded-none my-4">
                                                 Exportar Quincena
                                             </PrimaryButton>
@@ -255,12 +251,12 @@ data.tiposSiigo = [
                                                     Recuerde</h1>
                                                 <p class="text-base leading-relaxed w-full mx-auto">
                                                     Solo se descargarán, Los reportes que sean validos.</p>
-                                                <p v-if="props.NumReportes != 0" class="text-xl leading-relaxed w-full mx-auto">
+                                                <p v-if="props.NumReportes !== 0" class="text-xl leading-relaxed w-full mx-auto">
                                                     Para esta fecha, hay <b>{{ props.NumReportes }}</b> reportes.</p>
-                                                <p v-if="props.NumReportes != 0" class="text-base leading-relaxed w-full mx-auto">
+                                                <p v-if="props.NumReportes !== 0" class="text-base leading-relaxed w-full mx-auto">
                                                     <small>{{ props.ini }}</small> - <small>{{ props.fin }}</small>
                                                 </p>
-                                                <p v-if="props.NumReportes != 0" class="text-xl leading-relaxed w-full mx-auto">
+                                                <p v-if="props.NumReportes !== 0" class="text-xl leading-relaxed w-full mx-auto">
                                                     Existen <b>{{ props.NumReportesRecha }}</b> rechazados
                                                     y <b>{{ props.NumReportesSinval }}</b> sin aprobar.</p>
                                             </div>
@@ -303,7 +299,7 @@ data.tiposSiigo = [
                                             </div>
 
                                             <PrimaryButton v-if="form2.fecha_ini_sigo.year"
-                                                           :disabled="form2.fecha_ini_sigo == null" class="rounded-none my-4">
+                                                           :disabled="!form2.fecha_ini_sigo" class="rounded-none my-4">
                                                 Descargar formato siigo
                                             </PrimaryButton>
                                         </form>
@@ -320,12 +316,12 @@ data.tiposSiigo = [
                                                 <h1 v-if="!props.NumReportesSigo" class="text-xl font-medium text-center title-font text-gray-900 mb-4">
                                                     Este formato incluye
                                                 </h1>
-                                                <p class="text-base leading-relaxed w-full mx-auto">
+                                                <p class="text-base leading-relaxed w-full mx-auto my-2">
                                                     <!-- Solo se descargarán, Los reportes que sean validos. -->
                                                 </p>
 
                                                 <p v-for="tiposigo in data.tiposSiigo" class="text-base leading-relaxed w-full mx-auto">
-                                                    <p>{{ tiposigo }}</p>
+                                                    <small class="text-lg">{{ tiposigo }}</small>
                                                 </p>
                                             </div>
                                         </div>

@@ -3,11 +3,8 @@
 namespace App\helpers;
 
 use App\Models\Reporte;
-use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Facades\DB;
-
-// use Hamcrest\Type\IsInteger;
 
 class HelpExcel
 {
@@ -28,6 +25,7 @@ class HelpExcel
             ->distinct()
             ->orderBy('fecha_ini')
             ;
+
         $NumReportes = $reportesAgrupados->count();
 
         $currentDate = clone $ini;
@@ -58,7 +56,7 @@ class HelpExcel
         $salario_hora = $elSalario / (235);// 30 * 7.8333
         $salario_quincena = round($elSalario / (2), 0, PHP_ROUND_HALF_UP);
 
-        $horasN = $workingDays*8 + $SaturDays*7;
+        $horasN = $workingDays * 8 + $SaturDays * 7;
 //        dd($ini,$fin,$workingDays,$SaturDays, $NumeroDiasFestivos,$horasN);
         $cumplioQuicena = $horasTotalTrabajador >= $horasN;
 
@@ -85,8 +83,7 @@ class HelpExcel
                     $fechaResult = DateTime::createFromFormat('d/m/Y', $lafecha);
                     if ($fechaResult === false) {
                         throw new \Exception('Fecha inválida 1');
-                        // throw new \Exception('Fecha inválida '.$lafecha. ' --++--');
-                        return null;
+//                        return null;
                     }
                 }
             }
@@ -96,7 +93,6 @@ class HelpExcel
                 $fechaResult = DateTime::createFromFormat('d/m/Y', $lafecha);
                 if ($fechaResult === false) {
                     throw new \Exception('Fecha inválida 2' . $lafecha);
-                    return null;
                 }
             }
         }

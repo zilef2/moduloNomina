@@ -80,6 +80,17 @@ class ReportesController extends Controller{
         if ($request->has(['FiltroUser']) && $request->FiltroUser != 0) {
             $Reportes->Where('user_id',$request->FiltroUser);
         }
+        if ($request->has(['FiltroQuincenita']) && $request->FiltroQuincenita != 0) {
+            //$request->search
+            $hoyNow = Carbon::now();
+            $elquince = clone $hoyNow;$elquince = $elquince->startOfMonth()->addDays(14);
+            if($request->FiltroQuincenita['value'] === "1"){
+                $primerDia = clone $hoyNow;$primerDia = $primerDia->startOfMonth();
+                $Reportes->whereBetween('fecha_ini',[$primerDia,$elquince]);
+            }else{
+                $Reportes->whereBetween('fecha_ini',[$elquince, Carbon::now()->endOfMonth()]);
+            }
+        }
         //$request->has('search') es el mes
         if ($request->has('searchSiigo')) {
             $Reportes->where(function ($query) {
@@ -101,7 +112,6 @@ class ReportesController extends Controller{
             $hoyNow = Carbon::now();
             $hoyDia = clone $hoyNow;$hoyDia = $hoyDia->day;
             $primerDia = clone $hoyNow;$primerDia = $primerDia->startOfMonth();
-
             $elquince = clone $hoyNow;$elquince = $elquince->startOfMonth()->addDays(14);
 
             if($hoyDia <= 15){
@@ -264,6 +274,8 @@ class ReportesController extends Controller{
         //5abril2024
         //suma de horas ordinarias[0] &
         $ArrayOrdinarias = Myhelp::CalcularPendientesQuicena($Authuser);
+
+        //help: $HorasDeCadaSemana en el [0] esta la semana actual, y de resto son numSemana => SumaHorasOrdinarias
         $HorasDeCadaSemana = Myhelp::CalcularHorasDeCadaSemana($startDate, $endDate,$Authuser);
 //        dd($HorasDeCadaSemana);
 
@@ -290,7 +302,7 @@ class ReportesController extends Controller{
                 'search', 'field', 'order',
                 'soloValidos','FiltroUser','searchDDay',
                 'searchHorasD','soloQuincena','searchIncongruencias',
-                'searchQuincena'
+                'searchQuincena','FiltroQuincenita'
             ]),
             'perPage'               =>  (int) $perPage,
             'fromController'        =>  $Reportes->paginate($perPage),
@@ -472,7 +484,7 @@ class ReportesController extends Controller{
             $valorQuemado_HorasTrabajadas = 8;
 
             $UltimoUser = Myhelp::AuthU()->id;
-            $UltimoUser = 11;
+            $UltimoUser = 1;
 
             for ($i = 0; $i < $diff; $i++) {
                 $Reportes = new Reporte;

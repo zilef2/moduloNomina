@@ -98,7 +98,11 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
                 $empleado,$reportes, $salario_hora,
                 $salario_quincena, $cumplioQuicena,$paramBD,
                 $this->NumeroDiasFestivos,session('datesFest'),'siigo');
+//            if($empleado->id == 11)dd($reportes->pluck('id')->all());
 
+            /*alterados en
+            $users $reportes $salario_hora $cumplioQuicena
+            */
             $ArrayExtrasyDominicales = $this->CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, $H_diurno, $nocturnas, $extra_diurnas, $extra_nocturnas, $dominical_diurno, $dominical_nocturno, $dominical_extra_diurno, $dominical_extra_nocturno);
             // $Num_extra_diurnas = $ArrayExtrasyDominicales[1]; $Num_extra_nocturnas = $ArrayExtrasyDominicales[2]; $Num_dominical_diurno = $ArrayExtrasyDominicales[3]; $Num_dominical_nocturno = $ArrayExtrasyDominicales[4]; $Num_dominical_extra_diurno = $ArrayExtrasyDominicales[5]; $Num_dominical_extra_nocturno = $ArrayExtrasyDominicales[6];
             $ArrayExtrasyDominicales[7] = intval($reportes->sum('nocturnas'));
@@ -106,7 +110,7 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
             unset($empleado->id);
             // $empleado->diasnohabiles = "0";
 
-            for ($i=1; $i < 8; $i++) {
+            for ($i=1; $i < 8; $i++) { //8 es el tamaño del vector $mensajeSigo
                 if($ArrayExtrasyDominicales[$i] > 0){
                     if($Novedad != 0){
                         $nuevoReporte = clone $empleado;
@@ -118,12 +122,8 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
                         $result->push($nuevoReporte);
 //                        dd(
 //                            $result[0]->attributesToArray(),
-//                            $result[1]->attributesToArray(),
-//                            $result[2]->attributesToArray(),
-//                            $result[3]->attributesToArray(),
 //                        );
 //                        $users->splice(($key+1),0,[$nuevoReporte]);
-//                    if(15675718 == $nuevoReporte->cedula && $Novedad == 2) dd($ArrayExtrasyDominicales,$nuevoReporte->attributesToArray(),$Novedad);
 
                     }else{
                         $empleado->Quenov = $mensajeSigo[$i];
@@ -136,16 +136,11 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
                     $Novedad++;//novedades de un usuarios
                 }
             }
-//            if(15675718 == $empleado->cedula)
-//            dd($Novedad);
             if($Novedad === 0){ //Sin novedades
                 $users->forget($key);
             }
         }
-
-//         dd($users);
-//        dd($users[0]->attributesToArray());
-//        dd($asd);
+//        dd($result[0]->attributesToArray());
         return $result->filter(function ($resu) {
             return $resu->Quenov != '';
         });

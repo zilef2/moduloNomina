@@ -101,6 +101,7 @@
             soloValidos: props.filters?.soloValidos,
             soloQuincena: props.filters?.soloQuincena,
             FiltroUser: props.filters?.FiltroUser,
+            FiltroQuincenita: props.filters?.FiltroQuincenita,
 
             search: props.filters?.search,
             searchDDay: props.filters?.searchDDay,
@@ -305,18 +306,30 @@ const handleCheckboxChange = (values) => {
                     </div>
                     <div v-if="props.userFiltro && props.userFiltro.length > 0" v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro"
                              class="mx-4">
-                            <InputLabel for="trabajador" value="Filtrar por trabajador" />
-                            <v-select
-                                v-model="data.params.FiltroUser"
-                                :options="props.userFiltro" :reduce="element => element.value" label="label"
-                                required class="dark:bg-gray-400 xs:hidden lg:min-w-[240px]"
-                            ></v-select>
-                        </div>
+                        <InputLabel for="trabajador" value="Filtrar por trabajador" class="hidden md:block"/>
+                        <v-select
+                            v-model="data.params.FiltroUser"
+                            :options="props.userFiltro" :reduce="element => element.value" label="label"
+                            required class="dark:bg-gray-400 xs:hidden lg:min-w-[240px]"
+                        ></v-select>
+                    </div>
+                    <div v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor'])"
+                             class="mx-4">
+                        <InputLabel for="Quincena" value="Quincena" class="hidden md:block"/>
+                        <v-select
+                            v-model="data.params.FiltroQuincenita"
+                            label="texto"
+                            :options="[{value:1,texto:'Primera Quincena'},{value:2,texto:'Segunda quincena'}]"
+                            required class="dark:bg-gray-400 xs:hidden lg:min-w-[240px]"
+                        ></v-select>
+
+
+                    </div>
                     <div  class="flex gap-3">
                         <!-- ELFILTRO = horas diurnas-->
-                        <TextInput v-model="data.params.searchHorasD" v-show="props.numberPermissions > 1"
-                            type="number" min="0" class="block w-2/3 md:w-full rounded-lg"
-                            :placeholder="lang().placeholder.searchHorasD" />
+<!--                        <TextInput v-model="data.params.searchHorasD" v-show="props.numberPermissions > 1"-->
+<!--                            type="number" min="0" class="block w-2/3 md:w-full rounded-lg"-->
+<!--                            :placeholder="lang().placeholder.searchHorasD" />-->
                         <!-- ELFILTRO = numero del mes-->
                         <TextInput v-model="data.params.search" v-show="props.numberPermissions > 1"
                             type="number" min="0" max="12" class="block w-2/3 md:w-full rounded-lg"

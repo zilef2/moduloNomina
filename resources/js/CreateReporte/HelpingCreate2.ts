@@ -234,52 +234,70 @@ function RestarAlmuarzo(form,data){
     let LIMITE_ALMUERZO:number = 8
     var fechain_i = new Date(form.fecha_ini)
     var diaSemana = fechain_i.getDay();
-    if (diaSemana === 6) {
-        LIMITE_ALMUERZO-- //todo: machete.. deberia venir de las horas semanales
+    if (diaSemana === 6) {//sabado
+        LIMITE_ALMUERZO-=3
     }
 
-    form.almuerzo = Math.floor((form.horas_trabajadas) / 8)
-    console.log("=>(HelpingCreate.ts:209) form.almuerzo", form.almuerzo);
+    form.almuerzo = Math.floor((form.horas_trabajadas) / LIMITE_ALMUERZO)
     data.ValorRealalmuerzo = form.almuerzo
     form.almuerzo += ' horas'
 
     if(form.horas_trabajadas > LIMITE_ALMUERZO) {
         form.horas_trabajadas -= 1;
 
-        console.log("(F=>) LIMITE_ALMUERZO", LIMITE_ALMUERZO);
-        console.log("(F=>estarAlmuarzo) nocturnas", form.nocturnas);
-        console.log("(F=>estarAlmuarzo) diurnas", form.diurnas);
-        console.log("(F=>estarAlmuarzo) extra_diurnas", form.extra_diurnas);
-        console.log("(F=>estarAlmuarzo) extra_nocturnas", form.extra_nocturnas);
+            console.clear()
+        if(data.MostrarAlmuersini){
+            console.log('%cLIMITE_ALMUERZO', "color:red;font-family:system-ui;font-size:1rem;-webkit-text-stroke: 0.5px black;font-weight:bold")
+            console.log("=>(HelpingCreate.ts:209) form.almuerzo", form.almuerzo);
+            console.log("(F=>LIMITE_ALMUERZO) ", LIMITE_ALMUERZO);
+            console.log("(F=>estarAlmuarzo) nocturnas", form.nocturnas);
+            console.log("(F=>estarAlmuarzo) diurnas", form.diurnas);
+            console.log("(F=>estarAlmuarzo) extra_diurnas", form.extra_diurnas);
+            console.log("(F=>estarAlmuarzo) extra_nocturnas", form.extra_nocturnas);
+            console.log('%cFIN LIMITE_ALMUERZO', "color:blue;font-family:system-ui;font-size:15px;-webkit-text-stroke: 0.5px black;font-weight:bold")
+        }
 
-        //JessicaDebeRevisar: a que hora se debe quitar la hora de almuerzo
+        if(form.diurnas > 0) {
+            form.diurnas -= 1; form.almuerzo = ' diurno'
+            console.log("=>(HelpingCreate2.ts:261) form.diurnas", form.diurnas);
+            return true;
+        }else{
+            if(form.nocturnas > 0 && form.nocturnas > form.diurnas){
+                form.nocturnas -= 1;form.almuerzo = ' nocturno';
+                console.log("=>(HelpingCreate2.ts:267) form.nocturnas", form.nocturnas);
+                return true;
+            }
+        }
+        //extras
         if(form.extra_nocturnas > 0 && form.extra_nocturnas > form.extra_diurnas){
             form.extra_nocturnas -= 1
             form.almuerzo = ' nocturno'
-            console.log('F=> estarAlmuarzo 1|')
+            console.log('aqui')
             return true;
         }
         if(form.extra_diurnas > 0){
             form.extra_diurnas -= 1
             form.almuerzo = ' diurno'
-            console.log('F=> estarAlmuarzo 2|')
-            return true;
-        }
-        if(form.nocturnas > 0 && form.nocturnas > form.diurnas){
-            form.nocturnas -= 1;form.almuerzo = ' nocturno';
-            console.log('F=> estarAlmuarzo 3|')
-            return true;
-        }
-
-        if(form.diurnas > 0) {
-            form.diurnas -= 1; form.almuerzo = ' diurno'
-            console.log('F=> estarAlmuarzo 4|')
+            console.log('aquiiii2')
             return true;
         }
 
 
         //domini
-        //dominiextra
+        if(form.dominical_nocturnas > 0 && form.dominical_nocturnas > form.dominical_diurnas){
+            form.dominical_nocturnas -= 1;
+            form.almuerzo = ' dominical nocturno';
+            console.log("=>(HelpingCreate2.ts:277) form.almuerzo", form.almuerzo);
+            return true;
+        }else{
+            if(form.dominical_diurnas > 0) {
+                form.dominical_diurnas -= 1;
+                form.almuerzo = ' dominical'
+                console.log("=>(HelpingCreate2.ts:284) form.almuerzo", form.almuerzo);
+                return true;
+            }
+        }
+        //extra dominical
         if(form.dominical_extra_nocturnas > 0 && form.dominical_extra_nocturnas > form.dominical_extra_diurnas){
             form.dominical_extra_nocturnas -= 1;form.almuerzo = ' dominical extra nocturno';
             return true;
@@ -288,19 +306,10 @@ function RestarAlmuarzo(form,data){
             form.dominical_extra_diurnas -= 1; form.almuerzo = ' dominical extra diurno'
             return true;
         }
-        if(form.dominical_nocturnas > 0 && form.dominical_nocturnas > form.dominical_diurnas){
-            form.dominical_nocturnas -= 1;form.almuerzo = ' dominical nocturno';
-            return true;
-        }
-        if(form.dominical_diurnas > 0) {
-            form.dominical_diurnas -= 1; form.almuerzo = ' dominical'
-            return true;
-        }
 
 
     }
     form.almuerzo = 'No'
-
 }
 
 
@@ -342,5 +351,5 @@ export function setDominical(data,form,ini,fin,CuandoEmpiezaExtra,ExtrasManana,F
             calcularTerminaDomingo(ini,fin,CuandoEmpiezaExtra,ExtrasManana,form)
         }
     }
-    // RestarAlmuarzo(form)
+    RestarAlmuarzo(form,data)
 }
