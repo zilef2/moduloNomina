@@ -27,10 +27,12 @@
             <input type="radio" name="options" value="1" autocomplete="off" checked> Front Camera
         </label>
         <label class="btn btn-secondary">
-            <input type="radio" name="options" value="2" autocomplete="off"> Back Camera 1
+            <input type="radio" name="options" value="2" autocomplete="off">
+                Back Camera 1
         </label>
     <label class="btn btn-secondary">
-            <input type="radio" name="options" value="3" autocomplete="off"> Back Camera 2
+            <input type="radio" name="options" value="3" autocomplete="off">
+            Back Camera 2
         </label>
     </div>
     <script type="text/javascript">

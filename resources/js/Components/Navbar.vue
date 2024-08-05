@@ -84,9 +84,12 @@ const downloadExcel = async () => {
                                         <span class="block text-sm font-medium text-gray-500 truncate dark:text-gray-400">
                                             {{ $page.props.auth.user.email }}
                                         </span>
-                                        <!-- <span class="block text-sm font-medium text-gray-500 truncate dark:text-gray-400">
-                                            {{ $page.props.auth.user.id }}
-                                        </span> -->
+                                        <span
+                                            v-show="can(['isAdmin'])"
+                                            class="mt-6 block text-lg font-medium text-gray-500 dark:text-gray-400">
+                                            version aplicativo
+                                            <small>1.0.1</small>
+                                        </span>
                                     </div>
                                     <DropdownLink :href="route('profile.edit')"> {{ lang().label.profile }} </DropdownLink>
                                     <DropdownLink :href="route('logout')" method="post" as="button"> {{ lang().label.logout }} </DropdownLink>

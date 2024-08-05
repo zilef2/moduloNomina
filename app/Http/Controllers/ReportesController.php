@@ -85,10 +85,9 @@ class ReportesController extends Controller{
             $hoyNow = Carbon::now();
             $elquince = clone $hoyNow;$elquince = $elquince->startOfMonth()->addDays(14);
             if($request->FiltroQuincenita['value'] === "1"){
-                $primerDia = clone $hoyNow;$primerDia = $primerDia->startOfMonth();
-                $Reportes->whereBetween('fecha_ini',[$primerDia,$elquince]);
+                $Reportes->whereDay('fecha_ini','<=',15);
             }else{
-                $Reportes->whereBetween('fecha_ini',[$elquince, Carbon::now()->endOfMonth()]);
+                $Reportes->whereDay('fecha_ini','>',15);
             }
         }
         //$request->has('search') es el mes
