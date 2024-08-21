@@ -225,11 +225,11 @@ const handleCheckboxChange = (values) => {
 <template>
     <Head :title="props.title"></Head>
     <AuthenticatedLayout>
-        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />
+<!--        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />-->
         <div class="space-y-1">
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">
-                    <div class="mt-2 inline-flex">
+                    <div class="my-4 inline-flex">
                         <PrimaryButton v-if="can(['create reporte'])" class="rounded-md mx-2 h-8 mt-2" @click="data.createOpen = true">
                             {{ lang().button.add }}
                         </PrimaryButton>
@@ -292,9 +292,8 @@ const handleCheckboxChange = (values) => {
                 <div class="flex justify-between p-2">
                     <div class="flex space-x-2">
 <!--                      <span class="my-auto">Registros/pagina</span>-->
-                        <span class="my-auto hidden xl:block">Registros por página</span>
-<!--                          <span class="my-auto hidden md:block lg:block xl:hidden">R</span>-->
-                          <span class="my-auto md:hidden">R</span>
+                        <span class="my-auto hidden 2xl:block">Registros por página</span>
+                          <span class="my-auto block 2xl:hidden">Reg/pag</span>
                         <SelectInput v-if="filters !== null" v-model="data.params.perPage" :dataSet="data.dataSet" />
 
 
@@ -304,8 +303,7 @@ const handleCheckboxChange = (values) => {
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton>
                     </div>
-                    <div v-if="props.userFiltro && props.userFiltro.length > 0" v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro"
-                             class="mx-4">
+                    <div v-if="props.userFiltro && props.userFiltro.length > 0" v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro" class="hidden lg:block mx-4">
                         <InputLabel for="trabajador" value="Filtrar por trabajador" class="hidden md:block"/>
                         <v-select
                             v-model="data.params.FiltroUser"
@@ -313,8 +311,7 @@ const handleCheckboxChange = (values) => {
                             required class="dark:bg-gray-400 xs:hidden lg:min-w-[240px]"
                         ></v-select>
                     </div>
-                    <div v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor'])"
-                             class="mx-4">
+                    <div v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor'])" class="hidden lg:block mx-4">
                         <InputLabel for="Quincena" value="Quincena" class="hidden md:block"/>
                         <v-select
                             v-model="data.params.FiltroQuincenita"
@@ -325,20 +322,21 @@ const handleCheckboxChange = (values) => {
 
 
                     </div>
-                    <div  class="flex gap-3">
+
+                    <div  class="hidden 2xl:flex gap-3">
                         <!-- ELFILTRO = horas diurnas-->
 <!--                        <TextInput v-model="data.params.searchHorasD" v-show="props.numberPermissions > 1"-->
 <!--                            type="number" min="0" class="block w-2/3 md:w-full rounded-lg"-->
 <!--                            :placeholder="lang().placeholder.searchHorasD" />-->
                         <!-- ELFILTRO = numero del mes-->
                         <TextInput v-model="data.params.search" v-show="props.numberPermissions > 1"
-                            type="number" min="0" max="12" class="block w-2/3 md:w-full rounded-lg"
+                            type="number" min="0" max="12" class="hidden lg:block w-2/3 md:w-full rounded-lg"
                             :placeholder="lang().placeholder.searchDates" />
 <!--                        <SelectInput v-model="data.params.search" :dataSet="data.DiasDeLaSemana" />-->
 <!--                        e1 adminis2 su e ing 3-->
                         <!-- ELFILTRO = numero del dia-->
                         <TextInput v-model="data.params.searchDDay" v-show="props.numberPermissions > 1"
-                            type="number" min="0" max="31" class="block w-2/3 md:w-full rounded-lg"
+                            type="number" min="0" max="31" class="hidden lg:block w-2/3 md:w-full rounded-lg"
                             :placeholder="lang().placeholder.searchDDay" />
 <!--                        <TextInput v-model="data.params.searchQuincena"-->
 <!--                            type="number" min="0" max="31" class="block w-2/3 md:w-full rounded-lg"-->

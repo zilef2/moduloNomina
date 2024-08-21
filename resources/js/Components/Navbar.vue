@@ -88,7 +88,7 @@ const downloadExcel = async () => {
                                             v-show="can(['isAdmin'])"
                                             class="mt-6 block text-lg font-medium text-gray-500 dark:text-gray-400">
                                             version aplicativo
-                                            <small>1.0.1</small>
+                                            <small>1.1</small>
                                         </span>
                                     </div>
                                     <DropdownLink :href="route('profile.edit')"> {{ lang().label.profile }} </DropdownLink>
