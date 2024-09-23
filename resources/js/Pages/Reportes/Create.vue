@@ -55,7 +55,7 @@ const data = reactive({
     MensajeError:'',
     MostrarConsole:{
         watchEffect:false,
-        CuandoEiezaExtra:true,
+        CuandoEiezaExtra:false,
         dia:false,
         noche:false,
         extradia:false,
@@ -66,7 +66,7 @@ const data = reactive({
         EsFestivo:false,
 
         MostrarTrabajadaSemana:false,
-        MostrarAlmuersini:false,
+        MostrarAlmuersini:true,
         ValorRealalmuerzo: 0,
     },
     const:{
@@ -86,12 +86,6 @@ const message = reactive({
 onMounted(() => {
     data.TrabajadasSemana = props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] > HORAS_SEMANALES_MENOS_ESTANDAR ?
         props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
-    console.clear()
-    console.log("data.TrabajadasSemana",  data.TrabajadasSemana);
-    console.log("trabajado semanal",  props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]]);
-    console.log("HSME",  HORAS_SEMANALES_MENOS_ESTANDAR);
-    console.log("HORAS_ESTANDAR",  HORAS_ESTANDAR);
-    ;
 
     //data.TrabajadasSemana son las horas que hay que restarle a Cuandocomienzaextras
     data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
@@ -125,20 +119,20 @@ const form = useForm({
     dominical_extra_nocturnas: 0
 });
 
+// <!--</editor-fold>-->
 
 let newdate = (new Date())
 let horahoy = newdate.getHours()
-let timedate = TransformTdate(7)
-let timedate2 = TransformTdate(16)
 if(props.numberPermissions > 8){ //temporaly commented
-    form.fecha_ini = '2024-07-13T07:00'
-    form.fecha_fin = '2024-07-13T15:00'
+    form.fecha_ini = '2024-09-14T01:00'
+    form.fecha_fin = '2024-09-14T12:00'
     // form.fecha_ini = '2024-07-14T05:00'; form.fecha_fin = '2024-07-14T19:00'
 }else{
+    let timedate = TransformTdate(7)//la hora
+    let timedate2 = TransformTdate(16)
     form.fecha_ini = timedate
     form.fecha_fin = timedate2
 }
-// <!--</editor-fold>-->
 
 
 // <!--<editor-fold desc="Calcular">-->
@@ -174,7 +168,7 @@ watchEffect(() => {
             data.HorasDelDiaAnterior59 = props.ArrayOrdinarias[data.diaSelected];
 
             console.log("=>(Create.vue:664) data.diaSelected", data.diaSelected);
-            console.log("=>(Create.vue:664) props.ArrayOrdinarias", props.ArrayOrdinarias);
+            // console.log("=>(Create.vue:664) props.ArrayOrdinarias", props.ArrayOrdinarias);
         }
         form.errors = {}
         let Dateinii = Date.parse(form.fecha_ini);
@@ -189,9 +183,6 @@ watchEffect(() => {
 
             let WeekN = weekNumber(new Date(form.fecha_ini))
               // 38 => 46 - 8
-                console.log("=>(Create.vue:194) props.HorasDeCadaSemana[WeekN]", props.HorasDeCadaSemana);
-                console.log("=>(Create.vue:194) props.WeekN[WeekN]", WeekN);
-                console.log("=>(Create.vue:195) HORAS_SEMANALES_MENOS_ESTANDAR", HORAS_SEMANALES_MENOS_ESTANDAR);
             data.TrabajadasSemana = props.HorasDeCadaSemana[WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
                     props.HorasDeCadaSemana[WeekN] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
 
@@ -400,7 +391,9 @@ const formatfin = (date) => {
                     </div>
                     <div>
                         <InputLabel for="fecha_fin" :value="lang().label.fecha_fin" />
-                        <VueDatePicker :format="formatfin" :is-24="false" :day-names="daynames" auto-apply :flow="['calendar', 'time']" :enable-time-picker="true" :teleport="true"
+                        <VueDatePicker :format="formatfin" :is-24="false"
+                            :day-names="daynames" auto-apply :flow="['time']" :enable-time-picker="true" :teleport="true"
+                                       time-picker-inline
                             id="fecha_fin" type="date" class="mt-1 block w-full" v-model="form.fecha_fin" required
                             :placeholder="lang().placeholder.fecha_fin" :error="form.errors.fecha_fin" />
                         <InputError class="mt-2" :message="form.errors.fecha_fin" />

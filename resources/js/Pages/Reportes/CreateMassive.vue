@@ -71,7 +71,8 @@ const form = useForm({
     dominical_diurnas: 0,
     dominical_nocturnas: 0,
     dominical_extra_diurnas: 0,
-    dominical_extra_nocturnas: 0
+    dominical_extra_nocturnas: 0,
+    user_id: 1
 });
 
 
@@ -127,26 +128,20 @@ const create = () => {
     Reporte11_59();
     if(form.horas_trabajadas <= LimiteHorasTrabajadas && form.horas_trabajadas !== 0){
         if (Object.keys(form.errors).length === 0) {
-            form.almuerzo = ValorRealalmuerzo
+            form.almuerzo = 0
 
             form.post(route('MassiveReportes'), {
                 preserveScroll: true,
                 onSuccess: () => {
-                    // emit("close")
-                    // form.reset()
+                    emit("close")
+                    form.reset()
                 },
                 onError: () =>{
                     alert(JSON.stringify(form.errors, null, 4));
-                    // null
                 },
-                onFinish: () =>{
-
-                }
-            })
-
+                onFinish: () =>null})
         }else{
             alert('Verifique de nuevo')
-
         }
     }else{
         alert('Horas invalidas') //toask
@@ -157,7 +152,7 @@ const create = () => {
 <template>
     <section class="space-y-6">
         <Modal :show="props.show" @close="emit('close')" :maxWidth="'4xl'">
-            <form class="p-6 mb-20">
+            <form class="p-6 mb-28">
                 <div class="flex space-x-4">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                         <b>
@@ -264,6 +259,10 @@ const create = () => {
                     <div v-if="form.dominicales == 'si'" class="mt-4">
                         <label class="dark:text-white">Horario</label>
                         <TextInput id="dominicales" type="text" class="bg-gray-100 dark:bg-gray-700 block w-full" v-model="TextFestivo" disabled />
+                    </div>
+                    <div class="mt-4">
+                        <label class="dark:text-white">Userid</label>
+                        <TextInput id="user_id" type="number" class="bg-gray-100 dark:bg-gray-700 block w-full" v-model="form.user_id" required />
                     </div>
                 </div>
                 <!-- <div class="my-6 ">

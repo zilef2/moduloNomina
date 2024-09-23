@@ -1,14 +1,14 @@
 /*
-FESTIVOFUNCTIONS
+-- FESTIVOFUNCTIONS --
 estaFechaEsFestivo
 
 
-TERMINA_LUNES_O_DOMINGO
+-- TERMINA_LUNES_O_DOMINGO --
 calcularTerminaLunes
 calcularTerminaDomingo
 
 
-CALCULAR
+-- CALCULAR --
 calcularHoras
 */
 

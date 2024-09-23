@@ -15,7 +15,7 @@ const emit = defineEmits(["open"])
 //     Inertia.visit('/users/export', { method: 'get', download: true });
 // }
 
-
+let version = "1.22s_24"
 const downloadExcel = async () => {
     window.open('/users/export', '_blank')
 }
@@ -86,9 +86,8 @@ const downloadExcel = async () => {
                                         </span>
                                         <span
                                             v-show="can(['isAdmin'])"
-                                            class="mt-6 block text-lg font-medium text-gray-500 dark:text-gray-400">
-                                            version aplicativo
-                                            <small>1.1</small>
+                                            class="mt-6 block font-medium text-gray-500 dark:text-gray-400">
+                                            Version <small>{{ version }}</small>
                                         </span>
                                     </div>
                                     <DropdownLink :href="route('profile.edit')"> {{ lang().label.profile }} </DropdownLink>

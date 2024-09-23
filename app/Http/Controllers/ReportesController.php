@@ -482,9 +482,17 @@ class ReportesController extends Controller{
             $diff = $fecha_ini->diffinDays($fecha_fin) + 1;
             $valorQuemado_HorasTrabajadas = 8;
 
-            $UltimoUser = Myhelp::AuthU()->id;
-            $UltimoUser = 1;
+            if($request->user_id){
+                $userExiste = User::find($request->user_id);
 
+                if($userExiste)
+                    $UltimoUser = $request->user_id;
+                else
+                    return back()->with('error', 'Persona inexistente');
+
+            }else{
+                $UltimoUser = Myhelp::AuthU()->id;
+            }
             for ($i = 0; $i < $diff; $i++) {
                 $Reportes = new Reporte;
                 $fecha_in2 = clone $fecha_ini;

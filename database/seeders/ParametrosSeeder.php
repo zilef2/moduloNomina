@@ -40,6 +40,9 @@ class ParametrosSeeder extends Seeder
 
             //horario inicia diurno
             //horario finaliza diurno
+            'HORAS_ORDINARIAS' => 8,
+            'HORAS_DEL_MES_30_DIAS' => 0,
+            'MAXIMO_HORAS_SEMANALES' => 0,
         ]);
     }
 }

@@ -5,7 +5,7 @@
         import TextInput from '@/Components/TextInput.vue';
         import PrimaryButton from '@/Components/PrimaryButton.vue';
         import SelectInput from '@/Components/SelectInput.vue';
-    import {reactive, ref, watch} from 'vue';
+    import {onMounted, reactive, ref, watch} from 'vue';
         import DangerButton from '@/Components/DangerButton.vue';
         import pkg from 'lodash';
         import { router,usePage,useForm } from '@inertiajs/vue3';
@@ -139,7 +139,10 @@
 
     })
 
-
+    onMounted(() => {
+        let hoy = new Date()
+        data.params.search = hoy.getMonth() + 1
+    })
 
     // <!--<editor-fold desc="Order clonedeep select">-->
     const order = (field) => {
@@ -291,11 +294,6 @@ const handleCheckboxChange = (values) => {
                 <!-- paginacion, borrado y buscado -->
                 <div class="flex justify-between p-2">
                     <div class="flex space-x-2">
-<!--                      <span class="my-auto">Registros/pagina</span>-->
-                        <span class="my-auto hidden 2xl:block">Registros por página</span>
-                          <span class="my-auto block 2xl:hidden">Reg/pag</span>
-                        <SelectInput v-if="filters !== null" v-model="data.params.perPage" :dataSet="data.dataSet" />
-
 
 <!--                        los empleados pueden borrar reportes, pero no actualizarlos (ni borrarlos en masa-->
                         <DangerButton @click="data.deleteBulkOpen = true" v-show="data.selectedId.length != 0 && can(['update reporte'])"
@@ -475,6 +473,10 @@ const handleCheckboxChange = (values) => {
                 </div>
                 <div class="flex justify-betwween items-center p-2 border-t border-gray-200 dark:border-gray-700">
                     <Pagination :links="props.fromController" :filters="data.params" />
+                    <span class="ml-4 my-auto hidden 2xl:block">Registros por página</span>
+                    <span class="ml-4 my-auto block 2xl:hidden">Reg/pag</span>
+                    <SelectInput v-if="filters !== null" v-model="data.params.perPage" :dataSet="data.dataSet" />
+
                 </div>
             </div>
             <section v-if="props.quincena != null"

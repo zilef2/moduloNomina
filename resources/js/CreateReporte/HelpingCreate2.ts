@@ -231,53 +231,71 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
 
 //PRIVATE FUNCTION
 function RestarAlmuarzo(form,data){
+    console.clear()
+    console.log("=>(HelpingCreate2.ts:235) data.ValorRealalmuerzo", data.ValorRealalmuerzo);
     let LIMITE_ALMUERZO:number = 8
+    let HayAlmuerzo:number = 8
+    HayAlmuerzo -= data.TrabajadasHooy
+    // LIMITE_ALMUERZO = LIMITE_ALMUERZO - data.TrabajadasHooy < 0 ? 0 : LIMITE_ALMUERZO - data.TrabajadasHooy
+
     var fechain_i = new Date(form.fecha_ini)
     var diaSemana = fechain_i.getDay();
     if (diaSemana === 6) {//sabado
-        LIMITE_ALMUERZO-=3
+        HayAlmuerzo -= 2
+        LIMITE_ALMUERZO -= 2
     }
 
-    form.almuerzo = Math.floor((form.horas_trabajadas) / LIMITE_ALMUERZO)
+    if(HayAlmuerzo < form.horas_trabajadas){
+        form.almuerzo = Math.floor((form.horas_trabajadas) / LIMITE_ALMUERZO)
+
+        if(form.almuerzo > 1){
+            form.almuerzo = Math.floor((form.horas_trabajadas) / 8)
+        }
+    }
+
+
     data.ValorRealalmuerzo = form.almuerzo
+    console.log("=>(HelpingCreate2.ts:251) data.ValorRealalmuerzo", data.ValorRealalmuerzo);
     form.almuerzo += ' horas'
 
     if(form.horas_trabajadas > LIMITE_ALMUERZO) {
-        form.horas_trabajadas -= 1;
+        form.horas_trabajadas -= data.ValorRealalmuerzo;
 
-            console.clear()
+            // console.clear()
         if(data.MostrarAlmuersini){
             console.log('%cLIMITE_ALMUERZO', "color:red;font-family:system-ui;font-size:1rem;-webkit-text-stroke: 0.5px black;font-weight:bold")
             console.log("=>(HelpingCreate.ts:209) form.almuerzo", form.almuerzo);
             console.log("(F=>LIMITE_ALMUERZO) ", LIMITE_ALMUERZO);
-            console.log("(F=>estarAlmuarzo) nocturnas", form.nocturnas);
-            console.log("(F=>estarAlmuarzo) diurnas", form.diurnas);
-            console.log("(F=>estarAlmuarzo) extra_diurnas", form.extra_diurnas);
-            console.log("(F=>estarAlmuarzo) extra_nocturnas", form.extra_nocturnas);
+            console.log("achus data.ValorRealalmuerzo) ", data.ValorRealalmuerzo);
+            // console.log("(F=>estarAlmuarzo) nocturnas", form.nocturnas);
+            // console.log("(F=>estarAlmuarzo) diurnas", form.diurnas);
+            // console.log("(F=>estarAlmuarzo) extra_diurnas", form.extra_diurnas);
+            // console.log("(F=>estarAlmuarzo) extra_nocturnas", form.extra_nocturnas);
             console.log('%cFIN LIMITE_ALMUERZO', "color:blue;font-family:system-ui;font-size:15px;-webkit-text-stroke: 0.5px black;font-weight:bold")
         }
 
         if(form.nocturnas > 0){ //&& form.nocturnas > form.diurnas
-            form.nocturnas -= 1;form.almuerzo = ' nocturno';
+            form.nocturnas -= data.ValorRealalmuerzo;
+            form.almuerzo += ' nocturno';
             console.log("=>(HelpingCreate2.ts:267) form.nocturnas", form.nocturnas);
             return true;
         }
         if(form.diurnas > 0) {
-            form.diurnas -= 1;
-            form.almuerzo = ' diurno'
+            form.diurnas -= data.ValorRealalmuerzo;
+            form.almuerzo += ' diurno'
             console.log("=>(HelpingCreate2.ts:261) form.diurnas", form.diurnas);
             return true;
         }
         //extras
         if(form.extra_nocturnas > 0){ // && form.extra_nocturnas > form.extra_diurnas
-            form.extra_nocturnas -= 1
-            form.almuerzo = ' nocturno'
+            form.extra_nocturnas -= data.ValorRealalmuerzo
+            form.almuerzo += ' nocturno'
             console.log('aqui')
             return true;
         }
         if(form.extra_diurnas > 0){
-            form.extra_diurnas -= 1
-            form.almuerzo = ' diurno'
+            form.extra_diurnas -= data.ValorRealalmuerzo
+            form.almuerzo += ' diurno'
             console.log('aquiiii2')
             return true;
         }
@@ -285,24 +303,26 @@ function RestarAlmuarzo(form,data){
 
         //domini
         if(form.dominical_nocturnas > 0 ) { //&& form.dominical_nocturnas > form.dominical_diurnas
-            form.dominical_nocturnas -= 1;
-            form.almuerzo = ' dominical nocturno';
+            form.dominical_nocturnas -= data.ValorRealalmuerzo;
+            form.almuerzo += ' dominical nocturno';
             console.log("=>(HelpingCreate2.ts:277) form.almuerzo", form.almuerzo);
             return true;
         }
         if(form.dominical_diurnas > 0) {
-            form.dominical_diurnas -= 1;
-            form.almuerzo = ' dominical'
+            form.dominical_diurnas -= data.ValorRealalmuerzo;
+            form.almuerzo += ' dominical'
             console.log("=>(HelpingCreate2.ts:284) form.almuerzo", form.almuerzo);
             return true;
         }
         //extra dominical
         if(form.dominical_extra_nocturnas > 0 ){ //&& form.dominical_extra_nocturnas > form.dominical_extra_diurnas
-            form.dominical_extra_nocturnas -= 1;form.almuerzo = ' dominical extra nocturno';
+            form.dominical_extra_nocturnas -= data.ValorRealalmuerzo;
+            form.almuerzo += ' dominical extra nocturno';
             return true;
         }
         if(form.dominical_extra_diurnas > 0) {
-            form.dominical_extra_diurnas -= 1; form.almuerzo = ' dominical extra diurno'
+            form.dominical_extra_diurnas -= data.ValorRealalmuerzo;
+            form.almuerzo += ' dominical extra diurno'
             return true;
         }
 
