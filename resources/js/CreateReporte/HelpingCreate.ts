@@ -160,7 +160,7 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
 
     data.TemporalDiaAnterior = data.HorasDelDiaAnterior59 ? data.HorasDelDiaAnterior59 : 0 //7jul: esta desactivado
     let ExtrasPrematuras = HORAS_ESTANDAR //8
-
+console.log('queputas')
     let Dateinii = Date.parse(form.fecha_ini) ?? false;
     if(Dateinii && Date.parse(form.fecha_fin) ){
         let horasInicioome:number = parseInt(String(new Date(form.fecha_ini).getHours()))
@@ -195,7 +195,6 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
             console.log('CuandoEmpiezaExtra',CuandoEmpiezaExtra)
             // console.log('extras?',CuandoEmpiezaExtra < horasFinOme)
             console.log('ExtrasPrematuras',ExtrasPrematuras)
-
             console.log('data.TrabajadasSemana',data.TrabajadasSemana) // es mayor a 0 si ya cumplio las horas de semana
             console.log('data.TrabajadasHooy',data.TrabajadasHooy) //si reporto hoy
             console.log('TemporalDiaAnterior',data.TemporalDiaAnterior) // si reporto ayer
@@ -204,11 +203,10 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
         }
 
         if(CuandoEmpiezaExtra >= horasFinOme){
-
             form.diurnas = Math.abs(calcularDiurnas(data,form,form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra)[1]);
             form.nocturnas = Math.abs(calcularNocturnas(data,form,form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra)[1]);
+            console.log('aqui321 1')
         }else{ //extras
-
             // form.almuerzo = form.horas_trabajadas > 16 ? 2 : form.almuerzo;
             // form.almuerzo = form.horas_trabajadas + data.TemporalDiaAnterior > 8 ?  1 : 0;
             // form.almuerzo = form.horas_trabajadas + data.TemporalDiaAnterior > 16 ? 2 : form.almuerzo;
@@ -224,6 +222,7 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
             form.diurnas = horasExtrasDiurnas[1];
 
             let horasExtrasNocturnas = (calcularNocturnas(data,form,form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra));
+            console.log('aqui123 2')
             form.extra_nocturnas = horasExtrasNocturnas[0];
             form.nocturnas = horasExtrasNocturnas[1];
         }
@@ -238,7 +237,7 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
         setDominical(data,form,ini,fin,CuandoEmpiezaExtra,ExtrasManana,FestivosColombia,message);
         if(data.estado2359){
         // if(horafin === 23 && minfin === 59){
-            if(form.extra_nocturnas > 0) form.extra_nocturnas++
+            if(form.extra_nocturnas >= 0) form.extra_nocturnas++
             else{
                 if(form.dominical_nocturnas > 0) form.dominical_nocturnas++
                 else{
