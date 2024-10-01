@@ -160,7 +160,6 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
 
     data.TemporalDiaAnterior = data.HorasDelDiaAnterior59 ? data.HorasDelDiaAnterior59 : 0 //7jul: esta desactivado
     let ExtrasPrematuras = HORAS_ESTANDAR //8
-console.log('queputas')
     let Dateinii = Date.parse(form.fecha_ini) ?? false;
     if(Dateinii && Date.parse(form.fecha_fin) ){
         let horasInicioome:number = parseInt(String(new Date(form.fecha_ini).getHours()))
@@ -180,8 +179,8 @@ console.log('queputas')
         var diaSemana:number = fechain_i.getDay();
         if (diaSemana === 6) LIMITE_ALMUERZO -=3
         console.log("=>(HelpingCreate.ts:185) horasTrab", horasTrab);
-        if(horasTrab > LIMITE_ALMUERZO)
-            ExtrasPrematuras++
+        // if(horasTrab > LIMITE_ALMUERZO)
+        //     ExtrasPrematuras++
 
 
         ExtrasPrematuras = ExtrasPrematuras < 0 ? 0 : ExtrasPrematuras
