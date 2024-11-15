@@ -23,9 +23,12 @@ use Stevebauman\Location\Commands\Update;
 
 class CentroCostosController extends Controller {
 
+    private int $minutosActualizarPresupueto;
+
     public function __construct()
     {
         session(['parametros' => Parametro::Find(1)]);
+        $this->minutosActualizarPresupueto = 10;
     }
 
     public function MapearClasePP(&$centroCostos, $numberPermissions,$request){
@@ -33,10 +36,6 @@ class CentroCostosController extends Controller {
         $busqueda =false;
         if ($request->has('search')) {
             $busqueda =true;
-//            $centroCostos
-//                ->orWhere('nombre', 'LIKE', "%" . $request->search . "%")
-////                ->orWhere('descripcion', 'LIKE', "%" . $request->search . "%")
-//            ;
         }
         $searchSCC = $request->has('searchSCC');
 
@@ -50,7 +49,7 @@ class CentroCostosController extends Controller {
             ;
         }
 
-        $centroCostos = Cache::remember('centro_costos', 720, function () use ($centroCostos, $numberPermissions, $AUuser, $busqueda) {
+        $centroCostos = Cache::remember('centro_costos', $this->minutosActualizarPresupueto, function () use ($centroCostos, $numberPermissions, $AUuser, $busqueda) {
             return $centroCostos->get()->map(function ($centroCosto) use ($numberPermissions, $AUuser, $busqueda) {
                 if ($numberPermissions === 3) {
                     $objetoDelUser = $AUuser->ArrayCentrosID();
@@ -85,15 +84,17 @@ class CentroCostosController extends Controller {
     }
 
     //deep1
-    private function ActualizarPresupuesto($frecuencia){
+    private function ActualizarPresupuesto(){
         $cacheKey = 'ultima_llamada_cc_index';
         $ultimaLlamada = Cache::get($cacheKey);
         $tiempoActual = now();
         $centroCostosAll = CentroCosto::all();
 
-        if (!$ultimaLlamada || $tiempoActual->diffInMinutes($ultimaLlamada) >= ($frecuencia*60)) {
+        if (!$ultimaLlamada || $tiempoActual->diffInMinutes($ultimaLlamada) >= ($this->minutosActualizarPresupueto*60)) {
+            $anio = date("Y");
+            $mes = date("m");
             foreach ($centroCostosAll as $item) {
-                $item->actualizarEstimado();
+                $item->actualizarEstimado($anio,$mes);
             }
         }
         // Actualizar el tiempo de la última llamada en caché
@@ -102,7 +103,7 @@ class CentroCostosController extends Controller {
 
     public function index(Request $request) {
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'centro costos')); //0:error, 1:estudiante,  2: profesor, 3:++ )
-        $this->ActualizarPresupuesto(0);//horas
+        $this->ActualizarPresupuesto();//horas
         //<editor-fold desc="serach, order, mapear y paginar">
         $centroCostos = centroCosto::query();
         $perPage = $request->has('perPage') ? $request->perPage : 10;

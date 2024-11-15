@@ -18,6 +18,7 @@ class UserSeeder extends Seeder
         $sexos = ['Masculino', 'Femenino'];
         $genPa = env('sap_gen');
 
+        if(is_null($genPa)) dd('enviroment is null', $genPa);
 
         $superadmin = User::create([
             'name'              => 'Superadmin',
