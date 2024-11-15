@@ -168,7 +168,8 @@ return [
      * the `Spatie\Backup\Notifications\Notifications` classes.
      */
     'notifications' => [
-
+        'enabled' => true,
+        'on_failure_only' => false,
         'notifications' => [
             \Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification::class => ['mail'],
@@ -193,33 +194,6 @@ return [
             ],
         ],
 
-        'slack' => [
-            'webhook_url' => '',
-
-            /*
-             * If this is set to null the default channel of the webhook will be used.
-             */
-            'channel' => null,
-
-            'username' => null,
-
-            'icon' => null,
-
-        ],
-
-        'discord' => [
-            'webhook_url' => '',
-
-            /*
-             * If this is an empty string, the name field on the webhook will be used.
-             */
-            'username' => '',
-
-            /*
-             * If this is an empty string, the avatar on the webhook will be used.
-             */
-            'avatar_url' => '',
-        ],
     ],
 
     /*

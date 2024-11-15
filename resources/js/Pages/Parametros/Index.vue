@@ -111,7 +111,6 @@ const form = useForm({
                                     <div v-else-if="titulo_slug.substr(0, 1) === 't'">{{ formatDate(clasegenerica[titulo_slug.substr(2)], 'conLaHora') }}</div>
                                     <div v-else-if="titulo_slug.substr(0, 1) === 'o'">{{ number_format(clasegenerica[titulo_slug.substr(2)], 0, 1) }}</div>
                                     <div v-else-if="titulo_slug.substr(0, 1) === 'p'">{{ (number_format(clasegenerica[titulo_slug.substr(2)], 2, 0)) }} </div>
-
                                     <div v-else-if="titulo_slug.substr(0, 1) === 'i'">{{ number_format(clasegenerica[titulo_slug.substr(2)]) }}</div>
                                     <div v-else-if="titulo_slug.substr(0, 1) === 'm'">{{ number_format(clasegenerica[titulo_slug.substr(2)], 0, 1) }}</div>
                                 </td>
@@ -120,8 +119,10 @@ const form = useForm({
                                 class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
                                 <td class="whitespace-nowrap py-4 px-5 sm:py-3"> </td>
                                 <td class="whitespace-nowrap py-4 px-5 sm:py-3"> </td>
-                                <td class="whitespace-nowrap py-4 px-5 sm:py-3"> {{
-                                    PasarDiaAQuincena(fromController[0]['subsidio_de_transporte_dia']) }} </td>
+                                <td class="whitespace-nowrap py-4 px-5 sm:py-3"> </td>
+                                <td class="whitespace-nowrap py-4 px-5 sm:py-3">
+                                    {{ PasarDiaAQuincena(fromController[0]['subsidio_de_transporte_dia']) }}
+                                </td>
                             </tr>
                         </tbody>
                     </table>

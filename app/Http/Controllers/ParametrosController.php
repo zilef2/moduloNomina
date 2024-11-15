@@ -28,7 +28,8 @@ class ParametrosController extends Controller
 
         $nombresTabla = [ //0: como se ven //1 como es la BD
             [
-                'Horas necesarias para cumplir la semana',
+                'Horas necesarias diarias',
+                'Horas necesarias semanales',
                 'subsidio de transporte dia/quincena',
                 // 'subsidio de transporte',
                 'salario minimo',

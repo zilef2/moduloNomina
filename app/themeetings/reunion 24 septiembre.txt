@@ -1,0 +1,17 @@
+EN REPORTE (CENTROCOSTOTABLE)
+no se muestra el nombre del cc
+
+
+
+¿ si el centro no tiene supervisor?  "" debería estar inactivo
+
+
+cuando ya no hayan errores pordemos revisar la transformada de horas a dinero.
+
+desabilitar ver reportes e un administrativo. 
+
+
+
+
+- solo se pueda reportar 00 o 30 minutos
+

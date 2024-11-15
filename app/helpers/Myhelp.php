@@ -4,6 +4,8 @@ namespace App\helpers;
 
 use App\Models\Reporte;
 use Carbon\Carbon;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Normalizer;
@@ -18,11 +20,19 @@ class Myhelp{
         'superadmin' => 10
     ];
 
-    public static function AuthU(): \Illuminate\Contracts\Auth\Authenticatable|\Illuminate\Http\RedirectResponse
+    public static function AuthU(): Authenticatable|RedirectResponse
     {
         $TheUser = Auth::user();
         if($TheUser){
             return $TheUser;
+        }
+        return redirect()->to('/');
+    }
+    public static function AuthUid(): int
+    {
+        $TheUser = Auth::user();
+        if($TheUser){
+            return $TheUser->id;
         }
         return redirect()->to('/');
     }

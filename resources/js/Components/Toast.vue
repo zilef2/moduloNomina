@@ -48,7 +48,7 @@
         </div>
     </transition>
     <transition name="slide-fade">
-        <div v-if="flash.error && isErrorVisible" class="absolute top-4 right-4 w-8/12 md:w-6/12 lg:w-3/12 z-[100]">
+        <div v-if="flash.error && isErrorVisible" class="absolute top-4 right-4 w-8/12 md:w-6/12 xl:w-5/12 z-[100]">
             <div class="flex p-4 justify-between items-center bg-red-600 rounded-lg">
                 <div>
                     <ExclamationCircleIcon class="h-8 w-8 text-white" fill="currentColor" />

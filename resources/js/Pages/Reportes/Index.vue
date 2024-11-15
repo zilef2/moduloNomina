@@ -309,7 +309,7 @@ const handleCheckboxChange = (values) => {
                             required class="dark:bg-gray-400 xs:hidden lg:min-w-[240px]"
                         ></v-select>
                     </div>
-                    <div v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor'])" class="hidden lg:block mx-4">
+                    <div v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor'])" class="hidden md:block mx-4">
                         <InputLabel for="Quincena" value="Quincena" class="hidden md:block"/>
                         <v-select
                             v-model="data.params.FiltroQuincenita"
@@ -321,7 +321,7 @@ const handleCheckboxChange = (values) => {
 
                     </div>
 
-                    <div  class="hidden 2xl:flex gap-3">
+                    <div  class="hidden sm:flex lg:hidden xl:flex gap-3">
                         <!-- ELFILTRO = horas diurnas-->
 <!--                        <TextInput v-model="data.params.searchHorasD" v-show="props.numberPermissions > 1"-->
 <!--                            type="number" min="0" class="block w-2/3 md:w-full rounded-lg"-->

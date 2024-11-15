@@ -55,7 +55,7 @@ const data = reactive({
     MensajeError:'',
     MostrarConsole:{
         watchEffect:false,
-        CuandoEiezaExtra:false,
+        CuandoEiezaExtra:true,
         dia:false,
         noche:false,
         extradia:false,
@@ -124,17 +124,16 @@ const form = useForm({
 let newdate = (new Date())
 let horahoy = newdate.getHours()
 if(props.numberPermissions > 8){ //temporaly commented
-    form.fecha_ini = '2024-09-14T01:00'
-    form.fecha_fin = '2024-09-14T12:00'
-    // form.fecha_ini = '2024-07-14T05:00'; form.fecha_fin = '2024-07-14T19:00'
+    // form.fecha_ini = '2024-11-15T21:00'
+    // form.fecha_fin = '2024-11-15T23:58'
+    form.fecha_ini = '2024-11-15T01:00'
+    form.fecha_fin = '2024-11-15T02:00'
 }else{
     let timedate = TransformTdate(7)//la hora
     let timedate2 = TransformTdate(16)
     form.fecha_ini = timedate
     form.fecha_fin = timedate2
 }
-
-
 // <!--<editor-fold desc="Calcular">-->
 
 //apunto de ser eliminado
@@ -312,15 +311,12 @@ const create = () => {
               onSuccess: () => {
                 emit("close")
                 form.reset()
+                location.reload();
               },
               onError: () =>{
                 alert(JSON.stringify(form.errors, null, 4));
               },
-              onFinish: () =>{
-                //     setTimeout(function() {
-                        location.reload();
-                    // }, 700);
-              }
+              onFinish: () =>{}
             })
         }
       }else{

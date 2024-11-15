@@ -1,0 +1,40 @@
+EN REPORTE (CENTROCOSTOTABLE)
+no se muestra el nombre del cc
+
+
+
+¿ si el centro no tiene supervisor?  "" debería estar inactivo
+
+
+cuando ya no hayan errores podremos revisar la transformada de horas a dinero.
+
+desabilitar ver reportes de un administrativo.
+
+
+
+
+- solo se pueda reportar 00 o 30 minutos
+
+
+
+--------------------------------------------------------------------------
+
+
+
+
+LISTO(15NOV 12:06PM) :: 1. bloquear reportes anteriores. si reporta a las 8pm no podrá reportar mas temprano que eso
+
+ :: 2. valor hora = salario / 235
+no se tiene en cuenta, disponibilidad no puede generar horas extras.
+
+ :: 3. no se muestra el nombre del cc en el reporte
+botón para alternar entre tiempo/dinero
+
+bloquear reportes futuros
+
+_ pruebas : oscar dario palacios
+
+
+espero el comunicado de jessica para poner la restricción de no poder reportar mas de 2 días anteriores.  ejemplo hoy 5 ya no pueden reportar el 3
+
+Dias Restricción reporte (anterior)
