@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\helpers\Myhelp;
+use App\Models\CentroCosto;
 use App\Models\Reporte;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -112,7 +113,8 @@ class CentroTableController extends Controller
 
         return Inertia::render('CentroCostos/table', [ //carpeta
             'elIDD' => $id,
-            'title' => __('app.label.CentroCostos'),
+            'title' => CentroCosto::find($id)->nombre,
+//            'title' => __('app.label.CentroCostos'),
 //            'filters'        =>  $request->all(['search', 'field', 'order']),
             'perPage' => (int)$perPage,
             'fromController' => $paginated,
