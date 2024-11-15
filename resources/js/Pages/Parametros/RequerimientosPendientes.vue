@@ -30,7 +30,6 @@
                     2. Que se puedan poner activos e inactivos
                     3. Que se pueda seleccionar del centro de costos el supervisor
                     4. que se pueda filtrar ya sea por supervisor o por centro de costo"
-<!--                        //todo: organizar esto para que sea legible-->
                     </p>
                 </div>
               </div>

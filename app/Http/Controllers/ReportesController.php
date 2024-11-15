@@ -371,7 +371,6 @@ class ReportesController extends Controller
     {
     }
 
-    //todo: this function shount be here
     public function updatingDate($date)
     {
         if ($date === null || $date == '1969-12-31') {

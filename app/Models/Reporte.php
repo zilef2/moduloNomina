@@ -31,7 +31,6 @@ class Reporte extends Model {
         'user_id',
 	];
 
-    //TODO: es alrrevez... las relaciones hasone
 //	public function centrocostos() {
 //		return $this->hasOne('App\Models\CentroCosto');
 //	}

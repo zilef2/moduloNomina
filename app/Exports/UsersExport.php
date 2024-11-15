@@ -127,7 +127,6 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
                 $this->NumeroDiasFestivos,$this->ArrayDatesFest
             );
 
-            //todo: debugging
 //            if(substr($usersEmpleados[$key]->Completa,0,3) === 'Si '){
 //                dd(
 //                    substr($usersEmpleados[$key]->Completa,0,2),
