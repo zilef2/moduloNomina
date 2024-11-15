@@ -141,7 +141,9 @@
 
     onMounted(() => {
         let hoy = new Date()
-        data.params.search = hoy.getMonth() + 1
+        //todo: props.Procedencia => cc generar otra vista para el cc show
+        if(props.userFiltro !== -1)
+            data.params.search = hoy.getMonth() + 1
     })
 
     // <!--<editor-fold desc="Order clonedeep select">-->

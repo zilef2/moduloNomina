@@ -22,7 +22,8 @@ class CentroCosto extends Model
     public function reportes() { return $this->hasMany(Reporte::class); }
     public function users() { return $this->BelongstoMany(User::class,'centro_user'); }
 
-    public function ArrayListaSupervisores($centroid):Array {
+    public function ArrayListaSupervisores():Array {
+        $centroid = $this->id;
         $supervisores = User::UsersWithRol('supervisor')->get();
         $result = $supervisores->map(function($user) use($centroid) {
             if($user->TieneEsteCentro($centroid)){
@@ -50,7 +51,8 @@ class CentroCosto extends Model
         return array_unique($result);
 	}
 
-    public function ArraySupervIDs($centroid):Array {
+    public function ArraySupervIDs():Array {
+        $centroid = $this->id;
         $supervisores = User::UsersWithRol('supervisor')->get();
         $result = $supervisores->map(function($user) use($centroid) {
             if($user->TieneEsteCentro($centroid)){
@@ -61,7 +63,7 @@ class CentroCosto extends Model
         return $result;
 	}
 
-    //deep2
+    //deep2 | todo: mejorar y clarificar
     public function actualizarEstimado(){
         $parametros = session('parametros');
         if(!$parametros){
@@ -87,7 +89,7 @@ class CentroCosto extends Model
             $vardominical_nocturno = 0;
             $vardominical_extra_diurno = 0;
             $vardominical_extra_nocturno = 0;
-            foreach ($BaseDeReportes as $index => $baseDeReporte) {
+//            foreach ($BaseDeReportes as $index => $baseDeReporte) {
                 $user = User::find($baseDeReporte->user_id);
                 if($user){
                     $sal = $user->salario / 235;
@@ -101,7 +103,7 @@ class CentroCosto extends Model
                     $vardominical_extra_diurno += ((double)$BaseDeReportes->sum('dominical_extra_diurno')) * $parametros->porcentaje_dominical_extra_diurno * $sal;
                     $vardominical_extra_nocturno += ((double)$BaseDeReportes->sum('dominical_extra_nocturno')) * $parametros->porcentaje_dominical_extra_nocturno * $sal;
                 }
-            }
+//            }
 
             $this->mano_obra_estimada = $vardiurnas+ $varnocturnas+ $varextra_diurnas+ $varextra_nocturnas+ $vardominical_diurno+ $vardominical_nocturno+ $vardominical_extra_diurno+ $vardominical_extra_nocturno;
             $this->update();

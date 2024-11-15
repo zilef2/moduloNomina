@@ -71,6 +71,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
     <Head :title="props.title"></Head>
     <AuthenticatedLayout>
         <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />
+        <h2 class="text-lg mb-2">Mano de obra estimada de</h2>
         <div class="space-y-4">
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">

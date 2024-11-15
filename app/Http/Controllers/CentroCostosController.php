@@ -50,20 +50,20 @@ class CentroCostosController extends Controller {
             ;
         }
 
-        $centroCostos = $centroCostos->get()->map(function ($centroCosto) use ($numberPermissions,$AUuser,$busqueda) {
-            if ($numberPermissions === 3) {
-                $objetoDelUser = $AUuser->ArrayCentrosID();
-                if (in_array($centroCosto->id,$objetoDelUser)) return null;
-            }
+        $centroCostos = Cache::remember('centro_costos', 720, function () use ($centroCostos, $numberPermissions, $AUuser, $busqueda) {
+            return $centroCostos->get()->map(function ($centroCosto) use ($numberPermissions, $AUuser, $busqueda) {
+                if ($numberPermissions === 3) {
+                    $objetoDelUser = $AUuser->ArrayCentrosID();
+                    if (in_array($centroCosto->id, $objetoDelUser)) return null;
+                }
+                $ArrayListaSupervi = $centroCosto->ArrayListaSupervisores();
+                $centroCosto->cuantoshijos = count($centroCosto->users);
+                $centroCosto->todos = $centroCosto->ArraySupervIDs();
+                $centroCosto->supervi = implode(',', $ArrayListaSupervi);
+                return $centroCosto;
+            })->filter();
+        });
 
-            $centroCosto->cuantoshijos = count($centroCosto->users);
-            $centroCosto->todos = $centroCosto->ArraySupervIDs($centroCosto->id);
-            $centroCosto->supervi = implode(',',$centroCosto->ArrayListaSupervisores($centroCosto->id));
-            $centroCosto->supervi1 = $centroCosto->ArrayListaSupervisores($centroCosto->id)[0] ?? '';
-            $centroCosto->supervi2 = $centroCosto->ArrayListaSupervisores($centroCosto->id)[1] ?? '';
-            $centroCosto->supervi3 = $centroCosto->ArrayListaSupervisores($centroCosto->id)[2] ?? '';
-            return $centroCosto;
-        })->filter();
 
         if ($busqueda) {
             $centroCostos = $centroCostos->filter(function ($centro) use ($request) {
@@ -90,6 +90,7 @@ class CentroCostosController extends Controller {
         $ultimaLlamada = Cache::get($cacheKey);
         $tiempoActual = now();
         $centroCostosAll = CentroCosto::all();
+
         if (!$ultimaLlamada || $tiempoActual->diffInMinutes($ultimaLlamada) >= ($frecuencia*60)) {
             foreach ($centroCostosAll as $item) {
                 $item->actualizarEstimado();
@@ -101,8 +102,7 @@ class CentroCostosController extends Controller {
 
     public function index(Request $request) {
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'centro costos')); //0:error, 1:estudiante,  2: profesor, 3:++ )
-        $this->ActualizarPresupuesto(6);//horas
-
+        $this->ActualizarPresupuesto(0);//horas
         //<editor-fold desc="serach, order, mapear y paginar">
         $centroCostos = centroCosto::query();
         $perPage = $request->has('perPage') ? $request->perPage : 10;
@@ -194,9 +194,11 @@ class CentroCostosController extends Controller {
         }
 
         if($numberPermissions === 1) { //1 : empleado | 2 : administrativo | 3 :supervisor
-        }else{ // not empleado
+
+        }
+        else{ // not empleado
             $titulo = MyhelpQuincena::CalcularTituloQuincena($permissions);
-            $Reportes->orderBy('fecha_ini'); $perPage = 25;
+            $Reportes->orderBy('fecha_ini'); $perPage = 100;
 
             $nombresTabla =[//0: como se ven //1 como es la BD
 
@@ -209,7 +211,6 @@ class CentroCostosController extends Controller {
 
 //        $reporController = new ReportesController();
 //        $showSelect = $reporController->losSelect($valoresSelectConsulta, $showUsers,$valoresSelect,$userFiltro);
-
         return Inertia::render('Reportes/Index', [ //carpeta
             'title'          =>  $titulo,
             'filters'        =>  null,
@@ -224,7 +225,7 @@ class CentroCostosController extends Controller {
             'showUsers'             =>  $showUsers,
             'sumhoras_trabajadas'   =>  $sumhoras_trabajadas,
             //18dic2023
-            'userFiltro'            =>  null,
+            'userFiltro'            =>  -1,
 
             //24abril2024
             'quincena'              =>  0,
