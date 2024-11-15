@@ -61,6 +61,7 @@ class CentroCosto extends Model
         return $result;
 	}
 
+    //deep2
     public function actualizarEstimado(){
         $parametros = session('parametros');
         if(!$parametros){

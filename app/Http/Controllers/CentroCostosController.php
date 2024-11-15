@@ -23,6 +23,11 @@ use Stevebauman\Location\Commands\Update;
 
 class CentroCostosController extends Controller {
 
+    public function __construct()
+    {
+        session(['parametros' => Parametro::Find(1)]);
+    }
+
     public function MapearClasePP(&$centroCostos, $numberPermissions,$request){
         $AUuser = Myhelp::AuthU();
         $busqueda =false;
@@ -79,14 +84,13 @@ class CentroCostosController extends Controller {
         }
     }
 
+    //deep1
     private function ActualizarPresupuesto($frecuencia){
         $cacheKey = 'ultima_llamada_cc_index';
         $ultimaLlamada = Cache::get($cacheKey);
         $tiempoActual = now();
         $centroCostosAll = CentroCosto::all();
         if (!$ultimaLlamada || $tiempoActual->diffInMinutes($ultimaLlamada) >= ($frecuencia*60)) {
-            session(['parametros' => Parametro::Find(1)]);
-
             foreach ($centroCostosAll as $item) {
                 $item->actualizarEstimado();
             }
