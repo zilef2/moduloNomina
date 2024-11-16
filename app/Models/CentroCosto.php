@@ -100,7 +100,6 @@ class CentroCosto extends Model
         $vardominical_extra_diurno = 0;
         $vardominical_extra_nocturno = 0;
 
-        //todo: colocar $parametros->porcentaje_diurno * $sal como variable
         foreach ($BaseDeReportes as $index => $baseDeReporte) {
             $user = User::find($baseDeReporte->user_id);
             if ($user) {
