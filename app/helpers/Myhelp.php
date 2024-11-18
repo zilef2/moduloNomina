@@ -56,16 +56,15 @@ class Myhelp{
         if ($permissions === 'superadmin') return 10;
         return 0;
     }
+
     public static function EscribirEnLog($thiis, $clase = '', $mensaje = '', $returnPermission = true, $critico = false) {
         $permissions = $returnPermission ? auth()->user()->roles->pluck('name')[0] : null;
         $ListaControladoresYnombreClase = (explode('\\', get_class($thiis)));
         $nombreC = end($ListaControladoresYnombreClase);
         if (!$critico) {
             $Elpapa = (explode('\\', get_parent_class($thiis)));
-            $nombreP = end($Elpapa);
-
-            $ElMensaje = $mensaje != '' ? ' Mensaje: ' . $mensaje : '';
-            $ElMensaje = 'Vista: ' . $nombreC . ' Padre: ' . $nombreP . 'U:' . Auth::user()->name . ' | clase: ' . $clase . '|| ' . ' Mensaje: ' . $ElMensaje;
+            $ElMensaje = $mensaje != '' ? ' Mensaje: ' . $mensaje : ' Sin mensaje ';
+            $ElMensaje = 'Vista: ' . $nombreC . 'U:' . Auth::user()->name . ' | clase: ' . $clase . '|| ' . ' Mensaje: ' . $ElMensaje;
             if ($permissions == 'admin' || $permissions == 'superadmin') {
                 Log::channel('soloadmin')->info($ElMensaje);
             } else {

@@ -381,7 +381,7 @@ class ReportesController extends Controller
 
     public function store(ReporteRequest $request)
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes store| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         DB::beginTransaction();
         try {
             $fecha_ini = $this->updatingDate($request->fecha_ini);
@@ -417,6 +417,8 @@ class ReportesController extends Controller
 
         } catch (\Throwable $th) {
             DB::rollback();
+            myhelp::EscribirEnLog($this, 'reportes store', $th->getMessage(), 0, 1);
+
             return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Reportes')]) . $th->getMessage());
         }
     }
@@ -429,7 +431,7 @@ class ReportesController extends Controller
 
     public function edit($id)
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes edit| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 
         $Reportes = Reporte::findOrFail($id);
         return Inertia::render('Reportes.edit', ['Reportes' => $Reportes]);
@@ -444,7 +446,7 @@ class ReportesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes update| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 
         DB::beginTransaction();
         try {
@@ -475,6 +477,7 @@ class ReportesController extends Controller
             return back()->with('success', __('app.label.updated_successfully', ['name' => 'Reporte']));
         } catch (\Throwable $th) {
             DB::rollback();
+            myhelp::EscribirEnLog($this, 'reportes update', $th->getMessage(), 0, 1);
             return back()->with('error', __('app.label.updated_error', ['name' => __('app.label.Reportes')]) . $th->getMessage());
         }
     }
@@ -487,7 +490,7 @@ class ReportesController extends Controller
      */
     public function destroy($id)
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes destroy| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         DB::beginTransaction();
 
         try {
@@ -508,6 +511,8 @@ class ReportesController extends Controller
 
         } catch (\Throwable $th) {
             DB::rollback();
+            myhelp::EscribirEnLog($this, 'reportes destroy', $th->getMessage(), 0, 1);
+
             return back()->with('error', __('app.label.deleted_error', ['name' => __('app.label.Reportes')]) . $th->getMessage());
         }
     }
@@ -515,7 +520,7 @@ class ReportesController extends Controller
 
     public function MassiveReportes(Request $request)
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes MassiveReportes| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 
         DB::beginTransaction();
         try {
@@ -575,7 +580,7 @@ class ReportesController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
             $mensajeErrorTH = $th->getMessage() . ' L:' . $th->getLine() . ' Ubi:' . $th->getFile();
-            myhelp::EscribirEnLog($this, '', 1, $mensajeErrorTH);
+            myhelp::EscribirEnLog($this, 'MassiveReportes', $mensajeErrorTH,0,1);
             return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Reportes')]) . $mensajeErrorTH);
         }
     }
@@ -587,13 +592,15 @@ class ReportesController extends Controller
             $reportes->delete();
             return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.reporte')]));
         } catch (\Throwable $th) {
+            myhelp::EscribirEnLog($this, 'reportes destroybulk', $th->getMessage(), 0, 1);
+
             return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.reporte')]) . $th->getMessage());
         }
     }
 
     public function Reporte_Super_Edit(Request $request, $id)
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' | Reporte_Super_Edit | ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' | reportes Reporte_Super_Edit | ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 
         DB::beginTransaction();
         try {
@@ -619,6 +626,8 @@ class ReportesController extends Controller
             return back()->with('success', __('app.label.updated_successfully', ['name' => 'Reporte']));
         } catch (\Throwable $th) {
             DB::rollback();
+            myhelp::EscribirEnLog($this, 'reportes reporte super edit', $th->getMessage(), 0, 1);
+
             return back()->with('error', __('app.label.updated_error', ['name' => __('app.label.Reportes')]) . $th->getMessage());
         }
     }
