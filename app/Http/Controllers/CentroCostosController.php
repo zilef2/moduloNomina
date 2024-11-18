@@ -12,6 +12,7 @@ use App\Http\Requests\CentroCostoRequest;
 use App\Models\Parametro;
 use App\Models\Reporte;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -179,6 +180,7 @@ class CentroCostosController extends Controller
         }
     }
 
+    //todo: hacer una vista nueva
     public function show($id)
     {
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
@@ -308,9 +310,9 @@ class CentroCostosController extends Controller
      * Remove the specified resource from storage.
      *
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return RedirectResponse
      */
-    public function destroy($id)
+    public function destroy($id): RedirectResponse
     {
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         DB::beginTransaction();
@@ -327,9 +329,9 @@ class CentroCostosController extends Controller
             }
         } catch (\Throwable $th) {
             DB::rollback();
+            Myhelp::EscribirEnLog($this, ' destroy centro costos', $th->getMessage(), false, 1);
             return back()->with('error', __('app.label.deleted_error', ['name' => __('app.label.centroCostos')]) . $th->getMessage());
         }
     }
-
 
 }

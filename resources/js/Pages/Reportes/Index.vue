@@ -102,9 +102,14 @@
             soloQuincena: props.filters?.soloQuincena,
             FiltroUser: props.filters?.FiltroUser,
             FiltroQuincenita: props.filters?.FiltroQuincenita,
+            searchh1: props.filters?.searchh1,
+            searchh2: props.filters?.searchh2,
+            HorasNoDiurnas: props.filters?.HorasNoDiurnas,
 
             search: props.filters?.search,
             searchDDay: props.filters?.searchDDay,
+
+
             field: props.filters?.field,
             order: props.filters?.order,
             perPage: props.perPage,
@@ -231,25 +236,17 @@ const handleCheckboxChange = (values) => {
     <Head :title="props.title"></Head>
     <AuthenticatedLayout>
 <!--        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />-->
-        <div class="space-y-1">
+        <div class="space-y-0">
             <div class="px-4 sm:px-0">
+                <!--                CREATE Y DEMAS BOTONES-->
                 <div class="rounded-lg overflow-hidden w-fit">
-                    <div class="my-4 inline-flex">
+                    <div class="my-2 inline-flex">
                         <PrimaryButton v-if="can(['create reporte'])" class="rounded-md mx-2 h-8 mt-2" @click="data.createOpen = true">
                             {{ lang().button.add }}
                         </PrimaryButton>
                         <PrimaryButton v-if="can(['isAdmin'])" class="rounded-md mx-2 h-8 mt-2" @click="data.createMassOpen = true">
                             {{ lang().button.add }} Masivamente
                         </PrimaryButton>
-
-<!--                        <div v-if="props.userFiltro && props.userFiltro.length > 0" v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro"-->
-<!--                             class="mx-4 -mt-3">-->
-<!--                            <InputLabel for="trabajador" value="Filtrar por trabajador" />-->
-<!--                            <SelectInput v-model="data.params.FiltroUser" :dataSet="props.userFiltro"-->
-<!--                                         class="mt-1 block w-full"/>-->
-<!--                        </div>-->
-
-
                         <div v-else v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro"
                              class="mx-4">
                           <p class="pt-1 mt-6 font-extrabold">Sin reportes</p>
@@ -292,13 +289,56 @@ const handleCheckboxChange = (values) => {
                 </div>
             </div>
 
-            <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <!-- paginacion, borrado y buscado -->
-                <div class="flex justify-between p-2">
-                    <div class="flex space-x-2">
 
+            <!--                FILTROS-->
+
+            <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <div class="flex justify-between p-2">
+                    <div class="hidden sm:flex lg:hidden xl:flex space-x-2 gap-1">
+                        <!-- ELFILTRO = horas diurnas-->
+                        <TextInput v-model="data.params.searchHorasD" v-show="props.numberPermissions > 2"
+                                   type="number" min="0" class="block w-2/3 md:w-full rounded-lg"
+                                   :placeholder="lang().placeholder.searchHorasD"/>
+                        <TextInput v-model="data.params.HorasNoDiurnas" v-show="props.numberPermissions > 2"
+                                   type="number" min="0" class="block w-2/3 md:w-full rounded-lg"
+                                   placeholder="No diurnas"/>
+                        <!-- ELFILTRO = numero del mes-->
+                        <TextInput v-model="data.params.searchh1" v-show="props.numberPermissions > 1"
+                                   type="number" min="0" max="24" class="hidden lg:block w-full rounded-lg"
+                                   placeholder="dia ini"/>
+                        <TextInput v-model="data.params.searchh2" v-show="props.numberPermissions > 1"
+                                   type="number" min="0" max="24" class="hidden lg:block w-full rounded-lg"
+                                   placeholder="dia fin"/>
+                        <TextInput v-model="data.params.search" v-show="props.numberPermissions > 1"
+                                   type="number" min="0" max="12" class="hidden lg:block w-2/3 md:w-full rounded-lg"
+                                   :placeholder="lang().placeholder.searchDates"/>
+                        <!--                        <SelectInput v-model="data.params.search" :dataSet="data.DiasDeLaSemana" />-->
+                        <!--                        e1 adminis2 su e ing 3-->
+                        <!-- ELFILTRO = numero del dia-->
+                        <TextInput v-model="data.params.searchDDay" v-show="props.numberPermissions > 1"
+                                   type="number" min="0" max="31" class="hidden lg:block w-2/3 md:w-full rounded-lg"
+                                   :placeholder="lang().placeholder.searchDDay"/>
+                        <!--                        <TextInput v-model="data.params.searchQuincena"-->
+                        <!--                            type="number" min="0" max="31" class="block w-2/3 md:w-full rounded-lg"-->
+                        <!--                            :placeholder="lang().placeholder.searchQuincena" />-->
+                        <!--                        <label for="soloval" class="hidden md:block mx-1 my-auto">Solo validos</label>-->
+                        <!--                        <label for="soloval" class="mx-1 md:hidden my-auto">Val</label>-->
+                        <!--                        <input v-model="data.params.soloValidos" id="soloval" type="checkbox"-->
+                        <!--                            class="bg-gray-100 h-6 w-6 mt-2 ml-3" />-->
+                        <!--                        <label for="soloval" class="hidden md:block mx-1 my-auto">Quincena actual</label>-->
+                        <!--                        <label for="soloval" class="mx-1 md:hidden my-auto">Q</label>-->
+                        <!--                        <input v-model="data.params.soloQuincena" id="soloval" type="checkbox"-->
+                        <!--                            class="bg-gray-100 h-6 w-6 mt-2 ml-3" />-->
+
+                        <FilterButtons @update:checked="handleCheckboxChange"
+                                       :numberPermissions="props.numberPermissions"
+                        class="text-right"/>
+                    </div>
+                </div>
+                <div class="flex justify-between p-2">
+                    <div v-if="data.selectedId.length != 0 && can(['isingeniero','isadmin','isadministrativo','issupervisor'])" class="flex space-x-2">
 <!--                        los empleados pueden borrar reportes, pero no actualizarlos (ni borrarlos en masa-->
-                        <DangerButton @click="data.deleteBulkOpen = true" v-show="data.selectedId.length != 0 && can(['update reporte'])"
+                        <DangerButton @click="data.deleteBulkOpen = true"
                             class="px-3 py-1.5" v-tooltip="lang().tooltip.delete_selected">
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton>
@@ -319,39 +359,9 @@ const handleCheckboxChange = (values) => {
                             :options="[{value:1,texto:'Primera Quincena'},{value:2,texto:'Segunda quincena'}]"
                             required class="dark:bg-gray-400 xs:hidden lg:min-w-[240px]"
                         ></v-select>
-
-
                     </div>
 
-                    <div  class="hidden sm:flex lg:hidden xl:flex gap-3">
-                        <!-- ELFILTRO = horas diurnas-->
-<!--                        <TextInput v-model="data.params.searchHorasD" v-show="props.numberPermissions > 1"-->
-<!--                            type="number" min="0" class="block w-2/3 md:w-full rounded-lg"-->
-<!--                            :placeholder="lang().placeholder.searchHorasD" />-->
-                        <!-- ELFILTRO = numero del mes-->
-                        <TextInput v-model="data.params.search" v-show="props.numberPermissions > 1"
-                            type="number" min="0" max="12" class="hidden lg:block w-2/3 md:w-full rounded-lg"
-                            :placeholder="lang().placeholder.searchDates" />
-<!--                        <SelectInput v-model="data.params.search" :dataSet="data.DiasDeLaSemana" />-->
-<!--                        e1 adminis2 su e ing 3-->
-                        <!-- ELFILTRO = numero del dia-->
-                        <TextInput v-model="data.params.searchDDay" v-show="props.numberPermissions > 1"
-                            type="number" min="0" max="31" class="hidden lg:block w-2/3 md:w-full rounded-lg"
-                            :placeholder="lang().placeholder.searchDDay" />
-<!--                        <TextInput v-model="data.params.searchQuincena"-->
-<!--                            type="number" min="0" max="31" class="block w-2/3 md:w-full rounded-lg"-->
-<!--                            :placeholder="lang().placeholder.searchQuincena" />-->
-<!--                        <label for="soloval" class="hidden md:block mx-1 my-auto">Solo validos</label>-->
-<!--                        <label for="soloval" class="mx-1 md:hidden my-auto">Val</label>-->
-<!--                        <input v-model="data.params.soloValidos" id="soloval" type="checkbox"-->
-<!--                            class="bg-gray-100 h-6 w-6 mt-2 ml-3" />-->
-<!--                        <label for="soloval" class="hidden md:block mx-1 my-auto">Quincena actual</label>-->
-<!--                        <label for="soloval" class="mx-1 md:hidden my-auto">Q</label>-->
-<!--                        <input v-model="data.params.soloQuincena" id="soloval" type="checkbox"-->
-<!--                            class="bg-gray-100 h-6 w-6 mt-2 ml-3" />-->
 
-                        <FilterButtons @update:checked="handleCheckboxChange" :numberPermissions="props.numberPermissions" />
-                    </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table class="w-full">

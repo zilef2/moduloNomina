@@ -60,7 +60,9 @@ class ReportesController extends Controller
 
     public function Filtros(&$request, &$Reportes)
     {
-        if ($request->has('search') || $request->has('searchDDay') || $request->has('searchHorasD') || $request->has('searchIncongruencias') || $request->has('searchQuincena') || $request->has(['FiltroUser']) || $request->has(['FiltroQuincenita']) || $request->has('searchSiigo') || $request->has('soloValidos') || $request->has('soloQuincena')) {
+        if ($request->has('search') || $request->has('searchDDay') || $request->has('searchHorasD') || $request->has('searchIncongruencias') ||
+            $request->has('searchQuincena') || $request->has(['FiltroUser']) || $request->has(['FiltroQuincenita']) ||
+            $request->has('searchSiigo') || $request->has('soloValidos') || $request->has('soloQuincena')) {
             $esteAnio = Carbon::now()->format('Y');
             $Reportes->WhereYear('fecha_ini', $esteAnio);
         }
@@ -75,6 +77,9 @@ class ReportesController extends Controller
         }
         if ($request->has('searchHorasD')) {
             $Reportes->where('diurnas', $request->searchHorasD);
+        }
+        if ($request->has('HorasNoDiurnas')) {
+            $Reportes->where('diurnas', "!=",$request->HorasNoDiurnas);
         }
         if ($request->has('searchIncongruencias')) {
             $Reportes->whereRaw('diurnas + nocturnas + extra_diurnas + extra_nocturnas + dominical_diurno + dominical_nocturno + dominical_extra_diurno + dominical_extra_nocturno != horas_trabajadas');
@@ -97,6 +102,16 @@ class ReportesController extends Controller
             } else {
                 $Reportes->whereDay('fecha_ini', '>', 15);
             }
+        }
+        if (
+            $request->has(['searchh1']) &&
+            $request->has(['searchh2'])
+            && $request->searchh1 != 0
+        ) {
+            $h1 =$request->searchh1;
+            $h2 =$request->searchh2;
+            $Reportes->whereDay('fecha_ini', '>=', $h1);
+            $Reportes->whereDay('fecha_fin', '<=', $h2);
         }
         //$request->has('search') es el mes
         if ($request->has('searchSiigo')) {
@@ -338,7 +353,8 @@ class ReportesController extends Controller
                 'search', 'field', 'order',
                 'soloValidos', 'FiltroUser', 'searchDDay',
                 'searchHorasD', 'soloQuincena', 'searchIncongruencias',
-                'searchQuincena', 'FiltroQuincenita'
+                'searchQuincena', 'FiltroQuincenita',
+                'searchh1', 'searchh1','HorasNoDiurnas'
             ]),
             'perPage' => (int)$perPage,
             'fromController' => $Reportes->paginate($perPage),

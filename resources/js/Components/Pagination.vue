@@ -22,6 +22,8 @@ const data = reactive({
         soloQuincena: props.filters?.soloQuincena,
         FiltroUser: props.filters?.FiltroUser,
         FiltroQuincenita: props.filters?.FiltroQuincenita,
+        searchh1: props.filters?.searchh1,
+        searchh2: props.filters?.searchh2,
 
     },
 })
@@ -45,6 +47,8 @@ watchEffect(() => {
     data.params.soloQuincena = props.filters?.soloQuincena
     data.params.FiltroUser = props.filters?.FiltroUser
     data.params.FiltroQuincenita = props.filters?.FiltroQuincenita
+    data.params.searchh1 = props.filters?.searchh1
+    data.params.searchh2 = props.filters?.searchh2
 })
 </script>
 <template>
