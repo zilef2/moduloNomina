@@ -314,7 +314,7 @@ export function CuantosFestivosEstaQuincena2(numQuicena,elmes,anio) {
         const result = number_format(sum/TheArray.length,1,false);
         return result;
     }
-    export function number_format(amount, decimals, isPesos: boolean) {
+    export function number_format(amount, decimals, isPesos):string {
         amount += '';
         amount = parseFloat(amount.replace(/[^0-9\.]/g, ''));
         decimals = decimals || 0;
@@ -323,7 +323,7 @@ export function CuantosFestivosEstaQuincena2(numQuicena,elmes,anio) {
             return parseFloat("0").toFixed(decimals);
         amount = '' + amount.toFixed(decimals);
 
-        var amount_parts = amount.split(' '),
+        const amount_parts = amount.split(' '),
             regexp = /(\d+)(\d{3})/;
 
         while (regexp.test(amount_parts[0]))

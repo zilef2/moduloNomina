@@ -311,7 +311,9 @@ const create = () => {
               onSuccess: () => {
                 emit("close")
                 form.reset()
-                location.reload();
+                  setTimeout(() => {
+                        location.reload();
+                  }, 3500);
               },
               onError: () =>{
                 alert(JSON.stringify(form.errors, null, 4));

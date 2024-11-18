@@ -482,6 +482,7 @@ class ReportesController extends Controller
         }
     }
 
+
     /**
      * Remove the specified resource from storage.
      *
@@ -634,27 +635,39 @@ class ReportesController extends Controller
 
     private function NoEsValidoPorFecha($fecha_ini, $fecha_fin): string
     {
+        //info: reporte futuro
+        $manana = Carbon::tomorrow()->startOfDay();
+        $fechain = Carbon::parse($fecha_ini);
+        if($fechain->greaterThanOrEqualTo($manana)) {
+            return "Reporte futuro";
+        }
+
+        //no solapes
         $thisUserId = Myhelp::AuthUid();
         $fecha_ini2 = Carbon::parse($fecha_ini)->addMinute()->format('Y-m-d H:i:s');
         $fecha_fin2 = Carbon::parse($fecha_fin)->addMinutes(-1)->format('Y-m-d H:i:s');
-
-        $traslapa = Reporte::WhereBetween('fecha_ini', [$fecha_ini, $fecha_fin2])->Where('user_id', $thisUserId)->count();
-        $traslapa2 = Reporte::WhereBetween('fecha_fin', [$fecha_ini2, $fecha_fin])->Where('user_id', $thisUserId)->count();
-        if ($traslapa > 0 || $traslapa2 > 0) {
-            return 'Las fechas se solapan';
-        }
 
         $traslapa = Reporte::where('user_id', $thisUserId)
             ->where(function ($query) use ($fecha_ini, $fecha_ini2, $fecha_fin, $fecha_fin2) {
                 $query->whereBetween('fecha_ini', [$fecha_ini, $fecha_fin2])
                     ->orWhereBetween('fecha_fin', [$fecha_ini2, $fecha_fin])
-                    ->orWhere('fecha_ini', '<', $fecha_fin)
                 ;
-            })
-            ->exists();
+            })->exists();
+
         if ($traslapa) {
-            return 'Las fechas no coinciden';
+            return 'Las fechas se solapan';
         }
+
+        //no reportar primero en la noche y luego en el dia
+        $fechafi = Carbon::parse($fecha_fin);
+        $MismoDia = Reporte::Where('user_id', $thisUserId)
+            ->WhereDate('fecha_ini', $fechafi)
+            ->WhereTime('fecha_ini', '>', $fechafi->format('H:i:s')) // Posterior en tiempo
+            ->exists();
+        if ($MismoDia) {
+            return "Los reporten deben ser en orden";
+        }
+
         return '';
     }
 }
