@@ -19,14 +19,14 @@ LISTO(15NOV 12:06PM) :: 1. bloquear reportes anteriores. si reporta a las 8pm no
  LISTO:: 2. valor hora = salario / 235
   :: 2.1. no se tiene en cuenta, disponibilidad no puede generar horas extras.
 
- LISTO:: 3. no se muestra el nombre del cc en el reporte
- LISTO:: 3.1 botón para alternar entre tiempo/dinero
+LISTO:: 3. no se muestra el nombre del cc en el reporte
+LISTO:: 3.1 botón para alternar entre tiempo/dinero
 
 LISTO :: 4 bloquear reportes futuros
 
 _ pruebas : oscar dario palacios
 
-:: 5 no poder reportar mas de 2 días anteriores.  ejemplo hoy 5 ya no pueden reportar el 3
-:: 5.1 Se espera el comunicado de jessica para poner la restricción de
+LISTO:: 5 no poder reportar mas de 4 días anteriores (se hablo que 2, pero eso es muy poco).  ejemplo hoy 5 de nov, ya no pueden reportar el 3 noviembre pa atras
+:: 5.1 Se espera el comunicado de jessica para poner las nuevas restricciones
 
 Dias Restricción reporte (anterior)

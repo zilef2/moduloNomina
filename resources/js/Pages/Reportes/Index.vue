@@ -141,7 +141,7 @@
             {label:'Diciembre', value:12},
         ],
         Reporte_Super_EditOpen: false,
-
+        disableCreate:false,
     })
 
     onMounted(() => {
@@ -253,13 +253,14 @@ const handleCheckboxChange = (values) => {
                         </div>
                     </div>
 
-                    <Create :show="data.createOpen" @close="data.createOpen = false" :title="props.title"
+                    <Create :show="data.createOpen" @close="data.createOpen = false" @reportFinished="data.disableCreate = true" :title="props.title"
                         :valoresSelect="props.valoresSelect" :IntegerDefectoSelect="props.IntegerDefectoSelect"
                         :horasemana="props.horasemana" :startDateMostrar="props.startDateMostrar"
                         :endDateMostrar="props.endDateMostrar" :numberPermissions="props.numberPermissions"
                         :ArrayOrdinarias="props.ArrayOrdinarias" :horasTrabajadasHoy = "props.horasTrabajadasHoy"
                         :HorasDeCadaSemana="props.HorasDeCadaSemana"
                         :ArrayHorasSemanales="props.ArrayHorasSemanales"
+                            :disabled=disableCreate
                         />
                     <CreateMass :show="data.createMassOpen" @close="data.createMassOpen = false" :title="props.title"
                         :valoresSelect="props.valoresSelect" :IntegerDefectoSelect="props.IntegerDefectoSelect"

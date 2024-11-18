@@ -15,7 +15,7 @@ const emit = defineEmits(["open"])
 //     Inertia.visit('/users/export', { method: 'get', download: true });
 // }
 
-let version = "1.22s_24"
+let version = "1.23_nov18"
 const downloadExcel = async () => {
     window.open('/users/export', '_blank')
 }

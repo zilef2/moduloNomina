@@ -2,17 +2,13 @@
 
 return [
 
+    'mysql' => [
+        'dump_command_path' => "C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin"
+    ],
     'backup' => [
-
-        /*
-         * The name of this application. You can use this name to monitor
-         * the backups.
-         */
-        'name' => env('APP_NAME', 'laravel-backup').'_06oct2023',
+        'name' => env('APP_NAME', 'laravel-backup').'_18nov2024',
         'source' => [
-
             'files' => [
-
                 /*
                  * The list of directories and files that will be included in the backup.
                  */
