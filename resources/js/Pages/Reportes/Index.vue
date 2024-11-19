@@ -588,6 +588,7 @@ const handleCheckboxChange = (values) => {
 
     </AuthenticatedLayout>
 </template>
+
 <!--<style scoped>-->
 <!--&gt;>> {-->
 //--vs-controls-color: #664cc3;

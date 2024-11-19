@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static bool|null forceDelete()
  * @method static Builder|static query()
  * @method static Builder|static where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static Builder|static WhereBetween($column, $array)
  * @method static Builder|static WhereYear($column, $operator = null, $value = null)
  * @method static Builder|static WhereMonth($column, $operator = null, $value = null)
  * @method static Builder|static orWhere($column, $operator = null, $value = null)

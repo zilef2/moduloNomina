@@ -44,7 +44,7 @@ let label_diurnas = ref(null)
 
 const HORAS_ESTANDAR = props.ArrayHorasSemanales.HORAS_ORDINARIAS // 9horitas
 const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - HORAS_ESTANDAR //notes: 7jul = 40
-const LimiteHorasTrabajadas = 23
+const LimiteHorasTrabajadas = 25
 
 
 const emit = defineEmits(["close","reportFinished"]);
@@ -60,7 +60,7 @@ const data = reactive({
         watchEffect: false,
         CuandoEiezaExtra: true,
         dia: false,
-        noche: false,
+        noche: true,
         extradia: false,
         extranoche: false,
         dominicales: false,
@@ -69,7 +69,7 @@ const data = reactive({
         EsFestivo: false,
 
         MostrarTrabajadaSemana: false,
-        MostrarAlmuersini: true,
+        MostrarAlmuersini: false,
         ValorRealalmuerzo: 0,
     },
     const: {
@@ -129,8 +129,8 @@ let horahoy = newdate.getHours()
 if (props.numberPermissions > 8) { //temporaly commented
     // form.fecha_ini = '2024-11-15T21:00'
     // form.fecha_fin = '2024-11-15T23:58'
-    form.fecha_ini = '2024-11-15T01:00'
-    form.fecha_fin = '2024-11-15T02:00'
+    form.fecha_ini = '2024-11-19T19:00'
+    form.fecha_fin = '2024-11-19T23:58'
 } else {
     let timedate = TransformTdate(7)//la hora
     let timedate2 = TransformTdate(16)

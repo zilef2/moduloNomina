@@ -29,6 +29,13 @@ _ pruebas : oscar dario palacios
 LISTO:: 5 no poder reportar mas de 4 días anteriores (se hablo que 2, pero eso es muy poco).  ejemplo hoy 5 de nov, ya no pueden reportar el 3 noviembre pa atras
 :: 5.1 Se espera el comunicado de jessica para poner las nuevas restricciones
 
-Dias Restricción reporte (anterior)
+ANTERIOR:: 6 no se podia reportar mas de 23 horas, ahora si
 
 ADICIONAL:: aun :: filtro por cc
+
+
+PROXIMA REUNION::
+Esta en pruebas{
+    el calculo de las horas: extra_nocturnas
+    cuando son reportes que superan las 22 horas
+}

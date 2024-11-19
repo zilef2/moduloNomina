@@ -6,16 +6,17 @@ export function validacionNoMasDe3Diax(DiaForm:string):string {
     }
 
     let formDate:Date = new Date(DiaForm); // Convertir DiaForm a un objeto Date
-    let differenceInMilliseconds = formDate.getTime() - today.getTime(); // Diferencia en milisegundos
-    let differenceInDays = differenceInMilliseconds / (1000 * 60 * 60 * 24); // Diferencia en días
+    let differenceInDays:number = formDate.getDate() - today.getDate(); // Diferencia en días
 
     // Validaciones
-    if (differenceInDays > 0) {
+    console.clear()
+    console.log("differenceInDays", differenceInDays);
+    if (formDate.getDate() > today.getDate()) {
         return "El Reporte no puede ser futuro al día de hoy.";
     }
 
-    if (differenceInDays < -3) {
-        return "El Reporte es de mas de 4 días en el pasado";
+    if (differenceInDays < -4) {
+        return "El Reporte es de mas de 4 días átras";
     }
     return "ok";
 }

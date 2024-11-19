@@ -127,7 +127,6 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
         }else{
             if(horasFin > 21){//si existan horas nocturnas, si no son 0
                 Tarde = (horasFin - 21);
-                console.log("=>(Create.vue:512) Tarde", Tarde);
             }
         }
     }
@@ -237,7 +236,6 @@ function RestarAlmuarzo(form,data){
     let LIMITE_ALMUERZO:number = 8
     let HayAlmuerzo:number = 8
     HayAlmuerzo -= data.TrabajadasHooy
-    console.log("LUEGO HayAlmuerzo", HayAlmuerzo);
     // LIMITE_ALMUERZO = LIMITE_ALMUERZO - data.TrabajadasHooy < 0 ? 0 : LIMITE_ALMUERZO - data.TrabajadasHooy
 
     var fechain_i = new Date(form.fecha_ini)
@@ -246,7 +244,6 @@ function RestarAlmuarzo(form,data){
         HayAlmuerzo -= 2
         LIMITE_ALMUERZO -= 2
     }
-    console.log("=>(HelpingCreate2.ts:250) form.horas_trabajadas >= HayAlmuerzo", form.horas_trabajadas >= HayAlmuerzo);
     let numerador = form.horas_trabajadas + data.TrabajadasHooy
     // -9
     if(form.horas_trabajadas >= HayAlmuerzo){
@@ -257,9 +254,7 @@ function RestarAlmuarzo(form,data){
         }
     }
 
-
     data.ValorRealalmuerzo = form.almuerzo
-    console.log("=>(HelpingCreate2.ts:251) data.ValorRealalmuerzo", data.ValorRealalmuerzo);
     form.almuerzo += ' horas'
 
     if(numerador > LIMITE_ALMUERZO) {

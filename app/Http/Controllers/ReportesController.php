@@ -3,38 +3,35 @@
 namespace App\Http\Controllers;
 
 use App\helpers\Myhelp;
-use App\Http\Controllers\Controller;
-use App\Models\Parametro;
-use App\Models\Permission;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
-use App\Models\Reporte;
 use App\Http\Requests\ReporteRequest;
 use App\Models\CentroCosto;
+use App\Models\Parametro;
+use App\Models\Reporte;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class ReportesController extends Controller
 {
-
     //<editor-fold desc="Select y filtros">
     public function losSelect(&$valoresSelectConsulta, &$showUsers, &$valoresSelect, &$userFiltro, $numberPermissions)
     {
         $elUser = Myhelp::AuthU();
         $valoresSelectConsulta = CentroCosto::Where('activo', 1)->orderBy('nombre')->get();
-        $userFiltro[0] = ["label" => "Sin empleado", "value" => 0];
+        $userFiltro[0] = ['label' => 'Sin empleado', 'value' => 0];
         foreach ($valoresSelectConsulta as $value) {
             $valoresSelect[] = [
                 'label' => $value->nombre, //centro de costos
-                'value' => (int)($value->id),
+                'value' => (int) ($value->id),
             ];
-            $showSelect[(int)($value->id)] = $value->nombre;
+            $showSelect[(int) ($value->id)] = $value->nombre;
         }
         $usuariosSelectConsulta = User::orderBy('name')->get();
         foreach ($usuariosSelectConsulta as $value) {
-            $showUsers[(int)($value->id)] = $value->name;
+            $showUsers[(int) ($value->id)] = $value->name;
         }
 
         if ($numberPermissions === 3) { //
@@ -52,9 +49,10 @@ class ReportesController extends Controller
         foreach ($userEmpleados as $value) {
             $userFiltro[] = [
                 'label' => $value->name,
-                'value' => (int)($value->id),
+                'value' => (int) ($value->id),
             ];
         }
+
         return $showSelect;
     }
 
@@ -79,7 +77,7 @@ class ReportesController extends Controller
             $Reportes->where('diurnas', $request->searchHorasD);
         }
         if ($request->has('HorasNoDiurnas')) {
-            $Reportes->where('diurnas', "!=",$request->HorasNoDiurnas);
+            $Reportes->where('diurnas', '!=', $request->HorasNoDiurnas);
         }
         if ($request->has('searchIncongruencias')) {
             $Reportes->whereRaw('diurnas + nocturnas + extra_diurnas + extra_nocturnas + dominical_diurno + dominical_nocturno + dominical_extra_diurno + dominical_extra_nocturno != horas_trabajadas');
@@ -97,7 +95,7 @@ class ReportesController extends Controller
             $hoyNow = Carbon::now();
             $elquince = clone $hoyNow;
             $elquince = $elquince->startOfMonth()->addDays(14);
-            if ($request->FiltroQuincenita['value'] === "1") {
+            if ($request->FiltroQuincenita['value'] === '1') {
                 $Reportes->whereDay('fecha_ini', '<=', 15);
             } else {
                 $Reportes->whereDay('fecha_ini', '>', 15);
@@ -108,8 +106,8 @@ class ReportesController extends Controller
             $request->has(['searchh2'])
             && $request->searchh1 != 0
         ) {
-            $h1 =$request->searchh1;
-            $h2 =$request->searchh2;
+            $h1 = $request->searchh1;
+            $h2 = $request->searchh2;
             $Reportes->whereDay('fecha_ini', '>=', $h1);
             $Reportes->whereDay('fecha_fin', '<=', $h2);
         }
@@ -148,7 +146,6 @@ class ReportesController extends Controller
             }
         }
 
-
         //end of filters, now order
         if ($request->has(['field', 'order'])) {
             $Reportes->orderBy($request->field, $request->order);
@@ -158,7 +155,6 @@ class ReportesController extends Controller
     }
 
     //</editor-fold>
-
 
     private function ReportesFunQuicena($numberPermissions, $Authuser)
     {
@@ -194,9 +190,9 @@ class ReportesController extends Controller
             $Reportes->whereUser_id($Authuser->id);
 
             $nombresTabla = [//0: como se ven //1 como es la BD
-                ["Acciones", "#", "Centro costo", "valido", "inicio", "fin", "horas trabajadas", "🍗", 'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', "observaciones"],
-                ["b_valido", "t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "v_almuerzo", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno', "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean
-                [null, null, null, null, "b_valido", "t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "v_almuerzo", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno', "s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean
+                ['Acciones', '#', 'Centro costo', 'valido', 'inicio', 'fin', 'horas trabajadas', '🍗', 'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', 'observaciones'],
+                ['b_valido', 't_fecha_ini', 't_fecha_fin', 'i_horas_trabajadas', 'v_almuerzo', 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno', 's_observaciones'], //m for money || t for datetime || d date || i for integer || s string || b boolean
+                [null, null, null, null, 'b_valido', 't_fecha_ini', 't_fecha_fin', 'i_horas_trabajadas', 'v_almuerzo', 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno', 's_observaciones'], //m for money || t for datetime || d date || i for integer || s string || b boolean
             ];
 
             //# solo validos 0 aun no | 1 valido | 2 rechazado
@@ -220,14 +216,13 @@ class ReportesController extends Controller
                 }
             }
 
-
         } else { //administrativo, supervisor y admin
             $this->Filtros($request, $Reportes);
 
             $nombresTabla = [//0: como se ven //1 como es la BD
-                ["Acciones", "#", "Centro costo", "Trabajador", "Valido", "Inicio", "Fin", "Horas trabajadas", "🍗", 'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', "observaciones"],
-                ["b_valido", "t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "v_almuerzo", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno', "s_observaciones"], //m for money || t for datetime || d date || i for integer || s string || b boolean
-                [null, null, null, null, "b_valido", "t_fecha_ini", "t_fecha_fin", "i_horas_trabajadas", "v_almuerzo", 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno', "s_observaciones"] //m for money || t for datetime || d date || i for integer || s string || b boolean
+                ['Acciones', '#', 'Centro costo', 'Trabajador', 'Valido', 'Inicio', 'Fin', 'Horas trabajadas', '🍗', 'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', 'observaciones'],
+                ['b_valido', 't_fecha_ini', 't_fecha_fin', 'i_horas_trabajadas', 'v_almuerzo', 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno', 's_observaciones'], //m for money || t for datetime || d date || i for integer || s string || b boolean
+                [null, null, null, null, 'b_valido', 't_fecha_ini', 't_fecha_fin', 'i_horas_trabajadas', 'v_almuerzo', 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno', 's_observaciones'], //m for money || t for datetime || d date || i for integer || s string || b boolean
             ];
 
             $quincena = [
@@ -249,7 +244,7 @@ class ReportesController extends Controller
                         ->count(),
                     'Segunda quincena' => Reporte::whereBetween('fecha_ini', [Carbon::now()->startOfMonth()->addDays(15), Carbon::now()->LastOfMonth()])
                         ->Where('centro_costo_id', $Authuser->centro_costo_id)
-                        ->count()
+                        ->count(),
                 ];
 
             } else { //admin y administrativo
@@ -257,14 +252,14 @@ class ReportesController extends Controller
                     $horasPersonal = Reporte::WhereBetween('fecha_ini', [$startDate, $endDate])
                         ->sum('horas_trabajadas');
 
-//                    $Reportes->where('centro_costo_id', $Authuser->centro_costo_id);
+                    //                    $Reportes->where('centro_costo_id', $Authuser->centro_costo_id);
                 }
             }
-            $titulo = 'Mis Horas (esta quincena): ' . $horasPersonal;
+            $titulo = 'Mis Horas (esta quincena): '.$horasPersonal;
         }
+
         return [$nombresTabla, $horasemana, $quincena, $horasPersonal];
     }
-
 
     private function DoArrayHorasSemanales()
     {
@@ -275,6 +270,7 @@ class ReportesController extends Controller
                 'MAXIMO_HORAS_SEMANALES' => $parametros['HORAS_NECESARIAS_SEMANA'],
             ];
         }
+
         return [0, 0];
     }
 
@@ -317,15 +313,13 @@ class ReportesController extends Controller
         $sumdominical_extra_diurno = $ReportesMes->sum('dominical_extra_diurno');
         $sumdominical_extra_nocturno = $ReportesMes->sum('dominical_extra_nocturno');
 
-
         //5abril2024
         //suma de horas ordinarias[0] &
         $ArrayOrdinarias = Myhelp::CalcularPendientesQuicena($Authuser);
 
         //help: $HorasDeCadaSemana en el [0] esta la semana actual, y de resto son numSemana => SumaHorasOrdinarias
         $HorasDeCadaSemana = Myhelp::CalcularHorasDeCadaSemana($startDate, $endDate, $Authuser);
-//        dd($HorasDeCadaSemana);
-
+        //        dd($HorasDeCadaSemana);
 
         //todo: 1ago2024:  para el total de las horas, hay que filtrar por el anio
         //20ene2024
@@ -335,9 +329,9 @@ class ReportesController extends Controller
             ->WhereYear('fecha_ini', $esteAnio)
             ->Where('user_id', $Authuser->id)->pluck('horas_trabajadas', 'fecha_ini')
             ->toArray();
-//        dd($horasTrabajadasHoy);
+        //        dd($horasTrabajadasHoy);
         foreach ($horasTrabajadasHoy as $index => $item) {
-            $elIndex = (int)Carbon::parse($index)->format('d');
+            $elIndex = (int) Carbon::parse($index)->format('d');
             if (isset($horasTrabajadasHoy2[$elIndex])) {
                 $horasTrabajadasHoy2[$elIndex] += $item;
             } else {
@@ -354,9 +348,9 @@ class ReportesController extends Controller
                 'soloValidos', 'FiltroUser', 'searchDDay',
                 'searchHorasD', 'soloQuincena', 'searchIncongruencias',
                 'searchQuincena', 'FiltroQuincenita',
-                'searchh1', 'searchh1','HorasNoDiurnas'
+                'searchh1', 'searchh1', 'HorasNoDiurnas',
             ]),
-            'perPage' => (int)$perPage,
+            'perPage' => (int) $perPage,
             'fromController' => $Reportes->paginate($perPage),
             'breadcrumbs' => [['label' => __('app.label.Reportes'), 'href' => route('Reportes.index')]],
             'nombresTabla' => $nombresTabla,
@@ -374,7 +368,7 @@ class ReportesController extends Controller
             'ArrayOrdinarias' => $ArrayOrdinarias,
             'userFiltro' => $userFiltro,
 
-            'sumhoras_trabajadas' => (int)($sumhoras_trabajadas),
+            'sumhoras_trabajadas' => (int) ($sumhoras_trabajadas),
             'sumdiurnas' => $sumdiurnas, 'sumnocturnas' => $sumnocturnas, 'sumextra_diurnas' => $sumextra_diurnas, 'sumextra_nocturnas' => $sumextra_nocturnas, 'sumdominical_diurno' => $sumdominical_diurno, 'sumdominical_nocturno' => $sumdominical_nocturno, 'sumdominical_extra_diurno' => $sumdominical_extra_diurno, 'sumdominical_extra_nocturno' => $sumdominical_extra_nocturno,
             'horasTrabajadasHoy' => $horasTrabajadasHoy2 ?? [],
             'HorasDeCadaSemana' => $HorasDeCadaSemana,
@@ -383,16 +377,15 @@ class ReportesController extends Controller
         ]);
     }//fin index
 
-    public function create()
-    {
-    }
+    public function create() {}
 
     public function updatingDate($date)
     {
         if ($date === null || $date == '1969-12-31') {
             return null;
         }
-        return date("Y-m-d H:i:s", strtotime($date));
+
+        return date('Y-m-d H:i:s', strtotime($date));
     }
 
     public function store(ReporteRequest $request)
@@ -403,8 +396,9 @@ class ReportesController extends Controller
             $fecha_ini = $this->updatingDate($request->fecha_ini);
             $fecha_fin = $this->updatingDate($request->fecha_fin);
             $mensajeError = $this->NoEsValidoPorFecha($fecha_ini, $fecha_fin);
-            if ($mensajeError !== '')
+            if ($mensajeError !== '') {
                 return back()->with('error', $mensajeError);
+            }
 
             $Reportes = new Reporte;
             $Reportes->fecha_ini = $fecha_ini;
@@ -429,35 +423,35 @@ class ReportesController extends Controller
 
             $Reportes->save();
             DB::commit();
+
             return back()->with('success', __('app.label.created_successfully', ['name' => $Reportes->nombre]));
 
         } catch (\Throwable $th) {
             DB::rollback();
             myhelp::EscribirEnLog($this, 'reportes store', $th->getMessage(), 0, 1);
 
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Reportes')]) . $th->getMessage());
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Reportes')]).$th->getMessage());
         }
     }
 
     //fin store
 
-    public function show($id)
-    {
-    }
+    public function show($id) {}
 
     public function edit($id)
     {
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes edit| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 
         $Reportes = Reporte::findOrFail($id);
+
         return Inertia::render('Reportes.edit', ['Reportes' => $Reportes]);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param ReportesRequest $request
-     * @param int $id
+     * @param  ReportesRequest  $request
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -468,7 +462,7 @@ class ReportesController extends Controller
         try {
             $Reportes = Reporte::findOrFail($id);
             if ($request->valido === 1 || $request->valido === true) {
-                $Reportes->valido = $request->valido;//0 creado //1 aceptado //2 rechazado
+                $Reportes->valido = $request->valido; //0 creado //1 aceptado //2 rechazado
             } else {
                 $Reportes->fecha_ini = $this->updatingDate($request->fecha_ini);
                 $Reportes->fecha_fin = $this->updatingDate($request->fecha_fin);
@@ -484,25 +478,26 @@ class ReportesController extends Controller
                 $Reportes->dominical_extra_diurno = $request->dominical_extra_diurno;
                 $Reportes->dominical_extra_nocturno = $request->dominical_extra_nocturno;
 
-                $Reportes->valido = $request->valido;//0 creado //1 aceptado //2 rechazado
+                $Reportes->valido = $request->valido; //0 creado //1 aceptado //2 rechazado
                 $Reportes->observaciones = $request->observaciones;
                 $Reportes->centro_costo_id = $request->centro_costo_id;
             }
             $Reportes->save();
             DB::commit();
+
             return back()->with('success', __('app.label.updated_successfully', ['name' => 'Reporte']));
         } catch (\Throwable $th) {
             DB::rollback();
             myhelp::EscribirEnLog($this, 'reportes update', $th->getMessage(), 0, 1);
-            return back()->with('error', __('app.label.updated_error', ['name' => __('app.label.Reportes')]) . $th->getMessage());
+
+            return back()->with('error', __('app.label.updated_error', ['name' => __('app.label.Reportes')]).$th->getMessage());
         }
     }
-
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param int $id
+     * @param  int  $id
      * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy($id)
@@ -516,24 +511,26 @@ class ReportesController extends Controller
             if ($numberPermissions > 8) {
                 $Reportes->delete();
                 DB::commit();
+
                 return back()->with('success', __('app.label.deleted_successfully', ['name' => 'Reporte']));
             }
             if ($Reportes->valido == 0 || $Reportes->valido == 2) {
                 $Reportes->delete();
                 DB::commit();
+
                 return back()->with('success', __('app.label.deleted_successfully', ['name' => 'Reporte']));
             }
             DB::commit();
-            return back()->with('warning', __('app.label.not_deleted', ['name' => 'Reporte']) . '. Ya esta aprobado');
+
+            return back()->with('warning', __('app.label.not_deleted', ['name' => 'Reporte']).'. Ya esta aprobado');
 
         } catch (\Throwable $th) {
             DB::rollback();
             myhelp::EscribirEnLog($this, 'reportes destroy', $th->getMessage(), 0, 1);
 
-            return back()->with('error', __('app.label.deleted_error', ['name' => __('app.label.Reportes')]) . $th->getMessage());
+            return back()->with('error', __('app.label.deleted_error', ['name' => __('app.label.Reportes')]).$th->getMessage());
         }
     }
-
 
     public function MassiveReportes(Request $request)
     {
@@ -541,7 +538,7 @@ class ReportesController extends Controller
 
         DB::beginTransaction();
         try {
-//            $thisUserId = myhelp::AuthU()->id;
+            //            $thisUserId = myhelp::AuthU()->id;
             $fecha_ini = Carbon::parse($request->fecha_ini[0], 'America/Bogota')->setHour(7);
             $fecha_fin = Carbon::parse($request->fecha_ini[1], 'America/Bogota')->setHour(16);
             $diff = $fecha_ini->diffinDays($fecha_fin) + 1;
@@ -550,10 +547,11 @@ class ReportesController extends Controller
             if ($request->user_id) {
                 $userExiste = User::find($request->user_id);
 
-                if ($userExiste)
+                if ($userExiste) {
                     $UltimoUser = $request->user_id;
-                else
+                } else {
                     return back()->with('error', 'Persona inexistente');
+                }
 
             } else {
                 $UltimoUser = Myhelp::AuthU()->id;
@@ -566,6 +564,7 @@ class ReportesController extends Controller
                 $fecha_fin->addHours($valorQuemado_HorasTrabajadas);
                 if ($fecha_ini->isSunday()) {
                     $fecha_ini->addDays();
+
                     continue;
                 }
                 $fecha_ini->addDays();
@@ -592,13 +591,15 @@ class ReportesController extends Controller
             }
 
             DB::commit();
+
             return back()->with('success', __('app.label.created_successfully', ['name' => $Reportes->nombre]));
 
         } catch (\Throwable $th) {
             DB::rollback();
-            $mensajeErrorTH = $th->getMessage() . ' L:' . $th->getLine() . ' Ubi:' . $th->getFile();
-            myhelp::EscribirEnLog($this, 'MassiveReportes', $mensajeErrorTH,0,1);
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Reportes')]) . $mensajeErrorTH);
+            $mensajeErrorTH = $th->getMessage().' L:'.$th->getLine().' Ubi:'.$th->getFile();
+            myhelp::EscribirEnLog($this, 'MassiveReportes', $mensajeErrorTH, 0, 1);
+
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Reportes')]).$mensajeErrorTH);
         }
     }
 
@@ -607,11 +608,12 @@ class ReportesController extends Controller
         try {
             $reportes = Reporte::whereIn('id', $request->id);
             $reportes->delete();
-            return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.reporte')]));
+
+            return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id).' '.__('app.label.reporte')]));
         } catch (\Throwable $th) {
             myhelp::EscribirEnLog($this, 'reportes destroybulk', $th->getMessage(), 0, 1);
 
-            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.reporte')]) . $th->getMessage());
+            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id).' '.__('app.label.reporte')]).$th->getMessage());
         }
     }
 
@@ -640,12 +642,13 @@ class ReportesController extends Controller
             //            $Reporte->centro_costo_id = $request->centro_costo_id;
             $Reporte->save();
             DB::commit();
+
             return back()->with('success', __('app.label.updated_successfully', ['name' => 'Reporte']));
         } catch (\Throwable $th) {
             DB::rollback();
             myhelp::EscribirEnLog($this, 'reportes reporte super edit', $th->getMessage(), 0, 1);
 
-            return back()->with('error', __('app.label.updated_error', ['name' => __('app.label.Reportes')]) . $th->getMessage());
+            return back()->with('error', __('app.label.updated_error', ['name' => __('app.label.Reportes')]).$th->getMessage());
         }
     }
 
@@ -654,8 +657,8 @@ class ReportesController extends Controller
         //info: reporte futuro
         $manana = Carbon::tomorrow()->startOfDay();
         $fechain = Carbon::parse($fecha_ini);
-        if($fechain->greaterThanOrEqualTo($manana)) {
-            return "Reporte futuro";
+        if ($fechain->greaterThanOrEqualTo($manana)) {
+            return 'Reporte futuro';
         }
 
         //no solapes
@@ -666,8 +669,7 @@ class ReportesController extends Controller
         $traslapa = Reporte::where('user_id', $thisUserId)
             ->where(function ($query) use ($fecha_ini, $fecha_ini2, $fecha_fin, $fecha_fin2) {
                 $query->whereBetween('fecha_ini', [$fecha_ini, $fecha_fin2])
-                    ->orWhereBetween('fecha_fin', [$fecha_ini2, $fecha_fin])
-                ;
+                    ->orWhereBetween('fecha_fin', [$fecha_ini2, $fecha_fin]);
             })->exists();
 
         if ($traslapa) {
@@ -681,7 +683,7 @@ class ReportesController extends Controller
             ->WhereTime('fecha_ini', '>', $fechafi->format('H:i:s')) // Posterior en tiempo
             ->exists();
         if ($MismoDia) {
-            return "Los reporten deben ser en orden";
+            return 'Los reporten deben ser en orden';
         }
 
         return '';
