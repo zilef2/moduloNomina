@@ -3,16 +3,48 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * @method static \Illuminate\Database\Eloquent\Collection all()
+ * @method static Model|static find($id)
+ * @method static Model|static findOrFail($id)
+ * @method static Model|static first()
+ * @method static Model|static firstOrFail()
+ * @method static Model|static firstOrNew(array $attributes = [])
+ * @method static Model|static updateOrCreate(array $attributes, array $values = [])
+ * @method static Model|static create(array $attributes)
+ * @method static Model|static make(array $attributes = [])
+ * @method static \Illuminate\Database\Eloquent\Collection|static get()
+ * @method static bool|null forceDelete()
+ * @method static Builder|static query()
+ * @method static Builder|static where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static Builder|static WhereYear($column, $operator = null, $value = null)
+ * @method static Builder|static WhereMonth($column, $operator = null, $value = null)
+ * @method static Builder|static orWhere($column, $operator = null, $value = null)
+ * @method static Builder|static whereIn($column, $values)
+ * @method static Builder|static whereNotIn($column, $values)
+ * @method static Builder|static whereNull($column)
+ * @method static Builder|static whereNotNull($column)
+ * @method static Builder|static orderBy($column, $direction = 'asc')
+ * @method static Builder|static latest($column = 'created_at')
+ * @method static Builder|static oldest($column = 'created_at')
+ * @method static Builder|static paginate($perPage = 15, $columns = ['*'], $pageName = 'page')
+ * @method static Builder|static simplePaginate($perPage = 15, $columns = ['*'], $pageName = 'page')
+ * @method \Illuminate\Database\Eloquent\Relations\BelongsTo belongsTo(string $related, string $foreignKey = null, string $ownerKey = null)
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany hasMany(string $related, string $foreignKey = null, string $localKey = null)
+ * @method \Illuminate\Database\Eloquent\Relations\BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null, string $relatedPivotKey = null)
+ */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -36,91 +68,115 @@ class User extends Authenticatable
         'numero_contrato',
     ];
 
+    private mixed $salario;
+
     /**
      * * The attributes that should be hidden for serialization. * *
+     *
      * @var array<int, string>
      */
-    protected $hidden = [ 'password', 'remember_token', ];
+    protected $hidden = ['password', 'remember_token'];
 
-    public function getFechaIngreso() {
+    public function getFechaIngreso()
+    {
         return date('d-m-Y', strtotime($this->attributes['fecha_ingreso']));
     }
 
-    public function getCreatedAtAttribute() {
+    public function getCreatedAtAttribute()
+    {
         return date('d-m-Y H:i', strtotime($this->attributes['created_at']));
     }
 
-    public function getUpdatedAtAttribute() {
+    public function getUpdatedAtAttribute()
+    {
         return date('d-m-Y H:i', strtotime($this->attributes['updated_at']));
     }
 
-    public function getEmailVerifiedAtAttribute() {
-        return $this->attributes['email_verified_at'] == null ? null:date('d-m-Y H:i', strtotime($this->attributes['email_verified_at']));
+    public function getEmailVerifiedAtAttribute()
+    {
+        return $this->attributes['email_verified_at'] == null ? null : date('d-m-Y H:i', strtotime($this->attributes['email_verified_at']));
     }
 
-    public function getPermissionArray() {
+    public function getPermissionArray()
+    {
         return $this->getAllPermissions()->mapWithKeys(function ($pr) {
             return [$pr['name'] => true];
         });
     }
     //fin permissions
 
+    public function reportes()
+    {
+        return $this->hasMany('App\Models\Reporte');
+    }
 
-    public function reportes() {
-		return $this->hasMany('App\Models\Reporte');
-	}
-    public function cargo() {
-		return $this->belongsTo(Cargo::class);
-	}
-    public function centros() {
-		return $this->belongsToMany(CentroCosto::class,'centro_user');
-	}
-    public function ArrayCentrosID() {
+    public function cargo()
+    {
+        return $this->belongsTo(Cargo::class);
+    }
+
+    public function centros()
+    {
+        return $this->belongsToMany(CentroCosto::class, 'centro_user');
+    }
+
+    public function ArrayCentrosID()
+    {
         $result = [];
-        if(!$this->centros->isEmpty()){
+        if (! $this->centros->isEmpty()) {
             foreach ($this->centros as $centro) {
                 $result[] = $centro->id;
             }
         }
+
         return $result;
     }
-    public function ArraycentroName($numeroDeCentros = 0) {
-        if(!$this->centros->isEmpty()){
-            if($numeroDeCentros != 0){
+
+    public function ArraycentroName($numeroDeCentros = 0)
+    {
+        if (! $this->centros->isEmpty()) {
+            if ($numeroDeCentros != 0) {
                 $arrayNombres = [];
-                for ($i = 0; $i < $numeroDeCentros;$i++){
+                for ($i = 0; $i < $numeroDeCentros; $i++) {
                     $tempCentro = $this->centros->skip($i)->first();
-                    if(isset($tempCentro)){
+                    if (isset($tempCentro)) {
                         $arrayNombres[] = $this->centros->skip($i)->first()->nombre;
-                    }else{
+                    } else {
                         break;
                     }
                 }
-            }else{
+            } else {
                 foreach ($this->centros as $index => $centro) {
                     $arrayNombres[] = $centro->nombre;
                 }
             }
             $result = $arrayNombres;
-        } else{
+        } else {
             $result = 'Sin centros';
         }
-        return $result;
-	}
 
-    public static function UsersWithRol($rol){
+        return $result;
+    }
+
+    public static function UsersWithRol($rol)
+    {
         return User::whereHas('roles', function ($query) use ($rol) {
             return $query->where('name', $rol);
         });
     }
-    public static function UsersWithManyRols($ArrayRoles){
+
+    public static function UsersWithManyRols($ArrayRoles)
+    {
         return User::whereHas('roles', function ($query) use ($ArrayRoles) {
             return $query->whereIn('name', $ArrayRoles);
         });
     }
-    public function TieneEsteCentro($centroid){
+
+    public function TieneEsteCentro($centroid)
+    {
         $susCentros = $this->centros()->pluck('centro_costos.id')->toArray();
-        $result = in_array($centroid,$susCentros);
+        $result = in_array($centroid, $susCentros);
+
         return $result;
     }
 }

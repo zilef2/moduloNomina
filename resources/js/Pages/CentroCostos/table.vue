@@ -18,8 +18,8 @@ const props = defineProps({
     title: String,
     filters: Object,
     fromController: Object,
-    // breadcrumbs: Object,
     nombresTabla: Object,
+    UltimoReporteRealizado: String,
     perPage: Number,
 })
 
@@ -47,7 +47,7 @@ const sumarLoQueSea = () =>{
     if (data.params?.plata)
         SumarPlata()
     else
-        aSumarHoras()
+        aSumarHoras(0)
 }
 onMounted(() => {
     sumarLoQueSea()
@@ -73,7 +73,7 @@ const order = (field) => {
     }
 }
 
-const aSumarHoras = () => {
+const aSumarHoras = (veces) => {
     data.thoras_trabajadas = 0
     data.tdiurnas = 0
     data.tnocturnas = 0
@@ -83,11 +83,13 @@ const aSumarHoras = () => {
     data.tdominical_nocturno = 0
     data.tdominical_extra_diurno = 0
     data.tdominical_extra_nocturno = 0
-
+    veces++
     setTimeout(() => {
         if (props.fromController.data) {
             props.fromController.data.forEach(element => {
                 data.thoras_trabajadas += parseInt(element.horas_trabajadas)
+                console.log("=>(table.vue:91) element.horas_trabajadas", element.horas_trabajadas);
+
                 data.tdiurnas += parseInt(element.diurnas)
                 data.tnocturnas += parseInt(element.nocturnas)
                 data.textra_diurnas += parseInt(element.extra_diurnas)
@@ -98,7 +100,8 @@ const aSumarHoras = () => {
                 data.tdominical_extra_nocturno += parseInt(element.dominical_extra_nocturno)
             });
         } else {
-            aSumarHoras()
+            console.log("=>(table.vue:103) veces", veces);
+            aSumarHoras(veces)
         }
     }, 500)
 }
@@ -156,7 +159,6 @@ watchEffect(() => {})
 <template>
     <Head :title="props.title"></Head>
     <AuthenticatedLayout>
-        <!--        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />-->
         <section class="flex text-gray-600 body-font relative text-center mx-auto">
             <div class="px-5 py-2">
                 <div class="flex flex-col text-center w-full mb-2 mx-auto">
@@ -165,7 +167,10 @@ watchEffect(() => {})
                             <h1 class="sm:text-3xl text-2xl font-medium title-font mb-2 text-gray-900">
                                 Reporte de {{ props.title }}
                             </h1>
+                            <p class="text-center">{{props.UltimoReporteRealizado}}</p>
+
                             <h3 v-show="data.params.quincena"> Seleccione quincena y mes </h3>
+
                         </div>
                     </div>
                 </div>

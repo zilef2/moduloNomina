@@ -2,11 +2,40 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use PhpParser\Node\Param;
 
+/**
+ * @method static \Illuminate\Database\Eloquent\Collection all()
+ * @method static Model|static find($id)
+ * @method static Model|static findOrFail($id)
+ * @method static Model|static first()
+ * @method static Model|static firstOrFail()
+ * @method static Model|static firstOrNew(array $attributes = [])
+ * @method static Model|static updateOrCreate(array $attributes, array $values = [])
+ * @method static Model|static create(array $attributes)
+ * @method static Model|static make(array $attributes = [])
+ * @method static \Illuminate\Database\Eloquent\Collection|static get()
+ * @method static bool|null forceDelete()
+ * @method static Builder|static query()
+ * @method static Builder|static where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static Builder|static WhereYear($column, $operator = null, $value = null)
+ * @method static Builder|static WhereMonth($column, $operator = null, $value = null)
+ * @method static Builder|static orWhere($column, $operator = null, $value = null)
+ * @method static Builder|static whereIn($column, $values)
+ * @method static Builder|static whereNotIn($column, $values)
+ * @method static Builder|static whereNull($column)
+ * @method static Builder|static whereNotNull($column)
+ * @method static Builder|static orderBy($column, $direction = 'asc')
+ * @method static Builder|static latest($column = 'created_at')
+ * @method static Builder|static oldest($column = 'created_at')
+ * @method static Builder|static paginate($perPage = 15, $columns = ['*'], $pageName = 'page')
+ * @method static Builder|static simplePaginate($perPage = 15, $columns = ['*'], $pageName = 'page')
+ * @method \Illuminate\Database\Eloquent\Relations\BelongsTo belongsTo(string $related, string $foreignKey = null, string $ownerKey = null)
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany hasMany(string $related, string $foreignKey = null, string $localKey = null)
+ * @method \Illuminate\Database\Eloquent\Relations\BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null, string $relatedPivotKey = null)
+ */
 class CentroCosto extends Model
 {
     use HasFactory;
@@ -20,7 +49,19 @@ class CentroCosto extends Model
         'ValidoParaFacturar',
     ];
 
-    public function reportes()
+    private string|float $nombre;
+
+    private int|float $mano_obra_estimada;
+
+    private int|float $activo;
+
+    private string|float $descripcion;
+
+    private string|float $clasificacion;
+
+    private int|float $ValidoParaFacturar;
+
+    public function reportes(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Reporte::class);
     }
@@ -38,8 +79,10 @@ class CentroCosto extends Model
             if ($user->TieneEsteCentro($centroid)) {
                 return $user->name;
             }
+
             return null;
         })->filter()->toArray();
+
         return $result;
     }
 
@@ -51,6 +94,7 @@ class CentroCosto extends Model
                 $result[] = $supervisor->ArrayCentrosID();
             }
         }
+
         return array_unique($result);
     }
 
@@ -62,8 +106,10 @@ class CentroCosto extends Model
             if ($user->TieneEsteCentro($centroid)) {
                 return $user->id;
             }
+
             return null;
         })->filter()->toArray();
+
         return $result;
     }
 
@@ -71,25 +117,15 @@ class CentroCosto extends Model
     public function actualizarEstimado($anio, $mes): void
     {
         $parametros = session('parametros');
-        if (!$parametros) {
+        if (! $parametros) {
             $parametros = Parametro::find(1);
         }
 
         $BaseDeReportes = Reporte::Where('centro_costo_id', $this->id)
             ->WhereYear('fecha_ini', $anio)
             ->WhereMonth('fecha_ini', $mes)
+            ->Where('valido', 1)
             ->get();
-            //        }
-            //        else{
-            //            $diaquincena = date("d");
-            //            $dayMedio = 15;
-            //            $operacion = $diaquincena > $dayMedio ? '>' : '<=';
-            //            $BaseDeReportes = Reporte::Where('centro_costo_id', $this->id)
-            //                ->WhereYear('fecha_ini',date("Y"))
-            //                ->WhereMonth('fecha_ini',date("m"))
-            //                ->WhereDay('fecha_ini',$operacion,$dayMedio)
-            //                ->get();
-            //        }
 
         $vardiurnas = 0;
         $varnocturnas = 0;
@@ -113,18 +149,25 @@ class CentroCosto extends Model
                 $porcentaje_dominical_extra_diurno = $parametros->porcentaje_dominical_extra_diurno * $sal;
                 $porcentaje_dominical_extra_nocturno = $parametros->porcentaje_dominical_extra_nocturno * $sal;
 
-                $vardiurnas += ((double)$baseDeReporte->diurnas) * $porcentaje_diurno;
-                $varnocturnas += ((double)$baseDeReporte->nocturnas) * $porcentaje_nocturno;
-                $varextra_diurnas += ((double)$baseDeReporte->extra_diurnas) * $porcentaje_extra_diurno;
-                $varextra_nocturnas += ((double)$baseDeReporte->extra_nocturnas) * $porcentaje_extra_nocturno;
-                $vardominical_diurno += ((double)$baseDeReporte->dominical_diurno) * $porcentaje_dominical_diurno;
-                $vardominical_nocturno += ((double)$baseDeReporte->dominical_nocturno) * $porcentaje_dominical_nocturno;
-                $vardominical_extra_diurno += ((double)$baseDeReporte->dominical_extra_diurno) * $porcentaje_dominical_extra_diurno;
-                $vardominical_extra_nocturno += ((double)$baseDeReporte->dominical_extra_nocturno) * $porcentaje_dominical_extra_nocturno;
+                $vardiurnas += ((float) $baseDeReporte->diurnas) * $porcentaje_diurno;
+                $varnocturnas += ((float) $baseDeReporte->nocturnas) * $porcentaje_nocturno;
+                $varextra_diurnas += ((float) $baseDeReporte->extra_diurnas) * $porcentaje_extra_diurno;
+                $varextra_nocturnas += ((float) $baseDeReporte->extra_nocturnas) * $porcentaje_extra_nocturno;
+                $vardominical_diurno += ((float) $baseDeReporte->dominical_diurno) * $porcentaje_dominical_diurno;
+                $vardominical_nocturno += ((float) $baseDeReporte->dominical_nocturno) * $porcentaje_dominical_nocturno;
+                $vardominical_extra_diurno += ((float) $baseDeReporte->dominical_extra_diurno) * $porcentaje_dominical_extra_diurno;
+                $vardominical_extra_nocturno += ((float) $baseDeReporte->dominical_extra_nocturno) * $porcentaje_dominical_extra_nocturno;
             }
+
         }
 
-        $this->mano_obra_estimada = $vardiurnas + $varnocturnas + $varextra_diurnas + $varextra_nocturnas + $vardominical_diurno + $vardominical_nocturno + $vardominical_extra_diurno + $vardominical_extra_nocturno;
-        $this->update();
+        $this->mano_obra_estimada = (int) ($vardiurnas + $varnocturnas + $varextra_diurnas + $varextra_nocturnas + $vardominical_diurno + $vardominical_nocturno + $vardominical_extra_diurno + $vardominical_extra_nocturno);
+//        if ($this->id === 293)
+//            dd(
+//                $this->mano_obra_estimada
+//            );
+        $this->update([
+            'mano_obra_estimada' => $this->mano_obra_estimada,
+        ]);
     }
 }

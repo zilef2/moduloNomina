@@ -30,3 +30,5 @@ LISTO:: 5 no poder reportar mas de 4 días anteriores (se hablo que 2, pero eso 
 :: 5.1 Se espera el comunicado de jessica para poner las nuevas restricciones
 
 Dias Restricción reporte (anterior)
+
+ADICIONAL:: aun :: filtro por cc
