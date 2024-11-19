@@ -103,19 +103,20 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
     }
 }
 
-export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
-    const horasInicio = new Date(Inicio).getHours();
-    let horasFin = new Date(Fin).getHours();
+export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra, HORAS_ESTANDAR){
+    const horasInicio: number = new Date(Inicio).getHours();
+    let horasFin: number = new Date(Fin).getHours();
 
-    const DiaInicio = new Date(Inicio).getDate();
-    const DiaFin = new Date(Fin).getDate();
+    const DiaInicio: number = new Date(Inicio).getDate();
+    const DiaFin: number = new Date(Fin).getDate();
 
 
     let Madrugada:number = 0
     let Tarde:number = 0
+    let Resta = horasFin - horasInicio;
     if(DiaInicio === DiaFin){
         if(horasInicio < 6 && horasFin <= 6){//solo de noche
-            Madrugada = horasFin - horasInicio;
+            Madrugada = Resta;
         }else{
             if(horasInicio < 6){
                 Madrugada = (6 - horasInicio);
@@ -123,7 +124,7 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
         }
 
         if(horasInicio >= 21 && horasFin >= 21){//solo de noche
-            Tarde = horasFin - horasInicio;
+            Tarde = Resta;
         }else{
             if(horasFin > 21){//si existan horas nocturnas, si no son 0
                 Tarde = (horasFin - 21);
@@ -166,14 +167,14 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
     if(data.MostrarConsole.noche) {
         // console.clear()
         console.log("PRIMERO NOCHE 🚀");
-        console.log("Madrugada & tarde🚀", Madrugada,Tarde+' = '+(HorasNoc));
+        console.log("Madrugada & tarde🚀", Madrugada,Tarde,' = ',HorasNoc);
         console.log("horasInicio🚀", horasInicio);
         console.log("horasFin🚀", horasFin);
     }
     let extra:number = 0, ordinarias = 0;
 
     // --------------- calculo extra ---------------
-    if (CuandoEmpiezaExtra === null || typeof CuandoEmpiezaExtra === 'undefined' || CuandoEmpiezaExtra > 23) {
+    if (Resta < HORAS_ESTANDAR || CuandoEmpiezaExtra === null || typeof CuandoEmpiezaExtra === 'undefined' || CuandoEmpiezaExtra > 23) {
         return [0,HorasNoc]
     }else{
         if(CuandoEmpiezaExtra >= 21){
@@ -238,8 +239,8 @@ function RestarAlmuarzo(form,data){
     HayAlmuerzo -= data.TrabajadasHooy
     // LIMITE_ALMUERZO = LIMITE_ALMUERZO - data.TrabajadasHooy < 0 ? 0 : LIMITE_ALMUERZO - data.TrabajadasHooy
 
-    var fechain_i = new Date(form.fecha_ini)
-    var diaSemana = fechain_i.getDay();
+    const fechain_i: Date = new Date(form.fecha_ini);
+    const diaSemana:number = fechain_i.getDay();
     if (diaSemana === 6) {//sabado
         HayAlmuerzo -= 2
         LIMITE_ALMUERZO -= 2

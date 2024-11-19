@@ -202,7 +202,7 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
 
         if(CuandoEmpiezaExtra >= horasFinOme){
             form.diurnas = Math.abs(calcularDiurnas(data,form,form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra)[1]);
-            form.nocturnas = Math.abs(calcularNocturnas(data,form,form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra)[1]);
+            form.nocturnas = Math.abs(calcularNocturnas(data,form,form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra,HORAS_ESTANDAR)[1]);
         }else{ //extras
             // form.almuerzo = form.horas_trabajadas > 16 ? 2 : form.almuerzo;
             // form.almuerzo = form.horas_trabajadas + data.TemporalDiaAnterior > 8 ?  1 : 0;
@@ -218,7 +218,7 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
             form.extra_diurnas = horasExtrasDiurnas[0];
             form.diurnas = horasExtrasDiurnas[1];
 
-            let horasExtrasNocturnas = (calcularNocturnas(data,form,form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra));
+            let horasExtrasNocturnas = (calcularNocturnas(data,form,form.fecha_ini,form.fecha_fin,CuandoEmpiezaExtra,HORAS_ESTANDAR));
             form.extra_nocturnas = horasExtrasNocturnas[0];
             form.nocturnas = horasExtrasNocturnas[1];
         }
@@ -234,7 +234,7 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
 
         if(data.estado2359){
             if (CuandoEmpiezaExtra >= horasFinOme) {
-                if (form.extra_nocturnas >= 0) form.extra_nocturnas++
+                if (form.extra_nocturnas > 0) form.extra_nocturnas++
                 else {
                     if (form.dominical_nocturnas > 0) form.dominical_nocturnas++
                     else {
@@ -245,7 +245,7 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
                     }
                 }
             }else{
-                if (form.extra_nocturnas > 0) form.extra_nocturnas++
+                if (form.extra_nocturnas >= 0) form.extra_nocturnas++
                 else {
                     if (form.dominical_nocturnas > 0) form.dominical_nocturnas++
                     else {

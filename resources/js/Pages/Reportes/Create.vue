@@ -129,8 +129,8 @@ let horahoy = newdate.getHours()
 if (props.numberPermissions > 8) { //temporaly commented
     // form.fecha_ini = '2024-11-15T21:00'
     // form.fecha_fin = '2024-11-15T23:58'
-    form.fecha_ini = '2024-11-19T19:00'
-    form.fecha_fin = '2024-11-19T23:58'
+    form.fecha_ini = '2024-11-19T13:00'
+    form.fecha_fin = '2024-11-19T14:00'
 } else {
     let timedate = TransformTdate(7)//la hora
     let timedate2 = TransformTdate(16)
