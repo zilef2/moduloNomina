@@ -16,7 +16,7 @@ use Inertia\Response;
 
 class CentroTableController extends Controller
 {
-    private function noumbresTabla($numberPermissions)
+    private function noumbresTabla($numberPermissions): array
     {
         if ($numberPermissions < 2) { //admin | administrativo
             $nombresTabla = [//[0]: como se ven //[1] como es la BD
@@ -33,7 +33,7 @@ class CentroTableController extends Controller
         return $nombresTabla;
     }
 
-    private function TheQuery($id, $request, $plata = false)
+    private function TheQuery($id, $request, $plata = false): array
     {
         if ($request->fecha_ini && $request->quincena) {
             $esteMes = $request->fecha_ini;

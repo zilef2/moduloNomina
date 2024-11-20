@@ -24,7 +24,7 @@ class CentroCostosController extends Controller
     public function __construct()
     {
         session(['parametros' => Parametro::Find(1)]);
-        $this->minutosActualizarPresupueto = 15;
+        $this->minutosActualizarPresupueto = 1;
     }
 
     public function MapearClasePP(&$centroCostos, $numberPermissions, $request): void
@@ -90,7 +90,7 @@ class CentroCostosController extends Controller
         $ultimaLlamada = Cache::get($cacheKey);
         $tiempoActual = now();
         $centroCostosAll = CentroCosto::all();
-        if ( $tiempoActual->diffInMinutes($ultimaLlamada) >= ($this->minutosActualizarPresupueto)) {
+        if ($tiempoActual->diffInMinutes($ultimaLlamada) >= ($this->minutosActualizarPresupueto)) {
             $anio = date('Y');
             $mes = date('m');
             foreach ($centroCostosAll as $item) {

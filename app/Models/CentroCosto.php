@@ -162,10 +162,6 @@ class CentroCosto extends Model
         }
 
         $this->mano_obra_estimada = (int) ($vardiurnas + $varnocturnas + $varextra_diurnas + $varextra_nocturnas + $vardominical_diurno + $vardominical_nocturno + $vardominical_extra_diurno + $vardominical_extra_nocturno);
-//        if ($this->id === 293)
-//            dd(
-//                $this->mano_obra_estimada
-//            );
         $this->update([
             'mano_obra_estimada' => $this->mano_obra_estimada,
         ]);
