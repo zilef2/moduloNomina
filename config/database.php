@@ -34,7 +34,6 @@ return [
     */
 
     'connections' => [
-
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DATABASE_URL'),
@@ -94,7 +93,6 @@ return [
         ],
 
     ],
-
     /*
     |--------------------------------------------------------------------------
     | Migration Repository Table
@@ -105,9 +103,7 @@ return [
     | the migrations on disk haven't actually been run in the database.
     |
     */
-
     'migrations' => 'migrations',
-
     /*
     |--------------------------------------------------------------------------
     | Redis Databases
@@ -118,7 +114,6 @@ return [
     | such as APC or Memcached. Laravel makes it easy to dig right in.
     |
     */
-
     'redis' => [
 
         'client' => env('REDIS_CLIENT', 'phpredis'),
@@ -147,5 +142,4 @@ return [
         ],
 
     ],
-
 ];

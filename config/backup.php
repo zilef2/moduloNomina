@@ -3,7 +3,7 @@
 return [
 
     'mysql' => [
-        'dump_command_path' => "C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin"
+        'dump_command_path' => 'C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin',
     ],
     'backup' => [
         'name' => env('APP_NAME', 'laravel-backup').'_18nov2024',
@@ -28,9 +28,9 @@ return [
                     base_path('vscode'),
                     base_path('.vscode'),
                     base_path('bootstrap'),
-                    base_path('database'),
+                    //                    base_path('database'),
                     base_path('public'),
-                    base_path('routes'),
+                    //                    base_path('routes'),
                     base_path('tests'),
                     base_path('storage'),
                 ],
@@ -164,8 +164,8 @@ return [
      * the `Spatie\Backup\Notifications\Notifications` classes.
      */
     'notifications' => [
-        'enabled' => true,
-        'on_failure_only' => false,
+        'enabled' => false,
+        'on_failure_only' => true,
         'notifications' => [
             \Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification::class => ['mail'],
@@ -180,16 +180,13 @@ return [
          * notifiable will use the variables specified in this config file.
          */
         'notifiable' => \Spatie\Backup\Notifications\Notifiable::class,
-
         'mail' => [
             'to' => 'ajelof2@gmail.com',
-
             'from' => [
                 'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
                 'name' => env('MAIL_FROM_NAME', 'Example'),
             ],
         ],
-
     ],
 
     /*
@@ -232,12 +229,10 @@ return [
         'strategy' => \Spatie\Backup\Tasks\Cleanup\Strategies\DefaultStrategy::class,
 
         'default_strategy' => [
-
             /*
              * The number of days for which backups must be kept.
              */
-            'keep_all_backups_for_days' => 27,
-
+            'keep_all_backups_for_days' => 127,
             /*
              * The number of days for which daily backups must be kept.
              */
@@ -276,5 +271,4 @@ return [
          */
         'retry_delay' => 0,
     ],
-
 ];
