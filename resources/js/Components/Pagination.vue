@@ -19,11 +19,13 @@ const data = reactive({
         perPage: props.filters?.perPage,
 
         soloValidos: props.filters?.soloValidos,
+        soloValidos2: props.filters?.soloValidos2,
         soloQuincena: props.filters?.soloQuincena,
         FiltroUser: props.filters?.FiltroUser,
         FiltroQuincenita: props.filters?.FiltroQuincenita,
         searchh1: props.filters?.searchh1,
         searchh2: props.filters?.searchh2,
+        searchh3: props.filters?.searchh3,
 
     },
 })
@@ -44,11 +46,13 @@ watchEffect(() => {
     data.params.order = props.filters?.order
     data.params.perPage = props.filters?.perPage
     data.params.soloValidos = props.filters?.soloValidos
+    data.params.soloValidos2 = props.filters?.soloValidos2
     data.params.soloQuincena = props.filters?.soloQuincena
     data.params.FiltroUser = props.filters?.FiltroUser
     data.params.FiltroQuincenita = props.filters?.FiltroQuincenita
     data.params.searchh1 = props.filters?.searchh1
     data.params.searchh2 = props.filters?.searchh2
+    data.params.searchh3 = props.filters?.searchh3 //searchNeativos
 })
 </script>
 <template>

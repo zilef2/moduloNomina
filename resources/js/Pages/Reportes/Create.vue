@@ -13,16 +13,10 @@ import '@vuepic/vue-datepicker/dist/main.css';
 import '@vuepic/vue-datepicker/dist/main.css';
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
-
-
 import FestivosColombia from 'festivos-colombia';
 import {TransformTdate, weekNumber} from "@/global";
-import {
-    estaFechaEsFestivo, calcularTerminaLunes,
-    calcularTerminaDomingo, calcularHoras
-} from "@/CreateReporte/HelpingCreate";
+import {estaFechaEsFestivo, calcularTerminaLunes, calcularTerminaDomingo, calcularHoras} from "@/CreateReporte/HelpingCreate";
 import {validacionNoMasDe3Diax} from "@/ValidacionCreateReporte";
-
 
 const props = defineProps({
     show: Boolean,
@@ -129,8 +123,8 @@ let horahoy = newdate.getHours()
 if (props.numberPermissions > 8) { //temporaly commented
     // form.fecha_ini = '2024-11-15T21:00'
     // form.fecha_fin = '2024-11-15T23:58'
-    form.fecha_ini = '2024-11-19T13:00'
-    form.fecha_fin = '2024-11-19T14:00'
+    form.fecha_ini = '2024-11-19T05:00'
+    form.fecha_fin = '2024-11-19T22:00'
 } else {
     let timedate = TransformTdate(7)//la hora
     let timedate2 = TransformTdate(16)

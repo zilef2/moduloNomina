@@ -274,26 +274,26 @@ function RestarAlmuarzo(form,data){
         }
 
         //extras
-        if(form.extra_nocturnas > 0){ // && form.extra_nocturnas > form.extra_diurnas
+        if(form.extra_nocturnas >= data.ValorRealalmuerzo){ // && form.extra_nocturnas > form.extra_diurnas
             form.extra_nocturnas -= data.ValorRealalmuerzo
             form.almuerzo += ' nocturno'
             console.log('se quita noctura')
             return true;
         }
-        if(form.extra_diurnas > 0){
+        if(form.extra_diurnas >= data.ValorRealalmuerzo){
             form.extra_diurnas -= data.ValorRealalmuerzo
             form.almuerzo += ' diurno'
             console.log('se quita diurna')
             return true;
         }
 
-        if(form.nocturnas > 0){ //&& form.nocturnas > form.diurnas
+        if(form.nocturnas >= data.ValorRealalmuerzo){ //&& form.nocturnas > form.diurnas
             form.nocturnas -= data.ValorRealalmuerzo;
             form.almuerzo += ' nocturno';
             console.log(" form.nocturnas", form.nocturnas);
             return true;
         }
-        if(form.diurnas > 0) {
+        if(form.diurnas >= data.ValorRealalmuerzo) {
             form.diurnas -= data.ValorRealalmuerzo;
             form.almuerzo += ' diurno'
             console.log(" form.diurnas", form.diurnas);
@@ -304,24 +304,24 @@ function RestarAlmuarzo(form,data){
 
         //domini
         //extra dominical
-        if(form.dominical_extra_nocturnas > 0 ){ //&& form.dominical_extra_nocturnas > form.dominical_extra_diurnas
+        if(form.dominical_extra_nocturnas >= data.ValorRealalmuerzo ){ //&& form.dominical_extra_nocturnas > form.dominical_extra_diurnas
             form.dominical_extra_nocturnas -= data.ValorRealalmuerzo;
             form.almuerzo += ' dominical extra nocturno';
             return true;
         }
-        if(form.dominical_extra_diurnas > 0) {
+        if(form.dominical_extra_diurnas >= data.ValorRealalmuerzo) {
             form.dominical_extra_diurnas -= data.ValorRealalmuerzo;
             form.almuerzo += ' dominical extra diurno'
             return true;
         }
 
-        if(form.dominical_nocturnas > 0 ) { //&& form.dominical_nocturnas > form.dominical_diurnas
+        if(form.dominical_nocturnas >= data.ValorRealalmuerzo ) { //&& form.dominical_nocturnas > form.dominical_diurnas
             form.dominical_nocturnas -= data.ValorRealalmuerzo;
             form.almuerzo += ' dominical nocturno';
             console.log("=>(HelpingCreate2.ts:277) form.almuerzo", form.almuerzo);
             return true;
         }
-        if(form.dominical_diurnas > 0) {
+        if(form.dominical_diurnas >= data.ValorRealalmuerzo) {
             form.dominical_diurnas -= data.ValorRealalmuerzo;
             form.almuerzo += ' dominical'
             console.log("=>(HelpingCreate2.ts:284) form.almuerzo", form.almuerzo);

@@ -123,10 +123,22 @@ class ReportesController extends Controller
                     ->orWhere('dominical_extra_nocturno', '<>', 0);
             });
         }
+        if ($request->has('searchh3')) {
+            $campos = ['horas_trabajadas', 'almuerzo', 'diurnas', 'nocturnas', 'extra_diurnas', 'extra_nocturnas', 'dominical_diurno', 'dominical_nocturno', 'dominical_extra_diurno', 'dominical_extra_nocturno'];
+
+            $Reportes->Where(function ($query) use ($campos) {
+                foreach ($campos as $campo) {
+                    $query->orWhere($campo, '<', 0);
+                }
+            });
+        }
 
         //# solo validos //0 aun no | 1 valido | 2 rechazado
         if ($request->has('soloValidos')) {
             $Reportes->where('valido', 1);
+        }
+        if ($request->has('soloValidos2')) {
+            $Reportes->where('valido', 2);
         }
 
         //30abril 11am

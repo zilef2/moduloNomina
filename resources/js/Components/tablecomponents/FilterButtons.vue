@@ -7,7 +7,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:checked']);
 
-const checkedValues = ref([false, false,false]);
+const checkedValues = ref([false, false,false,false]);
 
 const handleChange = () => {
   emit('update:checked', checkedValues.value);
@@ -24,7 +24,7 @@ const handleChange = () => {
             </label>
         <div class="tooltip">Solo validos</div>
       </li>
-      <li class="icon-content">
+      <li v-show="props.numberPermissions > 10" class="icon-content">
           <label class="container">
             <input type="checkbox" v-model="checkedValues[1]" @change="handleChange">
             <div class="checkmark"></div>
@@ -37,15 +37,28 @@ const handleChange = () => {
             <div class="checkmark"></div>
             </label>
 <!--        <div class="tooltip">Siigo</div>-->
-        <div class="tooltip">(HD + HN) No son las H trabajadas</div>
+        <div class="tooltip">HD + HN</div>
       </li>
       <li class="icon-content" v-show="props.numberPermissions > 1">
           <label class="container">
             <input type="checkbox" v-model="checkedValues[3]" @change="handleChange" class="bg-red-300">
             <div class="checkmark"></div>
             </label>
-        <div class="tooltip">Siigo (solo extras)</div>
-<!--        <div class="tooltip">(HD + HN) No son las H trabajadas</div>-->
+        <div class="tooltip">Solo extras</div>
+      </li>
+      <li class="icon-content" v-show="props.numberPermissions > 9">
+          <label class="container">
+            <input type="checkbox" v-model="checkedValues[4]" @change="handleChange" class="bg-red-300">
+            <div class="checkmark"></div>
+            </label>
+        <div class="tooltip">Negativas</div>
+      </li>
+      <li class="icon-content" v-show="props.numberPermissions >= 0">
+          <label class="container">
+            <input type="checkbox" v-model="checkedValues[5]" @change="handleChange" class="bg-red-300">
+            <div class="checkmark"></div>
+            </label>
+        <div class="tooltip">No validos</div>
       </li>
     </ul>
 </template>
@@ -60,7 +73,6 @@ const handleChange = () => {
   height: 0;
   width: 0;
 }
-
 .container {
   display: block;
   position: relative;
@@ -68,42 +80,37 @@ const handleChange = () => {
   font-size: 1.7rem;
   user-select: none;
 }
-
 /* Create a custom checkbox */
 .checkmark {
   --clr: #0B6E4F;
   position: relative;
   top: 0;
-  left: 0;
+  left: -1px;
   height: 1.3em;
   width: 1.3em;
   background-color: #ccc;
   border-radius: 50%;
   transition: 300ms;
 }
-
 /* When the checkbox is checked, add a blue background */
 .container input:checked ~ .checkmark {
   background-color: var(--clr);
   border-radius: .5rem;
   animation: pulse 500ms ease-in-out;
 }
-
 /* Create the checkmark/indicator (hidden when not checked) */
 .checkmark:after {
   content: "";
   position: absolute;
   display: none;
 }
-
 /* Show the checkmark when checked */
 .container input:checked ~ .checkmark:after {
   display: block;
 }
-
 /* Style the checkmark/indicator */
 .container .checkmark:after {
-  left: 0.45em;
+  left: 0.6em;
   top: 0.25em;
   width: 0.25em;
   height: 0.5em;
@@ -111,7 +118,6 @@ const handleChange = () => {
   border-width: 0 0.15em 0.15em 0;
   transform: rotate(45deg);
 }
-
 @keyframes pulse {
   0% {
     box-shadow: 0 0 0 #0B6E4F90;
@@ -132,8 +138,6 @@ const handleChange = () => {
   }
 }
 
-
-
 //divisionn
 ul {
   list-style: none;
@@ -150,17 +154,17 @@ ul {
 }
 .example-2 .icon-content .tooltip {
   position: absolute;
-  width: 130px;
-  top: -60px;
-  left: 50%;
+  width: 100px;
+  top: -10px;
+  left: 20%;
   transform: translateX(-50%);
   color: #fff;
   background: #636363;
-  padding: 6px 10px;
-  border-radius: 15px;
+  padding: 6px 10px 4px 2px;
+  border-radius: 11px;
   opacity: 0;
   visibility: hidden;
-  font-size: 16px;
+  font-size: 15px;
   transition: all 0.2s ease;
 }
 .example-2 .icon-content:hover .tooltip {

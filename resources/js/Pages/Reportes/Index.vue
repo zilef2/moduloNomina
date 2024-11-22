@@ -107,6 +107,7 @@ const data = reactive({
         searchIncongruencias: props.filters?.searchIncongruencias,
         searchHorasD: props.filters?.searchHorasD,
         soloValidos: props.filters?.soloValidos,
+        soloValidos2: props.filters?.soloValidos2,
         soloQuincena: props.filters?.soloQuincena,
         FiltroUser: props.filters?.FiltroUser,
         FiltroQuincenita: props.filters?.FiltroQuincenita,
@@ -231,7 +232,8 @@ const handleCheckboxChange = (values) => {
     data.params.soloQuincena = values[1]
     data.params.searchIncongruencias = values[2]
     data.params.searchSiigo = values[3]
-    data.params.searchQuincena = values[4]
+    data.params.searchh3 = values[4]
+    data.params.soloValidos2 = values[5]
 };
 
 // props.userFiltro.unshift({
@@ -334,9 +336,6 @@ const handleCheckboxChange = (values) => {
                         <TextInput v-model="data.params.searchDDay" v-show="props.numberPermissions > 1"
                                    type="number" min="0" max="31" class="hidden lg:block w-2/3 md:w-full rounded-lg"
                                    :placeholder="lang().placeholder.searchDDay"/>
-                        <!--                        <TextInput v-model="data.params.searchQuincena"-->
-                        <!--                            type="number" min="0" max="31" class="block w-2/3 md:w-full rounded-lg"-->
-                        <!--                            :placeholder="lang().placeholder.searchQuincena" />-->
                         <!--                        <label for="soloval" class="hidden md:block mx-1 my-auto">Solo validos</label>-->
                         <!--                        <label for="soloval" class="mx-1 md:hidden my-auto">Val</label>-->
                         <!--                        <input v-model="data.params.soloValidos" id="soloval" type="checkbox"-->
@@ -367,8 +366,8 @@ const handleCheckboxChange = (values) => {
                 </div>
                 <div v-if="props.userFiltro && props.userFiltro.length > 0"
                      v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro"
-                     class="hidden lg:block mx-4">
-                    <InputLabel for="trabajador" value="Filtrar por trabajador" class="hidden md:block"/>
+                     class="block mx-4">
+                    <InputLabel for="trabajador" value="Filtrar por trabajador" class="block"/>
                     <v-select
                         v-model="data.params.FiltroUser"
                         :options="props.userFiltro" :reduce="element => element.value" label="label"
@@ -376,8 +375,8 @@ const handleCheckboxChange = (values) => {
                     ></v-select>
                 </div>
                 <div v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor'])"
-                     class="hidden md:block mx-4">
-                    <InputLabel for="Quincena" value="Quincena" class="hidden md:block"/>
+                     class="block mx-4">
+                    <InputLabel for="Quincena" value="Quincena" class="block"/>
                     <v-select
                         v-model="data.params.FiltroQuincenita"
                         label="texto"
@@ -406,7 +405,7 @@ const handleCheckboxChange = (values) => {
                     </thead>
                     <tbody>
                     <tr v-for="(clasegenerica, index) in fromController.data" :key="index"
-                        class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-indigo-600"
+                        class="border-t border-gray-200 dark:border-gray-700 hover:bg-indigo-300/30 hover:dark:bg-indigo-600"
                         :class="{ 'bg-gray-200/75 dark:bg-gray-600': index % 2 === 0 }"
                     >
                         <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
@@ -453,9 +452,7 @@ const handleCheckboxChange = (values) => {
                             </div>
                         </td>
                         <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (index + 1) }}</td>
-                        <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{
-                                showSelect[clasegenerica.centro_costo_id]
-                            }}
+                        <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ showSelect[clasegenerica.centro_costo_id] }}
                         </td>
                         <td v-show="can(['updateCorregido reporte'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
                             {{ showUsers[clasegenerica.user_id] }}
