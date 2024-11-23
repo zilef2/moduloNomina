@@ -66,6 +66,7 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::resource('/Reportes', ReportesController::class);
     Route::post('/Reportes/destroy-bulk', [ReportesController::class, 'destroyBulk'])->name('reporte.destroy-bulk');
     Route::post('/MassiveReportes', [ReportesController::class, 'MassiveReportes'])->name('MassiveReportes');
+    Route::post('/guardarCiudad', [\App\Http\Controllers\DashboardController::class, 'guardarCiudad'])->name('guardarCiudad');
 
     //# excel
     Route::get('users/export/{NumeroDiasFestivos}/{quincena}/{month}/{year}', [UserController::class, 'export'])->name('reporte1');
