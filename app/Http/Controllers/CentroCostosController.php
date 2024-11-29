@@ -68,7 +68,7 @@ class CentroCostosController extends Controller
         }
         if ($searchSCC) {
             $PosiblesSupervisores = User::UsersWithRol('supervisor')
-                ->Where('name', 'like', '%'.$request->searchSCC.'%')
+                ->Where('name', 'like', '%' . $request->searchSCC . '%')
                 ->get();
             $centroCostos = $centroCostos->filter(function ($centro) use ($PosiblesSupervisores) {
                 $ArrrayCentrosids = $centro->ArraySupervisores($centro->id, $PosiblesSupervisores);
@@ -107,7 +107,7 @@ class CentroCostosController extends Controller
         $this->ActualizarPresupuesto();
         //<editor-fold desc="serach, order, mapear y paginar">
         $centroCostos = centroCosto::query();
-        $perPage = $request->has('perPage') ? $request->perPage : 10;
+        $perPage = $request->has('perPage') ? $request->perPage : 50;
         $this->MapearClasePP($centroCostos, $numberPermissions, $request);
 
         $permissions = Auth()->user()->roles->pluck('name')[0];
@@ -141,7 +141,7 @@ class CentroCostosController extends Controller
         return Inertia::render('CentroCostos/Index', [ //carpeta
             'title' => __('app.label.CentroCostos'),
             'filters' => $request->all(['search', 'field', 'order']),
-            'perPage' => (int) $perPage,
+            'perPage' => (int)$perPage,
             'fromController' => $paginated,
             'breadcrumbs' => [['label' => __('app.label.CentroCostos'), 'href' => route('CentroCostos.index')]],
             'nombresTabla' => $nombresTabla,
@@ -149,7 +149,9 @@ class CentroCostosController extends Controller
         ]);
     }
 
-    public function create() {}
+    public function create()
+    {
+    }
 
     public function store(CentroCostoRequest $request)
     {
@@ -173,7 +175,7 @@ class CentroCostosController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
 
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.centroCostos')]).$th->getMessage());
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.centroCostos')]) . $th->getMessage());
         }
     }
 
@@ -191,13 +193,13 @@ class CentroCostosController extends Controller
         foreach ($valoresSelectConsulta as $value) {
             $valoresSelect[] = [
                 'label' => $value->nombre, //centro de costos
-                'value' => (int) ($value->id),
+                'value' => (int)($value->id),
             ];
-            $showSelect[(int) ($value->id)] = $value->nombre;
+            $showSelect[(int)($value->id)] = $value->nombre;
         }
         $usuariosSelectConsulta = User::orderBy('name')->get();
         foreach ($usuariosSelectConsulta as $value) {
-            $showUsers[(int) ($value->id)] = $value->name;
+            $showUsers[(int)($value->id)] = $value->name;
         }
 
         if ($numberPermissions === 1) { //1 : empleado | 2 : administrativo | 3 :supervisor
@@ -221,7 +223,7 @@ class CentroCostosController extends Controller
         return Inertia::render('Reportes/Index', [ //carpeta
             'title' => $titulo,
             'filters' => null,
-            'perPage' => (int) $perPage,
+            'perPage' => (int)$perPage,
             'fromController' => $Reportes->paginate($perPage),
             'breadcrumbs' => [['label' => __('app.label.Reportes'), 'href' => route('Reportes.index')]],
             'nombresTabla' => $nombresTabla,
@@ -264,7 +266,7 @@ class CentroCostosController extends Controller
         $validatedData = $request->validate([
             'nombre' => [
                 'required',
-                Rule::unique('centro_costos', 'nombre')->ignore((int) $id),
+                Rule::unique('centro_costos', 'nombre')->ignore((int)$id),
             ],
         ], [
             'nombre.unique' => 'El nombre ya está en uso.',
@@ -298,18 +300,18 @@ class CentroCostosController extends Controller
 
             return back()->with('success', __('app.label.updated_successfully', ['name' => $centroCosto->nombre]));
         } catch (\Throwable $th) {
-            $mensajeErrorTH = $th->getMessage().' L:'.$th->getLine().' Ubi:'.$th->getFile();
+            $mensajeErrorTH = $th->getMessage() . ' L:' . $th->getLine() . ' Ubi:' . $th->getFile();
             DB::rollback();
             Myhelp::EscribirEnLog($this, ' UPDATE centro costos', $mensajeErrorTH, false, 1);
 
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.centroCostos')]).$mensajeErrorTH);
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.centroCostos')]) . $mensajeErrorTH);
         }
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param int $id
      */
     public function destroy($id): RedirectResponse
     {
@@ -331,7 +333,36 @@ class CentroCostosController extends Controller
             DB::rollback();
             Myhelp::EscribirEnLog($this, ' destroy centro costos', $th->getMessage(), false, 1);
 
-            return back()->with('error', __('app.label.deleted_error', ['name' => __('app.label.centroCostos')]).$th->getMessage());
+            return back()->with('error', __('app.label.deleted_error', ['name' => __('app.label.centroCostos')]) . $th->getMessage());
+        }
+    }
+
+    public function AproxDestroy()
+    {
+        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |AproxDestroy centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        DB::beginTransaction();
+        try {
+            if ($numberPermissions > 8) {
+
+                $centroCostos = CentroCosto::all();
+                foreach ($centroCostos as $index => $centroCosto) {
+
+                    $centroCosto->update([
+                        'mano_obra_estimada' => 0
+                    ]);
+                }
+
+                DB::commit();
+                $contar = $centroCostos->count();
+                echo "modificamos $contar centros";
+            } else {
+                echo "modificamos nada";
+            }
+        } catch (\Throwable $th) {
+            DB::rollback();
+            $thmessa = $th->getMessage();
+            Myhelp::EscribirEnLog($this, ' destroy centro costos', $thmessa, false, 1);
+            echo "catch:  $thmessa";
         }
     }
 }

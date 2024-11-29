@@ -303,7 +303,7 @@ class ReportesController extends Controller
         $startDateMostrar = $startDate->isoFormat('dddd D [de] MMMM');
         $endDateMostrar = $endDate->isoFormat('dddd D [de] MMMM');
 
-        $perPage = $request->has('perPage') ? $request->perPage : 10;
+        $perPage = $request->has('perPage') ? $request->perPage : 50;
 
         //  aqui se filtra
         $fnombresT = $this->fNombresTabla($numberPermissions, $Reportes, $Authuser, $request, $titulo);

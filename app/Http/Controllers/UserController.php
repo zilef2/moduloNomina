@@ -194,7 +194,7 @@ class UserController extends Controller
         $numberPermissions = Myhelp::getPermissionToNumber($permissions);
         $users = $this->Busqueda($request);
 
-        $perPage = $request->has('perPage') ? $request->perPage : 10;
+        $perPage = $request->has('perPage') ? $request->perPage : 5;
         $roles = Role::get();
         if ($numberPermissions != 3 && $numberPermissions < 10) {
             $users->whereHas('roles', function ($query) {
