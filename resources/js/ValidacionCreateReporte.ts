@@ -1,4 +1,4 @@
-export function validacionNoMasDe3Diax(DiaForm:string):string {
+export function validacionNoMasDe3Diax(DiaForm:string,DiasPermitidoPasado:number):string {
     let today:Date = new Date(); // Fecha actual
     // Validar si DiaForm es una fecha válida
     if (!DiaForm) {
@@ -19,8 +19,8 @@ export function validacionNoMasDe3Diax(DiaForm:string):string {
     }
 
     //no muy pasados
-    if (differenceInDays < -4) {
-        return "El Reporte es de mas de 4 días átras";
+    if (differenceInDays < -DiasPermitidoPasado) {
+        return "El Reporte es de mas de "+ DiasPermitidoPasado +" días átras";
     }
     
     //no futuros de hoy

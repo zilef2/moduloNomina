@@ -298,7 +298,7 @@ const create = () => {
                 data.respuestaSeguro = confirm("¿Estás seguro de enviar el formulario?");
             }
             let validacionNoMasDe3Dias = true
-            validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini)
+            validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini,16) //todo: desde backend:parametros
           console.log("=>(Create.vue:302) validacionNoMasDe3Dias", validacionNoMasDe3Dias);
             if (data.respuestaSeguro && validacionNoMasDe3Dias === 'ok') {
                 // Reporte11_59();
