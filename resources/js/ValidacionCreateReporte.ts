@@ -11,13 +11,22 @@ export function validacionNoMasDe3Diax(DiaForm:string):string {
     // Validaciones
     console.clear()
     console.log("differenceInDays", differenceInDays);
+    console.log("=>(ValidacionCreateReporte.ts:14) formDate.getDate() ", formDate.getDate() );
+    console.log("=>(ValidacionCreateReporte.ts:14) today.getDate()", today.getDate());
+    //no futuros
     if (formDate.getDate() > today.getDate()) {
         return "El Reporte no puede ser futuro al día de hoy.";
     }
 
+    //no muy pasados
     if (differenceInDays < -4) {
         return "El Reporte es de mas de 4 días átras";
     }
+    
+    //no futuros de hoy
+    // if (differenceInDays === 0 && (formDate.getHours() < today.getHours())) {
+    //     return "El Reporte no puede ser futuro al día de hoy.";
+    // }
     return "ok";
 }
 

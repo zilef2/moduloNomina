@@ -400,15 +400,18 @@ class ReportesController extends Controller
         return date('Y-m-d H:i:s', strtotime($date));
     }
 
-    public function store(ReporteRequest $request)
+    public function store(ReporteRequest $request): \Illuminate\Http\RedirectResponse
     {
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes store| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         DB::beginTransaction();
+        $authUser = Myhelp::AuthU();
         try {
             $fecha_ini = $this->updatingDate($request->fecha_ini);
             $fecha_fin = $this->updatingDate($request->fecha_fin);
             $mensajeError = $this->NoEsValidoPorFecha($fecha_ini, $fecha_fin);
             if ($mensajeError !== '') {
+                DB::rollBack();
+                myhelp::EscribirEnLog($this, 'Se intento reportar en desorden U:'. $authUser->id, 'Usuario desordenado: '. $authUser->name);
                 return back()->with('error', $mensajeError);
             }
 
@@ -436,11 +439,11 @@ class ReportesController extends Controller
             $Reportes->save();
             DB::commit();
 
-            return back()->with('success', __('app.label.created_successfully', ['name' => $Reportes->nombre]));
+            return back()->with('success', __('app.label.created_successfully', ['name' => 'Reporte']));
 
         } catch (\Throwable $th) {
             DB::rollback();
-            myhelp::EscribirEnLog($this, 'reportes store', $th->getMessage(), 0, 1);
+            myhelp::EscribirEnLog($this, 'reportes fallo store', $th->getMessage(), 0, 1);
 
             return back()->with('error', __('app.label.created_error', ['name' => __('app.label.Reportes')]).$th->getMessage());
         }
@@ -692,7 +695,7 @@ class ReportesController extends Controller
         $fechafi = Carbon::parse($fecha_fin);
         $MismoDia = Reporte::Where('user_id', $thisUserId)
             ->WhereDate('fecha_ini', $fechafi)
-            ->WhereTime('fecha_ini', '>', $fechafi->format('H:i:s')) // Posterior en tiempo
+            ->WhereTime('fecha_ini', '>=', $fechafi) // Posterior en tiempo
             ->exists();
         if ($MismoDia) {
             return 'Los reporten deben ser en orden';

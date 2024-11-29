@@ -123,8 +123,8 @@ let horahoy = newdate.getHours()
 if (props.numberPermissions > 8) { //temporaly commented
     // form.fecha_ini = '2024-11-15T21:00'
     // form.fecha_fin = '2024-11-15T23:58'
-    form.fecha_ini = '2024-11-19T05:00'
-    form.fecha_fin = '2024-11-19T22:00'
+    form.fecha_ini = '2024-11-29T03:00'
+    form.fecha_fin = '2024-11-29T05:00'
 } else {
     let timedate = TransformTdate(7)//la hora
     let timedate2 = TransformTdate(16)
@@ -299,6 +299,7 @@ const create = () => {
             }
             let validacionNoMasDe3Dias = true
             validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini)
+          console.log("=>(Create.vue:302) validacionNoMasDe3Dias", validacionNoMasDe3Dias);
             if (data.respuestaSeguro && validacionNoMasDe3Dias === 'ok') {
                 // Reporte11_59();
                 form.almuerzo = data.ValorRealalmuerzo
@@ -312,7 +313,7 @@ const create = () => {
                         form.reset()
                         setTimeout(() => {
                             location.reload();
-                        }, 3500);
+                        }, 2500);
                     },
                     onError: () => {
                         alert(JSON.stringify(form.errors, null, 4));
