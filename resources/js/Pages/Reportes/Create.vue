@@ -52,9 +52,9 @@ const data = reactive({
     MensajeError: '',
     MostrarConsole: {
         watchEffect: false,
-        CuandoEiezaExtra: true,
+        CuandoEiezaExtra: false,
         dia: false,
-        noche: true,
+        noche: false,
         extradia: false,
         extranoche: false,
         dominicales: false,
@@ -123,8 +123,8 @@ let horahoy = newdate.getHours()
 if (props.numberPermissions > 8) { //temporaly commented
     // form.fecha_ini = '2024-11-15T21:00'
     // form.fecha_fin = '2024-11-15T23:58'
-    form.fecha_ini = '2024-11-29T03:00'
-    form.fecha_fin = '2024-11-29T05:00'
+    form.fecha_ini = '2024-11-09T03:00'
+    form.fecha_fin = '2024-11-09T05:00'
 } else {
     let timedate = TransformTdate(7)//la hora
     let timedate2 = TransformTdate(16)
@@ -298,13 +298,12 @@ const create = () => {
                 data.respuestaSeguro = confirm("¿Estás seguro de enviar el formulario?");
             }
             let validacionNoMasDe3Dias = true
-            validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini,16) //todo: desde backend:parametros
+            validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini,20) //todo: desde backend:parametros
           console.log("=>(Create.vue:302) validacionNoMasDe3Dias", validacionNoMasDe3Dias);
             if (data.respuestaSeguro && validacionNoMasDe3Dias === 'ok') {
                 // Reporte11_59();
+              
                 form.almuerzo = data.ValorRealalmuerzo
-
-
                 emit("reportFinished")
                 form.post(route('Reportes.store'), {
                     preserveScroll: true,

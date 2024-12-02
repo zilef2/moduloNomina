@@ -43,8 +43,8 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
                     HorasDiurnas = horasNormales
                 }else{
                     //es dominical
-                    console.log('HorasDiurnas',HorasDiurnas)
-                    console.log('horasNormales',horasNormales)
+                    // console.log('HorasDiurnas',HorasDiurnas)
+                    // console.log('horasNormales',horasNormales)
 
                 }
             }//cuando las horas extra >= 21, no hay horas extra diurnas
