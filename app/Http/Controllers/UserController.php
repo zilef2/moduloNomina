@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\GeneratorExport;
 use App\Exports\SiigoExport;
 use App\Exports\UsersExport;
 use App\helpers\Myhelp;
@@ -15,6 +16,7 @@ use App\Models\Reporte;
 use App\Models\Role;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +26,9 @@ use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use ZipStream\OperationMode;
+
 
 class UserController extends Controller
 {
@@ -653,9 +658,8 @@ class UserController extends Controller
         ]);
     }
 
-    public function downloadsigo(Request $request)
+    public function downloadsigo(Request $request): BinaryFileResponse|RedirectResponse
     {
-
         $NumeroDiasFestivos = (int) ($request->NumeroDiasFestivos);
         $NumReporteSigo = $this->SeeNumbersOfReporters($request);
 
@@ -667,8 +671,14 @@ class UserController extends Controller
             $year = $NumReporteSigo['year'];
             $month = $NumReporteSigo['month'];
 
-            return Excel::download(new SiigoExport($ini, $fin, $NumeroDiasFestivos), 'Siigo '.$year.'Quincena'.$quincena.'DelMes'.$month.'.xlsx');
+//            return (new GeneratorExport())->download('data.xlsx');
+            
+            return Excel::download(
+                new SiigoExport($ini, $fin, $NumeroDiasFestivos),
+                'Siigo ' . $year . 'Quincena' . $quincena . 'DelMes' . $month . '.xlsx'
+            );
         }
+
 
         return redirect()->route('user.uploadexcel')->with('warning',
             'El numero de reportes en esa quincena es 0. '.

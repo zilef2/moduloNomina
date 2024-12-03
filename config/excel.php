@@ -51,6 +51,7 @@ return [
             'output_encoding'        => '',
             'test_auto_detect'       => true,
         ],
+        'zipMode' => 'NORMAL',
 
         /*
         |--------------------------------------------------------------------------

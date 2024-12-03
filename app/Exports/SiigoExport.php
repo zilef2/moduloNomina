@@ -4,15 +4,16 @@ namespace App\Exports;
 
 use App\helpers\HelpExcel;
 use App\Models\Parametro;
-use App\Models\Reporte;
 use App\Models\User;
-use Carbon\Carbon;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
 {
+    use Exportable;
+
     public $ini,$fin, $NumeroDiasFestivos;
     public function __construct($ini,$fin, $NumeroDiasFestivos) {
         $this->ini = $ini;
