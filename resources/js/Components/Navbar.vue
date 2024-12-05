@@ -15,9 +15,12 @@ const emit = defineEmits(["open"])
 //     Inertia.visit('/users/export', { method: 'get', download: true });
 // }
 
-let version = "1.24_nov19"
+let version = "1.24_5d2024"
 const downloadExcel = async () => {
     window.open('/users/export', '_blank')
+}
+const justcc = async () => {
+    window.open('/justcc', '_blank')
 }
 
 </script>
@@ -49,7 +52,7 @@ const downloadExcel = async () => {
                     <SwitchDarkModeNavbar />
 
                     <!-- <DropdownLink v-if="can(['isAdmin'])" class="text-gray-500 dark:text-white" @click="downloadExcel"> {{ lang().label.downloadUsers }} </DropdownLink> -->
-
+                     <DropdownLink v-if="can(['isAdmin'])" class="text-gray-500 dark:text-white" @click="justcc"> Centros de Costos </DropdownLink> 
 
                     <div class="">
                         <!-- Settings Dropdown -->

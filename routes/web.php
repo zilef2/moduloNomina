@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CentroCostosController;
 use App\Http\Controllers\CentroTableController;
+use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\ParametrosController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController;
@@ -71,6 +72,7 @@ Route::middleware('auth', 'verified')->group(function () {
     //# excel
     Route::get('users/export/{NumeroDiasFestivos}/{quincena}/{month}/{year}', [UserController::class, 'export'])->name('reporte1');
     Route::get('users/downloadsigo/{NumeroDiasFestivos}/{quincena}/{month}/{year}', [UserController::class, 'downloadsigo']);
+    Route::get('justcc', [ExcelController::class, 'CentroCostos']);
 
     //19abril2024
     Route::resource('/Servicios', ServiciosController::class);

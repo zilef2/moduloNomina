@@ -671,7 +671,6 @@ class UserController extends Controller
             $year = $NumReporteSigo['year'];
             $month = $NumReporteSigo['month'];
 
-//            return (new GeneratorExport())->download('data.xlsx');
             
             return Excel::download(
                 new SiigoExport($ini, $fin, $NumeroDiasFestivos),
