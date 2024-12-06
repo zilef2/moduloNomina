@@ -39,6 +39,8 @@ Route::get('/setLang/{locale}', function ($locale) {
     return back();
 })->name('setlang');
 
+Route::get('/webhooks',[]);
+
 Route::middleware('auth', 'verified')->group(function () {
     //<editor-fold desc="profile - role - permission">
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
