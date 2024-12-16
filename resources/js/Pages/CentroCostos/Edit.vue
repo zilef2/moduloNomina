@@ -33,8 +33,8 @@ const form = useForm({
     clasificacion: '',
     activo: true,
     selectedUsers: [],
-    listaSupervisores: []
-    // ValidoParaFacturar: 1,
+    listaSupervisores: [],
+    ValidoParaFacturar: true,
 });
 
 function findIndexById(id) {
@@ -77,6 +77,8 @@ watchEffect(() => {
         form.clasificacion = props.CentroCosto?.clasificacion
         form.activo = props.CentroCosto?.activo
         form.activo = ref( !!props.CentroCosto?.activo);
+        form.ValidoParaFacturar = props.CentroCosto?.ValidoParaFacturar
+        form.ValidoParaFacturar = ref( !!props.CentroCosto?.ValidoParaFacturar);
     }
 })
 
@@ -153,13 +155,21 @@ const update = () => {
 
 
 
-                    <div class="inline-flex col-span-2 mt-6">
+                    <div class="inline-flex col-span-1 mt-6">
                         <input
                            @click="toggleCheckbox"
                            v-model="form.activo"
                            type="checkbox" id="activo" class="bg-gray-50 dark:bg-gray-600 mt-1 w-7 h-7 p-2 my-auto rounded-xl"
                         />
                         <InputLabel ref="activo" for="activo"  :value="lang().label.activo" class="mx-3 my-auto"/>
+                    </div>
+                    <div class="inline-flex col-span-1 mt-6">
+                        <input
+                           @click="toggleCheckbox"
+                           v-model="form.ValidoParaFacturar"
+                           type="checkbox" id="ValidoParaFacturar" class="bg-gray-50 dark:bg-gray-600 mt-1 w-7 h-7 p-2 my-auto rounded-xl"
+                        />
+                        <InputLabel ref="ValidoParaFacturar" for="ValidoParaFacturar"  :value="lang().label.ValidoParaFacturar" class="mx-3 my-auto"/>
                     </div>
                 </div>
                 <div class="flex justify-end">

@@ -15,7 +15,12 @@ import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 import FestivosColombia from 'festivos-colombia';
 import {TransformTdate, weekNumber} from "@/global";
-import {estaFechaEsFestivo, calcularTerminaLunes, calcularTerminaDomingo, calcularHoras} from "@/CreateReporte/HelpingCreate";
+import {
+    estaFechaEsFestivo,
+    calcularTerminaLunes,
+    calcularTerminaDomingo,
+    calcularHoras
+} from "@/CreateReporte/HelpingCreate";
 import {validacionNoMasDe3Diax} from "@/ValidacionCreateReporte";
 
 const props = defineProps({
@@ -33,6 +38,7 @@ const props = defineProps({
     horasTrabajadasHoy: Object, //[]  es por si reportaron el mismo dia
     HorasDeCadaSemana: Object,//[]
     ArrayHorasSemanales: Object,//[]
+    ArrayCentrosNoFactura: Object,//[]
 })
 let label_diurnas = ref(null)
 
@@ -41,7 +47,7 @@ const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SE
 const LimiteHorasTrabajadas = 25
 
 
-const emit = defineEmits(["close","reportFinished"]);
+const emit = defineEmits(["close", "reportFinished"]);
 const data = reactive({
     respuestaSeguro: '',
     startTime: {hours: 7, minutes: 0}, //valor que por defecto, viene la hora inicial cuando se abre el formulario
@@ -121,8 +127,8 @@ const form = useForm({
 let newdate = (new Date())
 let horahoy = newdate.getHours()
 if (props.numberPermissions > 8) { //temporaly commented
-    // form.fecha_ini = '2024-11-15T21:00'
-    // form.fecha_fin = '2024-11-15T23:58'
+                                   // form.fecha_ini = '2024-11-15T21:00'
+                                   // form.fecha_fin = '2024-11-15T23:58'
     form.fecha_ini = '2024-11-09T03:00'
     form.fecha_fin = '2024-11-09T05:00'
 } else {
@@ -230,11 +236,18 @@ watchEffect(() => {
                             horas < LimiteHorasTrabajadas
                             Diainicio == dia final
                         */
+                        let Calcular_extras_facturar = true
+                        if (props.ArrayCentrosNoFactura.includes(form.centro_costo_id)) {
+                            Calcular_extras_facturar = false
+                            //toask:
+                        }
                         calcularHoras(
                             data, form, props,
                             ini, fin,
                             HORAS_ESTANDAR
-                            , FestivosColombia, message);
+                            , FestivosColombia, message,
+                            Calcular_extras_facturar
+                        );
                     }
                 }
             }
@@ -289,6 +302,8 @@ watch(() => form.fecha_fin, (newX) => {
 })
 // <!--</editor-fold>-->
 
+
+// <!--<editor-fold desc="create and formats">-->
 const create = () => {
     data.MensajeError = ''
     data.respuestaSeguro = true
@@ -298,11 +313,11 @@ const create = () => {
                 data.respuestaSeguro = confirm("¿Estás seguro de enviar el formulario?");
             }
             let validacionNoMasDe3Dias = true
-            validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini,20) //todo: desde backend:parametros
-          console.log("=>(Create.vue:302) validacionNoMasDe3Dias", validacionNoMasDe3Dias);
+            validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini, 20) //todo: desde backend:parametros
+            console.log("=>(Create.vue:302) validacionNoMasDe3Dias", validacionNoMasDe3Dias);
             if (data.respuestaSeguro && validacionNoMasDe3Dias === 'ok') {
                 // Reporte11_59();
-              
+
                 form.almuerzo = data.ValorRealalmuerzo
                 emit("reportFinished")
                 form.post(route('Reportes.store'), {
@@ -320,7 +335,7 @@ const create = () => {
                     onFinish: () => {
                     }
                 })
-            }else{
+            } else {
                 data.MensajeError = validacionNoMasDe3Dias
             }
         } else {
@@ -359,6 +374,8 @@ const formatfin = (date) => {
     hours = hours.toString().padStart(2, '0');
     return `${hours}:${minutes} ${ampm}`;
 }
+// <!--</editor-fold>-->
+
 </script>
 
 <template>

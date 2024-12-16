@@ -27,7 +27,7 @@ return [
 		'activo' => 'Activo',
 		'descripcion' => 'Descripción',
 		'clasificacion' => 'Clasificación',
-		'ValidoParaFacturar' => 'Valido para Facturar',
+		'ValidoParaFacturar' => 'Válido para Facturar',
 
         'centro' => 'Centro de Costos',
         'CentroCostos' => 'Centro Costos',

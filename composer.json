@@ -20,6 +20,7 @@
         "maennchen/zipstream-php": "3.1.1",
         "monolog/monolog": "3.0",
         "myclabs/php-enum": "^1.8",
+        "nesbot/carbon": "2.72",
         "nunomaduro/collision": "*",
         "opcodesio/log-viewer": "^2.5",
         "phpoffice/phpspreadsheet": "^1.29",

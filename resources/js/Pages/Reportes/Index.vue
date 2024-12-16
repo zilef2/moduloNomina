@@ -81,6 +81,7 @@ const props = defineProps({
     horasTrabajadasHoy: Array, //horas que lleva trabajadas solo el dia de seleccionado(index)
     HorasDeCadaSemana: Array,  //horas de las semanas proximas a la actual
     ArrayHorasSemanales: Array,  //parametros
+    ArrayCentrosNoFactura: Array,  //centros que no facturan
 
 })
 
@@ -272,8 +273,8 @@ const handleCheckboxChange = (values) => {
                             :horasemana="props.horasemana" :startDateMostrar="props.startDateMostrar"
                             :endDateMostrar="props.endDateMostrar" :numberPermissions="props.numberPermissions"
                             :ArrayOrdinarias="props.ArrayOrdinarias" :horasTrabajadasHoy="props.horasTrabajadasHoy"
-                            :HorasDeCadaSemana="props.HorasDeCadaSemana"
-                            :ArrayHorasSemanales="props.ArrayHorasSemanales"
+                            :HorasDeCadaSemana="props.HorasDeCadaSemana" :ArrayHorasSemanales="props.ArrayHorasSemanales"
+                            :ArrayCentrosNoFactura="props.ArrayCentrosNoFactura"
                             :disabled=disableCreate
                     />
                     <CreateMass :show="data.createMassOpen" @close="data.createMassOpen = false" :title="props.title"

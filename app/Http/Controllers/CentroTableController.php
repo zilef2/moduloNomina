@@ -29,7 +29,6 @@ class CentroTableController extends Controller
                 [null, null, 'nombre', 'mano_obra_estimada', null, null, 'activo', 'descripcion', 'clasificacion'],
             ];
         }
-
         return $nombresTabla;
     }
 

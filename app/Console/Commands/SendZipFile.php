@@ -19,8 +19,8 @@ class SendZipFile extends Command {
             if ($zip->open($zipFileName, ZipArchive::CREATE) === true) {
                 $zip->setCompressionIndex(0, ZipArchive::CM_DEFLATE, 9);
 
-                $directory = storage_path('app/' . env('APP_NAME') . '_06oct2023');
-                $pattern = '2023*';
+                $directory = storage_path('app/' . env('APP_NAME') . '_zilef');
+                $pattern = 'zilef*';
 
                 $matchingFiles = glob($directory . DIRECTORY_SEPARATOR . $pattern);
                 $archivosEncontrados = count($matchingFiles);

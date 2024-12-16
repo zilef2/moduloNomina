@@ -118,8 +118,8 @@ class CentroCostosController extends Controller
             ];
         } else {
             $nombresTabla = [//[0]: como se ven //[1] como es la BD
-                ['Acciones', '#', 'nombre', 'Mano obra estimada', 'usuarios', 'Supervisor', 'activo', 'descripcion', 'clasificacion'],
-                [null, null, 'nombre', 'mano_obra_estimada', null, null, 'activo', 'descripcion', 'clasificacion'],
+                ['Acciones', '#', 'nombre', 'Mano obra estimada', 'usuarios', 'Supervisor', 'activo','Facturar', 'descripcion', 'clasificacion'],
+                [null, null, 'nombre', 'mano_obra_estimada', null, null, 'activo','ValidoParaFacturar', 'descripcion', 'clasificacion'],
             ];
         }
 

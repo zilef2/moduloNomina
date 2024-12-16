@@ -352,6 +352,7 @@ class ReportesController extends Controller
         }
 
         $ArrayHorasSemanales = $this->DoArrayHorasSemanales();
+        $ArrayCentrosNoFactura = $this->DoArrayCentrosNoFactura();
 
         return Inertia::render('Reportes/Index', [ //carpeta
             'title' => $titulo,
@@ -385,6 +386,7 @@ class ReportesController extends Controller
             'horasTrabajadasHoy' => $horasTrabajadasHoy2 ?? [],
             'HorasDeCadaSemana' => $HorasDeCadaSemana,
             'ArrayHorasSemanales' => $ArrayHorasSemanales,
+            'ArrayCentrosNoFactura' => $ArrayCentrosNoFactura,
 
         ]);
     }//fin index
@@ -702,5 +704,11 @@ class ReportesController extends Controller
         }
 
         return '';
+    }
+
+    private function DoArrayCentrosNoFactura()
+    {
+        $centros = CentroCosto::Where('ValidoParaFacturar',0)->pluck('id')->toArray();
+        return $centros;
     }
 }

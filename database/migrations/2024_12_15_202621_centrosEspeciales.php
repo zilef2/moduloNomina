@@ -8,12 +8,12 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     php artisan migrate --path=database/migrations/2024_11_22_202621_ubicacion.php
+     * php artisan migrate --path=database/migrations/2024_12_15_202621_centrosEspeciales.php
      * no seeder related
      */
     public function up(): void
     {
-        Schema::create('ubicacion', function (Blueprint $table) {
+        Schema::table('centro_costos', function (Blueprint $table) {
             $table->string('ubicacion')->nullable();
             $table->string('corx')->nullable();
             $table->string('cordy')->nullable();

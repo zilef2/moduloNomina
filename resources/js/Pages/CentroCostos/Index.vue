@@ -163,6 +163,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
                                 </td>
 <!--                                <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">({{clasegenerica.supervi.split(',').length}}) {{ (clasegenerica.supervi) }} </td>-->
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.activo ? '✅' : '❌') }} </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.ValidoParaFacturar ? '✅' : '❌') }} </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.descripcion) }} </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.clasificacion) }} </td>
 <!--                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.ValidoParaFacturar) }} </td>-->
