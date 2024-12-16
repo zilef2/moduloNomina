@@ -25,7 +25,7 @@ export function validacionNoMasDe3Diax(DiaForm:string,DiasPermitidoPasado:number
 
     //no muy pasados
     if (differenceInDays < -DiasPermitidoPasado) {
-        return "El Reporte es de mas de "+ DiasPermitidoPasado +" días átras";
+        return "El Reporte es de "+ DiasPermitidoPasado +" días átras";
     }
     
     //no futuros de hoy

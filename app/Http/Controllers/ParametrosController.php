@@ -28,6 +28,7 @@ class ParametrosController extends Controller
 
         $nombresTabla = [ //0: como se ven //1 como es la BD
             [
+                'Dias Gabela',
                 'Horas necesarias diarias',
                 'Horas necesarias semanales',
                 'subsidio de transporte dia/quincena',
@@ -43,6 +44,7 @@ class ParametrosController extends Controller
                 'porcentaje dominical extra nocturno'
             ],
             [
+                's_s_Dias_gabela',
                 's_HORAS_ORDINARIAS',
                 's_HORAS_NECESARIAS_SEMANA',
                 'o_subsidio_de_transporte_dia',
@@ -84,6 +86,7 @@ class ParametrosController extends Controller
         $parametro->porcentaje_dominical_nocturno = $request->input('porcentaje_dominical_nocturno');
         $parametro->porcentaje_dominical_extra_diurno = $request->input('porcentaje_dominical_extra_diurno');
         $parametro->porcentaje_dominical_extra_nocturno = $request->input('porcentaje_dominical_extra_nocturno');
+        $parametro->s_Dias_gabela = $request->input('s_Dias_gabela');
         $parametro->save();
         return redirect()->route('parametros.index');
     }
@@ -96,6 +99,7 @@ class ParametrosController extends Controller
             $parametro = Parametro::findOrFail($id);
             $parametro->subsidio_de_transporte_dia = $request->input('subsidio_de_transporte_dia');
             $parametro->salario_minimo = $request->input('salario_minimo');
+            $parametro->s_Dias_gabela = $request->input('s_Dias_gabela');
             $parametro->valor_maximo_subsidio_de_transporte = 2*(int)$request->input('salario_minimo');
             $today = Carbon::now();
 

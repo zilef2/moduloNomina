@@ -42,6 +42,7 @@ class Parametro extends Model
 
     protected $fillable = [
 
+        's_Dias_gabela',
         'HORAS_ORDINARIAS',
         'HORAS_NECESARIAS_SEMANA',
 

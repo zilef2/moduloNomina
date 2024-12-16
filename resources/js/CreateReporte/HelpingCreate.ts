@@ -153,8 +153,7 @@ export function calcularTerminaDomingo(ini,fin,CuandoEmpiezaExtra,ExtrasManana,f
 //<editor-fold desc="CALCULAR">
 
 //# papa = watchEffect
-export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,FestivosColombia,message
-                              , Calcular_extras_facturar){
+export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,FestivosColombia,message): void{
     let ini = new Date(inicio)
     let fin = new Date(final)
     let ExtrasManana = false

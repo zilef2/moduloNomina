@@ -24,6 +24,8 @@ return [
 
         //centro y reportes
         'mano_obra_estimada' => 'Mano obra estimada',
+		's_Dias_gabela' => 'Días gabela',
+		'Dias_gabela' => 'Días gabela',
 		'activo' => 'Activo',
 		'descripcion' => 'Descripción',
 		'clasificacion' => 'Clasificación',

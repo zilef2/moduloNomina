@@ -127,8 +127,8 @@ const form = useForm({
 let newdate = (new Date())
 let horahoy = newdate.getHours()
 if (props.numberPermissions > 8) { //temporaly commented
-                                   // form.fecha_ini = '2024-11-15T21:00'
-                                   // form.fecha_fin = '2024-11-15T23:58'
+    // form.fecha_ini = '2024-11-15T21:00'
+    // form.fecha_fin = '2024-11-15T23:58'
     form.fecha_ini = '2024-11-09T03:00'
     form.fecha_fin = '2024-11-09T05:00'
 } else {
@@ -236,18 +236,27 @@ watchEffect(() => {
                             horas < LimiteHorasTrabajadas
                             Diainicio == dia final
                         */
-                        let Calcular_extras_facturar = true
-                        if (props.ArrayCentrosNoFactura.includes(form.centro_costo_id)) {
-                            Calcular_extras_facturar = false
-                            //toask:
+                        
+                        
+                        console.log("=>(Create.vue:242) props.ArrayCentrosNoFactura", props.ArrayCentrosNoFactura[0]);
+                        console.log("=>(Create.vue:242) props.ArrayCentrosNoFactura", typeof(props.ArrayCentrosNoFactura[0]));
+                        let ccid = parseInt(form.centro_costo_id)
+                        console.log("=>(Create.vue:243) form.centro_costo_id", ccid);
+                        console.log("=>lo incluye?", props.ArrayCentrosNoFactura.includes(ccid));
+
+                        if (props.ArrayCentrosNoFactura.includes(ccid)) {
+                            let dirunasYnocturnas = calcularSinExtras(ini, fin)
+                            form.diurnas = dirunasYnocturnas[0];
+                            form.nocturnas = dirunasYnocturnas[1];
+                            
+                        }else {
+                            calcularHoras(
+                                data, form, props,
+                                ini, fin,
+                                HORAS_ESTANDAR
+                                , FestivosColombia, message
+                            );
                         }
-                        calcularHoras(
-                            data, form, props,
-                            ini, fin,
-                            HORAS_ESTANDAR
-                            , FestivosColombia, message,
-                            Calcular_extras_facturar
-                        );
                     }
                 }
             }
@@ -255,6 +264,38 @@ watchEffect(() => {
     }
 })
 
+//iscallin: watchEffect
+let calcularSinExtras = (Inicio, Fin) => {
+    const horasInicio = new Date(Inicio).getHours();
+    const horasFin = new Date(Fin).getHours();
+
+    let BaseInicial = horasInicio >= 6 ? horasInicio : 6
+    const BaseFinal = horasFin >= 21 ? 21 : horasFin
+
+    let HorasDiurnas = BaseFinal - BaseInicial;
+    HorasDiurnas = HorasDiurnas < 0 ? 0 : HorasDiurnas
+
+    //calcularnocturnas
+    let Madrugada = 0
+    let Tarde = 0
+    let Resta = horasFin - horasInicio;
+    if (horasInicio < 6 && horasFin <= 6) {//solo de noche
+        Madrugada = Resta;
+    } else {
+        if (horasInicio < 6) {
+            Madrugada = (6 - horasInicio);
+        }
+    }
+
+    if (horasInicio >= 21 && horasFin >= 21) {//solo de noche
+        Tarde = Resta;
+    } else {
+        if (horasFin > 21) {//si existan horas nocturnas, si no son 0
+            Tarde = (horasFin - 21);
+        }
+    }
+    return [HorasDiurnas, (Madrugada + Tarde)]
+}
 // <!--<editor-fold desc="Watchers">-->
 
 watch(() => form.centro_costo_id, (newX) => {
@@ -313,7 +354,10 @@ const create = () => {
                 data.respuestaSeguro = confirm("¿Estás seguro de enviar el formulario?");
             }
             let validacionNoMasDe3Dias = true
-            validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini, 20) //todo: desde backend:parametros
+            
+            console.log("=>(Create.vue:359) ArrayHorasSemanales['s_Dias_gabela']", props.ArrayHorasSemanales['s_Dias_gabela']);
+            console.log("=>(Create.vue:222222) props.ArrayHorasSemanales['s_Dias_gabela']", typeof(props.ArrayHorasSemanales['s_Dias_gabela']));
+            validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini, props.ArrayHorasSemanales['s_Dias_gabela'])
             console.log("=>(Create.vue:302) validacionNoMasDe3Dias", validacionNoMasDe3Dias);
             if (data.respuestaSeguro && validacionNoMasDe3Dias === 'ok') {
                 // Reporte11_59();

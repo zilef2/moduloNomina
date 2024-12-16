@@ -22,6 +22,7 @@ const props = defineProps({
 })
 const emit = defineEmits(["close"]);
 const form = useForm({
+    s_Dias_gabela: props.parametros?.s_Dias_gabela,
     subsidio_de_transporte_dia: props.parametros?.subsidio_de_transporte_dia,
     salario_minimo: props.parametros?.salario_minimo,
     HORAS_NECESARIAS_SEMANA: props.parametros?.HORAS_NECESARIAS_SEMANA,
@@ -67,6 +68,14 @@ watchEffect(() => {
                     {{ lang().label.edit }} {{ props.title }}
                 </h2>
                 <div class="my-6 grid grid-cols-2 gap-6">
+                    <div>
+                        <InputLabel for="s_Dias_gabela" :value="lang().label.s_Dias_gabela" />
+                        <TextInput id="s_Dias_gabela" type="number" class="mt-1 block w-full"
+                            v-model="form.s_Dias_gabela" required
+                            :placeholder="lang().placeholder.s_Dias_gabela"
+                            :error="form.errors.s_Dias_gabela" />
+                        <InputError class="mt-2" :message="form.errors.s_Dias_gabela" />
+                    </div>
                     <div>
                         <InputLabel for="HORAS_ORDINARIAS" :value="lang().label.HORAS_ORDINARIAS" />
                         <TextInput id="HORAS_ORDINARIAS" type="number" class="mt-1 block w-full"

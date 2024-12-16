@@ -54,7 +54,8 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
             console.log("CuandoEmpiezaExtra", CuandoEmpiezaExtra)
         }
         return [HorasExtra,HorasDiurnas];
-    }else{
+    }
+    else{
         //de un dia a otro
         let HorasDiurnasTotal = 0
         let HorasExtra = 0

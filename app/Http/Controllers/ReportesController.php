@@ -280,6 +280,7 @@ class ReportesController extends Controller
             return [
                 'HORAS_ORDINARIAS' => $parametros['HORAS_ORDINARIAS'],
                 'MAXIMO_HORAS_SEMANALES' => $parametros['HORAS_NECESARIAS_SEMANA'],
+                's_Dias_gabela' => $parametros['s_Dias_gabela'],
             ];
         }
 
@@ -708,7 +709,10 @@ class ReportesController extends Controller
 
     private function DoArrayCentrosNoFactura()
     {
-        $centros = CentroCosto::Where('ValidoParaFacturar',0)->pluck('id')->toArray();
+        $centros = CentroCosto::
+            OrWhere('ValidoParaFacturar',0)
+            ->OrWhere('ValidoParaFacturar')
+            ->pluck('id')->toArray();
         return $centros;
     }
 }
