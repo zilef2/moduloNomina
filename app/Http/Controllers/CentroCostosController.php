@@ -24,7 +24,7 @@ class CentroCostosController extends Controller
     public function __construct()
     {
         session(['parametros' => Parametro::Find(1)]);
-        $this->minutosActualizarPresupueto = 10;
+        $this->minutosActualizarPresupueto = 1;
     }
 
     public function MapearClasePP(&$centroCostos, $numberPermissions, $request): void

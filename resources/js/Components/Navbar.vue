@@ -52,8 +52,7 @@ const justcc = async () => {
                     <SwitchDarkModeNavbar />
 
                     <!-- <DropdownLink v-if="can(['isAdmin'])" class="text-gray-500 dark:text-white" @click="downloadExcel"> {{ lang().label.downloadUsers }} </DropdownLink> -->
-                     <DropdownLink class="text-gray-500 dark:text-white" @click="justcc"> Centros de Costos </DropdownLink>
-
+                     <DropdownLink v-if="can(['isAdmin', 'isadministrativo', 'issupervisor'])" class="text-gray-500 dark:text-white" @click="justcc"> Centros de Costos </DropdownLink>
                     <div class="">
                         <!-- Settings Dropdown -->
                         <div class="relative">
