@@ -338,9 +338,11 @@ function RestarAlmuarzo(form,data){
 export function setDominical(data,form,ini,fin,CuandoEmpiezaExtra,ExtrasManana,FestivosColombia,message){//date,date,int,bool
     let esFestivo = estaFechaEsFestivo(new Date(ini),data.MostrarConsole,FestivosColombia);
     let esFestivo2 = estaFechaEsFestivo(new Date(fin),data.MostrarConsole,FestivosColombia);
+        console.log("entramos a dominical");
 
     if(ini.getDay() === 0 || fin.getDay() === 0){
         form.dominicales = 'si'
+        console.log("=>(HelpingCreate2.ts:344) form.dominicales", form.dominicales);
         message.TextFestivo = 'Dominical'
 
         if(esFestivo || esFestivo2) message.TextFestivo += ' y festivo';

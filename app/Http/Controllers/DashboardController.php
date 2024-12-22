@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\helpers\Myhelp;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -12,12 +13,12 @@ class DashboardController extends Controller
 {
     public function guardarCiudad(Request $r): void
     {
+        $user = Myhelp::AuthU();
         if (Schema::hasTable('ubicacion')) {
-            $user = User::find($r->userid);
             DB::table('ubicacion')->insert([
                 'ubicacion' => $r->ciudad,
                 'valido' => 1,
-                'userid' => $r->userid,
+                'userid' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
                 'created_at' => Carbon::now()

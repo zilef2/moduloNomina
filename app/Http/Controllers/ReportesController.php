@@ -332,9 +332,7 @@ class ReportesController extends Controller
 
         //help: $HorasDeCadaSemana en el [0] esta la semana actual, y de resto son numSemana => SumaHorasOrdinarias
         $HorasDeCadaSemana = Myhelp::CalcularHorasDeCadaSemana($startDate, $endDate, $Authuser);
-        //        dd($HorasDeCadaSemana);
 
-        //todo: 1ago2024:  para el total de las horas, hay que filtrar por el anio
         //20ene2024
         $esteMes = Carbon::now()->format('m');
         $esteAnio = Carbon::now()->format('Y');

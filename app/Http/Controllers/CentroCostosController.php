@@ -63,7 +63,7 @@ class CentroCostosController extends Controller
 
         if ($busqueda) {
             $centroCostos = $centroCostos->filter(function ($centro) use ($request) {
-                return str_contains($centro->nombre, $request->search);
+                return str_contains(strtolower($centro->nombre), strtolower($request->search));
             });
         }
         if ($searchSCC) {
@@ -287,7 +287,6 @@ class CentroCostosController extends Controller
             $centroCosto->descripcion = $request->descripcion;
             $centroCosto->clasificacion = $request->clasificacion;
             $centroCosto->ValidoParaFacturar = $request->ValidoParaFacturar;
-
             $centroCosto->save();
             $IDsSeleccionados = [];
             foreach ($request->listaSupervisores as $index => $supervisor) {
