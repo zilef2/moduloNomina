@@ -86,6 +86,7 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::get('/CentroCostoTable/{id}', [CentroTableController::class, 'table'])->name('CentroCostos.table');
     Route::get('/AproxDestroy', [CentroCostosController::class, 'AproxDestroy'])->name('AproxDestroy');
     Route::get('/DescompresionDespliegue/{esAmbientePruebas}', [ZipController::class, 'DescompresionDespliegue']);
+    Route::get('/JustDeploy/{pruebas}', [\App\Http\Controllers\ScriptController::class, 'JustDeploy']);
 
 }); //fin verified
 require __DIR__.'/auth.php';
