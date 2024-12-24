@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Command\Command as CommandSymfony;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 
 class ScriptController extends Controller
 {
@@ -20,14 +22,14 @@ class ScriptController extends Controller
             return CommandSymfony::FAILURE;
         }
 
-        $output = shell_exec("bash $scriptPath 2>&1");
-
-        if ($output === null) {
-            $this->error('Hubo un error al ejecutar el script.');
-            return CommandSymfony::FAILURE;
+        $process = new Process(["bash", $scriptPath]);
+        $process->run();
+        // Verifica si el comando fue exitoso
+        if (!$process->isSuccessful()) {
+            throw new ProcessFailedException($process);
         }
 
-        $this->info("Script ejecutado correctamente:\n$output");
-        return CommandSymfony::SUCCESS;
+        $output = $process->getOutput();
+        return "$output";
     }
 }
