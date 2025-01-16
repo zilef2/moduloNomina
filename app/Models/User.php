@@ -128,7 +128,6 @@ class User extends Authenticatable
                 $result[] = $centro->id;
             }
         }
-
         return $result;
     }
 

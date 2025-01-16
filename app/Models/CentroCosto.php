@@ -71,15 +71,14 @@ class CentroCosto extends Model
         return $this->BelongstoMany(User::class, 'centro_user');
     }
 
-    public function ArrayListaSupervisores(): array
+    public function ArrayListaSupervisores($supervisores): array
     {
         $centroid = $this->id;
-        $supervisores = User::UsersWithRol('supervisor')->get();
+//        $supervisores = User::UsersWithRol('supervisor')->get();
         $result = $supervisores->map(function ($user) use ($centroid) {
             if ($user->TieneEsteCentro($centroid)) {
                 return $user->name;
             }
-
             return null;
         })->filter()->toArray();
 

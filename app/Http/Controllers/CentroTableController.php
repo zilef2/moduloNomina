@@ -194,6 +194,6 @@ class CentroTableController extends Controller
             ->first();
         $returning = Carbon::parse($ultimorepo->fecha_ini)->diffForHumans();
 
-        return $returning.', fue la ultima modificación de este centro de costos';
+        return 'La ultima modificación de este centro de costos fue: ' .$returning;
     }
 }

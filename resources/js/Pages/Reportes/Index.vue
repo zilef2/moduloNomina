@@ -1,29 +1,19 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import {Head} from '@inertiajs/vue3';
-import Breadcrumb from '@/Components/Breadcrumb.vue';
+import {Head, router, useForm, usePage} from '@inertiajs/vue3';
 import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SelectInput from '@/Components/SelectInput.vue';
-import {onMounted, reactive, ref, watch} from 'vue';
+import {computed, onMounted, reactive, ref, watch} from 'vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import pkg from 'lodash';
-import {router, usePage, useForm} from '@inertiajs/vue3';
 
 import Pagination from '@/Components/Pagination.vue';
-import {
-    DocumentCheckIcon,
-    ChevronUpDownIcon,
-    PencilIcon,
-    TrashIcon,
-    XCircleIcon,
-    CheckIcon
-} from '@heroicons/vue/24/solid';
+import {CheckIcon, ChevronUpDownIcon, DocumentCheckIcon, PencilIcon, TrashIcon, XCircleIcon} from '@heroicons/vue/24/solid';
 
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
 import SuccessButton from '@/Components/SuccessButton.vue';
-
 
 import Create from '@/Pages/Reportes/Create.vue';
 import CreateMass from '@/Pages/Reportes/CreateMassive.vue';
@@ -33,15 +23,15 @@ import DeleteBulk from "@/Pages/Reportes/DeleteBulk.vue";
 
 
 import {formatDate, number_format} from '@/global.ts';
+import {runOnce} from '@/clousures.ts';
 
 import {Bar} from 'vue-chartjs'
-import {Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale} from 'chart.js'
-import InputError from "@/Components/InputError.vue";
+import {BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip} from 'chart.js'
 import InputLabel from "@/Components/InputLabel.vue";
 import FilterButtons from "@/Components/tablecomponents/FilterButtons.vue";
 import Reporte_Super_Edit from '@/Pages/Reportes/Reporte_Super_Edit.vue';
-import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
+import vSelect from "vue-select";
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
@@ -114,6 +104,8 @@ const data = reactive({
         FiltroQuincenita: props.filters?.FiltroQuincenita,
         searchh1: props.filters?.searchh1,
         searchh2: props.filters?.searchh2,
+        searchh3: props.filters?.searchh3, //nose
+        searchh4: props.filters?.searchh4, //año
         HorasNoDiurnas: props.filters?.HorasNoDiurnas,
 
         search: props.filters?.search,
@@ -153,13 +145,32 @@ const data = reactive({
     Reporte_Super_EditOpen: false,
     disableCreate: false,
 })
-
 onMounted(() => {
     let hoy = new Date()
     //todo: props.Procedencia => cc generar otra vista para el cc show
-    if (props.userFiltro !== -1)
-        data.params.search = hoy.getMonth() + 1
+    if (props.userFiltro !== -1) {
+
+        const mesesOnmounted = [
+            "enero", "febrero", "marzo", "abril", "mayo", "junio",
+            "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+        ];
+
+        const hoy = new Date();
+        data.params.search = mesesOnmounted[hoy.getMonth()];
+        data.params.searchh4 = hoy.getFullYear()
+    }
 })
+
+let NumeroAMesString = () => {
+    const months = [
+        '', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    const value = data.params.search;
+    return Number.isInteger(Number(value)) && value >= 1 && value <= 12
+        ? months[Number(value)]
+        : value;
+}
 
 // <!--<editor-fold desc="Order clonedeep select">-->
 const order = (field) => {
@@ -174,14 +185,17 @@ const order = (field) => {
     }
 }
 
+
 watch(() => _.cloneDeep(data.params), debounce(() => {
     let params = pickBy(data.params)
+    params.search = NumeroAMesString()
     router.get(route("Reportes.index"), params, {
         replace: true,
         preserveState: true,
-        preserveScroll: true,
+        preserveScroll: true
     })
-}, 150))
+}, 175))
+
 
 const selectAll = (event) => {
     if (event.target.checked === false) {
@@ -273,7 +287,8 @@ const handleCheckboxChange = (values) => {
                             :horasemana="props.horasemana" :startDateMostrar="props.startDateMostrar"
                             :endDateMostrar="props.endDateMostrar" :numberPermissions="props.numberPermissions"
                             :ArrayOrdinarias="props.ArrayOrdinarias" :horasTrabajadasHoy="props.horasTrabajadasHoy"
-                            :HorasDeCadaSemana="props.HorasDeCadaSemana" :ArrayHorasSemanales="props.ArrayHorasSemanales"
+                            :HorasDeCadaSemana="props.HorasDeCadaSemana"
+                            :ArrayHorasSemanales="props.ArrayHorasSemanales"
                             :ArrayCentrosNoFactura="props.ArrayCentrosNoFactura"
                             :disabled=disableCreate
                     />
@@ -315,22 +330,24 @@ const handleCheckboxChange = (values) => {
                 <div class="flex justify-between p-2">
                     <div class="hidden sm:flex lg:hidden xl:flex space-x-2 gap-1">
                         <!-- ELFILTRO = horas diurnas-->
-                        <TextInput v-model="data.params.searchHorasD" v-show="props.numberPermissions > 2"
+                        <TextInput v-model="data.params.searchHorasD" v-show="props.numberPermissions > 9"
                                    type="number" min="0" class="block w-2/3 md:w-full rounded-lg"
                                    :placeholder="lang().placeholder.searchHorasD"/>
-                        <TextInput v-model="data.params.HorasNoDiurnas" v-show="props.numberPermissions > 2"
+                        <TextInput v-model="data.params.HorasNoDiurnas" v-show="props.numberPermissions > 9"
                                    type="number" min="0" class="block w-2/3 md:w-full rounded-lg"
                                    placeholder="No diurnas"/>
+                        
                         <!-- ELFILTRO = numero del mes-->
-                        <TextInput v-model="data.params.searchh1" v-show="props.numberPermissions > 1"
-                                   type="number" min="0" max="24" class="hidden lg:block w-full rounded-lg"
+                        <TextInput v-model="data.params.searchh1" v-show="props.numberPermissions > 10"
+                                   type="number" min="0" max="31" class="hidden xl:block w-full rounded-lg"
                                    placeholder="dia ini"/>
-                        <TextInput v-model="data.params.searchh2" v-show="props.numberPermissions > 1"
-                                   type="number" min="0" max="24" class="hidden lg:block w-full rounded-lg"
+                        <TextInput v-model="data.params.searchh2" v-show="props.numberPermissions > 10"
+                                   type="number" min="0" max="31" class="hidden xl:block w-full rounded-lg"
                                    placeholder="dia fin"/>
                         <TextInput v-model="data.params.search" v-show="props.numberPermissions > 1"
-                                   type="number" min="0" max="12" class="hidden lg:block w-2/3 md:w-full rounded-lg"
-                                   :placeholder="lang().placeholder.searchDates"/>
+                                   type="text" min="0" max="12"
+                                   class="hidden lg:block w-2/3 md:w-full rounded-lg"
+                                   placeholder="Mes"/>
                         <!--                        <SelectInput v-model="data.params.search" :dataSet="data.DiasDeLaSemana" />-->
                         <!--                        e1 adminis2 su e ing 3-->
                         <!-- ELFILTRO = numero del dia-->
@@ -355,7 +372,7 @@ const handleCheckboxChange = (values) => {
                     </div>
                 </div>
             </div>
-            <div class="flex justify-between p-2">
+            <div class="flex justify-between p-4">
                 <div
                     v-if="data.selectedId.length != 0 && can(['isingeniero','isadmin','isadministrativo','issupervisor'])"
                     class="flex space-x-2">
@@ -387,6 +404,8 @@ const handleCheckboxChange = (values) => {
                 </div>
             </div>
 
+            
+<!--            empieza la tabla-->
             <div class="overflow-x-auto scrollbar-table">
                 <table class="w-full">
                     <thead class="uppercase sticky text-sm border-t border-gray-200 dark:border-gray-700">
@@ -530,13 +549,19 @@ const handleCheckboxChange = (values) => {
                             {{ props.sumdominical_diurno ? 'Dominical diurno: ' + props.sumdominical_diurno : '' }}
                         </td>
                         <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                            {{ props.sumdominical_nocturno ? 'Dominical nocturno: ' + props.sumdominical_nocturno : '' }}
+                            {{
+                                props.sumdominical_nocturno ? 'Dominical nocturno: ' + props.sumdominical_nocturno : ''
+                            }}
                         </td>
                         <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                            {{ props.sumdominical_extra_diurno ? 'Dominical extra diurno: ' + props.sumdominical_extra_diurno : '' }}
+                            {{
+                                props.sumdominical_extra_diurno ? 'Dominical extra diurno: ' + props.sumdominical_extra_diurno : ''
+                            }}
                         </td>
                         <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                            {{ props.sumdominical_extra_nocturno ? 'Dominical extra nocturno: ' + props.sumdominical_extra_nocturno : '' }}
+                            {{
+                                props.sumdominical_extra_nocturno ? 'Dominical extra nocturno: ' + props.sumdominical_extra_nocturno : ''
+                            }}
                         </td>
                         <td class="whitespace-nowrap py-4 px-2 sm:py-3"></td>
                         <td class="whitespace-nowrap py-4 px-2 sm:py-3"></td>
@@ -544,12 +569,14 @@ const handleCheckboxChange = (values) => {
                     </tbody>
                 </table>
             </div>
+            <TextInput v-model="data.params.searchh4"
+                       type="number" min="2019" max="2099" class="hidden sm:block w-22 rounded-lg"
+                       placeholder="año"/>
             <div class="flex justify-betwween items-center p-2 border-t border-gray-200 dark:border-gray-700">
                 <Pagination :links="props.fromController" :filters="data.params"/>
                 <span class="ml-4 my-auto hidden 2xl:block">Registros por página</span>
                 <span class="ml-4 my-auto block 2xl:hidden">Reg/pag</span>
                 <SelectInput v-if="filters !== null" v-model="data.params.perPage" :dataSet="data.dataSet"/>
-
             </div>
         </div>
         <section v-if="props.quincena != null"
@@ -557,19 +584,19 @@ const handleCheckboxChange = (values) => {
                  class="text-gray-600 body-font overflow-hidden">
             <div class="container px-5 py-4 mx-auto">
                 <div class="flex flex-wrap m-2">
-                    <div class="p-1 md:w-1/2 flex flex-col items-start">
-                            <span
-                                class="inline-block py-1 px-2 rounded bg-indigo-50 text-indigo-500 text-xs font-medium tracking-widest">
-                                Este mes
-                            </span>
-                        <h2 v-if="props.nombrePersona"
-                            class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">
-                            Reportes de este mes: <b>{{ props.nombrePersona }}</b>
-                        </h2>
-                        <div class="m-1 p-1 w-full">
-                            <Bar id="my-chart-id" :options="chartOptions" :data="chartData"/>
-                        </div>
-                    </div>
+<!--                    <div class="p-1 md:w-1/2 flex flex-col items-start">-->
+<!--                            <span-->
+<!--                                class="inline-block py-1 px-2 rounded bg-indigo-50 text-indigo-500 text-xs font-medium tracking-widest">-->
+<!--                                Este mes-->
+<!--                            </span>-->
+<!--                        <h2 v-if="props.nombrePersona"-->
+<!--                            class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">-->
+<!--                            Reportes de este mes: <b>{{ props.nombrePersona }}</b>-->
+<!--                        </h2>-->
+<!--                        <div class="m-1 p-1 w-full">-->
+<!--                            <Bar id="my-chart-id" :options="chartOptions" :data="chartData"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
                     <!-- <div class="p-1 md:w-1/2 flex flex-col items-start">
                         <span class="inline-block py-1 px-2 rounded bg-indigo-50 text-indigo-500 text-xs font-medium tracking-widest">Segunda quincena</span>
                         <h2 class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">Numero de reportes</h2>

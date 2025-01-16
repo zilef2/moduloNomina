@@ -72,6 +72,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
     <AuthenticatedLayout>
         <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />
         <h2 class="text-lg mb-2">Mano de obra estimada de este mes</h2>
+        <h2 class="text-lg mb-2">Se tiene en cuenta el salario de la persona</h2>
         <div class="space-y-4">
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">
@@ -157,7 +158,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
                                 <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.cuantoshijos) }}</td>
                                 <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     <p v-for="(superv, inde) in clasegenerica.supervi.split(',')" :key="inde">
-                                        <span v-if="superv.trim()">{{ index+1 +' '+superv }}</span>
+                                        <span v-if="superv.trim()">{{ inde+1 +') '+superv }}</span>
                                         <span v-else class="border-b-blue-300 border-2">Sin supervisor</span>
                                     </p>
                                 </td>

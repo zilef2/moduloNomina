@@ -159,7 +159,7 @@ watchEffect(() => {})
 <template>
     <Head :title="props.title"></Head>
     <AuthenticatedLayout>
-        <section class="flex text-gray-600 body-font relative text-center mx-auto">
+        <section class="text-gray-600 body-font text-center mx-auto w-full">
             <div class="px-5 py-2">
                 <div class="flex flex-col text-center w-full mb-2 mx-auto">
                     <div class="px-4 sm:px-0 mx-auto">

@@ -12,10 +12,11 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
-use Opcodes\LogViewer\Facades\Cache;
 
 class CentroCostosController extends Controller
 {
@@ -27,8 +28,10 @@ class CentroCostosController extends Controller
         $this->minutosActualizarPresupueto = 15;
     }
 
-    public function MapearClasePP(&$centroCostos, $numberPermissions, $request): void
+    public function MapearClasePP($numberPermissions, $request)
     {
+        $centroCostos = centroCosto::query();
+
         $AUuser = Myhelp::AuthU();
         $busqueda = false;
         if ($request->has('search')) {
@@ -43,16 +46,21 @@ class CentroCostosController extends Controller
                 ->orderBy('activo', 'DESC')
                 ->orderBy('mano_obra_estimada', 'DESC');
         }
+        $supervisores = User::UsersWithRol('supervisor')->get();
 
-        $centroCostos = Cache::remember('centro_costos', $this->minutosActualizarPresupueto, function () use ($centroCostos, $numberPermissions, $AUuser) {
-            return $centroCostos->get()->map(function ($centroCosto) use ($numberPermissions, $AUuser) {
-                if ($numberPermissions === 3) {
+        $centroCostos = Cache::remember('centro_costos', $this->minutosActualizarPresupueto, function () use ($centroCostos, $numberPermissions, $AUuser, $supervisores) {
+            Log::info('Cache miss: recalculating centro_costos');
+            return $centroCostos->get()->map(function ($centroCosto) use ($supervisores, $numberPermissions, $AUuser) {
+                if ($numberPermissions === 3) { //todo: que es 3
                     $objetoDelUser = $AUuser->ArrayCentrosID();
                     if (in_array($centroCosto->id, $objetoDelUser)) {
                         return null;
                     }
                 }
-                $ArrayListaSupervi = $centroCosto->ArrayListaSupervisores();
+
+                $ArrayListaSupervi = Cache::remember("ArrayListaSupervisores_{$centroCosto->id}", ($this->minutosActualizarPresupueto*4), function () use ($centroCosto, $supervisores) {
+                    return $centroCosto->ArrayListaSupervisores($supervisores);
+                });
                 $centroCosto->cuantoshijos = count($centroCosto->users);
                 $centroCosto->todos = $centroCosto->ArraySupervIDs();
                 $centroCosto->supervi = implode(',', $ArrayListaSupervi);
@@ -81,10 +89,12 @@ class CentroCostosController extends Controller
                 return false;
             });
         }
+        
+        return $centroCostos;
     }
 
     //deep1
-    private function ActualizarPresupuesto()
+    private function ActualizarPresupuesto(): void
     {
         $cacheKey = 'ultima_llamada_cc_index';
         $ultimaLlamada = Cache::get($cacheKey);
@@ -101,49 +111,34 @@ class CentroCostosController extends Controller
         Cache::put($cacheKey, $tiempoActual);
     }
 
-    public function index(Request $request)
+    public function index(Request $request): \Inertia\Response
     {
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'centro costos')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         $this->ActualizarPresupuesto();
         //<editor-fold desc="serach, order, mapear y paginar">
-        $centroCostos = centroCosto::query();
         $perPage = $request->has('perPage') ? $request->perPage : 50;
-        $this->MapearClasePP($centroCostos, $numberPermissions, $request);
-
-        $permissions = Auth()->user()->roles->pluck('name')[0];
-        if ($permissions === 'empleado') { //admin | administrativo
-            $nombresTabla = [//[0]: como se ven //[1] como es la BD
-                ['#', 'nombre'],
-                [null, 'nombre'],
-            ];
-        } else {
-            $nombresTabla = [//[0]: como se ven //[1] como es la BD
-                ['Acciones', '#', 'nombre', 'Mano obra estimada', 'usuarios', 'Supervisor', 'activo','Facturar', 'descripcion', 'clasificacion'],
-                [null, null, 'nombre', 'mano_obra_estimada', null, null, 'activo','ValidoParaFacturar', 'descripcion', 'clasificacion'],
-            ];
-        }
+        $centroCostos = $this->MapearClasePP($numberPermissions, $request);
+        $nombresTabla = $this->getNombresTabla();
 
         $page = request('page', 1); // Current page number
-        $total = $centroCostos->count();
         $paginated = new LengthAwarePaginator(
             $centroCostos->forPage($page, $perPage),
-            $total,
+            $centroCostos->count(),
             $perPage,
             $page,
             ['path' => request()->url()]
         );
         //</editor-fold>
-
         $listaSupervisores = User::whereHas('roles', function ($q) {
             $q->where('name', 'supervisor');
         })->get();
 
         return Inertia::render('CentroCostos/Index', [ //carpeta
+            'breadcrumbs' => [['label' => __('app.label.CentroCostos'), 'href' => route('CentroCostos.index')]],
             'title' => __('app.label.CentroCostos'),
             'filters' => $request->all(['search', 'field', 'order']),
             'perPage' => (int)$perPage,
             'fromController' => $paginated,
-            'breadcrumbs' => [['label' => __('app.label.CentroCostos'), 'href' => route('CentroCostos.index')]],
             'nombresTabla' => $nombresTabla,
             'listaSupervisores' => $listaSupervisores,
         ]);
@@ -364,5 +359,25 @@ class CentroCostosController extends Controller
             Myhelp::EscribirEnLog($this, ' destroy centro costos', $thmessa, false, 1);
             echo "catch:  $thmessa";
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getNombresTabla(): array
+    {
+        $permissions = Auth()->user()->roles->pluck('name')[0];
+        if ($permissions === 'empleado') { //admin | administrativo
+            $nombresTabla = [//[0]: como se ven //[1] como es la BD
+                ['#', 'nombre'],
+                [null, 'nombre'],
+            ];
+        } else {
+            $nombresTabla = [//[0]: como se ven //[1] como es la BD
+                ['Acciones', '#', 'nombre', 'Mano obra estimada', 'usuarios', 'Supervisor', 'activo', 'Facturar', 'descripcion', 'clasificacion'],
+                [null, null, 'nombre', 'mano_obra_estimada', null, null, 'activo', 'ValidoParaFacturar', 'descripcion', 'clasificacion'],
+            ];
+        }
+        return $nombresTabla;
     }
 }

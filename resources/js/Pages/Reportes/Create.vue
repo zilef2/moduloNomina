@@ -238,7 +238,7 @@ watchEffect(() => {
                         */
                         
                         
-                        console.log("=>(Create.vue:242) props.ArrayCentrosNoFactura", props.ArrayCentrosNoFactura[0]);
+                        console.log(" props.ArrayCentrosNoFactura", props.ArrayCentrosNoFactura[0]);
                         console.log("=>(Create.vue:242) props.ArrayCentrosNoFactura", typeof(props.ArrayCentrosNoFactura[0]));
                         let ccid = parseInt(form.centro_costo_id)
                         console.log("=>(Create.vue:243) form.centro_costo_id", ccid);
@@ -248,8 +248,11 @@ watchEffect(() => {
                             let dirunasYnocturnas = calcularSinExtras(ini, fin)
                             form.diurnas = dirunasYnocturnas[0];
                             form.nocturnas = dirunasYnocturnas[1];
+                            data.BoolCentroNoFactura = true
+                            data.mensajeCentroNoFactura = "Este centro no factura"
                             
                         }else {
+                            data.BoolCentroNoFactura = false
                             calcularHoras(
                                 data, form, props,
                                 ini, fin,
@@ -557,7 +560,11 @@ const formatfin = (date) => {
                     </div>
 
                     <div class="mt-4">
-                        <InputLabel for="centro_costo_id" :value="lang().label.centro_costo_id"/>
+                        <span v-if="data.BoolCentroNoFactura" class="mx-2 px-1 text-sky-700 bg-sky-400/10 dark:text-white">
+                            {{data.mensajeCentroNoFactura}}
+                        </span>
+                        <InputLabel v-else for="centro_costo_id" :value="lang().label.centro_costo_id"/>
+                        
                         <SelectInput v-model="form.centro_costo_id" :dataSet="props.valoresSelect"
                                      class="mt-1 block w-full"/>
                         <InputError class="mt-2" :message="form.errors.centro_costo_id"/>

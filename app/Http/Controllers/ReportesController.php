@@ -58,17 +58,29 @@ class ReportesController extends Controller
 
     public function Filtros(&$request, &$Reportes)
     {
+        $esteAnio = Carbon::now()->format('Y');
         if ($request->has('search') || $request->has('searchDDay') || $request->has('searchHorasD') || $request->has('searchIncongruencias') ||
             $request->has('searchQuincena') || $request->has(['FiltroUser']) || $request->has(['FiltroQuincenita']) ||
             $request->has('searchSiigo') || $request->has('soloValidos') || $request->has('soloQuincena')) {
-            $esteAnio = Carbon::now()->format('Y');
-            $Reportes->WhereYear('fecha_ini', $esteAnio);
         }
 
+        if ($request->has('searchh4')) { //el anio
+            $Reportes->WhereYear('fecha_ini', $request->searchh4);
+        }else{
+            $Reportes->WhereYear('fecha_ini', $esteAnio);
+        }
         if ($request->has('search')) { //el mes
-            $Reportes->whereMonth('fecha_ini', $request->search);
-            // $Reportes->OrwhereDay('fecha_fin', $request->search);
-            // $Reportes->orWhere('fecha_fin', 'LIKE', "%" . $request->search . "%");
+//            dd($request->search);
+            $months = [
+                '', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+            ];
+            if(is_integer($request->search)){
+                $Reportes->whereMonth('fecha_ini', $request->search);
+                $request->search = $months[$request->search];
+            }else{
+                $Reportes->whereMonth('fecha_ini', array_search($request->search,$months));
+            }
         }
         if ($request->has('searchDDay')) {
             $Reportes->whereDay('fecha_ini', $request->searchDDay);
