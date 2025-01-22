@@ -2,7 +2,12 @@
 
 return [
     'label' => [
+        'cotizacion' => 'cotizacion',
+		//aquipues
+        
+        
         //parametros
+        'ubicacion' => 'ubicación',
         'servicio' => 'servicio',
         'servicios' => 'servicios',
         'Servicio' => 'Servicio',

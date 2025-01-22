@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Total_centro_costo extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'id',
+    ];
+
 }

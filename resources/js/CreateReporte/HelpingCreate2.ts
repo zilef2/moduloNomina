@@ -278,26 +278,26 @@ function RestarAlmuarzo(form,data){
         if(form.extra_nocturnas >= data.ValorRealalmuerzo){ // && form.extra_nocturnas > form.extra_diurnas
             form.extra_nocturnas -= data.ValorRealalmuerzo
             form.almuerzo += ' nocturno'
-            console.log('se quita noctura')
+            // console.log('se quita noctura')
             return true;
         }
-        if(form.extra_diurnas >= data.ValorRealalmuerzo){
+        if(form.extra_diurnas >= data.ValorRealalmuerzo){ //todo: hay ocasiones donde no se va a poder restar
             form.extra_diurnas -= data.ValorRealalmuerzo
             form.almuerzo += ' diurno'
-            console.log('se quita diurna')
+            // console.log('ED - Almuerzo')
             return true;
         }
 
         if(form.nocturnas >= data.ValorRealalmuerzo){ //&& form.nocturnas > form.diurnas
             form.nocturnas -= data.ValorRealalmuerzo;
             form.almuerzo += ' nocturno';
-            console.log(" form.nocturnas", form.nocturnas);
+            // console.log(" form.nocturnas", form.nocturnas);
             return true;
         }
         if(form.diurnas >= data.ValorRealalmuerzo) {
             form.diurnas -= data.ValorRealalmuerzo;
             form.almuerzo += ' diurno'
-            console.log(" form.diurnas", form.diurnas);
+            // console.log(" form.diurnas", form.diurnas);
             return true;
         }
 
@@ -319,13 +319,13 @@ function RestarAlmuarzo(form,data){
         if(form.dominical_nocturnas >= data.ValorRealalmuerzo ) { //&& form.dominical_nocturnas > form.dominical_diurnas
             form.dominical_nocturnas -= data.ValorRealalmuerzo;
             form.almuerzo += ' dominical nocturno';
-            console.log("=>(HelpingCreate2.ts:277) form.almuerzo", form.almuerzo);
+            // console.log("=>(HelpingCreate2.ts:277) form.almuerzo", form.almuerzo);
             return true;
         }
         if(form.dominical_diurnas >= data.ValorRealalmuerzo) {
             form.dominical_diurnas -= data.ValorRealalmuerzo;
             form.almuerzo += ' dominical'
-            console.log("=>(HelpingCreate2.ts:284) form.almuerzo", form.almuerzo);
+            // console.log("=>(HelpingCreate2.ts:284) form.almuerzo", form.almuerzo);
             return true;
         }
 
@@ -338,11 +338,10 @@ function RestarAlmuarzo(form,data){
 export function setDominical(data,form,ini,fin,CuandoEmpiezaExtra,ExtrasManana,FestivosColombia,message){//date,date,int,bool
     let esFestivo = estaFechaEsFestivo(new Date(ini),data.MostrarConsole,FestivosColombia);
     let esFestivo2 = estaFechaEsFestivo(new Date(fin),data.MostrarConsole,FestivosColombia);
-        console.log("entramos a dominical");
 
     if(ini.getDay() === 0 || fin.getDay() === 0){
         form.dominicales = 'si'
-        console.log("=>(HelpingCreate2.ts:344) form.dominicales", form.dominicales);
+        console.log('%cHelpingCreate2 form.dominicales: '+form.dominicales, "color:yellow;font-family:system-ui;font-size:22px;")
         message.TextFestivo = 'Dominical'
 
         if(esFestivo || esFestivo2) message.TextFestivo += ' y festivo';

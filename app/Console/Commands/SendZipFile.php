@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
+use Symfony\Component\Console\Command\Command as CommandAlias;
 use ZipArchive;
 
 class SendZipFile extends Command {
@@ -13,14 +14,14 @@ class SendZipFile extends Command {
 
     public function handle(): int{
         try {
-            $zip = new ZipArchive;
-            $zipFileName = public_path(env('APP_NAME') . 'BD.zip');
+            $zip = new ZipArchive;//ModNom_06oct2023
+            $zipFileName = public_path(env('APP_NAME','laravelBackupv2025') . '.zip');
 
             if ($zip->open($zipFileName, ZipArchive::CREATE) === true) {
                 $zip->setCompressionIndex(0, ZipArchive::CM_DEFLATE, 9);
 
-                $directory = storage_path('app/' . env('APP_NAME') . '_zilef');
-                $pattern = 'zilef*';
+                $directory = storage_path('app/' . env('APP_NAME','Modnom') . '_zilef2025');
+                $pattern = '*.zip';
 
                 $matchingFiles = glob($directory . DIRECTORY_SEPARATOR . $pattern);
                 $archivosEncontrados = count($matchingFiles);
@@ -65,7 +66,7 @@ class SendZipFile extends Command {
                         ->attach($zipFileName);
                 });
                 $this->info('Archivo ZIP enviado por correo.');
-                return Command::SUCCESS;
+                return CommandAlias::SUCCESS;
 
             } else {
                 $this->warn('Error al comprimir el archivo');

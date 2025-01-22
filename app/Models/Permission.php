@@ -40,6 +40,10 @@ use Spatie\Permission\Models\Permission as ModelsPermission;
 class Permission extends ModelsPermission
 {
     use HasFactory;
+    protected $fillable = [
+        'id',
+    ];
+
 
     public function getCreatedAtAttribute() {
         return date('d-m-Y H:i', strtotime($this->attributes['created_at']));

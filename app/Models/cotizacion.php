@@ -5,11 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Servicios extends Model
+class cotizacion extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'id',
+        'numero_cot',
+        'descripcion_cot',
+        'precio_cot',
+        'aprobado_cot',
+        'fecha_aprobacion_cot'
     ];
 
 }

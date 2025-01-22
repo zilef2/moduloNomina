@@ -7,20 +7,13 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import SelectInput from '@/Components/SelectInput.vue';
 import {useForm} from '@inertiajs/vue3';
-import {ref, watchEffect, reactive, onMounted, watch} from 'vue';
+import {onMounted, reactive, ref, watch, watchEffect} from 'vue';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
-import '@vuepic/vue-datepicker/dist/main.css';
-import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 import FestivosColombia from 'festivos-colombia';
 import {TransformTdate, weekNumber} from "@/global";
-import {
-    estaFechaEsFestivo,
-    calcularTerminaLunes,
-    calcularTerminaDomingo,
-    calcularHoras
-} from "@/CreateReporte/HelpingCreate";
+import {calcularHoras} from "@/CreateReporte/HelpingCreate";
 import {validacionNoMasDe3Diax} from "@/ValidacionCreateReporte";
 
 const props = defineProps({
@@ -42,7 +35,7 @@ const props = defineProps({
 })
 let label_diurnas = ref(null)
 
-const HORAS_ESTANDAR = props.ArrayHorasSemanales.HORAS_ORDINARIAS // 9horitas
+const HORAS_ESTANDAR = props.ArrayHorasSemanales.HORAS_ORDINARIAS // 8horitas
 const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - HORAS_ESTANDAR //notes: 7jul = 40
 const LimiteHorasTrabajadas = 25
 
@@ -87,15 +80,25 @@ const message = reactive({
 // <!--<editor-fold desc="onMounted - useForm">-->
 
 onMounted(() => {
+
+    //explaining: data.TrabajadasSemana solo se usa cuando se pasa de las horas que debe trabajar por semana 
     data.TrabajadasSemana = props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] > HORAS_SEMANALES_MENOS_ESTANDAR ?
         props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
 
-    //data.TrabajadasSemana son las horas que hay que restarle a Cuandocomienzaextras
+    //explaining: data.TrabajadasSemana son las horas que hay que restarle a Cuandocomienzaextras
     data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
+    
+    if (data.MostrarConsole.MostrarTrabajadaSemana) {
+        console.log("=>(Create.vue:86) props.HorasDeCadaSemana", props.HorasDeCadaSemana);
+        console.log("=>(Create.vue:86) data.TrabajadasSemana", data.TrabajadasSemana);
+    }
+
+    //explaining: recuperamos el centro de costo que habiamos selecciopnado previamente
     if (localStorage.getItem('centroCostoId')) {
         form.centro_costo_id = localStorage.getItem('centroCostoId')
     }
 });
+
 
 const form = useForm({
     fecha_ini: '', fecha_fin: '',
@@ -126,11 +129,12 @@ const form = useForm({
 
 let newdate = (new Date())
 let horahoy = newdate.getHours()
-if (props.numberPermissions > 8) { //temporaly commented
+if (props.numberPermissions < 9) {
+// if (props.numberPermissions > 8) {
     // form.fecha_ini = '2024-11-15T21:00'
     // form.fecha_fin = '2024-11-15T23:58'
-    form.fecha_ini = '2024-11-09T03:00'
-    form.fecha_fin = '2024-11-09T05:00'
+    form.fecha_ini = '2025-01-14T07:00'
+    form.fecha_fin = '2025-01-14T16:00'
 } else {
     let timedate = TransformTdate(7)//la hora
     let timedate2 = TransformTdate(16)
@@ -164,11 +168,11 @@ const Reporte11_59 = () => {
 
 watchEffect(() => {
     if (props.show) {
-        // console.clear()
+        // explaining: El dia anterior trabajo? 
         if (data.diaSelected) {
             data.HorasDelDiaAnterior59 = props.ArrayOrdinarias[data.diaSelected];
 
-            console.log("=>(Create.vue:664) data.diaSelected", data.diaSelected);
+            // console.log("=>(Create.vue:171) data anterior", data.diaSelected);
             // console.log("=>(Create.vue:664) props.ArrayOrdinarias", props.ArrayOrdinarias);
         }
         form.errors = {}
@@ -178,15 +182,17 @@ watchEffect(() => {
             data.TrabajadasHooy = (props.horasTrabajadasHoy[data.diaini]) ?? 0
             data.TrabajadasHooy = parseInt(data.TrabajadasHooy)
 
-
             let ini = Date.parse(form.fecha_ini);
             let fin = Date.parse(form.fecha_fin);
 
             let WeekN = weekNumber(new Date(form.fecha_ini))
+            if (data.MostrarConsole.MostrarTrabajadaSemana) console.log("=>(Create.vue:190) WeekN", WeekN);
+            
             // 38 => 46 - 8
             data.TrabajadasSemana = props.HorasDeCadaSemana[WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
                 props.HorasDeCadaSemana[WeekN] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
-
+            console.log("=>(Create.vue:194) WeekN", WeekN);
+            
             data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
 
             form.horas_trabajadas = 0
@@ -236,22 +242,17 @@ watchEffect(() => {
                             horas < LimiteHorasTrabajadas
                             Diainicio == dia final
                         */
-                        
-                        
-                        console.log(" props.ArrayCentrosNoFactura", props.ArrayCentrosNoFactura[0]);
-                        console.log("=>(Create.vue:242) props.ArrayCentrosNoFactura", typeof(props.ArrayCentrosNoFactura[0]));
-                        let ccid = parseInt(form.centro_costo_id)
-                        console.log("=>(Create.vue:243) form.centro_costo_id", ccid);
-                        console.log("=>lo incluye?", props.ArrayCentrosNoFactura.includes(ccid));
 
+
+                        let ccid = parseInt(form.centro_costo_id)
                         if (props.ArrayCentrosNoFactura.includes(ccid)) {
                             let dirunasYnocturnas = calcularSinExtras(ini, fin)
                             form.diurnas = dirunasYnocturnas[0];
                             form.nocturnas = dirunasYnocturnas[1];
                             data.BoolCentroNoFactura = true
                             data.mensajeCentroNoFactura = "Este centro no factura"
-                            
-                        }else {
+
+                        } else {
                             data.BoolCentroNoFactura = false
                             calcularHoras(
                                 data, form, props,
@@ -333,7 +334,7 @@ watch(() => form.fecha_fin, (newX) => {
 
         if (data.estado2359) {
             form.horas_trabajadas++
-            if (form.nocturnas < 8 && form.nocturnas >= 0) {
+            if (form.nocturnas < 8 && form.nocturnas >= 0) { //todo: solo se verifica que no se pase de 8 horas nocturnas. deberia verificar con CUANDOEMPIEZANOCTURNAS
                 form.nocturnas++
             } else
                 form.extra_nocturnas++
@@ -351,15 +352,16 @@ watch(() => form.fecha_fin, (newX) => {
 const create = () => {
     data.MensajeError = ''
     data.respuestaSeguro = true
+
     if (form.horas_trabajadas <= LimiteHorasTrabajadas && form.horas_trabajadas !== 0) {
         if (Object.keys(form.errors).length === 0) {
             if (props.numberPermissions < 9) {
                 data.respuestaSeguro = confirm("¿Estás seguro de enviar el formulario?");
             }
             let validacionNoMasDe3Dias = true
-            
+
             console.log("=>(Create.vue:359) ArrayHorasSemanales['s_Dias_gabela']", props.ArrayHorasSemanales['s_Dias_gabela']);
-            console.log("=>(Create.vue:222222) props.ArrayHorasSemanales['s_Dias_gabela']", typeof(props.ArrayHorasSemanales['s_Dias_gabela']));
+            console.log("=>(Create.vue:222222) props.ArrayHorasSemanales['s_Dias_gabela']", typeof (props.ArrayHorasSemanales['s_Dias_gabela']));
             validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini, props.ArrayHorasSemanales['s_Dias_gabela'])
             console.log("=>(Create.vue:302) validacionNoMasDe3Dias", validacionNoMasDe3Dias);
             if (data.respuestaSeguro && validacionNoMasDe3Dias === 'ok') {
@@ -560,11 +562,12 @@ const formatfin = (date) => {
                     </div>
 
                     <div class="mt-4">
-                        <span v-if="data.BoolCentroNoFactura" class="mx-2 px-1 text-sky-700 bg-sky-400/10 dark:text-white">
-                            {{data.mensajeCentroNoFactura}}
+                        <span v-if="data.BoolCentroNoFactura"
+                              class="mx-2 px-1 text-sky-700 bg-sky-400/10 dark:text-white">
+                            {{ data.mensajeCentroNoFactura }}
                         </span>
                         <InputLabel v-else for="centro_costo_id" :value="lang().label.centro_costo_id"/>
-                        
+
                         <SelectInput v-model="form.centro_costo_id" :dataSet="props.valoresSelect"
                                      class="mt-1 block w-full"/>
                         <InputError class="mt-2" :message="form.errors.centro_costo_id"/>

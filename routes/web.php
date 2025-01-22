@@ -10,12 +10,14 @@ use App\Http\Controllers\QRController;
 use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ServiciosController;
+use App\Http\Controllers\UbicacionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ZipController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Inertia\Inertia;
+require __DIR__.'/auth.php';
 
 // use Stevebauman\Location\Facades\Location;
 
@@ -78,6 +80,7 @@ Route::middleware('auth', 'verified')->group(function () {
 
     //19abril2024
     Route::resource('/Servicios', ServiciosController::class);
+    Route::resource('/ubicacion', UbicacionController::class);
 
     //yan
     Route::get('/qrscanner', [QRController::class, 'index'])->name('qrscanner');
@@ -88,8 +91,14 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::get('/DescompresionDespliegue/{esAmbientePruebas}', [ZipController::class, 'DescompresionDespliegue']);
     Route::get('/JustDeploy/{pruebas}', [\App\Http\Controllers\ScriptController::class, 'JustDeploy']);
 
+//aquipue
+//aquipue
 }); //fin verified
-require __DIR__.'/auth.php';
+
+
+
+
+
 
 // <editor-fold desc="Artisan">
 Route::get('/exception', function () {

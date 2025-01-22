@@ -23,7 +23,6 @@ class CreateCargosTable extends Migration
         
         Schema::table('users', function (Blueprint $table) {
             $table->unsignedBigInteger('cargo_id')->default(1);
-             
             $table->foreign('cargo_id')
                 ->references('id')
                 ->on('cargos')

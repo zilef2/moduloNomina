@@ -79,7 +79,8 @@ class ReportesController extends Controller
                 $Reportes->whereMonth('fecha_ini', $request->search);
                 $request->search = $months[$request->search];
             }else{
-                $Reportes->whereMonth('fecha_ini', array_search($request->search,$months));
+                $mesMinusculas = ucfirst($request->search);
+                $Reportes->whereMonth('fecha_ini', array_search($mesMinusculas,$months));
             }
         }
         if ($request->has('searchDDay')) {

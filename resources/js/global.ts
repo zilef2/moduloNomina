@@ -90,7 +90,33 @@ export function CuantosFestivosEstaQuincena2(numQuicena,elmes,anio) {
 
 
 // --DATE functions
-    export function weekNumber(date) {
+    
+    export function weekNumber(date: Date): number {
+        if (!(date instanceof Date) || isNaN(date.getTime())) {
+            return 0;
+        }
+    
+        // Clonar la fecha para no modificar el objeto original
+        const clonedDate = new Date(date.getTime());
+        clonedDate.setHours(0, 0, 0, 0); // Configurar al inicio del día
+    
+        // Obtener la fecha del 1 de enero del mismo año
+        const startOfYear = new Date(clonedDate.getFullYear(), 0, 1);
+        startOfYear.setHours(0, 0, 0, 0); // Configurar al inicio del día
+    
+        // Calcular el día de la semana del 1 de enero (0 = domingo, 6 = sábado)
+        const startDayOfWeek = startOfYear.getDay();
+    
+        // Ajustar para que la semana comience en lunes (ISO 8601)
+        const dayOfYear = Math.floor((clonedDate.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+        const adjustedDayOfWeek = (startDayOfWeek === 0 ? 7 : startDayOfWeek); // Convertir domingo (0) en 7
+        const weekNumber = Math.ceil((dayOfYear + adjustedDayOfWeek - 1) / 7);
+    
+        return weekNumber;
+    }
+
+
+    export function weekNumberv2(date) {//todo: quiero saber porque el 14 enero de 2025 era la semana 2 !absurdo¡
         if (!(date instanceof Date) || isNaN(date.getTime())) {
             return 0
         }

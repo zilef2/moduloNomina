@@ -6,7 +6,7 @@ return [
         'dump_command_path' => 'C:/laragon/bin/mysql/mysql-8.0.30-winx64/bin',
     ],
     'backup' => [
-        'name' => env('APP_NAME', 'laravel-backup').'_zilef',
+        'name' => env('APP_NAME', 'laravelBackupv2025') . '_zilef2025',
         'source' => [
             'files' => [
                 /*

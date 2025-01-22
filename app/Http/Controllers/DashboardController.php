@@ -15,12 +15,13 @@ class DashboardController extends Controller
     {
         $user = Myhelp::AuthU();
         if (Schema::hasTable('ubicacion')) {
+            $ipAddress = $r->ip();
             DB::table('ubicacion')->insert([
                 'ubicacion' => $r->ciudad,
                 'valido' => 1,
                 'userid' => $user->id,
                 'name' => $user->name,
-                'email' => $user->email,
+                'email' => $ipAddress ?? 'Sin ip',
                 'created_at' => Carbon::now()
             ]);
         }

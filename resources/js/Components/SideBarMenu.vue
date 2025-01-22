@@ -12,6 +12,22 @@ import {
 
 
 import { Link } from '@inertiajs/vue3';
+import { reactive } from 'vue';
+
+const data = reactive({
+    showContent: false,
+    showContent2: true
+})
+const toggleContent = () => {
+    data.showContent = !data.showContent
+}
+const toggleContent2 = () => {
+    data.showContent2 = !data.showContent2
+}
+const sidebarButtonsNormal = [ //SAME AS WEB.PHP
+	'cotizacion',
+	//aquipuesSide
+];
 
 </script>
 <template>
@@ -61,6 +77,14 @@ import { Link } from '@inertiajs/vue3';
                     <span class="ml-3">{{ lang().label.Parametros }}</span>
                 </Link>
             </li>
+            <li v-show="can(['read parametros'])"
+                class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
+                :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('Parametros.index') }">
+                <Link :href="route('ubicacion.index')" class="flex items-center py-2 px-4">
+                    <BanknotesIcon class="w-6 h-5" />
+                    <span class="ml-3">Ubicaciones</span>
+                </Link>
+            </li>
             <li v-show="can(['read role', 'read permission'])" class="py-2">
                 <p>{{ lang().label.access }}</p>
             </li>
@@ -97,6 +121,32 @@ import { Link } from '@inertiajs/vue3';
                 </Link>
             </li>
             
+        </ul>
+        
+        <button @click="toggleContent2" v-show="can(['isAdmin'])" class="text-blue-500">{{ data.showContent2 ? 'Administrativo' : 'Mostrar contenido' }}</button>
+        <ul v-if="data.showContent2" class="space-y-2 my-4">
+            <div class="" v-for="value in ButtonsAdministrativo">
+                <li
+                    class="text-white rounded-lg hover:bg-primary"
+                    :class="route().current(value + '.index') ? 'bg-primary' : 'bg-gray-700'">
+                    <Link :href="route(value+'.index')" class="flex items-center py-4 px-4">
+                        <PresentationChartLineIcon class="w-5 h-auto" />
+                        <span class="ml-3">{{ lang().side[value] }}</span>
+                    </Link>
+                </li>
+            </div>
+        </ul>
+        <ul v-show="can((['isAdmin']))" class="space-y-2 my-4">
+            <div class="" v-for="value in sidebarButtonsAdmin">
+                <li v-show="can(['isAdmin'])"
+                    class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
+                    :class="{ 'bg-blue-700 dark:bg-blue-700': route().current(value+'.index') }">
+                    <Link :href="route(value+'.index')" class="flex items-center py-4 px-4">
+                        <PresentationChartLineIcon class="w-6 h-5" />
+                        <span class="ml-3">{{ lang().label[value] }}</span>
+                    </Link>
+                </li>
+            </div>
         </ul>
     </div>
 </template>
