@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @method static \Illuminate\Database\Eloquent\Collection all()
+ */
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +17,17 @@ class cotizacion extends Model
         'descripcion_cot',
         'precio_cot',
         'aprobado_cot',
-        'fecha_aprobacion_cot'
+        'fecha_aprobacion_cot',
+        'centro_costo_id',
     ];
+    
+    public function centro(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(CentroCosto::class, 'centro_costo_id');
+    }
+        public function centros2()
+    {
+        return $this->belongsTo(CentroCosto::class, 'centro_user');
+    }
 
 }

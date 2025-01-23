@@ -91,8 +91,8 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::get('/DescompresionDespliegue/{esAmbientePruebas}', [ZipController::class, 'DescompresionDespliegue']);
     Route::get('/JustDeploy/{pruebas}', [\App\Http\Controllers\ScriptController::class, 'JustDeploy']);
 
-//aquipue
-//aquipue
+Route::resource("/cotizacion", \App\Http\Controllers\CotizacionController::class);
+	//aquipues
 }); //fin verified
 
 

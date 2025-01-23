@@ -16,7 +16,8 @@ import { reactive } from 'vue';
 
 const data = reactive({
     showContent: false,
-    showContent2: true
+    showContent2: true,
+    showContent3: false
 })
 const toggleContent = () => {
     data.showContent = !data.showContent
@@ -24,17 +25,26 @@ const toggleContent = () => {
 const toggleContent2 = () => {
     data.showContent2 = !data.showContent2
 }
-const sidebarButtonsNormal = [ //SAME AS WEB.PHP
+const toggleContent3 = () => {
+    data.showContent3 = !data.showContent3
+}
+const ButtonsConfig = [ //SAME AS WEB.PHP
+	'Parametros',
+	'ubicacion',
+];
+const ButtonsAdministrativo = [ //SAME AS WEB.PHP
+	'user',
+	'role',
 	'cotizacion',
 	//aquipuesSide
 ];
 
 </script>
 <template>
-    <div class="text-gray-300 pt-5 pb-20">
+    <div class="text-gray-300 pt-5 pb-12">
         <div class="flex justify-center">
             <div
-                class="rounded-full flex items-center justify-center bg-primary text-gray-300 w-24 h-24 text-4xl uppercase">
+                class="rounded-full flex items-center justify-center bg-primary text-gray-300 w-20 h-20 text-2xl uppercase">
                 <!-- imagen del nombre -->
                 {{ $page.props.auth.user.name.match(/(^\S\S?|\b\S)?/g).join("").match(/(^\S|\S$)?/g).join("") }}
             </div>
@@ -49,52 +59,28 @@ const sidebarButtonsNormal = [ //SAME AS WEB.PHP
             <span class="block text-sm font-medium truncate">{{ $page.props.auth.user.roles[0].name }}</span>
         </div>
         <ul class="space-y-2 my-4">
-            <li class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
-                :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('dashboard') }">
-                <Link :href="route('dashboard')" class="flex items-center py-2 px-4">
-                    <HomeIcon class="w-6 h-5" />
-                    <span class="ml-3">Tablero principal</span>
-                </Link>
-            </li>
-            <li v-show="can(['read user'])" class="py-2">
-                <p>{{ lang().label.data }}</p>
-            </li>
+<!--            <li class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"-->
+<!--                :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('dashboard') }">-->
+<!--                <Link :href="route('dashboard')" class="flex items-center py-2 px-4">-->
+<!--                    <HomeIcon class="w-6 h-5" />-->
+<!--                    <span class="ml-3">Tablero principal</span>-->
+<!--                </Link>-->
+<!--            </li>-->
+<!--            <li v-show="can(['read user'])" class="py-2">-->
+<!--                <p>{{ lang().label.data }}</p>-->
+<!--            </li>-->
 
-            <li v-show="can(['read user'])"
-                class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
-                :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('user.index') }">
-                <Link :href="route('user.index')" class="flex items-center py-2 px-4">
-                    <UserIcon class="w-6 h-5" />
-                    <span class="ml-3">{{ lang().label.user }}</span>
-                </Link>
-            </li>
+<!--            <li v-show="can(['read user'])"-->
+<!--                class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"-->
+<!--                :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('user.index') }">-->
+<!--                <Link :href="route('user.index')" class="flex items-center py-2 px-4">-->
+<!--                    <UserIcon class="w-6 h-5" />-->
+<!--                    <span class="ml-3">{{ lang().label.user }}</span>-->
+<!--                </Link>-->
+<!--            </li>-->
             
-            <li v-show="can(['read parametros'])"
-                class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
-                :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('Parametros.index') }">
-                <Link :href="route('Parametros.index')" class="flex items-center py-2 px-4">
-                    <BanknotesIcon class="w-6 h-5" />
-                    <span class="ml-3">{{ lang().label.Parametros }}</span>
-                </Link>
-            </li>
-            <li v-show="can(['read parametros'])"
-                class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
-                :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('Parametros.index') }">
-                <Link :href="route('ubicacion.index')" class="flex items-center py-2 px-4">
-                    <BanknotesIcon class="w-6 h-5" />
-                    <span class="ml-3">Ubicaciones</span>
-                </Link>
-            </li>
             <li v-show="can(['read role', 'read permission'])" class="py-2">
                 <p>{{ lang().label.access }}</p>
-            </li>
-            <li v-show="can(['read role'])"
-                class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
-                :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('role.index') }">
-                <Link :href="route('role.index')" class="flex items-center py-2 px-4">
-                    <KeyIcon class="w-6 h-5" />
-                    <span class="ml-3">{{ lang().label.role }}</span>
-                </Link>
             </li>
             <li v-show="can(['isSuper'])"
                 class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
@@ -122,26 +108,25 @@ const sidebarButtonsNormal = [ //SAME AS WEB.PHP
             </li>
             
         </ul>
-        
-        <button @click="toggleContent2" v-show="can(['isAdmin'])" class="text-blue-500">{{ data.showContent2 ? 'Administrativo' : 'Mostrar contenido' }}</button>
-        <ul v-if="data.showContent2" class="space-y-2 my-4">
+        <button @click="toggleContent2" v-show="can(['isAdmin','isadministrativo','issupervisor'])" class="text-blue-500">{{ (data.showContent2 ? '' : 'Ver ') + 'Administrativo' }}</button>
+        <ul v-if="data.showContent2" class="space-y-1 my-1">
             <div class="" v-for="value in ButtonsAdministrativo">
-                <li
-                    class="text-white rounded-lg hover:bg-primary"
+                <li class="text-white rounded-lg hover:bg-primary"
                     :class="route().current(value + '.index') ? 'bg-primary' : 'bg-gray-700'">
-                    <Link :href="route(value+'.index')" class="flex items-center py-4 px-4">
+                    <Link :href="route(value+'.index')" class="flex items-center py-2 px-4">
                         <PresentationChartLineIcon class="w-5 h-auto" />
                         <span class="ml-3">{{ lang().side[value] }}</span>
                     </Link>
                 </li>
             </div>
         </ul>
-        <ul v-show="can((['isAdmin']))" class="space-y-2 my-4">
-            <div class="" v-for="value in sidebarButtonsAdmin">
+        <button @click="toggleContent3" v-show="can(['isAdmin'])" class="text-blue-800">{{ (data.showContent3 ? '' : 'Ver ') + 'Solo Administrador' }}</button>
+        <ul v-if="data.showContent3" v-show="can((['isAdmin']))" class="space-y-2 my-4">
+            <div class="" v-for="value in ButtonsConfig">
                 <li v-show="can(['isAdmin'])"
                     class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
-                    :class="{ 'bg-blue-700 dark:bg-blue-700': route().current(value+'.index') }">
-                    <Link :href="route(value+'.index')" class="flex items-center py-4 px-4">
+                    :class="{ 'bg-blue-900 dark:bg-blue-900': route().current(value+'.index') }">
+                    <Link :href="route(value+'.index')" class="flex items-center py-2 px-4">
                         <PresentationChartLineIcon class="w-6 h-5" />
                         <span class="ml-3">{{ lang().label[value] }}</span>
                     </Link>

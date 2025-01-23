@@ -2,12 +2,21 @@
 
 return [
     'label' => [
+        //aquipues
         'cotizacion' => 'cotizacion',
-		//aquipues
+        'numero_cot' => 'Número',
+        'descripcion_cot' => 'Descripción',
+        'precio_cot' => 'Precio',
+        'aprobado_cot' => 'Aprobado',
+        'fecha_aprobacion_cot' => 'Fecha aprobacion',
         
         
+        'viatico' => 'viático',
+
+
         //parametros
-        'ubicacion' => 'ubicación',
+        'user' => 'Persona',
+        'ubicacion' => 'Ubicación',
         'servicio' => 'servicio',
         'servicios' => 'servicios',
         'Servicio' => 'Servicio',
@@ -29,12 +38,12 @@ return [
 
         //centro y reportes
         'mano_obra_estimada' => 'Mano obra estimada',
-		's_Dias_gabela' => 'Días gabela',
-		'Dias_gabela' => 'Días gabela',
-		'activo' => 'Activo',
-		'descripcion' => 'Descripción',
-		'clasificacion' => 'Clasificación',
-		'ValidoParaFacturar' => 'Válido para Facturar',
+        's_Dias_gabela' => 'Días gabela',
+        'Dias_gabela' => 'Días gabela',
+        'activo' => 'Activo',
+        'descripcion' => 'Descripción',
+        'clasificacion' => 'Clasificación',
+        'ValidoParaFacturar' => 'Válido para Facturar',
 
         'centro' => 'Centro de Costos',
         'CentroCostos' => 'Centro Costos',
@@ -101,7 +110,6 @@ return [
         'confirm_password' => 'Esta es una area segura de la aplicación. Por favor confirme su contraseña antes de continuar.',
         'verify_email' => "Gracias por ingresar! Antes de comnezar, ¿Podria verificar su correo electronico haciendo click en el link que acabamos de enviar a su correo? Si no resiviste el correo, Con mucho gusto le enviaremos otro.",
         'data' => 'Info',
-        'user' => 'Usuario',
         'access' => 'Acceso',
         'role' => 'Rol',
         'permission' => 'Permisos',
@@ -130,6 +138,7 @@ return [
         'delete' => 'Borrar',
         'not_deleted' => 'No se puede borrar el registro',
         'add' => 'Nuevo',
+        'adda' => 'Nueva',
 
 
         'verify_email_notification' => 'A new verification link has been sent to the email address you provided during registration.',
@@ -143,6 +152,28 @@ return [
         'of' => 'de',
         'HORAS_ORDINARIAS' => 'Horas ordinarias del día',
     ],
+    'side' => [
+        'user' => 'Persona',
+        'cuenta' => 'Cuenta',
+        'viatico' => 'viático',
+        'transacciones' => 'Transacciones',
+        'transaccion' => 'Transaccion',
+        'Comprobante' => 'Comprobante',
+        'porcentajeIC' => 'Porcentaje Interes',
+        'conceptoflujo' => 'Concepto de flujo',
+        'concepto_flujo' => 'Concepto de flujo',
+        'docentes' => 'Docentes',
+        'llaves' => 'llaves',
+        'objetos' => 'objetos',
+        'horario' => 'Horario',
+        'Horario' => 'Horario',
+        'prestamoHistorico' => 'prestamoHistorico',
+        'prestamosayer' => 'Prestamosayer',
+        'cotizacion' => 'Cotizacion',
+        'role' => 'Rol',
+        'ubicacion' => 'Rol',
+        //aquipues
+    ],
     'button' => [
         'Recontratar' => 'Recontratar',
         //edit reportes
@@ -152,6 +183,7 @@ return [
         'subir' => 'Subir',
 
         'see' => 'Ver',
+        'new' => 'Registrar',
 
         'login' => 'Ingresar',
         'loading' => 'Cargando...',
@@ -243,8 +275,8 @@ return [
         'create reporte' => 'Crear reportes',
         'delete reporte' => 'Delete reportes',
         'update reporte' => 'Actualizar reportes',
-        'read reporte' =>   'Leer reportes',
-        'updateCorregido reporte' =>   'Corregir reportes',
+        'read reporte' => 'Leer reportes',
+        'updateCorregido reporte' => 'Corregir reportes',
         'create centroCostos' => 'Crear centro de costos',
         'delete centroCostos' => 'Delete centro de costos',
         'update centroCostos' => 'Actualizar centro de costos',
@@ -259,7 +291,17 @@ return [
         'create parametros' => 'Crear parametros',
         'delete parametros' => 'Delete parametros',
         'update parametros' => 'Actualizar parametros',
-        'read parametros' =>   'Leer parametros',
+        'read parametros' => 'Leer parametros',
+
+        'delete cotizacion' => 'Borrar cotización',
+        'update cotizacion' => 'Actualizar cotización',
+        'read cotizacion' => 'Leer cotización',
+        'create cotizacion' => 'Crear cotización',
+
+        'delete viaticos' => 'Borrar viáticos',
+        'update viaticos' => 'Actualizar viáticos',
+        'read viaticos' => 'Leer viáticos',
+        'create viaticos' => 'Crear viáticos',
 
     ],
 ];

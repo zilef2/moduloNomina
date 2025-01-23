@@ -5,14 +5,14 @@ namespace App\helpers;
 use App\Models\Reporte;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Normalizer;
 
-class Myhelp{
+class Myhelp
+{
 
-    const MyRoles =[ //not using
+    const MyRoles = [ //not using
         'empleado' => 1,
         'administrativo' => 2,
         'supervisor' => 3,
@@ -20,18 +20,39 @@ class Myhelp{
         'superadmin' => 10
     ];
 
-    public static function AuthU(): Authenticatable|RedirectResponse
+    public static function AuthU2(): Authenticatable
     {
         $TheUser = Auth::user();
-        if($TheUser){
+        if ($TheUser) {
             return $TheUser;
         }
+
         return redirect()->to('/');
     }
-    public static function AuthUid(): int
+
+    public static function AuthU(): ?\App\Models\User
     {
         $TheUser = Auth::user();
-        if($TheUser){
+        if ($TheUser instanceof \App\Models\User) {
+            return $TheUser;
+        }
+
+        abort(403, 'Unauthorized');
+    }
+    public static function AuthUid(): ?int
+    {
+        $TheUser = Auth::user();
+        if ($TheUser instanceof \App\Models\User) {
+            return $TheUser->id;
+        }
+
+        abort(403, 'Unauthorized');
+    }
+
+    public static function AuthUid2(): int
+    {
+        $TheUser = Auth::user();
+        if ($TheUser) {
             return $TheUser->id;
         }
         return redirect()->to('/');
@@ -39,7 +60,8 @@ class Myhelp{
 
     //************************logs************************\\
 
-    public static function getPermissionToNumber($permissions) {
+    public static function getPermissionToNumber($permissions)
+    {
 
         // $valorReturn = 0;
         // if(in_array($permissions, constant('MyRoles'))){
@@ -57,7 +79,8 @@ class Myhelp{
         return 0;
     }
 
-    public static function EscribirEnLog($thiis, $clase = '', $mensaje = '', $returnPermission = true, $critico = false) {
+    public static function EscribirEnLog($thiis, $clase = '', $mensaje = '', $returnPermission = true, $critico = false)
+    {
         $permissions = $returnPermission ? auth()->user()->roles->pluck('name')[0] : null;
         $ListaControladoresYnombreClase = (explode('\\', get_class($thiis)));
         $nombreC = end($ListaControladoresYnombreClase);
@@ -68,36 +91,38 @@ class Myhelp{
             if ($permissions == 'admin' || $permissions == 'superadmin') {
                 Log::channel('soloadmin')->info($ElMensaje);
             } else {
-                if($permissions == 'isadministrativo'){
+                if ($permissions == 'isadministrativo') {
                     Log::channgel('soloadministrativo')->info($ElMensaje);
-                }else{
-                    if($permissions == 'issupervisor'){
+                } else {
+                    if ($permissions == 'issupervisor') {
                         Log::channgel('issupervisor')->info($ElMensaje);
-                    }else{
+                    } else {
                         Log::info($ElMensaje);
                     }
                 }
             }
             return $permissions;
         } else {
-            Log::critical('Vista: ' . ($nombreC??'null') . 'U:' . Auth::user()->name . ' ||' . ($clase??'null') . '|| ' . ' Mensaje: ' . ($mensaje??'null'));
+            Log::critical('Vista: ' . ($nombreC ?? 'null') . 'U:' . Auth::user()->name . ' ||' . ($clase ?? 'null') . '|| ' . ' Mensaje: ' . ($mensaje ?? 'null'));
         }
     }
 
     //************************laravel************************\\
 
 
-    public function redirect($ruta,$seconds = 4) {
+    public function redirect($ruta, $seconds = 4)
+    {
         sleep($seconds);
         return redirect()->to($ruta);
     }
 
 
     //************************string************************\\
-    function cortarFrase($frase, $maxPalabras = 3) {
+    function cortarFrase($frase, $maxPalabras = 3)
+    {
         $noTerminales = [
-            "de","a","para",
-            "of","by","for"
+            "de", "a", "para",
+            "of", "by", "for"
         ];
 
         $palabras = explode(" ", $frase);
@@ -108,7 +133,7 @@ class Myhelp{
                 $offset++;
             }
             $ultimaPalabra = $palabras[$offset];
-            if((intval($ultimaPalabra)) != 0){
+            if ((intval($ultimaPalabra)) != 0) {
                 session(['ultimaPalabra' => $ultimaPalabra]);
             }
             return implode(" ", array_slice($palabras, 0, $offset + 1));
@@ -116,33 +141,37 @@ class Myhelp{
         return $frase;
     }
 
-    public static function quitarTildes($palabras){
+    public static function quitarTildes($palabras)
+    {
         $normalizedString = Normalizer::normalize($palabras, Normalizer::FORM_D);
         $cleanString = preg_replace('/\p{Mn}/u', '', $normalizedString);
         return $cleanString;
     }
 
-    public function erroresExcel($errorFeo){
+    public function erroresExcel($errorFeo)
+    {
         // $fila = session('ultimaPalabra');
-        $error1 ="PDOException: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date";
-        if($errorFeo == $error1){
+        $error1 = "PDOException: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date";
+        if ($errorFeo == $error1) {
             return 'Existe una fecha invalida';
         }
         return 'Error desconocido';
     }
-    public function ValidarFecha($laFecha){
-        if(strtotime($laFecha)){
+
+    public function ValidarFecha($laFecha)
+    {
+        if (strtotime($laFecha)) {
             return $laFecha;
         }
         return '';
     }
 
-    public static function CalcularHorasDeCadaSemana(Carbon $startDate,Carbon  $endDate,$Authuser): array
+    public static function CalcularHorasDeCadaSemana(Carbon $startDate, Carbon $endDate, $Authuser): array
     {
-        $vector  = self::HorasDeLasSemanasProximas(20); //calcula primer y ultimo dia de las x proximas semanas
+        $vector = self::HorasDeLasSemanasProximas(20); //calcula primer y ultimo dia de las x proximas semanas
         $horasemana[0] = Carbon::now()->weekOfYear;
         foreach ($vector as $vec) {
-            $horasemana[$vec['numero_semana']] = (int)Reporte::Where('user_id',$Authuser->id)
+            $horasemana[$vec['numero_semana']] = (int)Reporte::Where('user_id', $Authuser->id)
                 ->WhereBetween('fecha_ini', [$vec['primer_dia_semana'], $vec['ultimo_dia_semana']])
                 ->selectRaw('fecha_ini, (diurnas + nocturnas) as ordinarias')
                 ->get()->sum('ordinarias');
@@ -151,7 +180,8 @@ class Myhelp{
         return $horasemana;
     }
 
-    private static function HorasDeLasSemanasProximas($ProximasSemanas) { //calcula primer y ultimo dia de las semanas
+    private static function HorasDeLasSemanasProximas($ProximasSemanas)
+    { //calcula primer y ultimo dia de las semanas
         $vectorSemanas = [];
         $fechaActual = Carbon::now()->addMonths(2);
 
@@ -175,7 +205,8 @@ class Myhelp{
     }
 
     //:? calcular cuantas horas ha trabajado en esta semana y la pasada
-    public static function CalcularPendientesQuicena($Authuser) { //calcula primer y ultimo dia de las semanas
+    public static function CalcularPendientesQuicena($Authuser)
+    { //calcula primer y ultimo dia de las semanas
         $hoy = Carbon::now();
         $primerDiaSemana = $hoy->startOfWeek();
         $primerClone = clone $primerDiaSemana;
@@ -183,14 +214,14 @@ class Myhelp{
         $hoy = Carbon::now();
         $ultimoDiaSemana = $hoy->addWeek()->endOfWeek();
 
-        $ArrayOrdinarias =  Reporte::Where('user_id', $Authuser->id)
-            ->WhereBetween('fecha_ini',[$primerDiaSemanaPasada,$ultimoDiaSemana])
-            ->whereTime('fecha_fin','23:59:00')
+        $ArrayOrdinarias = Reporte::Where('user_id', $Authuser->id)
+            ->WhereBetween('fecha_ini', [$primerDiaSemanaPasada, $ultimoDiaSemana])
+            ->whereTime('fecha_fin', '23:59:00')
             ->selectRaw('DATE(fecha_fin) as fecha_fn, (dominical_nocturno + dominical_extra_nocturno + nocturnas) as horasDiaAnterior')
-            ->pluck('horasDiaAnterior','fecha_fn');
+            ->pluck('horasDiaAnterior', 'fecha_fn');
 
-        $ArrayOrdinarias[0] =  Reporte::Where('user_id', $Authuser->id)
-            ->WhereBetween('fecha_ini',[$primerDiaSemana,$ultimoDiaSemana])
+        $ArrayOrdinarias[0] = Reporte::Where('user_id', $Authuser->id)
+            ->WhereBetween('fecha_ini', [$primerDiaSemana, $ultimoDiaSemana])
             ->selectRaw('fecha_ini, (diurnas + nocturnas) as ordinarias')
             ->get()->sum('ordinarias');
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use AllowDynamicProperties;
 use App\helpers\Myhelp;
 use App\helpers\MyhelpQuincena;
 use App\Http\Requests\CentroCostoRequest;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
+#[AllowDynamicProperties]
 class CentroCostosController extends Controller
 {
     private int $minutosActualizarPresupueto;
@@ -25,13 +27,22 @@ class CentroCostosController extends Controller
     public function __construct()
     {
         session(['parametros' => Parametro::Find(1)]);
-        $this->minutosActualizarPresupueto = 15;
+        $this->limitadorCentrosParaVer = 80;
+        $this->minutosActualizarPresupueto = 30 * 60;
+        $this->centroCostosAll = CentroCosto::all();
+        $this->parametros = Parametro::find(1);
+        
     }
 
     public function MapearClasePP($numberPermissions, $request)
     {
         $centroCostos = centroCosto::query();
 
+        if ($request->has(['limitadorVer'])) {
+            $this->limitadorCentrosParaVer = 80;
+        }else{
+            $this->limitadorCentrosParaVer = 2000;
+        }
         $AUuser = Myhelp::AuthU();
         $busqueda = false;
         if ($request->has('search')) {
@@ -47,12 +58,18 @@ class CentroCostosController extends Controller
                 ->orderBy('mano_obra_estimada', 'DESC');
         }
         $supervisores = User::UsersWithRol('supervisor')->get();
-
-        $centroCostos = Cache::remember('centro_costos', $this->minutosActualizarPresupueto, function () use ($centroCostos, $numberPermissions, $AUuser, $supervisores) {
+        $objetoDelUser = $AUuser->ArrayCentrosID();
+        
+//        $ArrayListaSupervi
+        
+        $centroCostos = Cache::remember('centro_costos', $this->minutosActualizarPresupueto, function () 
+            use ($centroCostos, $numberPermissions, $AUuser, $supervisores,$objetoDelUser) {
+            
             Log::info('Cache miss: recalculating centro_costos');
-            return $centroCostos->get()->map(function ($centroCosto) use ($supervisores, $numberPermissions, $AUuser) {
+            return $centroCostos->limit($this->limitadorCentrosParaVer)->get()->map(function ($centroCosto)
+                use ($supervisores, $numberPermissions, $AUuser,$objetoDelUser) {
+                
                 if ($numberPermissions === 3) { //todo: que es 3
-                    $objetoDelUser = $AUuser->ArrayCentrosID();
                     if (in_array($centroCosto->id, $objetoDelUser)) {
                         return null;
                     }
@@ -99,12 +116,11 @@ class CentroCostosController extends Controller
         $cacheKey = 'ultima_llamada_cc_index';
         $ultimaLlamada = Cache::get($cacheKey);
         $tiempoActual = now();
-        $centroCostosAll = CentroCosto::all();
-        if ($tiempoActual->diffInMinutes($ultimaLlamada) >= ($this->minutosActualizarPresupueto)) {
+        if ($tiempoActual->diffInSeconds($ultimaLlamada) >= ($this->minutosActualizarPresupueto)) {
             $anio = date('Y');
             $mes = date('m');
-            foreach ($centroCostosAll as $item) {
-                $item->actualizarEstimado($anio, $mes);
+            foreach ($this->centroCostosAll as $item) {
+                $item->actualizarEstimado($anio, $mes,$this->parametros);
             }
         }
         // Actualizar el tiempo de la última llamada en caché
@@ -116,7 +132,7 @@ class CentroCostosController extends Controller
         $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'centro costos')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         $this->ActualizarPresupuesto();
         //<editor-fold desc="serach, order, mapear y paginar">
-        $perPage = $request->has('perPage') ? $request->perPage : 50;
+        $perPage = $request->has('perPage') ? $request->perPage : 5;
         $centroCostos = $this->MapearClasePP($numberPermissions, $request);
         $nombresTabla = $this->getNombresTabla();
 

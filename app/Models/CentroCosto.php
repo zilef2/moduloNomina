@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @method static \Illuminate\Database\Eloquent\Collection all()
@@ -33,8 +35,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static Builder|static paginate($perPage = 15, $columns = ['*'], $pageName = 'page')
  * @method static Builder|static simplePaginate($perPage = 15, $columns = ['*'], $pageName = 'page')
  * @method \Illuminate\Database\Eloquent\Relations\BelongsTo belongsTo(string $related, string $foreignKey = null, string $ownerKey = null)
- * @method \Illuminate\Database\Eloquent\Relations\HasMany hasMany(string $related, string $foreignKey = null, string $localKey = null)
- * @method \Illuminate\Database\Eloquent\Relations\BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null, string $relatedPivotKey = null)
+ * @method HasMany hasMany(string $related, string $foreignKey = null, string $localKey = null)
+ * @method BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null, string $relatedPivotKey = null)
+ * @method static selectRaw(string $string)
+ * @property mixed $id
  */
 class CentroCosto extends Model
 {
@@ -61,20 +65,16 @@ class CentroCosto extends Model
 
     private int|float $ValidoParaFacturar;
 
-    public function reportes(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
+    public function reportes(): HasMany{
         return $this->hasMany(Reporte::class);
     }
 
-    public function users()
-    {
+    public function users(): BelongsToMany{
         return $this->BelongstoMany(User::class, 'centro_user');
     }
 
-    public function ArrayListaSupervisores($supervisores): array
-    {
+    public function ArrayListaSupervisores($supervisores): array{
         $centroid = $this->id;
-//        $supervisores = User::UsersWithRol('supervisor')->get();
         $result = $supervisores->map(function ($user) use ($centroid) {
             if ($user->TieneEsteCentro($centroid)) {
                 return $user->name;
@@ -113,13 +113,8 @@ class CentroCosto extends Model
     }
 
     //deep2 |
-    public function actualizarEstimado($anio, $mes): void
+    public function actualizarEstimado($anio, $mes,$parametros): void
     {
-        $parametros = session('parametros');
-        if (! $parametros) {
-            $parametros = Parametro::find(1);
-        }
-
         $BaseDeReportes = Reporte::Where('centro_costo_id', $this->id)
             ->WhereYear('fecha_ini', $anio)
             ->WhereMonth('fecha_ini', $mes)
@@ -157,7 +152,6 @@ class CentroCosto extends Model
                 $vardominical_extra_diurno += ((float) $baseDeReporte->dominical_extra_diurno) * $porcentaje_dominical_extra_diurno;
                 $vardominical_extra_nocturno += ((float) $baseDeReporte->dominical_extra_nocturno) * $porcentaje_dominical_extra_nocturno;
             }
-
         }
 
         $this->mano_obra_estimada = (int) ($vardiurnas + $varnocturnas + $varextra_diurnas + $varextra_nocturnas + $vardominical_diurno + $vardominical_nocturno + $vardominical_extra_diurno + $vardominical_extra_nocturno);

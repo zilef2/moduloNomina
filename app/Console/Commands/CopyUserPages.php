@@ -1,5 +1,7 @@
 <?php
 //VERSION 1.0 22ENE2025
+        //$ipAddress = $request->ip();
+
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -94,7 +96,7 @@ class CopyUserPages extends Command
     private function MakeControllerPages($plantillaActual, $modelName): bool
     {
         $folderMayus = ucfirst($modelName);
-        $sourcePath = base_path('app/Http/Controllers/' . $plantillaActual . 'sController.php');
+        $sourcePath = base_path('app/Http/Controllers/' . $plantillaActual . 'Controller.php');
         $destinationPath = base_path("app/Http/Controllers/" . $folderMayus . "sController.php");
 
         if (File::exists($destinationPath)) {
@@ -104,7 +106,6 @@ class CopyUserPages extends Command
         File::copyDirectory($sourcePath, $destinationPath);
         $this->info("- " . $sourcePath);
         $this->info("- " . $destinationPath);
-        //$ipAddress = $request->ip();
 
         return true;
     }

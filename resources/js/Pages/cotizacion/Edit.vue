@@ -8,11 +8,11 @@ import TextInput from '@/Components/TextInput.vue';
 import {useForm} from '@inertiajs/vue3';
 import {onMounted, reactive, watchEffect} from 'vue';
 import "vue-select/dist/vue-select.css";
-
+import vSelect from "vue-select";
 const props = defineProps({
     show: Boolean,
     title: String,
-    generica: Object,
+    cotizaciona: Object,
     titulos: Object, //parametros de la clase principal
     losSelect:Object,
 
@@ -47,19 +47,19 @@ props.titulos.forEach(names => {
 watchEffect(() => {
     if (props.show) {
         // data.justNames.forEach(element => {
-        //     form[element] =  props.generica[element]
+        //     form[element] =  props.cotizaciona[element]
         // });
         form.errors = {}
         props.titulos.forEach(names => {
-            form[names['order']] = props.generica[names['order']]
+            form[names['order']] = props.cotizaciona[names['order']]
         });
 
-        // form.codigo = props.generica?.codigo
+        // form.codigo = props.cotizaciona?.codigo
     }
 })
 
 const update = () => {
-    form.put(route('generic.update', props.generica?.id), {
+    form.put(route('cotizacion.update', props.cotizaciona?.id), {
         preserveScroll: true,
         onSuccess: () => {
             emit("close")
@@ -75,7 +75,7 @@ const update = () => {
 
 <template>
     <section class="space-y-6">
-        <Modal :show="props.show" @close="emit('close')">
+        <Modal :show="props.show" @close="emit('close')" :maxWidth="'lg'">
             <form class="p-6" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     {{ lang().label.edit }} {{ props.title }}
@@ -85,8 +85,10 @@ const update = () => {
                     <div v-for="(atributosform, indice) in data.printForm" :key="indice">
                         <div v-if="atributosform.type == 'id'" id="SelectVue">
                             <label name="labelSelectVue"> {{ atributosform.label }} </label>
-                            <v-select :options="data[atributosform.idd]" label="title" v-model="form[atributosform.idd]"
-                                :value="data[atributosform.idd][props.generica.generic_id]"></v-select>
+                            <v-select :options="props.losSelect"
+                                v-model="form[atributosform.idd]" 
+                                      :reduce="element => element.value" label="label"
+                            ></v-select>
                             <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
 

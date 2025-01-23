@@ -6,9 +6,10 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import {useForm} from '@inertiajs/vue3';
-import "vue-select/dist/vue-select.css";
 import {onMounted, reactive, watchEffect} from 'vue';
 import '@vuepic/vue-datepicker/dist/main.css'
+import vSelect from "vue-select";
+import "vue-select/dist/vue-select.css";
 
 // --------------------------- ** -------------------------
 
@@ -35,8 +36,8 @@ onMounted(() => {
     if(props.numberPermissions > 9){
 
         const valueRAn = Math.floor(Math.random() * (9) + 1)
-        form.nombre = 'nombre de prueba inspeccion '+ (valueRAn);
-        form.codigo = (valueRAn);
+        form.numero_cot = (valueRAn);
+        form.descripcion_cot = "holi" + (valueRAn);
         // form.hora_inicial = '0'+valueRAn+':00'//temp
         // form.fecha = '2023-06-01'
 
@@ -61,11 +62,39 @@ function ValidarVacios(){
     });
     return result
 }
+function borrarNumber(valueid) {
+  form[valueid] = '';
+}
+
+function formatNumberWithZeros(valueid) {
+  let value = form[valueid]
+  const stringValue = String(value || '');
+
+  if (!stringValue) return '0.000';
+
+  // Eliminar caracteres no numéricos excepto el punto
+  const numericValue = stringValue.replace(/[^0-9.]/g, '');
+
+  // Dividir en parte entera y decimal
+  let [integer, decimal] = numericValue.split('.');
+
+  // Asegurar que la parte entera tenga un valor
+  integer = integer || '0';
+
+  // Limitar los decimales a 3 dígitos o agregar ceros
+  decimal = (decimal || '').padEnd(3, '0').slice(0, 3);
+
+  // Formatear la parte entera con puntos como separadores
+  const formattedInteger = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+  // Combinar la parte entera y decimal
+  form[valueid] = `${formattedInteger}.${decimal}`;
+}
 
 const create = () => {
     if(ValidarVacios()){
         // console.log("🧈 debu pieza_id:", form.pieza_id);
-        form.post(route('AreaInspeccion.store'), {
+        form.post(route('cotizacion.store'), {
             preserveScroll: true,
             onSuccess: () => {
                 emit("close")
@@ -80,11 +109,8 @@ const create = () => {
 }
 
 watchEffect(() => {
-    if (props.show) {
-        form.errors = {}
-    }
+    if (props.show) form.errors = {}
 })
-
 
 //very usefull
 const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }];
@@ -92,30 +118,43 @@ const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }
 
 <template>
     <section class="space-y-6">
-        <Modal :show="props.show" @close="emit('close')">
-            <form class="p-6" @submit.prevent="create">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    {{ lang().label.add }} {{ props.title }}
+        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl7'">
+            <form class="px-6 pt-4 pb-48" @submit.prevent="create">
+                <h2 class="mb-8 text-lg font-medium text-gray-900 dark:text-gray-100">
+                    {{ lang().label.adda }} {{ props.title }}
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div v-for="(atributosform, indice) in printForm" :key="indice">
+                <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
+                    <div v-for="(atributosform, indice) in printForm" :key="indice"
+                        :class="atributosform.type === 'id' ? 'col-span-2' : 'bg-blue-50/50'"
+                         class="rounded-xl"
 
+                    >
                         <!-- si es foreign -->
-                        <div v-if="atributosform.type === 'id'" id="SelectVue">
+                        <div v-if="atributosform.type === 'id'" id="SelectVue" class="">
                             <label name="labelSelectVue"> {{ atributosform.label }} </label>
-                            <v-select :options="data[atributosform.idd]" label="title"
-                                v-model="form[atributosform.idd]"></v-select>
+                            <v-select :options="props.losSelect"
+                                v-model="form[atributosform.idd]" 
+                                      :reduce="element => element.value" label="label"
+                            ></v-select>
                             <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
-
                         </div>
 
 
                         <!-- tiempo -->
-                        <div v-else-if="atributosform.type === 'time'" id="SelectVue">
+                        <div v-else-if="atributosform.type === 'time'" id="SelectVue" class="">
                             <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
                             <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
                                 v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
                                 :error="form.errors[atributosform.idd]" step="3600" />
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+                        </div>
+                        <!-- number -->
+                        <div v-else-if="atributosform.type === 'number'" id="SelectVue" class="">
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
+                            <TextInput :id="atributosform.idd" type="text" class="mt-1 w-full"
+                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
+                                :error="form.errors[atributosform.idd]" @change="formatNumberWithZeros(atributosform.idd)"
+                                       @focus="borrarNumber(atributosform.idd)" />
                             <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
 

@@ -41,6 +41,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @method \Illuminate\Database\Eloquent\Relations\BelongsTo belongsTo(string $related, string $foreignKey = null, string $ownerKey = null)
  * @method \Illuminate\Database\Eloquent\Relations\HasMany hasMany(string $related, string $foreignKey = null, string $localKey = null)
  * @method \Illuminate\Database\Eloquent\Relations\BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null, string $relatedPivotKey = null)
+ * @property mixed $id
  */
 class User extends Authenticatable
 {
@@ -103,6 +104,7 @@ class User extends Authenticatable
             return [$pr['name'] => true];
         });
     }
+
     //fin permissions
 
     public function reportes()
@@ -123,7 +125,7 @@ class User extends Authenticatable
     public function ArrayCentrosID()
     {
         $result = [];
-        if (! $this->centros->isEmpty()) {
+        if (!$this->centros->isEmpty()) {
             foreach ($this->centros as $centro) {
                 $result[] = $centro->id;
             }
@@ -133,7 +135,7 @@ class User extends Authenticatable
 
     public function ArraycentroName($numeroDeCentros = 0)
     {
-        if (! $this->centros->isEmpty()) {
+        if (!$this->centros->isEmpty()) {
             if ($numeroDeCentros != 0) {
                 $arrayNombres = [];
                 for ($i = 0; $i < $numeroDeCentros; $i++) {
@@ -177,5 +179,15 @@ class User extends Authenticatable
         $result = in_array($centroid, $susCentros);
 
         return $result;
+    }
+
+    public static function usuariosConCentros(): array
+    {
+        return self::with('centros:id')
+            ->get()
+            ->mapWithKeys(function ($user) {
+                return [$user->id => $user->centros->pluck('id')->toArray()];
+            })
+            ->toArray();
     }
 }
