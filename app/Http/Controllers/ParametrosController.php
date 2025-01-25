@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\helpers\Myhelp;
+use App\helpers\MyModels;
 use App\Http\Controllers\Controller;
 
 use App\Models\Parametro;
@@ -24,7 +25,7 @@ class ParametrosController extends Controller
     {
         $parametros = Parametro::all();
         $titulo = __('app.label.Params');
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'Parametros index')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'Parametros index')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 
         $nombresTabla = [ //0: como se ven //1 como es la BD
             [
@@ -93,7 +94,7 @@ class ParametrosController extends Controller
 
     public function update(ParametroRequest $request, $id){
         DB::beginTransaction();
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'Parametros update'));
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'Parametros update'));
 
         try {
             $parametro = Parametro::findOrFail($id);

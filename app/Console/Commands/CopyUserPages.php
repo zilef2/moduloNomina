@@ -17,21 +17,15 @@ php artisan make:command copy:u
 class CopyUserPages extends Command
 {
     use Constants;
-    protected function generateAttributes(): array
-    {
-        return [
+    protected function generateAttributes(): array{return [
             'numero_cot' => 'integer',        // Número COT
             'descripcion_cot' => 'string',         // Descripción
-            'precio_cot' => 'integer',             // Precio
+            'precio_cot' => 'biginteger',             // Precio
             'aprobado_cot' => 'boolean',           // Aprobado
             'fecha_aprobacion_cot' => 'date',     // Fecha aprobación
         ];
-//            'precio' => 'integer',
-//            'nombre' => 'string',
 //            'descripcion' => 'text',
 //            'precio' => 'decimal',
-//            'estado' => 'boolean',
-//            'fecha_disponible' => 'date',
     }
 
     protected $signature = 'copy:u';
@@ -44,8 +38,10 @@ class CopyUserPages extends Command
     {
         try {
             $this->generando = self::getMessage('generando');
-
+            
             $contadorMetodos = 0;
+            $submetodo['Lenguaje'] = 0;
+
             $modelName = $this->ask('¿Cuál es el nombre del modelo?');
             if (!$modelName || $modelName == '') {
                 $this->info('Sin modelo');
@@ -62,9 +58,14 @@ class CopyUserPages extends Command
                 return;
             }
             if ($this->DoAppLenguaje($modelName)) {
-
+                $submetodo_oAppLenguaje = 0;
                 $this->info('DoAppLenguaje' . self::MSJ_EXITO);
                 $contadorMetodos++;
+
+                foreach ($this->generateAttributes() as $index => $generateAttribute) {
+                    $this->DoAppLenguaje($generateAttribute);
+                    $submetodo['Lenguaje']++;
+                }
             } else {
                 $this->error('DoAppLenguaje ' . self::MSJ_FALLO);
                 return;
@@ -87,7 +88,10 @@ class CopyUserPages extends Command
             $this->info(Artisan::call('optimize:clear'));
             $this->info('FINISH');
         } catch (Exception $e){
-            $this->error("FALLO CONTADOR: ".$contadorMetodos . " excepcion: ". $e->getMessage());
+            $this->error(
+                "FALLO CONTADOR: ".$contadorMetodos .
+                "FALLO Lenguaje: ".$submetodo['Lenguaje'] .
+                " excepcion: ". $e->getMessage());
 
         }
     }
@@ -200,7 +204,7 @@ class CopyUserPages extends Command
             $content = file_get_contents($file);
             if (!str_contains($content, $pattern)) {
                 $content2 = preg_replace($pattern, $insertable, $content);
-//                $content2 = preg_replace($pattern, "$0$insertable", $content);
+                // $content2 = preg_replace($pattern, "$0$insertable", $content);
                 file_put_contents($file, $content2);
                 if ($content == $content2)
                     $this->info("Language Actualizado: $file\n");

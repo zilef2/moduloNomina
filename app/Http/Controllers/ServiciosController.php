@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\SiigoExport;
+use App\helpers\MyModels;
 use App\Http\Requests\User\UserIndexRequest;
 use App\Http\Requests\User\UserStoreRequest;
 use App\Http\Requests\User\UserUpdateRequest;
@@ -87,7 +88,7 @@ class ServiciosController extends Controller {
 
     public function index(UserIndexRequest $request){
         $permissions = Myhelp::EscribirEnLog($this, ' users');
-        $numberPermissions = Myhelp::getPermissionToNumber($permissions);
+        $numberPermissions = MyModels::getPermissionToNumber($permissions);
         $users = $this->Busqueda($request);
 
         $perPage = $request->has('perPage') ? $request->perPage : 10;
@@ -657,7 +658,7 @@ class ServiciosController extends Controller {
 
     public function IndexTrashed(UserIndexRequest $request){
         $permissions = Myhelp::EscribirEnLog($this, ' users');
-        $numberPermissions = Myhelp::getPermissionToNumber($permissions);
+        $numberPermissions = MyModels::getPermissionToNumber($permissions);
         $users = $this->Busqueda($request,'trashed');
 
         $perPage = $request->has('perPage') ? $request->perPage : 10;

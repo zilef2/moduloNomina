@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\helpers\Myhelp;
+use App\helpers\MyModels;
 use App\Models\CentroCosto;
 use App\Models\Parametro;
 use App\Models\Reporte;
@@ -109,7 +110,7 @@ class CentroTableController extends Controller
     public function table(Request $request, $id): Response
     {
         $permissions = Myhelp::EscribirEnLog($this, ' |reportes table| ');
-        $numberPermissions = Myhelp::getPermissionToNumber($permissions);
+        $numberPermissions = MyModels::getPermissionToNumber($permissions);
         $Authuser = Myhelp::AuthU();
         $titulo = __('app.label.Reportes');
 

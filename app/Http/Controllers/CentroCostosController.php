@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use AllowDynamicProperties;
 use App\helpers\Myhelp;
 use App\helpers\MyhelpQuincena;
+use App\helpers\MyModels;
 use App\Http\Requests\CentroCostoRequest;
 use App\Models\CentroCosto;
 use App\Models\Parametro;
@@ -28,26 +29,42 @@ class CentroCostosController extends Controller
     {
         session(['parametros' => Parametro::Find(1)]);
         $this->limitadorCentrosParaVer = 80;
-        $this->minutosActualizarPresupueto = 30 * 60;
+        $this->minutosActualizarPresupueto = 60 * 30;
         $this->centroCostosAll = CentroCosto::all();
         $this->parametros = Parametro::find(1);
-        
+
     }
 
     public function MapearClasePP($numberPermissions, $request)
     {
         $centroCostos = centroCosto::query();
 
-        if ($request->has(['limitadorVer'])) {
-            $this->limitadorCentrosParaVer = 80;
-        }else{
-            $this->limitadorCentrosParaVer = 2000;
-        }
+//        if ($request->has(['limitadorVer'])) {
+//            $this->limitadorCentrosParaVer = 80;
+//        } else {
+//            $this->limitadorCentrosParaVer = 300;
+//        }
         $AUuser = Myhelp::AuthU();
+
         $busqueda = false;
-        if ($request->has('search')) {
+        $this->limitadorCentrosParaVer = 80;
+
+        if ($request->search) {
             $busqueda = true;
+            if (!Cache::has('centro_costos_busqueda')) {
+                Cache::forget('centro_costos'); // Borra la caché normal para búsquedas nuevas
+                Cache::put('centro_costos_busqueda', true); // Indica que hay una búsqueda activa
+                $this->limitadorCentrosParaVer = 20;
+            }
+        } else {
+            if (Cache::has('centro_costos_busqueda')) {
+                Cache::forget('centro_costos'); // Borra la caché de búsqueda
+                Cache::forget('centro_costos_busqueda'); // Elimina el indicador de búsqueda activa
+            }
+            $this->limitadorCentrosParaVer = 80;
         }
+
+
         $searchSCC = $request->has('searchSCC');
 
         if ($request->has(['field', 'order'])) {
@@ -59,23 +76,22 @@ class CentroCostosController extends Controller
         }
         $supervisores = User::UsersWithRol('supervisor')->get();
         $objetoDelUser = $AUuser->ArrayCentrosID();
-        
-//        $ArrayListaSupervi
-        
-        $centroCostos = Cache::remember('centro_costos', $this->minutosActualizarPresupueto, function () 
-            use ($centroCostos, $numberPermissions, $AUuser, $supervisores,$objetoDelUser) {
-            
+
+
+        $centroCostos = Cache::remember('centro_costos', $this->minutosActualizarPresupueto, function ()
+        use ($centroCostos, $numberPermissions, $AUuser, $supervisores, $objetoDelUser) {
+
             Log::info('Cache miss: recalculating centro_costos');
             return $centroCostos->limit($this->limitadorCentrosParaVer)->get()->map(function ($centroCosto)
-                use ($supervisores, $numberPermissions, $AUuser,$objetoDelUser) {
-                
-                if ($numberPermissions === 3) { //todo: que es 3
+            use ($supervisores, $numberPermissions, $AUuser, $objetoDelUser) {
+
+                if ($numberPermissions === 3) { //ingeniero
                     if (in_array($centroCosto->id, $objetoDelUser)) {
                         return null;
                     }
                 }
 
-                $ArrayListaSupervi = Cache::remember("ArrayListaSupervisores_{$centroCosto->id}", ($this->minutosActualizarPresupueto*4), function () use ($centroCosto, $supervisores) {
+                $ArrayListaSupervi = Cache::remember("ArrayListaSupervisores_{$centroCosto->id}", ($this->minutosActualizarPresupueto * 4), function () use ($centroCosto, $supervisores) {
                     return $centroCosto->ArrayListaSupervisores($supervisores);
                 });
                 $centroCosto->cuantoshijos = count($centroCosto->users);
@@ -86,9 +102,12 @@ class CentroCostosController extends Controller
             })->filter();
         });
 
+
         if ($busqueda) {
             $centroCostos = $centroCostos->filter(function ($centro) use ($request) {
-                return str_contains(strtolower($centro->nombre), strtolower($request->search));
+                return
+                    str_contains(strtolower($centro->nombre), strtolower($request->search)) ||
+                    str_contains(strtolower($centro->descripcion), strtolower($request->search));
             });
         }
         if ($searchSCC) {
@@ -102,11 +121,9 @@ class CentroCostosController extends Controller
                         return true;
                     }
                 }
-
                 return false;
             });
         }
-        
         return $centroCostos;
     }
 
@@ -120,7 +137,7 @@ class CentroCostosController extends Controller
             $anio = date('Y');
             $mes = date('m');
             foreach ($this->centroCostosAll as $item) {
-                $item->actualizarEstimado($anio, $mes,$this->parametros);
+                $item->actualizarEstimado($anio, $mes, $this->parametros);
             }
         }
         // Actualizar el tiempo de la última llamada en caché
@@ -129,7 +146,7 @@ class CentroCostosController extends Controller
 
     public function index(Request $request): \Inertia\Response
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'centro costos')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'centro costos')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         $this->ActualizarPresupuesto();
         //<editor-fold desc="serach, order, mapear y paginar">
         $perPage = $request->has('perPage') ? $request->perPage : 5;
@@ -157,6 +174,7 @@ class CentroCostosController extends Controller
             'fromController' => $paginated,
             'nombresTabla' => $nombresTabla,
             'listaSupervisores' => $listaSupervisores,
+            'numberPermissions' => $numberPermissions,
         ]);
     }
 
@@ -166,12 +184,10 @@ class CentroCostosController extends Controller
 
     public function store(CentroCostoRequest $request)
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         DB::beginTransaction();
         try {
             $centroCostos = new centroCosto;
-            //            $centroCostos->nombre = $request->nombre;
-            //            $request->merge(['tipo_gasto_id' => $request->tipo_gasto['id']]);
             $request->merge(['ValidoParaFacturar' => 1]);
             $centroCostos->fill($request->all());
 
@@ -193,7 +209,7 @@ class CentroCostosController extends Controller
     //todo: hacer una vista nueva
     public function show($id)
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         $Reportes = Reporte::query();
 
         $titulo = __('app.label.Reportes');
@@ -266,7 +282,7 @@ class CentroCostosController extends Controller
 
     public function edit($id)
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         $centroCostos = centroCosto::findOrFail($id);
 
         return Inertia::render('centroCostos.edit', ['centroCostos' => $centroCostos]);
@@ -283,7 +299,7 @@ class CentroCostosController extends Controller
             'nombre.unique' => 'El nombre ya está en uso.',
         ]);
         DB::beginTransaction();
-        Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' | centro de Costos | '));
+        MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' | centro de Costos | '));
 
         try {
             $centroCosto = centroCosto::findOrFail($id);
@@ -326,7 +342,7 @@ class CentroCostosController extends Controller
      */
     public function destroy($id): RedirectResponse
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         DB::beginTransaction();
         try {
             if ($numberPermissions > 8) {
@@ -350,7 +366,7 @@ class CentroCostosController extends Controller
 
     public function AproxDestroy()
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |AproxDestroy centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |AproxDestroy centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         DB::beginTransaction();
         try {
             if ($numberPermissions > 8) {

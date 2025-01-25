@@ -6,6 +6,7 @@ use App\Exports\GeneratorExport;
 use App\Exports\SiigoExport;
 use App\Exports\UsersExport;
 use App\helpers\Myhelp;
+use App\helpers\MyModels;
 use App\Http\Requests\User\UserIndexRequest;
 use App\Http\Requests\User\UserStoreRequest;
 use App\Imports\UsersImport;
@@ -49,7 +50,7 @@ class UserController extends Controller
         $Authuser = Myhelp::AuthU();
         $userid = $Authuser->id;
         $permissions = auth()->user()->roles->pluck('name')[0];
-        $numberPermissions = Myhelp::getPermissionToNumber($permissions);
+        $numberPermissions = MyModels::getPermissionToNumber($permissions);
 
         $ultimos5dias = null;
         if ($numberPermissions === 1) {
@@ -189,14 +190,14 @@ class UserController extends Controller
             $users = $users->onlyTrashed();
         }
 
-        //        Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'users'));
+        //        MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'users'));
         return $users;
     }
 
     public function index(UserIndexRequest $request)
     {
         $permissions = Myhelp::EscribirEnLog($this, ' users');
-        $numberPermissions = Myhelp::getPermissionToNumber($permissions);
+        $numberPermissions = MyModels::getPermissionToNumber($permissions);
         $users = $this->Busqueda($request);
 
         $perPage = $request->has('perPage') ? $request->perPage : 5;
@@ -802,7 +803,7 @@ class UserController extends Controller
     public function IndexTrashed(UserIndexRequest $request)
     {
         $permissions = Myhelp::EscribirEnLog($this, ' users');
-        $numberPermissions = Myhelp::getPermissionToNumber($permissions);
+        $numberPermissions = MyModels::getPermissionToNumber($permissions);
         $users = $this->Busqueda($request, 'trashed');
 
         $perPage = $request->has('perPage') ? $request->perPage : 10;

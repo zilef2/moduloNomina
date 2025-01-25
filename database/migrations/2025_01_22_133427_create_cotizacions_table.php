@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('cotizacions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('centro_costo_id')->default(1);
+            $table->unsignedBigInteger('centro_costo_id')->nullable();
             $table->foreign('centro_costo_id')
                 ->references('id')
                 ->on('centro_costos')
@@ -24,7 +24,7 @@ return new class extends Migration
                 ->on('users')
                 ->onDelete('cascade'); //cascade, set null, restrict, no action 
             
-            $table->integer('numero_cot');
+            $table->bigInteger('numero_cot');
             $table->string('descripcion_cot');
             $table->integer('precio_cot');
             $table->boolean('aprobado_cot')->default(false);

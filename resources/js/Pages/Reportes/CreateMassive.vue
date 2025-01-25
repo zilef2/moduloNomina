@@ -151,7 +151,7 @@ const create = () => {
 
 <template>
     <section class="space-y-6">
-        <Modal :show="props.show" @close="emit('close')" :maxWidth="'4xl'">
+        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl4'">
             <form class="p-6 mb-28">
                 <div class="flex space-x-4">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\helpers\Myhelp;
+use App\helpers\MyModels;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -57,7 +58,7 @@ class UbicacionController extends Controller
     public function index(Request $request)
     {
         $permissions = Myhelp::EscribirEnLog($this, ' ubicacions');
-        $numberPermissions = Myhelp::getPermissionToNumber($permissions);
+        $numberPermissions = MyModels::getPermissionToNumber($permissions);
         $ubicacions = $this->Busqueda($request);
 
         $perPage = $request->has('perPage') ? $request->perPage : 5;

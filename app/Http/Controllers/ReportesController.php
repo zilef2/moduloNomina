@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\helpers\Myhelp;
+use App\helpers\MyModels;
 use App\Http\Requests\ReporteRequest;
 use App\Models\CentroCosto;
 use App\Models\Parametro;
@@ -303,7 +304,7 @@ class ReportesController extends Controller
     public function index(Request $request)
     {
         $permissions = Myhelp::EscribirEnLog($this, ' |reportes index| ');
-        $numberPermissions = Myhelp::getPermissionToNumber($permissions);
+        $numberPermissions = MyModels::getPermissionToNumber($permissions);
         $Authuser = Myhelp::AuthU();
         Carbon::setLocale('es');
         $titulo = __('app.label.Reportes');
@@ -416,7 +417,7 @@ class ReportesController extends Controller
 
     public function store(ReporteRequest $request): \Illuminate\Http\RedirectResponse
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes store| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes store| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         DB::beginTransaction();
         $authUser = Myhelp::AuthU();
         try {
@@ -469,7 +470,7 @@ class ReportesController extends Controller
 
     public function edit($id)
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes edit| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes edit| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 
         $Reportes = Reporte::findOrFail($id);
 
@@ -485,7 +486,7 @@ class ReportesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes update| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes update| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 
         DB::beginTransaction();
         try {
@@ -531,7 +532,7 @@ class ReportesController extends Controller
      */
     public function destroy($id)
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes destroy| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes destroy| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         DB::beginTransaction();
 
         try {
@@ -563,7 +564,7 @@ class ReportesController extends Controller
 
     public function MassiveReportes(Request $request)
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes MassiveReportes| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes MassiveReportes| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 
         DB::beginTransaction();
         try {
@@ -648,7 +649,7 @@ class ReportesController extends Controller
 
     public function Reporte_Super_Edit(Request $request, $id)
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' | reportes Reporte_Super_Edit | ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' | reportes Reporte_Super_Edit | ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 
         DB::beginTransaction();
         try {

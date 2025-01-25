@@ -3,6 +3,7 @@
 namespace App\helpers;
 
 use App\Models\Reporte;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Auth;
@@ -20,82 +21,43 @@ class Myhelp
         'superadmin' => 10
     ];
 
-    public static function AuthU2(): Authenticatable
+    public static function AuthU(): ?User
     {
         $TheUser = Auth::user();
-        if ($TheUser) {
+        if ($TheUser instanceof User) {
             return $TheUser;
         }
 
-        return redirect()->to('/');
-    }
-
-    public static function AuthU(): ?\App\Models\User
-    {
-        $TheUser = Auth::user();
-        if ($TheUser instanceof \App\Models\User) {
-            return $TheUser;
-        }
-
+//        return redirect()->to('/');
         abort(403, 'Unauthorized');
     }
     public static function AuthUid(): ?int
     {
         $TheUser = Auth::user();
-        if ($TheUser instanceof \App\Models\User) {
+        if ($TheUser instanceof User) {
             return $TheUser->id;
         }
-
         abort(403, 'Unauthorized');
-    }
-
-    public static function AuthUid2(): int
-    {
-        $TheUser = Auth::user();
-        if ($TheUser) {
-            return $TheUser->id;
-        }
-        return redirect()->to('/');
     }
 
     //************************logs************************\\
 
-    public static function getPermissionToNumber($permissions)
-    {
-
-        // $valorReturn = 0;
-        // if(in_array($permissions, constant('MyRoles'))){
-        //     $valorReturn = constant('MyRoles')[$permissions];
-        // }
-        // dd($valorReturn);
-        // return $valorReturn;
-
-        if ($permissions === 'empleado') return 1;
-        if ($permissions === 'administrativo') return 2;// no reportan
-        if ($permissions === 'supervisor') return 3;// no reportan
-        if ($permissions === 'ingeniero') return 3;
-        if ($permissions === 'admin') return 9;
-        if ($permissions === 'superadmin') return 10;
-        return 0;
-    }
-
     public static function EscribirEnLog($thiis, $clase = '', $mensaje = '', $returnPermission = true, $critico = false)
     {
-        $permissions = $returnPermission ? auth()->user()->roles->pluck('name')[0] : null;
+        $permissions = $returnPermission ? self::AuthU()->roles->pluck('name')[0] : null;
         $ListaControladoresYnombreClase = (explode('\\', get_class($thiis)));
         $nombreC = end($ListaControladoresYnombreClase);
         if (!$critico) {
-            $Elpapa = (explode('\\', get_parent_class($thiis)));
             $ElMensaje = $mensaje != '' ? ' Mensaje: ' . $mensaje : ' Sin mensaje ';
-            $ElMensaje = 'Vista: ' . $nombreC . 'U:' . Auth::user()->name . ' | clase: ' . $clase . '|| ' . ' Mensaje: ' . $ElMensaje;
+            $ElMensaje = 'Vista: ' . $nombreC . 'U:' . self::AuthU()->name . ' | clase: ' . $clase . '|| ' . ' Mensaje: ' . $ElMensaje;
             if ($permissions == 'admin' || $permissions == 'superadmin') {
                 Log::channel('soloadmin')->info($ElMensaje);
             } else {
                 if ($permissions == 'isadministrativo') {
-                    Log::channgel('soloadministrativo')->info($ElMensaje);
+                    Log::channel('soloadministrativo')->info($ElMensaje);
                 } else {
                     if ($permissions == 'issupervisor') {
-                        Log::channgel('issupervisor')->info($ElMensaje);
+                        Log::channel('issupervisor')->info($ElMensaje);
                     } else {
                         Log::info($ElMensaje);
                     }
@@ -103,7 +65,7 @@ class Myhelp
             }
             return $permissions;
         } else {
-            Log::critical('Vista: ' . ($nombreC ?? 'null') . 'U:' . Auth::user()->name . ' ||' . ($clase ?? 'null') . '|| ' . ' Mensaje: ' . ($mensaje ?? 'null'));
+            Log::critical('Vista: ' . ($nombreC ?? 'null') . 'U:' . self::AuthU()->name . ' ||' . ($clase ?? 'null') . '|| ' . ' Mensaje: ' . ($mensaje ?? 'null'));
         }
     }
 

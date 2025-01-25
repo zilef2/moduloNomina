@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CentroCostosController;
 use App\Http\Controllers\CentroTableController;
+use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\ParametrosController;
 use App\Http\Controllers\PermissionController;
@@ -91,7 +92,8 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::get('/DescompresionDespliegue/{esAmbientePruebas}', [ZipController::class, 'DescompresionDespliegue']);
     Route::get('/JustDeploy/{pruebas}', [\App\Http\Controllers\ScriptController::class, 'JustDeploy']);
 
-Route::resource("/cotizacion", \App\Http\Controllers\CotizacionController::class);
+    Route::resource("/cotizacion", CotizacionController::class);
+    Route::put('/cotiza/{id}', [CotizacionController::class, 'update2'])->name('cotizacion.update2');
 	//aquipues
 }); //fin verified
 

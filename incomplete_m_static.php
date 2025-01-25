@@ -1,8 +1,7 @@
 <?php
 /*
 //pendietnets 2025 enero
-php artisan migrate
-php artisan db:seed
+php artisan migrate && php artisan db:seed
 */
 $directory = __DIR__ . '/app/Models'; // Ruta de los modelos en Laravel.
 $annotation = "/**\n * @method static \\Illuminate\\Database\\Eloquent\\Collection all()\n */";

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\helpers\Myhelp;
+use App\helpers\MyModels;
 use App\Models\CentroCosto;
 use App\Models\cotizacion;
 use Carbon\Carbon;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -32,8 +32,9 @@ class CotizacionController extends Controller
     public function Mapear($cotizacions)
     {
         $cotizacions = $cotizacions->get()->map(function ($cotizacion) {
-            $cotizacion->centro_costo_id2 = $cotizacion->centro->nombre;
-            
+            $cotizacion->centro_costo_id2 = $cotizacion->centro;
+            if ($cotizacion->centro_costo_id2) $cotizacion->centro_costo_id2 = $cotizacion->centro_costo_id2->nombre;
+
             return $cotizacion;
         });
         return $cotizacions;
@@ -64,7 +65,7 @@ class CotizacionController extends Controller
             ->map(function ($item) {
                 return [
                     'value' => $item->value,
-                    'label' => $item->nombre . ' - ' . mb_substr($item->descripcion ?? '', 0, 17),
+                    'label' => ($item->nombre ?? '') . ' - ' . mb_substr($item->descripcion ?? '', 0, 17),
                 ];
             })
             ->toArray();
@@ -78,7 +79,7 @@ class CotizacionController extends Controller
 
     public function index(Request $request)
     {
-        $numberPermissions = Myhelp::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' cotizacions '));
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' cotizacions '));
         $this->Filtros($cotizacions, $request);
         $cotizacions = $this->Mapear($cotizacions);
         $losSelect = $this->Dependencias();
@@ -120,6 +121,7 @@ class CotizacionController extends Controller
 //        $dependex = $request->dependex['id'];
 //        $request->merge(['dependex_id' => $request->dependex['id']]);
 
+//        $request->merge(['centro_costo_id' => null]);
         $request->merge(['aprobado_cot' => false]);
         $request->merge(['fecha_aprobacion_cot' => Carbon::now()]);
         $request->merge(['user_id' => Myhelp::AuthUid()]);
@@ -133,13 +135,7 @@ class CotizacionController extends Controller
 
     //fin store functions
 
-    public function show($id)
-    {
-    }
-
-    public function edit($id)
-    {
-    }
+    public function show($id){}public function edit($id){}
 
     public function update(Request $request, $id)
     {
@@ -152,6 +148,27 @@ class CotizacionController extends Controller
         DB::commit();
         Myhelp::EscribirEnLog($this, 'UPDATE:cotizacions EXITOSO', 'cotizacion id:' . $cotizacion->id . ' | ' . $cotizacion->numero_cot, false);
         return back()->with('success', __('app.label.updated_successfully2', ['numero_cot' => $cotizacion->numero_cot]));
+    }
+    
+    public function update2(Request $request, $id)
+    {
+        Myhelp::EscribirEnLog($this, ' Begin UPDATE:cotizacions');
+        DB::beginTransaction();
+        $cotizacion = cotizacion::findOrFail($id);
+        $centro = centrocosto::create([
+            'nombre' => $cotizacion->numero_cot,
+            'mano_obra_estimada' => 0,
+            'activo' => 1,
+            'descripcion' => $cotizacion->descripcion_cot,
+            'clasificacion' => '',
+            'ValidoParaFacturar' => 1,
+        ]);
+        $request->merge(['centro_costo_id' => $centro->id]);
+        $cotizacion->update($request->all());
+        
+        DB::commit();
+        Myhelp::EscribirEnLog($this, 'UPDATE:cotizacions EXITOSO', 'cotizacion id:' . $cotizacion->id . ' | ' . $cotizacion->numero_cot, false);
+        return back()->with('success', __('app.label.updated_successfully', ['name' => $cotizacion->numero_cot]));
     }
 
     /**

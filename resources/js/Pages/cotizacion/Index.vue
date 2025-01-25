@@ -174,6 +174,20 @@ const titulos = [
                                     <ChevronUpDownIcon class="w-4 h-4"/>
                                 </div>
                             </th>
+<!--                            <th class="px-2 py-4 cursor-pointer"-->
+<!--                                v-on:click="order('centro_costo_id')">-->
+<!--                                <div class="flex justify-between items-center">-->
+<!--                                    <span>Centro de costo</span>-->
+<!--                                    <ChevronUpDownIcon class="w-4 h-4"/>-->
+<!--                                </div>-->
+<!--                            </th>-->
+                            <th class="px-2 py-4 cursor-pointer"
+                                v-on:click="order('centro_costo_id')">
+                                <div class="flex justify-between items-center">
+                                    <span>Tiene Centro de costo</span>
+                                    <ChevronUpDownIcon class="w-4 h-4"/>
+                                </div>
+                            </th>
                             <!-- <th class="px-2 py-4 cursor-pointer" v-on:click="order('fecha_nacimiento')">
                                 <div class="flex justify-between items-center"> <span>{{ lang().label.edad }}</span>
                                     <ChevronUpDownIcon class="w-4 h-4" />
@@ -233,6 +247,8 @@ const titulos = [
                                 
                             </td>
 
+<!--                            <td>{{claseFromController['centro_costo_id2']}}</td>-->
+                            <td>{{claseFromController['centro_costo_id2'] ? '✅' : '❌'}}</td>
                         </tr>
                         <tr class="border-t border-gray-600">
                             <td v-if="numberPermissions > 1"

@@ -73,7 +73,7 @@ const create = () => {
 
 <template>
     <section class="space-y-6">
-        <Modal :show="props.show" @close="emit('close')">
+        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl4'">
             <form class="p-6" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     {{ lang().label.add }} {{ props.title }}

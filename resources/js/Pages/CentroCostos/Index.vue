@@ -25,6 +25,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
         filters: Object,
         fromController: Object,
         breadcrumbs: Object,
+        numberPermissions: Object,
         perPage: Number,
         nombresTabla: Array,
         listaSupervisores: Object,

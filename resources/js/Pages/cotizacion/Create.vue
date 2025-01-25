@@ -29,15 +29,20 @@ const data = reactive({
     },
 })
 
-//very usefull
-const justNames = props.titulos.map(names => names['order'] )
+let justNames = props.titulos.map(names =>{
+    if(names['order'] !== 'centro_costo_id')
+        return names['order']
+})
+justNames = justNames.filter(item => item !== undefined);
 const form = useForm({ ...Object.fromEntries(justNames.map(field => [field, ''])) });
+
 onMounted(() => {
     if(props.numberPermissions > 9){
 
-        const valueRAn = Math.floor(Math.random() * (9) + 1)
+        const valueRAn = Math.floor(Math.random() * (900) + 1)
         form.numero_cot = (valueRAn);
         form.descripcion_cot = "holi" + (valueRAn);
+        form.precio_cot = (valueRAn);
         // form.hora_inicial = '0'+valueRAn+':00'//temp
         // form.fecha = '2023-06-01'
 
@@ -45,12 +50,12 @@ onMounted(() => {
 });
 
 const printForm =[];
-props.titulos.forEach(names =>
+props.titulos.forEach(names =>{
+ if(names['order'] !== 'centro_costo_id')   
     printForm.push ({
         idd: names['order'], label: names['label'], type: names['type']
-        //, value: form[names['order']]
     })
-);
+});
 
 function ValidarVacios(){
     let result = true
@@ -123,7 +128,7 @@ const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }
                 <h2 class="mb-8 text-lg font-medium text-gray-900 dark:text-gray-100">
                     {{ lang().label.adda }} {{ props.title }}
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
                     <div v-for="(atributosform, indice) in printForm" :key="indice"
                         :class="atributosform.type === 'id' ? 'col-span-2' : 'bg-blue-50/50'"
                          class="rounded-xl"

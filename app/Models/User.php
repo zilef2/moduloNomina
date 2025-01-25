@@ -42,6 +42,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @method \Illuminate\Database\Eloquent\Relations\HasMany hasMany(string $related, string $foreignKey = null, string $localKey = null)
  * @method \Illuminate\Database\Eloquent\Relations\BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null, string $relatedPivotKey = null)
  * @property mixed $id
+ * @property mixed $roles
+ * @property mixed $name
  */
 class User extends Authenticatable
 {

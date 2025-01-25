@@ -37,10 +37,10 @@ onMounted(() => {
     // data.printForm.length -= 1 //dependex
 });
 
-props.titulos.forEach(names => {
+props.titulos.forEach(names =>{
+ if(names['order'] !== 'centro_costo_id')   
     data.printForm.push ({
         idd: names['order'], label: names['label'], type: names['type']
-        , value: form[names['order']]
     })
 });
 
@@ -69,13 +69,24 @@ const update = () => {
         onFinish: () => null,
     })
 }
+const update2 = () => {
+    form.put(route('cotizacion.update2', props.cotizaciona?.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            emit("close")
+            form.reset()
+        },
+        onError: () => null,
+        onFinish: () => null,
+    })
+}
 // const sexos = [ { label: 'Masculino', value: 'Masculino' }, { label: 'Femenino', value: 'Femenino' } ];
 
 </script>
 
 <template>
     <section class="space-y-6">
-        <Modal :show="props.show" @close="emit('close')" :maxWidth="'lg'">
+        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl2'">
             <form class="p-6" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     {{ lang().label.edit }} {{ props.title }}
@@ -110,11 +121,14 @@ const update = () => {
 
                 </div>
                 <div class=" my-8 flex justify-end">
-                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
-                    </SecondaryButton>
-                    <PrimaryButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
+                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}</SecondaryButton>
+                    <PrimaryButton v-if="cotizaciona.centro_costo_id" class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                         @click="update">
                         {{ form.processing ? lang().button.save + '...' : lang().button.save }}
+                    </PrimaryButton>
+                    <PrimaryButton v-else class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
+                        @click="update2">
+                        Generar Centro de costo
                     </PrimaryButton>
                 </div>
             </form>
