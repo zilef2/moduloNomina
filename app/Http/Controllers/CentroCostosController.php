@@ -28,8 +28,9 @@ class CentroCostosController extends Controller
     public function __construct()
     {
         session(['parametros' => Parametro::Find(1)]);
-        $this->limitadorCentrosParaVer = 80;
-        $this->minutosActualizarPresupueto = 60 * 30;
+        $this->minutosActualizarPresupueto =
+//            1;
+            60 * 5;
         $this->centroCostosAll = CentroCosto::all();
         $this->parametros = Parametro::find(1);
 
@@ -39,41 +40,37 @@ class CentroCostosController extends Controller
     {
         $centroCostos = centroCosto::query();
 
-//        if ($request->has(['limitadorVer'])) {
-//            $this->limitadorCentrosParaVer = 80;
-//        } else {
-//            $this->limitadorCentrosParaVer = 300;
-//        }
+        $this->limitadorCentrosParaVer = 80;
+        if ($request->has(['searchh2'])) {
+            $this->limitadorCentrosParaVer = 20000;
+        }
         $AUuser = Myhelp::AuthU();
 
         $busqueda = false;
-        $this->limitadorCentrosParaVer = 80;
+        $searchSCC = $request->has('searchSCC');
 
         if ($request->search) {
             $busqueda = true;
             if (!Cache::has('centro_costos_busqueda')) {
                 Cache::forget('centro_costos'); // Borra la caché normal para búsquedas nuevas
                 Cache::put('centro_costos_busqueda', true); // Indica que hay una búsqueda activa
-                $this->limitadorCentrosParaVer = 20;
+                $this->limitadorCentrosParaVer = 20050;
             }
+            $centroCostos->orderBy('created_at', 'DESC');
         } else {
             if (Cache::has('centro_costos_busqueda')) {
                 Cache::forget('centro_costos'); // Borra la caché de búsqueda
                 Cache::forget('centro_costos_busqueda'); // Elimina el indicador de búsqueda activa
             }
-            $this->limitadorCentrosParaVer = 80;
+            if ($request->has(['field', 'order'])) {
+                $centroCostos->orderBy($request->field, $request->order);
+            } else {
+                $centroCostos->orderBy('activo', 'DESC')
+                    ->orderBy('mano_obra_estimada', 'DESC');
+            }
         }
 
 
-        $searchSCC = $request->has('searchSCC');
-
-        if ($request->has(['field', 'order'])) {
-            $centroCostos->orderBy($request->field, $request->order);
-        } else {
-            $centroCostos
-                ->orderBy('activo', 'DESC')
-                ->orderBy('mano_obra_estimada', 'DESC');
-        }
         $supervisores = User::UsersWithRol('supervisor')->get();
         $objetoDelUser = $AUuser->ArrayCentrosID();
 
@@ -137,6 +134,7 @@ class CentroCostosController extends Controller
             $anio = date('Y');
             $mes = date('m');
             foreach ($this->centroCostosAll as $item) {
+                /** @var CentroCosto $item */
                 $item->actualizarEstimado($anio, $mes, $this->parametros);
             }
         }
@@ -169,7 +167,7 @@ class CentroCostosController extends Controller
         return Inertia::render('CentroCostos/Index', [ //carpeta
             'breadcrumbs' => [['label' => __('app.label.CentroCostos'), 'href' => route('CentroCostos.index')]],
             'title' => __('app.label.CentroCostos'),
-            'filters' => $request->all(['search', 'field', 'order']),
+            'filters' => $request->all(['search', 'field', 'order', 'searchh2', 'searchSCC']),
             'perPage' => (int)$perPage,
             'fromController' => $paginated,
             'nombresTabla' => $nombresTabla,

@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -123,10 +124,11 @@ class CotizacionController extends Controller
 
 //        $request->merge(['centro_costo_id' => null]);
         $request->merge(['aprobado_cot' => false]);
-        $request->merge(['fecha_aprobacion_cot' => Carbon::now()]);
+//        $request->merge(['fecha_aprobacion_cot' => Carbon::now()]);
         $request->merge(['user_id' => Myhelp::AuthUid()]);
         $request->merge(['precio_cot' => str_replace(".", "", $request->precio_cot)]);
         $cotizacion = cotizacion::create($request->all());
+        Cache::forget('centro_costos'); // Borra la caché normal para búsquedas nuevas
 
         DB::commit();
         Myhelp::EscribirEnLog($this, 'STORE:cotizacions EXITOSO', 'cotizacion id:' . $cotizacion->id . ' | ' . $cotizacion->numero_cot, false);
@@ -164,6 +166,7 @@ class CotizacionController extends Controller
             'ValidoParaFacturar' => 1,
         ]);
         $request->merge(['centro_costo_id' => $centro->id]);
+        $request->merge(['fecha_aprobacion_cot' => Carbon::now()]);
         $cotizacion->update($request->all());
         
         DB::commit();

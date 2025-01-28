@@ -8,28 +8,28 @@ import TextInput from '@/Components/TextInput.vue';
 import {useForm} from '@inertiajs/vue3';
 import {onMounted, reactive, watchEffect} from 'vue';
 import "vue-select/dist/vue-select.css";
-import vSelect from "vue-select";
+
 const props = defineProps({
     show: Boolean,
     title: String,
     cotizaciona: Object,
     titulos: Object, //parametros de la clase principal
-    losSelect:Object,
+    losSelect: Object,
 
 })
 
 const emit = defineEmits(["close"]);
 const data = reactive({
-  printForm:[]
+    printForm: []
 })
 
 //very usefull
-const justNames = props.titulos.map(names => names['order'] )
-const form = useForm({ ...Object.fromEntries(justNames.map(field => [field, ''])) });
+const justNames = props.titulos.map(names => names['order'])
+const form = useForm({...Object.fromEntries(justNames.map(field => [field, '']))});
 onMounted(() => {
-    if(props.numberPermissions > 9){
+    if (props.numberPermissions > 9) {
         const valueRAn = Math.floor(Math.random() * 9 + 1)
-        form.nombre = 'admin orden trabajo '+ (valueRAn);
+        form.nombre = 'admin orden trabajo ' + (valueRAn);
         form.codigo = (valueRAn);
         // form.hora_inicial = '0'+valueRAn+':00'//temp
         // form.fecha = '2023-06-01'
@@ -37,11 +37,12 @@ onMounted(() => {
     // data.printForm.length -= 1 //dependex
 });
 
-props.titulos.forEach(names =>{
- if(names['order'] !== 'centro_costo_id')   
-    data.printForm.push ({
-        idd: names['order'], label: names['label'], type: names['type']
-    })
+props.titulos.forEach(names => {
+    if (names['order'] !== 'centro_costo_id' &&
+        names['order'] !== 'fecha_aprobacion_cot')
+        data.printForm.push({
+            idd: names['order'], label: names['label'], type: names['type']
+        })
 });
 
 watchEffect(() => {
@@ -97,37 +98,42 @@ const update2 = () => {
                         <div v-if="atributosform.type == 'id'" id="SelectVue">
                             <label name="labelSelectVue"> {{ atributosform.label }} </label>
                             <v-select :options="props.losSelect"
-                                v-model="form[atributosform.idd]" 
+                                      v-model="form[atributosform.idd]"
                                       :reduce="element => element.value" label="label"
                             ></v-select>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
                         </div>
 
                         <div v-else-if="atributosform.type == 'time'" id="SelectVue">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
                             <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                :error="form.errors[atributosform.idd]" step="3600" />
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+                                       v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
+                                       :error="form.errors[atributosform.idd]" step="3600"/>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
                         </div>
                         <div v-else class="">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
                             <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                :error="form.errors[atributosform.idd]" />
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+                                       v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
+                                       :error="form.errors[atributosform.idd]"/>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
                         </div>
                     </div>
 
                 </div>
                 <div class=" my-8 flex justify-end">
-                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}</SecondaryButton>
-                    <PrimaryButton v-if="cotizaciona.centro_costo_id" class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
-                        @click="update">
+                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{
+                            lang().button.close
+                        }}
+                    </SecondaryButton>
+                    <PrimaryButton v-if="cotizaciona.centro_costo_id" class="ml-3"
+                                   :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
+                                   @click="update">
                         {{ form.processing ? lang().button.save + '...' : lang().button.save }}
                     </PrimaryButton>
-                    <PrimaryButton v-else class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
-                        @click="update2">
+                    <PrimaryButton v-else class="ml-3" :class="{ 'opacity-25': form.processing }"
+                                   :disabled="form.processing"
+                                   @click="update2">
                         Generar Centro de costo
                     </PrimaryButton>
                 </div>

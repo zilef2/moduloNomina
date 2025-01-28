@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\CentroTableController;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @method static \Illuminate\Database\Eloquent\Collection all()
@@ -38,7 +40,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method HasMany hasMany(string $related, string $foreignKey = null, string $localKey = null)
  * @method BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null, string $relatedPivotKey = null)
  * @method static selectRaw(string $string)
- * @property mixed $id
  */
 class CentroCosto extends Model
 {
@@ -53,17 +54,6 @@ class CentroCosto extends Model
         'ValidoParaFacturar',
     ];
 
-    private string|float $nombre;
-
-    private int|float $mano_obra_estimada;
-
-    private int|float $activo;
-
-    private string|float $descripcion;
-
-    private string|float $clasificacion;
-
-    private int|float $ValidoParaFacturar;
 
     public function reportes(): HasMany{
         return $this->hasMany(Reporte::class);
@@ -115,48 +105,34 @@ class CentroCosto extends Model
     //deep2 |
     public function actualizarEstimado($anio, $mes,$parametros): void
     {
-        $BaseDeReportes = Reporte::Where('centro_costo_id', $this->id)
+        $elSelect = [
+            'user_id',
+            DB::raw('COUNT(*) as total'),
+            DB::raw('SUM(horas_trabajadas) as horas_trabajadas'),
+            DB::raw('SUM(almuerzo) as almuerzo'),
+            DB::raw('SUM(diurnas) as diurnas'),
+            DB::raw('SUM(nocturnas) as nocturnas'),
+            DB::raw('SUM(extra_diurnas) as extra_diurnas'),
+            DB::raw('SUM(extra_nocturnas) as extra_nocturnas'),
+            DB::raw('SUM(dominical_diurno) as dominical_diurno'),
+            DB::raw('SUM(dominical_nocturno) as dominical_nocturno'),
+            DB::raw('SUM(dominical_extra_diurno) as dominical_extra_diurno'),
+            DB::raw('SUM(dominical_extra_nocturno) as dominical_extra_nocturno'),
+        ];
+
+        $Reportes = Reporte::Select($elSelect)
+            ->Where('centro_costo_id', $this->id)
             ->WhereYear('fecha_ini', $anio)
             ->WhereMonth('fecha_ini', $mes)
             ->Where('valido', 1)
+            ->groupBy('user_id')
             ->get();
-
-        $vardiurnas = 0;
-        $varnocturnas = 0;
-        $varextra_diurnas = 0;
-        $varextra_nocturnas = 0;
-        $vardominical_diurno = 0;
-        $vardominical_nocturno = 0;
-        $vardominical_extra_diurno = 0;
-        $vardominical_extra_nocturno = 0;
-
-        foreach ($BaseDeReportes as $index => $baseDeReporte) {
-            $user = User::find($baseDeReporte->user_id);
-            if ($user) {
-                $sal = $user->salario / 235;
-                $porcentaje_diurno = $parametros->porcentaje_diurno * $sal;
-                $porcentaje_nocturno = $parametros->porcentaje_nocturno * $sal;
-                $porcentaje_extra_diurno = $parametros->porcentaje_extra_diurno * $sal;
-                $porcentaje_extra_nocturno = $parametros->porcentaje_extra_nocturno * $sal;
-                $porcentaje_dominical_diurno = $parametros->porcentaje_dominical_diurno * $sal;
-                $porcentaje_dominical_nocturno = $parametros->porcentaje_dominical_nocturno * $sal;
-                $porcentaje_dominical_extra_diurno = $parametros->porcentaje_dominical_extra_diurno * $sal;
-                $porcentaje_dominical_extra_nocturno = $parametros->porcentaje_dominical_extra_nocturno * $sal;
-
-                $vardiurnas += ((float) $baseDeReporte->diurnas) * $porcentaje_diurno;
-                $varnocturnas += ((float) $baseDeReporte->nocturnas) * $porcentaje_nocturno;
-                $varextra_diurnas += ((float) $baseDeReporte->extra_diurnas) * $porcentaje_extra_diurno;
-                $varextra_nocturnas += ((float) $baseDeReporte->extra_nocturnas) * $porcentaje_extra_nocturno;
-                $vardominical_diurno += ((float) $baseDeReporte->dominical_diurno) * $porcentaje_dominical_diurno;
-                $vardominical_nocturno += ((float) $baseDeReporte->dominical_nocturno) * $porcentaje_dominical_nocturno;
-                $vardominical_extra_diurno += ((float) $baseDeReporte->dominical_extra_diurno) * $porcentaje_dominical_extra_diurno;
-                $vardominical_extra_nocturno += ((float) $baseDeReporte->dominical_extra_nocturno) * $porcentaje_dominical_extra_nocturno;
-            }
-        }
-
-        $this->mano_obra_estimada = (int) ($vardiurnas + $varnocturnas + $varextra_diurnas + $varextra_nocturnas + $vardominical_diurno + $vardominical_nocturno + $vardominical_extra_diurno + $vardominical_extra_nocturno);
+        
+        $CTC = new CentroTableController();
+        [$Reportes,$mano_obra_estimada] = $CTC->MultiplicarPorSalario($Reportes,$this->id);
+        
         $this->update([
-            'mano_obra_estimada' => $this->mano_obra_estimada,
+            'mano_obra_estimada' => $mano_obra_estimada,
         ]);
     }
 }

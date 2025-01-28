@@ -30,7 +30,8 @@ const data = reactive({
 })
 
 let justNames = props.titulos.map(names =>{
-    if(names['order'] !== 'centro_costo_id')
+    if(names['order'] !== 'centro_costo_id' &&
+       names['order'] !== 'fecha_aprobacion_cot')
         return names['order']
 })
 justNames = justNames.filter(item => item !== undefined);
@@ -51,7 +52,8 @@ onMounted(() => {
 
 const printForm =[];
 props.titulos.forEach(names =>{
- if(names['order'] !== 'centro_costo_id')   
+ if(names['order'] !== 'centro_costo_id' &&
+       names['order'] !== 'fecha_aprobacion_cot')   
     printForm.push ({
         idd: names['order'], label: names['label'], type: names['type']
     })

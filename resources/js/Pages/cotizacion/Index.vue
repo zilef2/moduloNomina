@@ -105,6 +105,7 @@ const titulos = [
     {order: 'centro_costo_id', label: 'centro_costo', type: 'id',nameid:'nombre'},
     {order: 'descripcion_cot', label: 'descripcion_cot', type: 'text'},
     {order: 'precio_cot', label: 'precio_cot', type: 'number'},
+    {order: 'fecha_aprobacion_cot', label: 'fecha_aprobacion_cot', type: 'date'},
     // {order: 'aprobado_cot', label: 'aprobado_cot', type: 'text'},
     // {order: 'fecha_aprobacion_cot', label: 'fecha_aprobacion_cot', type: 'text'},
 ];
@@ -137,10 +138,10 @@ const titulos = [
                           :losSelect=props.losSelect
                     />
 
-                    <Delete v-if="can(['delete cotizacion'])" :numberPermissions="props.numberPermissions"
-                            :show="data.deleteOpen" @close="data.deleteOpen = false" :cotizaciona="data.cotizaciono"
-                            :title="props.title"
-                    />
+<!--                    <Delete v-if="can(['delete cotizacion'])" :numberPermissions="props.numberPermissions"-->
+<!--                            :show="data.deleteOpen" @close="data.deleteOpen = false" :cotizaciona="data.cotizaciono"-->
+<!--                            :title="props.title"-->
+<!--                    />-->
                     
                 </div>
             </div>
@@ -214,39 +215,26 @@ const titulos = [
                                                     class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
                                             <PencilIcon class="w-4 h-4"/>
                                         </InfoButton>
-                                        <DangerButton v-show="can(['delete cotizacion'])" type="button"
-                                                      @click="(data.deleteOpen = true), (data.cotizaciono = claseFromController)"
-                                                      class="px-2 py-1.5 rounded-none"
-                                                      v-tooltip="lang().tooltip.delete">
-                                            <TrashIcon class="w-4 h-4"/>
-                                        </DangerButton>
+<!--                                        <DangerButton v-show="can(['delete cotizacion'])" type="button"-->
+<!--                                                      @click="(data.deleteOpen = true), (data.cotizaciono = claseFromController)"-->
+<!--                                                      class="px-2 py-1.5 rounded-none"-->
+<!--                                                      v-tooltip="lang().tooltip.delete">-->
+<!--                                            <TrashIcon class="w-4 h-4"/>-->
+<!--                                        </DangerButton>-->
                                     </div>
                                 </div>
                             </td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++indexu }}</td>
                             <td v-for="titulo in titulos" class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                <span v-if="titulo['type'] === 'text'"> {{
-                                        claseFromController[titulo['order']]
-                                    }} </span>
-                                <span v-if="titulo['type'] === 'number'"> {{
-                                        number_format(claseFromController[titulo['order']], 0, false)
-                                    }} </span>
-                                <span v-if="titulo['type'] === 'dinero'"> {{
-                                        number_format(claseFromController[titulo['order']], 0, true)
-                                    }} </span>
-                                <span v-if="titulo['type'] === 'date'"> {{
-                                        formatDate(claseFromController[titulo['order']], false)
-                                    }} </span>
-                                <span v-if="titulo['type'] === 'datetime'"> {{
-                                        formatDate(claseFromController[titulo['order']], true)
-                                    }} </span>
+                                <span v-if="titulo['type'] === 'text'"> {{ claseFromController[titulo['order']] }} </span>
+                                <span v-if="titulo['type'] === 'number'"> {{ number_format(claseFromController[titulo['order']], 0, false) }} </span>
+                                <span v-if="titulo['type'] === 'dinero'"> {{ number_format(claseFromController[titulo['order']], 0, true) }} </span>
+                                <span v-if="titulo['type'] === 'date'"> {{ formatDate(claseFromController[titulo['order']], false) }} </span>
+                                <span v-if="titulo['type'] === 'datetime'"> {{ formatDate(claseFromController[titulo['order']], true) }} </span>
                                 <span v-if="titulo['type'] === 'id'">
-<!--                                    {{ claseFromController[titulo['order']][titulo['nameid']] }} -->
                                     {{claseFromController[titulo['order']+'2']}}
                                 </span>
-                                
                             </td>
-
 <!--                            <td>{{claseFromController['centro_costo_id2']}}</td>-->
                             <td>{{claseFromController['centro_costo_id2'] ? '✅' : '❌'}}</td>
                         </tr>

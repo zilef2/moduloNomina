@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('descripcion_cot');
             $table->integer('precio_cot');
             $table->boolean('aprobado_cot')->default(false);
-            $table->date('fecha_aprobacion_cot');
+            $table->date('fecha_aprobacion_cot')->nullable();
             $table->timestamps();
         });
     }

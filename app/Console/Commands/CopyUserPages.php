@@ -1,14 +1,14 @@
 <?php
 //VERSION 1.0 22ENE2025
-        //$ipAddress = $request->ip();
+//$ipAddress = $request->ip();
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use Exception;
 
 /*
 php artisan make:command copy:u
@@ -17,13 +17,18 @@ php artisan make:command copy:u
 class CopyUserPages extends Command
 {
     use Constants;
-    protected function generateAttributes(): array{return [
-            'numero_cot' => 'integer',        // Número COT
-            'descripcion_cot' => 'string',         // Descripción
-            'precio_cot' => 'biginteger',             // Precio
-            'aprobado_cot' => 'boolean',           // Aprobado
-            'fecha_aprobacion_cot' => 'date',     // Fecha aprobación
-        ];
+
+    protected function generateAttributes(): array
+    {
+        return
+            [
+                'cc' => 'biginteger',                 
+                'gasto' => 'biginteger',           
+                'descripcion' => 'text',         
+                'user_id' => 'biginteger',            
+                'legalizacion' => 'boolean',       
+                'fecha_legalizacion' => 'datetime',
+            ];
 //            'descripcion' => 'text',
 //            'precio' => 'decimal',
     }
@@ -38,7 +43,7 @@ class CopyUserPages extends Command
     {
         try {
             $this->generando = self::getMessage('generando');
-            
+
             $contadorMetodos = 0;
             $submetodo['Lenguaje'] = 0;
 
@@ -48,7 +53,8 @@ class CopyUserPages extends Command
                 return;
             }
 
-        $this->MetodologiaInicial($modelName, 'generic', '');
+            $this->MetodologiaInicial($modelName, 'generic', '');
+            
             if ($this->DoWebphp($modelName)) {
 
                 $this->info('DoWebphp' . self::MSJ_EXITO);
@@ -57,6 +63,8 @@ class CopyUserPages extends Command
                 $this->error('DoWebphp ' . self::MSJ_FALLO);
                 return;
             }
+            
+            //this
             if ($this->DoAppLenguaje($modelName)) {
                 $submetodo_oAppLenguaje = 0;
                 $this->info('DoAppLenguaje' . self::MSJ_EXITO);
@@ -87,11 +95,11 @@ class CopyUserPages extends Command
             $this->info(Artisan::call('optimize'));
             $this->info(Artisan::call('optimize:clear'));
             $this->info('FINISH');
-        } catch (Exception $e){
+        } catch (Exception $e) {
             $this->error(
-                "FALLO CONTADOR: ".$contadorMetodos .
-                "FALLO Lenguaje: ".$submetodo['Lenguaje'] .
-                " excepcion: ". $e->getMessage());
+                "FALLO CONTADOR: " . $contadorMetodos .
+                "FALLO Lenguaje: " . $submetodo['Lenguaje'] .
+                " excepcion: " . $e->getMessage());
 
         }
     }

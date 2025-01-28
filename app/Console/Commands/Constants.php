@@ -9,6 +9,7 @@ trait Constants
         return match ($type) {
             'generando' => 'La generación del componente: ',
             'exito' => ' fue realizada con éxito ',
+            
             'fallo' => ' Fallo',
             
             

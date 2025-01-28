@@ -6,6 +6,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -38,9 +41,9 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static Builder|static oldest($column = 'created_at')
  * @method static Builder|static paginate($perPage = 15, $columns = ['*'], $pageName = 'page')
  * @method static Builder|static simplePaginate($perPage = 15, $columns = ['*'], $pageName = 'page')
- * @method \Illuminate\Database\Eloquent\Relations\BelongsTo belongsTo(string $related, string $foreignKey = null, string $ownerKey = null)
- * @method \Illuminate\Database\Eloquent\Relations\HasMany hasMany(string $related, string $foreignKey = null, string $localKey = null)
- * @method \Illuminate\Database\Eloquent\Relations\BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null, string $relatedPivotKey = null)
+ * @method BelongsTo belongsTo(string $related, string $foreignKey = null, string $ownerKey = null)
+ * @method HasMany hasMany(string $related, string $foreignKey = null, string $localKey = null)
+ * @method BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null, string $relatedPivotKey = null)
  * @property mixed $id
  * @property mixed $roles
  * @property mixed $name

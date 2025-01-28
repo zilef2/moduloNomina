@@ -6,7 +6,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
-import { watchEffect, reactive } from 'vue';
+import {watchEffect, reactive, computed} from 'vue';
 import Checkbox from '@/Components/Checkbox.vue';
 
 const props = defineProps({
@@ -72,11 +72,27 @@ const select = () => {
     }
 }
 
+const groupedPermissions = computed(() => {
+  return props.permissions.reduce((groups, permission) => {
+    // Obtén el primer término del "name" (por ejemplo, "crear" de "crear cotizacion")
+    const key = permission.name.split(' ')[0]; 
+
+    // Si el grupo no existe, lo creamos
+    if (!groups[key]) {
+      groups[key] = [];
+    }
+
+    // Añadimos el permiso al grupo correspondiente
+    groups[key].push(permission);
+    return groups;
+  }, {});
+});
+
 </script>
 
 <template>
     <section class="space-y-6">
-        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl4'">
+        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl6'">
             <form class="p-6" @submit.prevent="update">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     {{ lang().label.edit }} {{ props.title }}
@@ -95,15 +111,15 @@ const select = () => {
                             <Checkbox id="permission-all" v-model:checked="data.multipleSelect" @change="selectAll" />
                             <InputLabel for="permission-all" :value="lang().label.check_all" />
                         </div>
-                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mt-2">
+                        <div v-for="(groupPerr, name) in groupedPermissions" :key="name" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 my-6">
                             <div class="flex items-center justify-start space-x-2"
-                                v-for="(permission, index) in props.permissions" :key="index">
+                                v-for="(permission, index) in groupPerr" :key="index">
                                 <input @change="select"
                                     class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary dark:text-primary shadow-sm focus:ring-primary/80 dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-primary dark:checked:border-primary"
                                     type="checkbox" :id="'permission_' + permission.id" :value="permission.id"
                                     v-model="form.permissions" />
                                 <InputLabel :for="'permission_' + permission.id" :value="lang().permissions[permission.name]
-                                //   + ' - ' + permission.name
+                                  // + ' - ' + permission.name
                                   " />
                             </div>
                         </div>

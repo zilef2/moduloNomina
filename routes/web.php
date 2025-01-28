@@ -3,6 +3,7 @@
 use App\Http\Controllers\CentroCostosController;
 use App\Http\Controllers\CentroTableController;
 use App\Http\Controllers\CotizacionController;
+use App\Http\Controllers\DeudaSingularController;
 use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\ParametrosController;
 use App\Http\Controllers\PermissionController;
@@ -94,6 +95,7 @@ Route::middleware('auth', 'verified')->group(function () {
 
     Route::resource("/cotizacion", CotizacionController::class);
     Route::put('/cotiza/{id}', [CotizacionController::class, 'update2'])->name('cotizacion.update2');
+    Route::get('/deuda', [DeudaSingularController::class, 'index'])->name('deuda.index');
 	//aquipues
 }); //fin verified
 

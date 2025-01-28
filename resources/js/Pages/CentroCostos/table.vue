@@ -88,7 +88,6 @@ const aSumarHoras = (veces) => {
         if (props.fromController.data) {
             props.fromController.data.forEach(element => {
                 data.thoras_trabajadas += parseInt(element.horas_trabajadas)
-                console.log("=>(table.vue:91) element.horas_trabajadas", element.horas_trabajadas);
 
                 data.tdiurnas += parseInt(element.diurnas)
                 data.tnocturnas += parseInt(element.nocturnas)
@@ -100,7 +99,6 @@ const aSumarHoras = (veces) => {
                 data.tdominical_extra_nocturno += parseInt(element.dominical_extra_nocturno)
             });
         } else {
-            console.log("=>(table.vue:103) veces", veces);
             aSumarHoras(veces)
         }
     }, 500)
@@ -141,7 +139,7 @@ const SumarPlata = () => {
         } else {
             SumarPlata()
         }
-    }, 500)
+    }, 300)
 }
 watch(() => _.cloneDeep(data.params), debounce(() => {
     let params = pickBy(data.params)
@@ -186,7 +184,7 @@ watchEffect(() => {})
                                     class="mx-auto my-1 w-28 rounded-xl shadow-lg">
                                     Alternar
                                 </PrimaryButton>
-
+                                <!--very usefull-->
                                 <v-select v-model="data.params.quincena"
                                           label="texto"
                                           :options="[
@@ -237,16 +235,16 @@ watchEffect(() => {})
                                 class="border-t border-gray-200 dark:border-black hover:bg-indigo-100"
                                 :class="{ 'bg-gray-200 dark:bg-bg-gray-600': index % 2 === 0 }">
 
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ clasegenerica.usera }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ number_format(clasegenerica.horas_trabajadas,0,0) }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ number_format(clasegenerica.diurnas,0,0) }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ number_format(clasegenerica.nocturnas,0,0) }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ number_format(clasegenerica.extra_diurnas,0,0) }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ number_format(clasegenerica.extra_nocturnas,0,0) }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ number_format(clasegenerica.dominical_diurno,0,0) }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ number_format(clasegenerica.dominical_nocturno,0,0) }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ number_format(clasegenerica.dominical_extra_diurno,0,0) }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ number_format(clasegenerica.dominical_extra_nocturno,0,0) }}</td>
+                                <td class="whitespace-nowrap -py-4 px-2">{{ clasegenerica.usera }}</td>
+                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.horas_trabajadas,0,0) }}</td>
+                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.diurnas,0,0) }}</td>
+                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.nocturnas,0,0) }}</td>
+                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.extra_diurnas,0,0) }}</td>
+                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.extra_nocturnas,0,0) }}</td>
+                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.dominical_diurno,0,0) }}</td>
+                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.dominical_nocturno,0,0) }}</td>
+                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.dominical_extra_diurno,0,0) }}</td>
+                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.dominical_extra_nocturno,0,0) }}</td>
                             </tr>
                             <tr class="border border-amber-400 bg-white dark:border-gray-700 hover:bg-gray-300 hover:dark:bg-gray-900/20">
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 font-bold"> Total</td>

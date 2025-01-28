@@ -3,6 +3,8 @@
 return [
     'label' => [
         //aquipues
+        'deuda' => 'Deuda',
+        
         'cotizacion' => 'cotizacion',
         'numero_cot' => 'Número',
         'descripcion_cot' => 'Descripción',
@@ -258,6 +260,7 @@ return [
         'delete_account_modal_caption' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
     ],
     'permissions' => [
+        //aquipermissionpues
         'delete user' => 'Borrar usuarios',
         'update user' => 'Actualizar usuarios',
         'read user' => 'Leer usuarios',
@@ -286,6 +289,8 @@ return [
         'isAdmin' => 'Es Admin',
         'isadministrativo' => 'Es administrativo',
         'issupervisor' => 'Es supervisor',
+        'isingeniero' => 'Es ingeniero',
+        'isIngeniero' => 'Es ingeniero',
 
         'parametros' => 'Parametros',
         'create parametros' => 'Crear parametros',
@@ -295,13 +300,17 @@ return [
 
         'delete cotizacion' => 'Borrar cotización',
         'update cotizacion' => 'Actualizar cotización',
+        'update2 cotizacion' => 'Actualizar 2 cotización',
+        'update3 cotizacion' => 'Actualizar 3 cotización',
         'read cotizacion' => 'Leer cotización',
         'create cotizacion' => 'Crear cotización',
 
-        'delete viaticos' => 'Borrar viáticos',
-        'update viaticos' => 'Actualizar viáticos',
-        'read viaticos' => 'Leer viáticos',
-        'create viaticos' => 'Crear viáticos',
+        'delete viatico' => 'Borrar viáticos',
+        'update viatico' => 'Actualizar viáticos',
+        'update2 viatico' => 'Actualizar 2 viáticos',
+        'update3 viatico' => 'Actualizar 3 viáticos',
+        'read viatico' => 'Leer viáticos',
+        'create viatico' => 'Crear viáticos',
 
     ],
 ];
