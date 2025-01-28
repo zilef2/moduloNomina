@@ -13,9 +13,9 @@ import pkg from 'lodash';
 import Pagination from '@/Components/Pagination.vue';
 import {ChevronUpDownIcon, PencilIcon, TrashIcon} from '@heroicons/vue/24/solid';
 // import { CursorArrowRippleIcon, ChevronUpDownIcon,QuestionMarkCircleIcon, EyeIcon, PencilIcon, TrashIcon, UserGroupIcon } from '@heroicons/vue/24/solid';
-import Create from '@/Pages/generic/Create.vue';
-import Edit from '@/Pages/generic/Edit.vue';
-import Delete from '@/Pages/generic/Delete.vue';
+import Create from '@/Pages/viatico/Create.vue';
+import Edit from '@/Pages/viatico/Edit.vue';
+import Delete from '@/Pages/viatico/Delete.vue';
 
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
@@ -43,7 +43,7 @@ const data = reactive({
         order: props.filters.order,
         perPage: props.perPage,
     },
-    generico: null,
+    viaticoo: null,
     selectedId: [],
     multipleSelect: false,
     createOpen: false,
@@ -61,7 +61,7 @@ const order = (field) => {
 
 watch(() => _.cloneDeep(data.params), debounce(() => {
     let params = pickBy(data.params)
-    router.get(route("generic.index"), params, {
+    router.get(route("viatico.index"), params, {
         replace: true,
         preserveState: true,
         preserveScroll: true,
@@ -72,13 +72,12 @@ const selectAll = (event) => {
     if (event.target.checked === false) {
         data.selectedId = []
     } else {
-        props.fromController?.data.forEach((generic) => {
-            data.selectedId.push(generic.id)
+        props.fromController?.data.forEach((viatico) => {
+            data.selectedId.push(viatico.id)
         })
     }
 }
 const select = () => data.multipleSelect = props.fromController?.data.length === data.selectedId.length;
-
 // <!--</editor-fold>-->
 
 
@@ -89,7 +88,14 @@ const select = () => data.multipleSelect = props.fromController?.data.length ===
 // text // number // dinero // date // datetime // foreign
 const titulos = [
     // { order: 'codigo', label: 'codigo', type: 'text' },
-    { order: 'nombre', label: 'nombre', type: 'text' },
+    { order: 'gasto', label: 'gasto', type: 'text' },
+    { order: 'saldo', label: 'saldo', type: 'number' },
+    { order: 'descripcion', label: 'descripcion', type: 'text' },
+    { order: 'legalizacion', label: 'legalizacion', type: 'text' },
+    
+    { order: 'fecha_legalizacion', label: 'fecha_legalizacion', type: 'date' },
+    { order: 'user_id', label: 'user_id', type: 'foreign' },
+    { order: 'centro_costo_id', label: 'centro_costo_id', type: 'foreign' },
   // { order: 'inventario', label: 'inventario', type: 'foreign',nameid:'nombre'},
 ];
 
@@ -105,20 +111,20 @@ const titulos = [
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">
                     <PrimaryButton class="rounded-none" @click="data.createOpen = true"
-                        v-if="can(['create generic'])">
+                        v-if="can(['create viatico'])">
                         {{ lang().button.new }}
                     </PrimaryButton>
 
-                    <Create v-if="can(['create generic'])" :numberPermissions="props.numberPermissions"
+                    <Create v-if="can(['create viatico'])" :numberPermissions="props.numberPermissions"
                         :titulos="titulos" :show="data.createOpen" @close="data.createOpen = false" :title="props.title"
                         :losSelect=props.losSelect />
 
-                    <Edit v-if="can(['update generic'])" :titulos="titulos"
+                    <Edit v-if="can(['update viatico'])" :titulos="titulos"
                         :numberPermissions="props.numberPermissions" :show="data.editOpen" @close="data.editOpen = false"
-                        :generica="data.generico" :title="props.title" :losSelect=props.losSelect />
+                        :viaticoa="data.viaticoo" :title="props.title" :losSelect=props.losSelect />
 
-                    <Delete v-if="can(['delete generic'])" :numberPermissions="props.numberPermissions"
-                        :show="data.deleteOpen" @close="data.deleteOpen = false" :generica="data.generico"
+                    <Delete v-if="can(['delete viatico'])" :numberPermissions="props.numberPermissions"
+                        :show="data.deleteOpen" @close="data.deleteOpen = false" :viaticoa="data.viaticoo"
                         :title="props.title" />
                 </div>
             </div>
@@ -127,7 +133,7 @@ const titulos = [
                     <div class="flex space-x-2">
                         <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet" />
                         <!-- <DangerButton @click="data.deleteBulkOpen = true"
-                            v-show="data.selectedId.length != 0 && can(['delete generic'])" class="px-3 py-1.5"
+                            v-show="data.selectedId.length != 0 && can(['delete viatico'])" class="px-3 py-1.5"
                             v-tooltip="lang().tooltip.delete_selected">
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton> -->
@@ -173,13 +179,13 @@ const titulos = [
                                 <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 w-12 px-2 sm:py-3">
                                     <div class="flex justify-center items-center">
                                         <div class="rounded-md overflow-hidden">
-                                            <InfoButton v-show="can(['update generic'])" type="button"
-                                                @click="(data.editOpen = true), (data.generico = claseFromController)"
+                                            <InfoButton v-show="can(['update viatico'])" type="button"
+                                                @click="(data.editOpen = true), (data.viaticoo = claseFromController)"
                                                 class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
                                                 <PencilIcon class="w-4 h-4" />
                                             </InfoButton>
-                                            <DangerButton v-show="can(['delete generic'])" type="button"
-                                                @click="(data.deleteOpen = true), (data.generico = claseFromController)"
+                                            <DangerButton v-show="can(['delete viatico'])" type="button"
+                                                @click="(data.deleteOpen = true), (data.viaticoo = claseFromController)"
                                                 class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.delete">
                                                 <TrashIcon class="w-4 h-4" />
                                             </DangerButton>
@@ -193,7 +199,7 @@ const titulos = [
                                     <span v-if="titulo['type'] === 'dinero'"> {{ number_format(claseFromController[titulo['order']], 0, true) }} </span>
                                     <span v-if="titulo['type'] === 'date'"> {{ formatDate(claseFromController[titulo['order']], false) }} </span>
                                     <span v-if="titulo['type'] === 'datetime'"> {{ formatDate(claseFromController[titulo['order']], true) }} </span>
-                                    <span v-if="titulo['type'] === 'foreign'"> {{ clasegenerica[titulo['order']][titulo['nameid']] }} </span>
+                                    <span v-if="titulo['type'] === 'foreign'"> {{ claseviaticoa[titulo['order']][titulo['nameid']] }} </span>
                                 </td>
 
                             </tr>

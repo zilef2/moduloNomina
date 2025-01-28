@@ -29,7 +29,7 @@ class pasoAuxiliar extends Command
         $directory = 'routes';
         $files = glob($directory . '/*.php');
         $resource = 'cotizacion';
-        $insertable = "Route::resource(\"/$resource\", \\App\\Http\\Controllers\\" . ucfirst($resource) . "Controller::class);\n\t//aquipues";
+        $insertable2 = "Route::resource(\"/$resource\", \\App\\Http\\Controllers\\" . ucfirst($resource) . "Controller::class);\n\t//aquipues";
 
         $pattern = '/\/\/aquipues/';
 
@@ -39,7 +39,7 @@ class pasoAuxiliar extends Command
             $contadorVerificador++;
 
             if (!str_contains($content, $pattern)) {
-                $content2 = preg_replace($pattern, $insertable, $content);
+                $content2 = preg_replace($pattern, $insertable2, $content);
 //                $content2 = preg_replace($pattern, "$0$insertable", $content);
                 file_put_contents($file, $content2);
                 if ($content == $content2)

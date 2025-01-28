@@ -20,13 +20,17 @@ class CopyUserPages extends Command
 
     protected function generateAttributes(): array
     {
+        //TODO: poner estos en index.vue con su respectivo tipo de dato: 
+        // text // number // dinero // date // datetime // foreign
+        //TODO: hacer otro array para las clavesForaneas 
+        
         return
             [
-                'cc' => 'biginteger',                 
-                'gasto' => 'biginteger',           
-                'descripcion' => 'text',         
-                'user_id' => 'biginteger',            
-                'legalizacion' => 'boolean',       
+                'cc' => 'biginteger',
+                'gasto' => 'biginteger',
+                'descripcion' => 'text',
+                'user_id' => 'biginteger',
+                'legalizacion' => 'boolean',
                 'fecha_legalizacion' => 'datetime',
             ];
 //            'descripcion' => 'text',
@@ -39,9 +43,10 @@ class CopyUserPages extends Command
     const string MSJ_EXITO = ' fue realizada con exito ';
     const string MSJ_FALLO = ' Fallo';
 
-    public function handle(): void
+    public function handle(): int
     {
         try {
+            //TODO: hay que validar primero
             $this->generando = self::getMessage('generando');
 
             $contadorMetodos = 0;
@@ -50,41 +55,32 @@ class CopyUserPages extends Command
             $modelName = $this->ask('¿Cuál es el nombre del modelo?');
             if (!$modelName || $modelName == '') {
                 $this->info('Sin modelo');
-                return;
+                return 0;
             }
 
-            $this->MetodologiaInicial($modelName, 'generic', '');
-            
+//            $this->MetodologiaInicial($modelName, 'generic', '');
+
+            //estos metodos para abajo tienen validacion
             if ($this->DoWebphp($modelName)) {
 
                 $this->info('DoWebphp' . self::MSJ_EXITO);
                 $contadorMetodos++;
             } else {
                 $this->error('DoWebphp ' . self::MSJ_FALLO);
-                return;
+                return 0;
             }
-            
-            //this
-            if ($this->DoAppLenguaje($modelName)) {
-                $submetodo_oAppLenguaje = 0;
-                $this->info('DoAppLenguaje' . self::MSJ_EXITO);
-                $contadorMetodos++;
 
-                foreach ($this->generateAttributes() as $index => $generateAttribute) {
-                    $this->DoAppLenguaje($generateAttribute);
-                    $submetodo['Lenguaje']++;
-                }
-            } else {
-                $this->error('DoAppLenguaje ' . self::MSJ_FALLO);
-                return;
-            }
+            
+            if ($this->L2_LenguajeInsert($modelName, $contadorMetodos, $submetodo) === 0) return 0;
+
+
             if ($this->DoSideBar($modelName)) {
 
                 $this->info('DoSideBar' . self::MSJ_EXITO);
                 $contadorMetodos++;
             } else {
                 $this->error('DoSideBar ' . self::MSJ_FALLO);
-                return;
+                return 0;
             }
             $this->DoFillable($modelName);
             $contadorMetodos++;
@@ -102,6 +98,8 @@ class CopyUserPages extends Command
                 " excepcion: " . $e->getMessage());
 
         }
+
+        return 1;
     }
 
 
@@ -135,7 +133,7 @@ class CopyUserPages extends Command
         return true;
     }
 
-    private function replaceWordInFiles($oldWord, $permiteRemplazo, $modelName, $depende): void
+    private function replaceWordInFiles($oldWord, $permiteRemplazo, $modelName, $depende): int
     {
         $folderMayus = ucfirst($modelName);
         $files = File::allFiles(base_path("resources/js/Pages/$modelName"));
@@ -165,9 +163,10 @@ class CopyUserPages extends Command
             );
             file_put_contents($controller, $content);
         }
+        return 1;
     }
 
-    protected function DoFillable($modelName): void
+    protected function DoFillable($modelName): int
     {
         $attributes = $this->generateAttributes();
 
@@ -181,7 +180,7 @@ class CopyUserPages extends Command
         // Verificar si el modelo existe
         if (!File::exists($modelPath)) {
             $this->error("El modelo $modelName no existe.");
-            return;
+            return 0;
         }
 
         // Leer el contenido del modelo
@@ -197,6 +196,7 @@ class CopyUserPages extends Command
         File::put($modelPath, $modelContent);
 
         $this->info("El fillable y SoftDeletes han sido añadidos al modelo $modelName.");
+        return 1;
     }
 
     private function DoAppLenguaje($resource): int
@@ -291,7 +291,7 @@ class CopyUserPages extends Command
         return $contadorVerificador;
     }
 
-    protected function updateMigration($modelName): void
+    protected function updateMigration($modelName): int
     {
         $atributos = $this->generateAttributes();
         $migrationFile = collect(glob(database_path('migrations/*.php')))
@@ -299,7 +299,7 @@ class CopyUserPages extends Command
 
         if (!$migrationFile) {
             $this->error("No se encontró la migración para $modelName");
-            return;
+            return 0;
         }
 
         $columns = collect($atributos)->map(function ($type, $name) {
@@ -311,15 +311,16 @@ class CopyUserPages extends Command
         file_put_contents($migrationFile, $content);
 
         $this->info("Migración actualizada para $modelName");
+        return 1;
     }
 
     /**
      * @param mixed $modelName
      * @param string $plantillaActual
      * @param mixed $depende
-     * @return void
+     * @return int
      */
-    public function MetodologiaInicial(mixed $modelName, string $plantillaActual, mixed $depende): void
+    public function MetodologiaInicial(mixed $modelName, string $plantillaActual, mixed $depende): int
     {
         $this->warn("Empezando make:model");
         Artisan::call('make:model', ['name' => $modelName, '--all' => true]);
@@ -350,6 +351,27 @@ class CopyUserPages extends Command
                     'controller' => $RealizoControllerConExito
                 ]
                 , $modelName, $depende);
+        return 1;
+    }
+
+    private function L2_LenguajeInsert($modelName, &$contadorMetodos, &$submetodo): int
+    {
+        if ($this->DoAppLenguaje($modelName)) {
+            $submetodo['Lenguaje'] = 0;
+            $this->info('DoAppLenguaje' . self::MSJ_EXITO);
+            $contadorMetodos++;
+
+            foreach ($this->generateAttributes() as $key => $generateAttribute) {
+                $this->DoAppLenguaje($key);
+                $submetodo['Lenguaje']++;
+            }
+            return 1;
+        } else {
+            $this->error('DoAppLenguaje ' . self::MSJ_FALLO);
+            $this->error('$contadorMetodos = ' . $contadorMetodos);
+            $this->error('$submetodo = ' . $submetodo['Lenguaje']);
+            return 0;
+        }
     }
 
 }

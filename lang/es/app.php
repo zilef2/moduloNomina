@@ -2,7 +2,12 @@
 
 return [
     'label' => [
-        //aquipues
+		//aquipues
+        
+        'viatico' => 'viático',
+		'gasto' => 'Gasto',
+        'saldo' => 'saldo',
+		'legalizacion' => 'Legalizacion',
         'deuda' => 'Deuda',
         
         'cotizacion' => 'cotizacion',
@@ -11,9 +16,6 @@ return [
         'precio_cot' => 'Precio',
         'aprobado_cot' => 'Aprobado',
         'fecha_aprobacion_cot' => 'Fecha aprobacion',
-        
-        
-        'viatico' => 'viático',
 
 
         //parametros
@@ -157,7 +159,7 @@ return [
     'side' => [
         'user' => 'Persona',
         'cuenta' => 'Cuenta',
-        'viatico' => 'viático',
+        'viatico' => 'Viático',
         'transacciones' => 'Transacciones',
         'transaccion' => 'Transaccion',
         'Comprobante' => 'Comprobante',
@@ -174,7 +176,7 @@ return [
         'cotizacion' => 'Cotizacion',
         'role' => 'Rol',
         'ubicacion' => 'Rol',
-        //aquipues
+		//aquipues
     ],
     'button' => [
         'Recontratar' => 'Recontratar',
@@ -233,6 +235,7 @@ return [
         'observaciones' => 'observaciones',
     ],
     'tooltip' => [
+        'saldo' => 'saldo',
         'Reporte' => 'Reporte',
         'see' => 'Ver',
         'seeReport' => 'Ver reporte',

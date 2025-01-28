@@ -6,9 +6,10 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import {useForm} from '@inertiajs/vue3';
-import "vue-select/dist/vue-select.css";
 import {onMounted, reactive, watchEffect} from 'vue';
 import '@vuepic/vue-datepicker/dist/main.css'
+import vSelect from "vue-select";
+import "vue-select/dist/vue-select.css";
 
 // --------------------------- ** -------------------------
 
@@ -29,13 +30,19 @@ const data = reactive({
 })
 
 //very usefull
-const justNames = props.titulos.map(names => names['order'] )
+let justNames = props.titulos.map(names =>{
+    if(names['order'] !== 'noquiero' 
+        // &&
+        // names['order'] !== 'noquiero1'
+        )
+        return names['order']
+})
 const form = useForm({ ...Object.fromEntries(justNames.map(field => [field, ''])) });
 onMounted(() => {
     if(props.numberPermissions > 9){
 
         const valueRAn = Math.floor(Math.random() * (9) + 1)
-        form.nombre = 'nombre de prueba inspeccion '+ (valueRAn);
+        form.nombre = 'nombre genenerico '+ (valueRAn);
         form.codigo = (valueRAn);
         // form.hora_inicial = '0'+valueRAn+':00'//temp
         // form.fecha = '2023-06-01'
@@ -44,17 +51,20 @@ onMounted(() => {
 });
 
 const printForm =[];
-props.titulos.forEach(names =>
+props.titulos.forEach(names =>{
+ if(names['order'] !== 'noquiero'
+     // && names['order'] !== 'noquiero1'
+ )   
     printForm.push ({
         idd: names['order'], label: names['label'], type: names['type']
-        //, value: form[names['order']]
     })
-);
+});
 
 function ValidarVacios(){
     let result = true
     printForm.forEach(element => {
         if(!form[element.idd]){
+            console.log("=>(Create.vue:70) falta esto papa element.idd", element.idd);
             result = false
             return result
         }
@@ -65,7 +75,7 @@ function ValidarVacios(){
 const create = () => {
     if(ValidarVacios()){
         // console.log("🧈 debu pieza_id:", form.pieza_id);
-        form.post(route('AreaInspeccion.store'), {
+        form.post(route('generico.store'), {
             preserveScroll: true,
             onSuccess: () => {
                 emit("close")
@@ -100,13 +110,13 @@ const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div v-for="(atributosform, indice) in printForm" :key="indice">
 
-                        <!-- si es foreign -->
-                        <div v-if="atributosform.type === 'id'" id="SelectVue">
+                        <div v-if="atributosform.type === 'foreign'" id="SelectVue" class="">
                             <label name="labelSelectVue"> {{ atributosform.label }} </label>
-                            <v-select :options="data[atributosform.idd]" label="title"
-                                v-model="form[atributosform.idd]"></v-select>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
-
+                            <v-select :options="props.losSelect[0]"
+                                      v-model="form[atributosform.idd]"
+                                      :reduce="element => element.value" label="name"
+                            ></v-select>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
                         </div>
 
 

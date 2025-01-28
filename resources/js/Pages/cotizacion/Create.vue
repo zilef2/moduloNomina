@@ -8,7 +8,6 @@ import TextInput from '@/Components/TextInput.vue';
 import {useForm} from '@inertiajs/vue3';
 import {onMounted, reactive, watchEffect} from 'vue';
 import '@vuepic/vue-datepicker/dist/main.css'
-import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 
 // --------------------------- ** -------------------------
@@ -18,7 +17,7 @@ const props = defineProps({
     title: String,
     roles: Object,
     titulos: Object, //parametros de la clase principal
-    losSelect:Object,
+    losSelect: Object,
     numberPermissions: Number,
 })
 const emit = defineEmits(["close"]);
@@ -29,77 +28,72 @@ const data = reactive({
     },
 })
 
-let justNames = props.titulos.map(names =>{
-    if(names['order'] !== 'centro_costo_id' &&
-       names['order'] !== 'fecha_aprobacion_cot')
+let justNames = props.titulos.map(names => {
+    if (names['order'] !== 'centro_costo_id' &&
+        names['order'] !== 'fecha_aprobacion_cot')
         return names['order']
 })
 justNames = justNames.filter(item => item !== undefined);
-const form = useForm({ ...Object.fromEntries(justNames.map(field => [field, ''])) });
+const form = useForm({...Object.fromEntries(justNames.map(field => [field, '']))});
 
 onMounted(() => {
-    if(props.numberPermissions > 9){
+    if (props.numberPermissions > 9) {
 
         const valueRAn = Math.floor(Math.random() * (900) + 1)
         form.numero_cot = (valueRAn);
         form.descripcion_cot = "holi" + (valueRAn);
-        form.precio_cot = (valueRAn);
+        form.precio_cot = (valueRAn) * 1000;
         // form.hora_inicial = '0'+valueRAn+':00'//temp
         // form.fecha = '2023-06-01'
 
     }
 });
 
-const printForm =[];
-props.titulos.forEach(names =>{
- if(names['order'] !== 'centro_costo_id' &&
-       names['order'] !== 'fecha_aprobacion_cot')   
-    printForm.push ({
-        idd: names['order'], label: names['label'], type: names['type']
-    })
+const printForm = [];
+props.titulos.forEach(names => {
+    if (names['order'] !== 'centro_costo_id' &&
+        names['order'] !== 'fecha_aprobacion_cot')
+        printForm.push({
+            idd: names['order'], label: names['label'], type: names['type']
+        })
 });
 
-function ValidarVacios(){
+function ValidarVacios() {
     let result = true
     printForm.forEach(element => {
-        if(!form[element.idd]){
+        if (!form[element.idd]) {
             result = false
             return result
         }
     });
     return result
 }
+
 function borrarNumber(valueid) {
-  form[valueid] = '';
+    form[valueid] = '';
 }
 
 function formatNumberWithZeros(valueid) {
-  let value = form[valueid]
-  const stringValue = String(value || '');
+    let value = form[valueid]
+    const stringValue = String(value || '');
 
-  if (!stringValue) return '0.000';
-
-  // Eliminar caracteres no numéricos excepto el punto
-  const numericValue = stringValue.replace(/[^0-9.]/g, '');
-
-  // Dividir en parte entera y decimal
-  let [integer, decimal] = numericValue.split('.');
-
-  // Asegurar que la parte entera tenga un valor
-  integer = integer || '0';
-
-  // Limitar los decimales a 3 dígitos o agregar ceros
-  decimal = (decimal || '').padEnd(3, '0').slice(0, 3);
-
-  // Formatear la parte entera con puntos como separadores
-  const formattedInteger = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-
-  // Combinar la parte entera y decimal
-  form[valueid] = `${formattedInteger}.${decimal}`;
+    if (!stringValue) return '0.000';
+    // Eliminar caracteres no numéricos excepto el punto
+    const numericValue = stringValue.replace(/[^0-9.]/g, '');
+    // Dividir en parte entera y decimal
+    let [integer, decimal] = numericValue.split('.');
+    // Asegurar que la parte entera tenga un valor
+    integer = integer || '0';
+    // Limitar los decimales a 3 dígitos o agregar ceros
+    decimal = (decimal || '').padEnd(3, '0').slice(0, 3);
+    // Formatear la parte entera con puntos como separadores
+    const formattedInteger = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    // Combinar la parte entera y decimal
+    form[valueid] = `${formattedInteger}.${decimal}`;
 }
 
 const create = () => {
-    if(ValidarVacios()){
+    if (ValidarVacios()) {
         // console.log("🧈 debu pieza_id:", form.pieza_id);
         form.post(route('cotizacion.store'), {
             preserveScroll: true,
@@ -110,7 +104,7 @@ const create = () => {
             onError: () => null,
             onFinish: () => null,
         })
-    }else{
+    } else {
         console.log('Hay campos vacios')
     }
 }
@@ -120,7 +114,7 @@ watchEffect(() => {
 })
 
 //very usefull
-const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }];
+const sexos = [{label: 'Masculino', value: 0}, {label: 'Femenino', value: 1}];
 </script>
 
 <template>
@@ -132,47 +126,47 @@ const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
                     <div v-for="(atributosform, indice) in printForm" :key="indice"
-                        :class="atributosform.type === 'id' ? 'col-span-2' : 'bg-blue-50/50'"
+                         :class="atributosform.type === 'id' ? 'col-span-2' : 'bg-blue-50/50'"
                          class="rounded-xl"
 
                     >
-                        <!-- si es foreign -->
-                        <div v-if="atributosform.type === 'id'" id="SelectVue" class="">
+                        <div v-if="atributosform.type === 'foreign'" id="SelectVue" class="">
                             <label name="labelSelectVue"> {{ atributosform.label }} </label>
-                            <v-select :options="props.losSelect"
-                                v-model="form[atributosform.idd]" 
-                                      :reduce="element => element.value" label="label"
+                            <v-select :options="props.losSelect[0]"
+                                      v-model="form[atributosform.idd]"
+                                      :reduce="element => element.value" label="name"
                             ></v-select>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
                         </div>
 
 
                         <!-- tiempo -->
                         <div v-else-if="atributosform.type === 'time'" id="SelectVue" class="">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
                             <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                :error="form.errors[atributosform.idd]" step="3600" />
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+                                       v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
+                                       :error="form.errors[atributosform.idd]" step="3600"/>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
                         </div>
                         <!-- number -->
                         <div v-else-if="atributosform.type === 'number'" id="SelectVue" class="">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
                             <TextInput :id="atributosform.idd" type="text" class="mt-1 w-full"
-                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                :error="form.errors[atributosform.idd]" @change="formatNumberWithZeros(atributosform.idd)"
-                                       @focus="borrarNumber(atributosform.idd)" />
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+                                       v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
+                                       :error="form.errors[atributosform.idd]"
+                                       @change="formatNumberWithZeros(atributosform.idd)"
+                                       @focus="borrarNumber(atributosform.idd)"/>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
                         </div>
 
 
                         <!-- normal -->
                         <div v-else class="">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
                             <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                :error="form.errors[atributosform.idd]" />
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
+                                       v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
+                                       :error="form.errors[atributosform.idd]"/>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
                         </div>
                     </div>
                 </div>
@@ -180,7 +174,7 @@ const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
                     </SecondaryButton>
                     <PrimaryButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
-                        @click="create">
+                                   @click="create">
                         {{ lang().button.add }} {{ form.processing ? '...' : '' }}
                     </PrimaryButton>
                 </div>

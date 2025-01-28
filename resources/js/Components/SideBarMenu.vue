@@ -24,7 +24,8 @@ const ButtonsAdministrativo = [ //SAME AS WEB.PHP
     'user',
     'role',
     'cotizacion',
-    //aquipuesSide
+    'viatico',
+	//aquipuesSide
 ];
 const ButtonsInformes = [ //SAME AS WEB.PHP
     'deuda',
@@ -114,7 +115,7 @@ const ButtonsInformes = [ //SAME AS WEB.PHP
             </div>
         </ul>
         <button @click="toggleContent3" v-show="can(['isAdmin', 'isadministrativo'])" class="mt-1 text-blue-400">
-            {{ (data.showContent3 ? '' : 'Ver ') + 'Administrativo' }}
+            {{ (data.showContent3 ? '' : 'Ver ') + 'Adminitrador' }}
         </button>
         <ul v-if="data.showContent3" v-show="can((['isAdmin', 'isadministrativo']))" class="space-y-2 my-1">
             <div class="" v-for="value in ButtonsConfig">
@@ -129,13 +130,12 @@ const ButtonsInformes = [ //SAME AS WEB.PHP
             </div>
         </ul>
         <div class="mt-1">
-            <button @click="toggleContent4" v-show="can(['isAdmin','isadministrativo'])" class=" text-blue-400">
+            <button @click="toggleContent4" v-show="can(['isAdmin'])" class=" text-blue-400">
                 {{ (data.showContent4 ? '' : 'Ver ') + 'Informes' }}
             </button>
-            <ul v-if="data.showContent4" v-show="can((['isAdmin','isadministrativo']))" class="space-y-2 my-1">
+            <ul v-if="data.showContent4" v-show="can((['isAdmin']))" class="space-y-2 my-1">
                 <div class="" v-for="value in ButtonsInformes">
-                    <li v-show="can(['isAdmin','isadministrativo'])"
-                        class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
+                    <li class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
                         :class="{ 'bg-red-900 dark:bg-red-900': route().current(value+'.index') }">
                         <Link :href="route(value+'.index')" class="flex items-center py-2 px-4">
                             <PresentationChartLineIcon class="w-6 h-5"/>
