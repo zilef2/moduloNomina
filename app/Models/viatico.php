@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 class viatico extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected $appends = ['userino','centrou'];
     protected $fillable = [
         'gasto',
@@ -22,6 +23,7 @@ class viatico extends Model
         'centro_costo_id',
     ];
 
+    
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

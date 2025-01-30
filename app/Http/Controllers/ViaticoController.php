@@ -126,7 +126,7 @@ class ViaticoController extends Controller
         $permissions = Myhelp::EscribirEnLog($this, ' Begin STORE:viaticos');
         DB::beginTransaction();
 //        $no_nada = $request->no_nada['id'];
-        $request->merge(['user_id' => $request->user_id['id']]);
+        $request->merge(['user_id' => Myhelp::AuthUid()]);
         $request->merge(['centro_costo_id' => $request->centro_costo_id['id']]);
         $request->merge(['fecha_legalizacion' => Carbon::now()]);
         $viatico = viatico::create($request->all());

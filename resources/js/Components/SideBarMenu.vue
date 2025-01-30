@@ -25,7 +25,7 @@ const ButtonsAdministrativo = [ //SAME AS WEB.PHP
     'role',
     'cotizacion',
     'viatico',
-	'consignarViatico',
+	// 'consignarViatico',
 	//aquipuesSide
 ];
 const ButtonsInformes = [ //SAME AS WEB.PHP
@@ -72,7 +72,7 @@ const ButtonsInformes = [ //SAME AS WEB.PHP
             <!--                </Link>-->
             <!--            </li>-->
 
-            <li v-show="can(['read role', 'read permission'])" class="py-2">
+            <li v-show="can(['isSuper'])" class="py-2">
                 <p>{{ lang().label.access }}</p>
             </li>
             <li v-show="can(['isSuper'])"
@@ -116,7 +116,7 @@ const ButtonsInformes = [ //SAME AS WEB.PHP
             </div>
         </ul>
         <button @click="toggleContent3" v-show="can(['isAdmin', 'isadministrativo'])" class="mt-1 text-blue-400">
-            {{ (data.showContent3 ? '' : 'Ver ') + 'Adminitrador' }}
+            {{ (data.showContent3 ? '' : 'Ver ') + 'Administrador' }}
         </button>
         <ul v-if="data.showContent3" v-show="can((['isAdmin', 'isadministrativo']))" class="space-y-2 my-1">
             <div class="" v-for="value in ButtonsConfig">

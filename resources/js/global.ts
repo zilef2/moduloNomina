@@ -354,8 +354,7 @@ export function CalcularAvg(TheArray, NameValue = '', isTime = false) {
     return result;
 }
 
-export function number_format(amount, decimals = 0, isPesos = false) {
-    console.log("=>(global.ts:358) amount", amount);
+export function number_format(amount:any, decimals:number = 0, isPesos = false) {
     if (typeof amount !== 'string' && typeof amount !== 'number') return '0';
 
     // Convertir a string y asegurarse de que el signo negativo no se elimine

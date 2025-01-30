@@ -25,13 +25,15 @@ class CopyUserPages extends Command
         //TODO: hacer otro array para las clavesForaneas 
 
         return [
-            'valor_consig' => 'biginteger',
-            'fecha_consig' => 'date',
+            'ninini' => 'date',
         ];
+        /*
+//            'valor_consig' => 'biginteger',
 //            'texto' => 'text',
 //            'fecha_legalizacion' => 'datetime',
 //            'descripcion' => 'text',
 //            'precio' => 'decimal',
+        */
     }
 
     protected function generateForeign(): array
@@ -66,6 +68,7 @@ class CopyUserPages extends Command
             $this->MetodologiaInicial($modelName, 'generic', '');
             $this->Paso2($modelName, $submetodo);
 
+        
             $this->info(Artisan::call('optimize'));
             $this->info(Artisan::call('optimize:clear'));
             $this->info('FINISH');
@@ -177,7 +180,7 @@ class CopyUserPages extends Command
 
     protected function DoFillable($modelName): int
     {
-        $attributes = array_merge($this->generateAttributes(),$this->generateForeign());
+        $attributes = array_merge($this->generateAttributes(), $this->generateForeign());
 
         // Generar el fillable
         $fillable = array_keys($attributes);
@@ -198,15 +201,31 @@ class CopyUserPages extends Command
         // Añadir el fillable y SoftDeletes
         $modelContent = preg_replace('/protected \$fillable = \[.*?\];/s', "protected \$fillable = ['$fillableString'];", $modelContent);
         if (!str_contains($modelContent, 'use SoftDeletes;')) {
-            $modelContent = preg_replace('/class ' . $modelName . ' extends/', "use Illuminate\Database\Eloquent\SoftDeletes;\n\n    class $modelName extends", $modelContent);
+            $modelContent = preg_replace('/class ' . $modelName . ' extends/', "use Illuminate\\Database\\Eloquent\\SoftDeletes;\n\n    class $modelName extends", $modelContent);
+        }
+
+        // Generar relaciones belongsTo
+        $foreignKeys = $this->generateForeign();
+        foreach ($foreignKeys as $key => $value) {
+            $functionName = lcfirst(str_replace('_id', '', $key)); // Nombre de la función
+            $relatedModel = ucfirst(str_replace('_id', '', $key)); // Nombre del modelo relacionado
+
+            // Verificar si la relación ya existe
+            if (!str_contains($modelContent, "function $functionName(")) {
+                $relationMethod = "\n    public function $functionName(): BelongsTo\n    {\n        return \$this->belongsTo($relatedModel::class);\n    }\n";
+
+                // Insertar la relación antes del final de la clase
+                $modelContent = preg_replace('/}\s*$/', "$relationMethod\n}", $modelContent);
+            }
         }
 
         // Guardar el contenido modificado
         File::put($modelPath, $modelContent);
 
-        $this->info("El fillable y SoftDeletes han sido añadidos al modelo $modelName.");
+        $this->info("El fillable, SoftDeletes y relaciones han sido añadidos al modelo $modelName.");
         return 1;
     }
+
 
     private function DoAppLenguaje($resource, $mochar = 'no'): int
     {

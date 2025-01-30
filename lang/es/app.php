@@ -5,26 +5,23 @@ return [
 		'consignarViatico' => 'consignarViatico',
 		'cc' => 'cc',
 		'gasto' => 'gasto',
-		'descripcion' => 'descripcion',
-		'user_id' => 'user_id',
-		'legalizacion' => 'legalizacion',
-		'fecha_legalizacion' => 'fecha_legalizacion',
+        
+		'fecha_legalizacion' => 'Fecha legalización',
+		'consignarviatico' => 'Consignarviatico',
 		//aquipues
         
         'viatico' => 'viático',
 		'user_id' => 'Persona',
-		'gasto' => 'Gasto',
         'saldo' => 'saldo',
-		'legalizacion' => 'Legalizacion',
-		'fecha_legalizacion' => 'Fecha legalizacion',
+		'legalizacion' => 'Legalización',
         'deuda' => 'Deuda',
         
-        'cotizacion' => 'cotizacion',
+        'cotizacion' => 'Cotización',
         'numero_cot' => 'Número',
         'descripcion_cot' => 'Descripción',
         'precio_cot' => 'Precio',
         'aprobado_cot' => 'Aprobado',
-        'fecha_aprobacion_cot' => 'Fecha aprobacion',
+        'fecha_aprobacion_cot' => 'Fecha aprobación',
 
 
         //parametros
@@ -186,13 +183,14 @@ return [
         'cotizacion' => 'Cotizacion',
         'role' => 'Rol',
         'ubicacion' => 'Rol',
-		'consignarViatico' => 'consignarViatico',
-		'cc' => 'cc',
-		'gasto' => 'gasto',
-		'descripcion' => 'descripcion',
-		'user_id' => 'user_id',
-		'legalizacion' => 'legalizacion',
-		'fecha_legalizacion' => 'fecha_legalizacion',
+		'consignarViatico' => 'Consignar',
+		'cc' => 'Centro',
+		'gasto' => 'Gasto',
+		'descripcion' => 'Descripcion',
+		'user_id' => 'Persona',
+		'legalizacion' => 'LegalizaciÓn',
+		'fecha_legalizacion' => 'Fecha legalizacion',
+		'consignarviatico' => 'Consignar',
 		//aquipues
     ],
     'button' => [

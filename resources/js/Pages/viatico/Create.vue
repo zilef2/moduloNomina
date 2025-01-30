@@ -25,10 +25,26 @@ const emit = defineEmits(["close"]);
 
 //very usefull
 let justNames = props.titulos.map((names) => {
-    if (names['order'] !== 'descripcion'
-        // && names['order'] !== 'fecha_aprobacion_cot'
+    if (names['order'] !== 'legalizacion'
+        && names['order'] !== 'saldo'
+        && names['order'] !== 'user_id'
+        && names['order'] !== 'fecha_legalizacion'
     )
         return names["order"];
+});
+const printForm = [];
+props.titulos.forEach((names) => {
+    if (names['order'] !== 'descripcion'
+        && names['order'] !== 'legalizacion'
+        && names['order'] !== 'saldo'
+        && names['order'] !== 'user_id'
+        && names['order'] !== 'fecha_legalizacion'
+    )
+        printForm.push({
+            idd: names["order"],
+            label: names["label"],
+            type: names["type"],
+        });
 });
 
 const form = useForm({
@@ -46,17 +62,6 @@ onMounted(() => {
     }
 });
 
-const printForm = [];
-props.titulos.forEach((names) => {
-    if (names['order'] !== 'descripcion'
-        // && names['order'] !== 'centro_costo_id'
-    )
-        printForm.push({
-            idd: names["order"],
-            label: names["label"],
-            type: names["type"],
-        });
-});
 
 function ValidarVacios() {
     let result = true;
