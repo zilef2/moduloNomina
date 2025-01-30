@@ -430,6 +430,7 @@ class ReportesController extends Controller
                 return back()->with('error', $mensajeError);
             }
 
+            
             $Reportes = new Reporte;
             $Reportes->fecha_ini = $fecha_ini;
             $Reportes->fecha_fin = $fecha_fin;
@@ -696,6 +697,7 @@ class ReportesController extends Controller
         $fecha_ini2 = Carbon::parse($fecha_ini)->addMinute()->format('Y-m-d H:i:s');
         $fecha_fin2 = Carbon::parse($fecha_fin)->addMinutes(-1)->format('Y-m-d H:i:s');
 
+            
         $traslapa = Reporte::where('user_id', $thisUserId)
             ->where(function ($query) use ($fecha_ini, $fecha_ini2, $fecha_fin, $fecha_fin2) {
                 $query->whereBetween('fecha_ini', [$fecha_ini, $fecha_fin2])

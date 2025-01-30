@@ -338,10 +338,10 @@ const handleCheckboxChange = (values) => {
                                    placeholder="No diurnas"/>
                         
                         <!-- ELFILTRO = numero del mes-->
-                        <TextInput v-model="data.params.searchh1" v-show="props.numberPermissions > 10"
+                        <TextInput v-model="data.params.searchh1" v-show="props.numberPermissions > 9"
                                    type="number" min="0" max="31" class="hidden xl:block w-full rounded-lg"
                                    placeholder="dia ini"/>
-                        <TextInput v-model="data.params.searchh2" v-show="props.numberPermissions > 10"
+                        <TextInput v-model="data.params.searchh2" v-show="props.numberPermissions > 9"
                                    type="number" min="0" max="31" class="hidden xl:block w-full rounded-lg"
                                    placeholder="dia fin"/>
                         <TextInput v-model="data.params.search" v-show="props.numberPermissions > 1"

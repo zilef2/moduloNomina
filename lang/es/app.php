@@ -2,12 +2,21 @@
 
 return [
     'label' => [
+		'consignarViatico' => 'consignarViatico',
+		'cc' => 'cc',
+		'gasto' => 'gasto',
+		'descripcion' => 'descripcion',
+		'user_id' => 'user_id',
+		'legalizacion' => 'legalizacion',
+		'fecha_legalizacion' => 'fecha_legalizacion',
 		//aquipues
         
         'viatico' => 'viático',
+		'user_id' => 'Persona',
 		'gasto' => 'Gasto',
         'saldo' => 'saldo',
 		'legalizacion' => 'Legalizacion',
+		'fecha_legalizacion' => 'Fecha legalizacion',
         'deuda' => 'Deuda',
         
         'cotizacion' => 'cotizacion',
@@ -132,6 +141,7 @@ return [
         'created_successfully' => '<b>:name</b> creado satisfactoriamente.',
         'created_error' => 'Error creando :name.',
         'updated_successfully' => '<b>:name</b> actualizado satisfactoriamente.',
+        'updated_successfully2' => 'Actualizado satisfactoriamente.',
         'updated_error' => 'Error actualizando :name.',
         'deleted_successfully' => '<b>:name</b> borrado satisfactoriamente.',
         'recontratado_successfully' => '<b>:name</b> recontratado.',
@@ -176,6 +186,13 @@ return [
         'cotizacion' => 'Cotizacion',
         'role' => 'Rol',
         'ubicacion' => 'Rol',
+		'consignarViatico' => 'consignarViatico',
+		'cc' => 'cc',
+		'gasto' => 'gasto',
+		'descripcion' => 'descripcion',
+		'user_id' => 'user_id',
+		'legalizacion' => 'legalizacion',
+		'fecha_legalizacion' => 'fecha_legalizacion',
 		//aquipues
     ],
     'button' => [

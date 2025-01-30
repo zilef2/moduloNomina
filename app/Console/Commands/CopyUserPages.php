@@ -23,22 +23,27 @@ class CopyUserPages extends Command
         //TODO: poner estos en index.vue con su respectivo tipo de dato: 
         // text // number // dinero // date // datetime // foreign
         //TODO: hacer otro array para las clavesForaneas 
-        
-        return
-            [
-                'cc' => 'biginteger',
-                'gasto' => 'biginteger',
-                'descripcion' => 'text',
-                'user_id' => 'biginteger',
-                'legalizacion' => 'boolean',
-                'fecha_legalizacion' => 'datetime',
-            ];
+
+        return [
+            'valor_consig' => 'biginteger',
+            'fecha_consig' => 'date',
+        ];
+//            'texto' => 'text',
+//            'fecha_legalizacion' => 'datetime',
 //            'descripcion' => 'text',
 //            'precio' => 'decimal',
     }
 
+    protected function generateForeign(): array
+    {
+        return [
+            'viatico_id' => 'viatico_id',
+        ];
+    }
+
     protected $signature = 'copy:u';
     protected $description = 'Copia de la entidad generica';
+    protected int $contadorMetodos;
     public string $generando;
     const string MSJ_EXITO = ' fue realizada con exito ';
     const string MSJ_FALLO = ' Fallo';
@@ -49,7 +54,7 @@ class CopyUserPages extends Command
             //TODO: hay que validar primero
             $this->generando = self::getMessage('generando');
 
-            $contadorMetodos = 0;
+            $this->contadorMetodos = 0;
             $submetodo['Lenguaje'] = 0;
 
             $modelName = $this->ask('¿Cuál es el nombre del modelo?');
@@ -58,42 +63,15 @@ class CopyUserPages extends Command
                 return 0;
             }
 
-//            $this->MetodologiaInicial($modelName, 'generic', '');
-
-            //estos metodos para abajo tienen validacion
-            if ($this->DoWebphp($modelName)) {
-
-                $this->info('DoWebphp' . self::MSJ_EXITO);
-                $contadorMetodos++;
-            } else {
-                $this->error('DoWebphp ' . self::MSJ_FALLO);
-                return 0;
-            }
-
-            
-            if ($this->L2_LenguajeInsert($modelName, $contadorMetodos, $submetodo) === 0) return 0;
-
-
-            if ($this->DoSideBar($modelName)) {
-
-                $this->info('DoSideBar' . self::MSJ_EXITO);
-                $contadorMetodos++;
-            } else {
-                $this->error('DoSideBar ' . self::MSJ_FALLO);
-                return 0;
-            }
-            $this->DoFillable($modelName);
-            $contadorMetodos++;
-            $this->updateMigration($modelName);
-            $contadorMetodos++;
-
+            $this->MetodologiaInicial($modelName, 'generic', '');
+            $this->Paso2($modelName, $submetodo);
 
             $this->info(Artisan::call('optimize'));
             $this->info(Artisan::call('optimize:clear'));
             $this->info('FINISH');
         } catch (Exception $e) {
             $this->error(
-                "FALLO CONTADOR: " . $contadorMetodos .
+                "FALLO CONTADOR: " . $this->contadorMetodos .
                 "FALLO Lenguaje: " . $submetodo['Lenguaje'] .
                 " excepcion: " . $e->getMessage());
 
@@ -102,6 +80,37 @@ class CopyUserPages extends Command
         return 1;
     }
 
+
+    private function Paso2($modelName, &$submetodo): int
+    {
+        //estos metodos para abajo tienen validacion
+        if ($this->DoWebphp($modelName)) {
+
+            $this->info('DoWebphp' . self::MSJ_EXITO);
+            $this->contadorMetodos++;
+        } else {
+            $this->error('DoWebphp ' . self::MSJ_FALLO);
+            return 0;
+        }
+
+
+        if ($this->L2_LenguajeInsert($modelName, $submetodo) === 0) return 0;
+
+
+        if ($this->DoSideBar($modelName)) {
+
+            $this->info('DoSideBar' . self::MSJ_EXITO);
+            $this->contadorMetodos++;
+        } else {
+            $this->error('DoSideBar ' . self::MSJ_FALLO);
+            return 0;
+        }
+        $this->DoFillable($modelName);
+        $this->contadorMetodos++;
+        $this->updateMigration($modelName);
+        $this->contadorMetodos++;
+        return 1;
+    }
 
     private function MakeControllerPages($plantillaActual, $modelName): bool
     {
@@ -168,7 +177,7 @@ class CopyUserPages extends Command
 
     protected function DoFillable($modelName): int
     {
-        $attributes = $this->generateAttributes();
+        $attributes = array_merge($this->generateAttributes(),$this->generateForeign());
 
         // Generar el fillable
         $fillable = array_keys($attributes);
@@ -199,12 +208,17 @@ class CopyUserPages extends Command
         return 1;
     }
 
-    private function DoAppLenguaje($resource): int
+    private function DoAppLenguaje($resource, $mochar = 'no'): int
     {
         $directory = 'lang/es/app.php';
         $files = glob($directory);
 
-        $insertable = "'$resource' => '$resource',\n\t\t//aquipues";
+        if ($mochar == 'mochar_id') {
+            $resource_Sin_Id = substr($resource, 0, -3);
+            $insertable = "'$resource' => '$resource_Sin_Id',\n\t\t//aquipues";
+        } else {
+            $insertable = "'$resource' => '$resource',\n\t\t//aquipues";
+        }
         $pattern = '/\/\/aquipues/';
         $contadorVerificador = 0;
         foreach ($files as $file) {
@@ -354,21 +368,26 @@ class CopyUserPages extends Command
         return 1;
     }
 
-    private function L2_LenguajeInsert($modelName, &$contadorMetodos, &$submetodo): int
+    public function L2_LenguajeInsert($modelName, &$submetodo): int
     {
         if ($this->DoAppLenguaje($modelName)) {
             $submetodo['Lenguaje'] = 0;
             $this->info('DoAppLenguaje' . self::MSJ_EXITO);
-            $contadorMetodos++;
+            $this->contadorMetodos++;
 
             foreach ($this->generateAttributes() as $key => $generateAttribute) {
                 $this->DoAppLenguaje($key);
                 $submetodo['Lenguaje']++;
             }
+            foreach ($this->generateForeign() as $generateAttribute) {
+                $this->DoAppLenguaje($generateAttribute, 'mochar_id');
+                $submetodo['Lenguaje']++;
+            }
+
             return 1;
         } else {
             $this->error('DoAppLenguaje ' . self::MSJ_FALLO);
-            $this->error('$contadorMetodos = ' . $contadorMetodos);
+            $this->error('$this->contadorMetodos = ' . $this->contadorMetodos);
             $this->error('$submetodo = ' . $submetodo['Lenguaje']);
             return 0;
         }

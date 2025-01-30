@@ -19,7 +19,7 @@ return new class extends Migration
             $table->boolean('legalizacion')->nullable();
             $table->datetime('fecha_legalizacion')->nullable();
             
-            $table->unsignedBigInteger('centro_costo_id');
+            $table->unsignedBigInteger('centro_costo_id')->nullable();
             $table->foreign('centro_costo_id')
                 ->references('id')
                 ->on('centro_costos')

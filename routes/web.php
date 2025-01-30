@@ -97,6 +97,7 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::put('/cotiza/{id}', [CotizacionController::class, 'update2'])->name('cotizacion.update2');
     Route::get('/deuda', [DeudaSingularController::class, 'index'])->name('deuda.index');
 	Route::resource("/viatico", \App\Http\Controllers\ViaticoController::class);
+	Route::resource("/consignarViatico", \App\Http\Controllers\ConsignarViaticoController::class);
 	//aquipues
 }); //fin verified
 

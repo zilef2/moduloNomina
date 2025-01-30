@@ -83,6 +83,17 @@ const update = () => {
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
+                    
+<!--                    <div id="SelectVue" class="">-->
+<!--                        <label name="labelSelectVue2"> Centro de costo </label>-->
+<!--                        <v-select :options="props.losSelect[0]"-->
+<!--                                  v-model="form.centro_costo_id"-->
+<!--                                  label="name"-->
+<!--                        ></v-select>-->
+<!--                    </div>-->
+                    
+                    
+                    
                     <div v-for="(atributosform, indice) in data.printForm" :key="indice">
                         <div v-if="atributosform.type === 'foreign'" id="SelectVue" class="">
                             <label name="labelSelectVue"> {{ atributosform.label }} </label>

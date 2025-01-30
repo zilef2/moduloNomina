@@ -8,6 +8,7 @@ use App\helpers\MyModels;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -15,7 +16,7 @@ use Inertia\Response;
 class geenericController extends Controller
 {
     public array $thisAtributos;
-    public string $FromController = 'viatico';
+    public string $FromController = 'generic';
 
 
     //<editor-fold desc="Construc | mapea | filtro and dependencia">
@@ -28,12 +29,31 @@ class geenericController extends Controller
     }
 
 
-    public function Mapear(): Builder {
-        //$generics = geeneric::with('dependex');
-        $generics = geeneric::Where('id','>',0);
+    public function Mapear($generics)
+    {
+        $generics = $generics->get()->map(function ($generic) {
+//            $genericdep = $generic->user;
+//            if ($genericdep) $generic->user_id['nombre'] = $generic->user->nombre;
+//            else $generic->user_id['nombre'] = '';
+            return $generic;
+        });
         return $generics;
-
     }
+    
+     public function PerPageAndPaginate($request,$cotizacions)
+    {
+        $perPage = $request->has('perPage') ? $request->perPage : 10;
+        $page = request('page', 1); // Current page number
+        $paginated = new LengthAwarePaginator(
+            $cotizacions->forPage($page, $perPage),
+            $cotizacions->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url()]
+        );
+        return $paginated;
+    }
+    
     public function Filtros(&$generics,$request){
         if ($request->has('search')) {
             $generics = $generics->where(function ($query) use ($request) {
@@ -71,7 +91,7 @@ class geenericController extends Controller
 
         $perPage = $request->has('perPage') ? $request->perPage : 10;
         return Inertia::render($this->FromController.'/Index', [
-            'fromController'        => $generics->paginate($perPage),
+            'fromController' => $this->PerPageAndPaginate($request,$generics),
             'total'                 => $generics->count(),
 
             'breadcrumbs'           => [['label' => __('app.label.'.$this->FromController), 'href' => route($this->FromController.'.index')]],

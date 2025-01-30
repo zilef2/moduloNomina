@@ -21,7 +21,9 @@ const props = defineProps({
 })
 
 const emit = defineEmits(["close"]);
-const data = reactive({ })
+const data = reactive({ 
+  AutoActualizarse: false,
+})
 
 const form = useForm({
     name: '',

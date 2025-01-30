@@ -88,14 +88,14 @@ const select = () => data.multipleSelect = props.fromController?.data.length ===
 // text // number // dinero // date // datetime // foreign
 const titulos = [
     // { order: 'codigo', label: 'codigo', type: 'text' },
-    { order: 'gasto', label: 'gasto', type: 'text' },
+    { order: 'gasto', label: 'gasto', type: 'number' },
     { order: 'saldo', label: 'saldo', type: 'number' },
-    { order: 'descripcion', label: 'descripcion', type: 'text' },
+    { order: 'descripcion', label: 'descripcion', type: 'text2' },
     { order: 'legalizacion', label: 'legalizacion', type: 'text' },
     
-    { order: 'fecha_legalizacion', label: 'fecha_legalizacion', type: 'date' },
-    { order: 'user_id', label: 'user_id', type: 'foreign' },
-    { order: 'centro_costo_id', label: 'centro_costo_id', type: 'foreign' },
+    { order: 'fecha_legalizacion', label: 'fecha_legalizacion', type: 'datetime' },
+    { order: 'user_id', label: 'user_id', type: 'foreign', nameid:'userino'},
+    { order: 'centro_costo_id', label: 'centro_costo_id', type: 'foreign' , nameid:'centrou'},
   // { order: 'inventario', label: 'inventario', type: 'foreign',nameid:'nombre'},
 ];
 
@@ -103,7 +103,6 @@ const titulos = [
 
 <template>
     <Head :title="props.title" />
-
     <AuthenticatedLayout>
         <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" class="capitalize text-xl font-bold"/>
         <div class="space-y-4">
@@ -195,11 +194,14 @@ const titulos = [
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++indexu }}</td>
                                 <td v-for="titulo in titulos" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     <span v-if="titulo['type'] === 'text'"> {{ claseFromController[titulo['order']] }} </span>
+                                    <span v-if="titulo['type'] === 'text2'"> {{ claseFromController[titulo['order']] }} </span>
                                     <span v-if="titulo['type'] === 'number'"> {{ number_format(claseFromController[titulo['order']], 0, false) }} </span>
                                     <span v-if="titulo['type'] === 'dinero'"> {{ number_format(claseFromController[titulo['order']], 0, true) }} </span>
-                                    <span v-if="titulo['type'] === 'date'"> {{ formatDate(claseFromController[titulo['order']], false) }} </span>
-                                    <span v-if="titulo['type'] === 'datetime'"> {{ formatDate(claseFromController[titulo['order']], true) }} </span>
-                                    <span v-if="titulo['type'] === 'foreign'"> {{ claseviaticoa[titulo['order']][titulo['nameid']] }} </span>
+                                    <span v-if="titulo['type'] === 'date'"> {{ formatDate(claseFromController[titulo['order']]) }} </span>
+                                    <span v-if="titulo['type'] === 'datetime'"> {{ formatDate(claseFromController[titulo['order']], 'conLaHora') }} </span>
+                                    <span v-if="titulo['type'] === 'foreign'">
+                                        {{ claseFromController?.[titulo?.['nameid']] ?? '' }}
+                                    </span>
                                 </td>
 
                             </tr>

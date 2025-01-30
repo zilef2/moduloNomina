@@ -90,7 +90,7 @@ const select = () => data.multipleSelect = props.fromController?.data.length ===
 const titulos = [
     // { order: 'codigo', label: 'codigo', type: 'text' },
     { order: 'nombre', label: 'nombre', type: 'text' },
-  // { order: 'inventario', label: 'inventario', type: 'foreign',nameid:'nombre'},
+  // { order: 'inventario', label: 'inventario', type: 'foreign',nameid:'userino'},
 ];
 
 </script>
@@ -193,7 +193,9 @@ const titulos = [
                                     <span v-if="titulo['type'] === 'dinero'"> {{ number_format(claseFromController[titulo['order']], 0, true) }} </span>
                                     <span v-if="titulo['type'] === 'date'"> {{ formatDate(claseFromController[titulo['order']], false) }} </span>
                                     <span v-if="titulo['type'] === 'datetime'"> {{ formatDate(claseFromController[titulo['order']], true) }} </span>
-                                    <span v-if="titulo['type'] === 'foreign'"> {{ clasegenerica[titulo['order']][titulo['nameid']] }} </span>
+                                     <span v-if="titulo['type'] === 'foreign'">
+                                        {{ claseFromController?.[titulo?.['nameid']] ?? '' }}
+                                    </span>
                                 </td>
 
                             </tr>

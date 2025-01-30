@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\helpers\Myhelp;
-use App\helpers\MyModels;
 use App\Models\CentroCosto;
 use App\Models\User;
 use App\Models\viatico;
+use App\helpers\Myhelp;
+use App\helpers\MyModels;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -31,16 +33,34 @@ class ViaticoController extends Controller
     }
 
 
-    public function Mapear(): Builder
-    {
-        //$viaticos = Viatico::with('no_nada');
-        $viaticos = Viatico::Where('id', '>', 0);
-        return $viaticos;
+//    public function Mapear($viaticos)
+//    {
+//        $viaticos = $viaticos->get()->map(function ($viatico) {
+////            $viaticodep = $viatico->user();
+////            $viatico['userino']['nombre'] = $viaticodep ? $viatico->user->name : '';
+//
+//            return $viatico;
+//        });
+//        return $viaticos;
+//    }
 
+    public function PerPageAndPaginate($request,$cotizacions)
+    {
+        $perPage = $request->has('perPage') ? $request->perPage : 10;
+        $page = request('page', 1); // Current page number
+        $paginated = new LengthAwarePaginator(
+            $cotizacions->forPage($page, $perPage),
+            $cotizacions->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url()]
+        );
+        return $paginated;
     }
-
-    public function Filtros(&$viaticos, $request)
+    
+    public function Filtros($request): Builder
     {
+        $viaticos = Viatico::query();
         if ($request->has('search')) {
             $viaticos = $viaticos->where(function ($query) use ($request) {
                 $query->where('descripcion', 'LIKE', "%" . $request->search . "%")
@@ -54,7 +74,11 @@ class ViaticoController extends Controller
             $viaticos = $viaticos->orderBy($request->field, $request->order);
         } else
             $viaticos = $viaticos->orderBy('updated_at', 'DESC');
+        
+        return $viaticos;
     }
+    
+    
 
     public function Dependencias()
     {
@@ -72,14 +96,13 @@ class ViaticoController extends Controller
     public function index(Request $request): Response
     {
         $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' viaticos '));
-        $viaticos = $this->Mapear();
-        $this->Filtros($viaticos, $request);
+//        $viaticos = $this->Mapear($this->Filtros($request));
+        $viaticos = $this->Filtros($request)->get();
         $losSelect = $this->Dependencias();
-
 
         $perPage = $request->has('perPage') ? $request->perPage : 10;
         return Inertia::render($this->FromController . '/Index', [
-            'fromController' => $viaticos->paginate($perPage),
+            'fromController' => $this->PerPageAndPaginate($request,$viaticos),
             'total' => $viaticos->count(),
 
             'breadcrumbs' => [['label' => __('app.label.' . $this->FromController), 'href' => route($this->FromController . '.index')]],
@@ -102,10 +125,10 @@ class ViaticoController extends Controller
     {
         $permissions = Myhelp::EscribirEnLog($this, ' Begin STORE:viaticos');
         DB::beginTransaction();
-        dd($request->centro_costo_id);
 //        $no_nada = $request->no_nada['id'];
-        $request->merge(['user_id' => $request->user_id]);
-        $request->merge(['centro_costo_id' => $request->centro_costo_id]);
+        $request->merge(['user_id' => $request->user_id['id']]);
+        $request->merge(['centro_costo_id' => $request->centro_costo_id['id']]);
+        $request->merge(['fecha_legalizacion' => Carbon::now()]);
         $viatico = viatico::create($request->all());
 
         DB::commit();
@@ -115,21 +138,28 @@ class ViaticoController extends Controller
 
     //fin store functions
 
-    public function show($id)
-    {
-    }
+    public function show($id) {}public function edit($id) {}
 
-    public function edit($id)
-    {
-    }
-
-    public function update(Request $request, $id): RedirectResponse
-    {
+    public function update(Request $request, $id): RedirectResponse {
         $permissions = Myhelp::EscribirEnLog($this, ' Begin UPDATE:viaticos');
         DB::beginTransaction();
         $viatico = viatico::findOrFail($id);
-        $request->merge(['user_id' => $request->user_id]);
-        $request->merge(['centro_costo_id' => $request->centro_costo_id]);
+        
+        if(gettype($request->user_id) === 'integer'){
+            $foreign1 = $request->user_id;
+        }
+        else{
+            $foreign1 = $request->user_id['id'];
+        }
+        
+        if(gettype($request->centro_costo_id) === 'integer'){
+            $foreign2 = $request->centro_costo_id;
+        }
+        else{
+            $foreign2 = $request->centro_costo_id['id'];
+        }
+        $request->merge(['user_id' => $foreign1]);
+        $request->merge(['centro_costo_id' => $foreign2]);
         $viatico->update($request->all());
 
         DB::commit();

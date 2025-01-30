@@ -112,17 +112,17 @@ class User extends Authenticatable
 
     //fin permissions
 
-    public function reportes()
+    public function reportes(): HasMany
     {
         return $this->hasMany('App\Models\Reporte');
     }
 
-    public function cargo()
+    public function cargo(): BelongsTo
     {
         return $this->belongsTo(Cargo::class);
     }
 
-    public function centros()
+    public function centros(): BelongsToMany
     {
         return $this->belongsToMany(CentroCosto::class, 'centro_user');
     }
@@ -138,7 +138,7 @@ class User extends Authenticatable
         return $result;
     }
 
-    public function ArraycentroName($numeroDeCentros = 0)
+    public function ArraycentroName($numeroDeCentros = 0): array|string
     {
         if (!$this->centros->isEmpty()) {
             if ($numeroDeCentros != 0) {

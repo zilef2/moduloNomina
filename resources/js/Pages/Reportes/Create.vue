@@ -129,12 +129,12 @@ const form = useForm({
 
 let newdate = (new Date())
 let horahoy = newdate.getHours()
-if (props.numberPermissions < 9) {
+if (props.numberPermissions > 9) {
 // if (props.numberPermissions > 8) {
     // form.fecha_ini = '2024-11-15T21:00'
     // form.fecha_fin = '2024-11-15T23:58'
-    form.fecha_ini = '2025-01-14T07:00'
-    form.fecha_fin = '2025-01-14T16:00'
+    form.fecha_ini = '2025-01-17T19:00'
+    form.fecha_fin = '2025-01-17T23:00'
 } else {
     let timedate = TransformTdate(7)//la hora
     let timedate2 = TransformTdate(16)

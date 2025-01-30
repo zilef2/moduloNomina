@@ -157,12 +157,17 @@ export function formatDate(date, isDateTime: string): string {
     if (isNullOrUndef(date)) return '';
     let validDate = new Date(date)
     // validDate = new Date(validDate.getTime() + (5 * 60 * 60 * 1000)) //correccion con GTM -5
-    // const day = validDate.getDate().toString().padStart(2, "0");
-    const day = validDate.getUTCDate().toString().padStart(2, "0");
+    const day = validDate.getDate().toString().padStart(2, "0");
+    // const day = validDate.getUTCDate().toString().padStart(2, "0");
 
     // getMonthName(1)); // January
     const month = monthName((validDate.getMonth() + 1).toString().padStart(2, "0"));
     let year = validDate.getFullYear();
+    
+    // console.log("=>(global.ts:162) day", day);
+    // console.log("=>(global.ts:165) month", month);
+    // console.log("=>(global.ts:167) year", year);
+    
     let anioActual = new Date().getFullYear();
     if (isDateTime == 'conLaHora') {
 
@@ -170,12 +175,14 @@ export function formatDate(date, isDateTime: string): string {
         const AMPM = hora >= 12 ? ' PM' : ' AM';
         hora = hora % 12 || 12;
         let hourAndtime = hora + ':' + (validDate.getMinutes() < 10 ? '0' : '') + validDate.getMinutes() + AMPM;
+        
         if (anioActual == year) {
             return `${day}-${month} | ${hourAndtime}`;
         } else {
             let Stringyear = year.toString().slice(-2);
             return `${day}-${month}-${Stringyear} | ${hourAndtime}`;
         }
+       
     } 
     else {
         if (anioActual == year) {
@@ -347,25 +354,29 @@ export function CalcularAvg(TheArray, NameValue = '', isTime = false) {
     return result;
 }
 
-export function number_format(amount, decimals, isPesos): string {
-    amount += '';
-    amount = parseFloat(amount.replace(/[^0-9\.]/g, ''));
-    decimals = decimals || 0;
+export function number_format(amount, decimals = 0, isPesos = false) {
+    console.log("=>(global.ts:358) amount", amount);
+    if (typeof amount !== 'string' && typeof amount !== 'number') return '0';
 
-    if (isNaN(amount) || amount === 0)
-        return parseFloat("0").toFixed(decimals);
-    amount = '' + amount.toFixed(decimals);
+    // Convertir a string y asegurarse de que el signo negativo no se elimine
+    amount = amount.toString().replace(/[^0-9\.-]/g, '');
 
-    const amount_parts = amount.split(' '),
-        regexp = /(\d+)(\d{3})/;
+    let num: number = parseFloat(amount);
+    if (isNaN(num)) return (0).toFixed(decimals);
 
-    while (regexp.test(amount_parts[0]))
-        amount_parts[0] = amount_parts[0].replace(regexp, '$1' + '.' + '$2');
+    // Formatear el número con la cantidad de decimales deseada
+    let num2 = num.toFixed(decimals);
+    
+    let [integerPart, decimalPart] = num2.split('.');
 
-    if (isPesos)
-        return '$' + amount_parts.join(' ');
-    return amount_parts.join(' ');
+    // Agregar separadores de miles con un regex
+    integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+    // Construir el resultado final
+    let formattedNumber = decimalPart ? `${integerPart},${decimalPart}` : integerPart;
+    return isPesos ? `$${formattedNumber}` : formattedNumber;
 }
+
 
 export function CalcularEdad(nacimiento) {
     const anioHoy = new Date().getFullYear();
