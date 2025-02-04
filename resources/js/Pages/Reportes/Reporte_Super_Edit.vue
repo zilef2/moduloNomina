@@ -123,7 +123,7 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
 
 <template>
     <section class="space-y-6">
-        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl2xl'">
+        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl2'">
             <form class="p-6" @submit.prevent="update">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     <b>{{ props.showUsers[props.Reporte.user_id] }}</b>

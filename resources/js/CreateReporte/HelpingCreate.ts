@@ -156,7 +156,7 @@ export function calcularTerminaDomingo(ini,fin,CuandoEmpiezaExtra,ExtrasManana,f
 export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,FestivosColombia,message): void{
     let ini = new Date(inicio)
     let fin = new Date(final)
-    let ExtrasManana = false
+    let ExtrasManana = false //
 
     data.TemporalDiaAnterior = data.HorasDelDiaAnterior59 ? data.HorasDelDiaAnterior59 : 0 //7jul: esta desactivado
     let ExtrasPrematuras = HORAS_ESTANDAR //8
@@ -166,10 +166,12 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
         let horasFinOme:number = parseInt(String(new Date(form.fecha_fin).getHours()))
         let CuandoEmpiezaExtra:number = horasInicioome
         let horasTrab:number = horasFinOme - horasInicioome
+        console.log("=>(HelpingCreate.ts:170) ExtrasPrematuras", ExtrasPrematuras);
         ExtrasPrematuras -= (data.TrabajadasSemana)
+        console.log("=>(HelpingCreate.ts:170) ExtrasPrematuras", ExtrasPrematuras);
 
 
-        if(data.TrabajadasSemana < 40)
+        if(data.TrabajadasSemana < 40) //todo: 40 porque? deberia venir de db no?
             ExtrasPrematuras -= data.TrabajadasHooy
         // ExtrasPrematuras -= data.TemporalDiaAnterior //23:59
 
@@ -191,13 +193,11 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
         if(data.MostrarConsole.CuandoEiezaExtra){
             console.log('%cPRIMERO: CuandoEmpiezaExtra', "color:red;font-family:system-ui;font-size:1rem;-webkit-text-stroke: 0.5px black;font-weight:bold")
             console.log('CuandoEmpiezaExtra',CuandoEmpiezaExtra)
-            // console.log('extras?',CuandoEmpiezaExtra < horasFinOme)
             console.log('ExtrasPrematuras ((debe ser 8 si no hay extras))',ExtrasPrematuras)
             console.log('data.TrabajadasSemana',data.TrabajadasSemana) // es mayor a 0 si ya cumplio las horas de semana
             console.log('data.TrabajadasHooy',data.TrabajadasHooy) //si reporto hoy
             console.log('TemporalDiaAnterior',data.TemporalDiaAnterior) // si reporto ayer
             console.log('%cFIN: CuandoEmpiezaExtra', "color:blue;font-family:system-ui;font-size:15px;-webkit-text-stroke: 0.5px black;font-weight:bold")
-            console.log('horasFinOme',horasFinOme);
         }
 
         if(CuandoEmpiezaExtra >= horasFinOme){

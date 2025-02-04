@@ -34,6 +34,7 @@ const props = defineProps({
 
     numberPermissions: Number,
     losSelect: Object,//normally used by headlessui
+    CentrosRepetidos: Array,
 })
 
 const data = reactive({
@@ -78,7 +79,7 @@ const selectAll = (event) => {
     }
 }
 const select = () => {
-    if (props.fromController?.data.length == data.selectedId.length) {
+    if (props.fromController?.data.length === data.selectedId.length) {
         data.multipleSelect = true
     } else {
         data.multipleSelect = false
@@ -88,8 +89,7 @@ const select = () => {
 
 
 // const form = useForm({ })
-// watchEffect(() => { })
-
+// watchEffect(() => {})
 
 // text // number // dinero // date // datetime // foreign
 const fillable = [
@@ -129,6 +129,7 @@ const titulos = [
                             :titulos="titulos" :show="data.createOpen" @close="data.createOpen = false"
                             :title="props.title"
                             :losSelect=props.losSelect
+                            :CentrosRepetidos=props.CentrosRepetidos
                     />
 
                     <Edit v-if="can(['update cotizacion'])" :titulos="titulos"

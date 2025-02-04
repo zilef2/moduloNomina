@@ -19,6 +19,8 @@ const props = defineProps({
     titulos: Object, //parametros de la clase principal
     losSelect: Object,
     numberPermissions: Number,
+    CentrosRepetidos: Array,
+
 })
 const emit = defineEmits(["close"]);
 
@@ -26,6 +28,7 @@ const data = reactive({
     params: {
         pregunta: ''
     },
+    existe:false,
 })
 
 let justNames = props.titulos.map(names => {
@@ -87,7 +90,14 @@ const create = () => {
 }
 
 watchEffect(() => {
-    if (props.show) form.errors = {}
+    if (props.show) {
+
+        form.errors = {}
+        
+        data.existe = props.CentrosRepetidos.some(item =>{
+            return (item === (''+form.numero_cot).trim())
+        });
+    }
 })
 
 //very usefull
@@ -147,9 +157,11 @@ const sexos = [{label: 'Masculino', value: 0}, {label: 'Femenino', value: 1}];
                     </div>
                 </div>
                 <div class=" my-8 flex justify-end">
-                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
-                    </SecondaryButton>
-                    <PrimaryButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
+                    
+                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}</SecondaryButton>
+                    
+                    <p v-if="data.existe" class="mx-auto text-red-700">Ya existe un centro de costo con ese numero</p>
+                    <PrimaryButton v-else class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                                    @click="create">
                         {{ lang().button.add }} {{ form.processing ? '...' : '' }}
                     </PrimaryButton>

@@ -104,7 +104,9 @@ const ButtonsInformes = [ //SAME AS WEB.PHP
         <button @click="toggleContent2" v-show="can(['isAdmin','isadministrativo','issupervisor'])"
                 class="text-blue-500">{{ (data.showContent2 ? '' : 'Ver ') + 'Administrativo' }}
         </button>
-        <ul v-if="data.showContent2" class="space-y-1 my-1">
+        
+        <ul v-if="data.showContent2" v-show="can(['isAdmin','isadministrativo','issupervisor'])" 
+            class="space-y-1 my-1">
             <div class="" v-for="value in ButtonsAdministrativo">
                 <li class="text-white rounded-lg hover:bg-primary"
                     :class="route().current(value + '.index') ? 'bg-primary' : 'bg-gray-700'">

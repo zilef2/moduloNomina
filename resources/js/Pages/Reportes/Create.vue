@@ -51,7 +51,7 @@ const data = reactive({
     MensajeError: '',
     MostrarConsole: {
         watchEffect: false,
-        CuandoEiezaExtra: false,
+        CuandoEiezaExtra: 1,
         dia: false,
         noche: false,
         extradia: false,
@@ -61,7 +61,7 @@ const data = reactive({
         terminaLunes: false,
         EsFestivo: false,
 
-        MostrarTrabajadaSemana: false,
+        MostrarTrabajadaSemana: 1,
         MostrarAlmuersini: false,
         ValorRealalmuerzo: 0,
     },
@@ -72,6 +72,7 @@ const data = reactive({
     Horas1159: props.ArrayOrdinarias.length > 1,
     diaSelected: 0,
     TemporalDiaAnterior: 0,
+    debugHorasSemana:0,
 })
 
 const message = reactive({
@@ -87,7 +88,8 @@ onMounted(() => {
 
     //explaining: data.TrabajadasSemana son las horas que hay que restarle a Cuandocomienzaextras
     data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
-    
+
+    console.clear()
     if (data.MostrarConsole.MostrarTrabajadaSemana) {
         console.log("=>(Create.vue:86) props.HorasDeCadaSemana", props.HorasDeCadaSemana);
         console.log("=>(Create.vue:86) data.TrabajadasSemana", data.TrabajadasSemana);
@@ -133,8 +135,8 @@ if (props.numberPermissions > 9) {
 // if (props.numberPermissions > 8) {
     // form.fecha_ini = '2024-11-15T21:00'
     // form.fecha_fin = '2024-11-15T23:58'
-    form.fecha_ini = '2025-01-17T19:00'
-    form.fecha_fin = '2025-01-17T23:00'
+    form.fecha_ini = '2025-02-08T07:00'
+    form.fecha_fin = '2025-02-08T14:00'
 } else {
     let timedate = TransformTdate(7)//la hora
     let timedate2 = TransformTdate(16)
@@ -186,13 +188,17 @@ watchEffect(() => {
             let fin = Date.parse(form.fecha_fin);
 
             let WeekN = weekNumber(new Date(form.fecha_ini))
-            if (data.MostrarConsole.MostrarTrabajadaSemana) console.log("=>(Create.vue:190) WeekN", WeekN);
-            
+            if (data.MostrarConsole.MostrarTrabajadaSemana){
+                
+                console.log("=>(Create.vue:190) WeekN", WeekN);
+                console.log("=>(data.TrabajadasHooy", data.TrabajadasHooy);
+            } 
+
             // 38 => 46 - 8
             data.TrabajadasSemana = props.HorasDeCadaSemana[WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
                 props.HorasDeCadaSemana[WeekN] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
             console.log("=>(Create.vue:194) WeekN", WeekN);
-            
+
             data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
 
             form.horas_trabajadas = 0
@@ -358,11 +364,11 @@ const create = () => {
             if (props.numberPermissions < 9) {
                 data.respuestaSeguro = confirm("¿Estás seguro de enviar el formulario?");
             }
-            let validacionNoMasDe3Dias = true
-
-            console.log("=>(Create.vue:359) ArrayHorasSemanales['s_Dias_gabela']", props.ArrayHorasSemanales['s_Dias_gabela']);
-            console.log("=>(Create.vue:222222) props.ArrayHorasSemanales['s_Dias_gabela']", typeof (props.ArrayHorasSemanales['s_Dias_gabela']));
-            validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini, props.ArrayHorasSemanales['s_Dias_gabela'])
+            console.log("111) ArrayHorasSemanales['s_Dias_gabela']", props.ArrayHorasSemanales['s_Dias_gabela']);
+            console.log("222) props.ArrayHorasSemanales['s_Dias_gabela']", typeof (props.ArrayHorasSemanales['s_Dias_gabela']));
+            let validacionNoMasDe3Dias
+            if(props.numberPermissions > 9) validacionNoMasDe3Dias = 'ok'
+            else validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini, props.ArrayHorasSemanales['s_Dias_gabela'])
             console.log("=>(Create.vue:302) validacionNoMasDe3Dias", validacionNoMasDe3Dias);
             if (data.respuestaSeguro && validacionNoMasDe3Dias === 'ok') {
                 // Reporte11_59();
@@ -499,7 +505,7 @@ const formatfin = (date) => {
                         </div>
                     </div>
                     <!-- mt-80 -->
-                    <div v-if="form.extra_diurnas || form.extra_nocturnas || form.dominicales == 'si'"
+                    <div v-if="form.extra_diurnas || form.extra_nocturnas || form.dominicales === 'si'"
                          class="mt-4 grid grid-cols-2 gap-6">
                         <div>
                             <InputLabel ref="label_extra_diurnas" for="extra_diurnas"
@@ -520,7 +526,7 @@ const formatfin = (date) => {
                         </div>
                     </div>
                     <!-- dominicales -->
-                    <div v-if="form.dominicales == 'si'" class="grid grid-cols-2 gap-6">
+                    <div v-if="form.dominicales === 'si'" class="grid grid-cols-2 gap-6">
                         <div>
                             <InputLabel ref="label_diurnas" for="dominical_diurnas"
                                         :value="lang().label.dominical_diurnas"/>
@@ -540,7 +546,7 @@ const formatfin = (date) => {
                                        :error="form.errors.dominical_nocturnas"/>
                         </div>
                     </div>
-                    <div v-if="form.dominicales == 'si'" class="grid grid-cols-2 gap-6">
+                    <div v-if="form.dominicales === 'si'" class="grid grid-cols-2 gap-6">
                         <div>
                             <InputLabel ref="label_extra_diurnas" for="dominical_extra_diurnas"
                                         :value="lang().label.dominical_extra_diurnas"/>
@@ -630,6 +636,10 @@ const formatfin = (date) => {
                     <!--                    <p v-if="data.TemporalDiaAnterior" class="mx-2 text-amber-700 bg-amber-400/10 rounded-2xl">-->
                     <!--                        <small v-if="numberPermissions > 8">{{ data.TemporalDiaAnterior }}</small>-->
                     <!--                    </p>-->
+                    <p v-if="data.debugHorasSemana" class="mx-2 text-amber-700 bg-amber-400/10 rounded-2xl">
+                        <small v-if="numberPermissions > 8">{{ data.debugHorasSemana }}</small>
+                    </p>
+                    
                 </div>
             </form>
         </Modal>

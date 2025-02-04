@@ -128,43 +128,6 @@ class Myhelp
         return '';
     }
 
-    public static function CalcularHorasDeCadaSemana(Carbon $startDate, Carbon $endDate, $Authuser): array
-    {
-        $vector = self::HorasDeLasSemanasProximas(20); //calcula primer y ultimo dia de las x proximas semanas
-        $horasemana[0] = Carbon::now()->weekOfYear;
-        foreach ($vector as $vec) {
-            $horasemana[$vec['numero_semana']] = (int)Reporte::Where('user_id', $Authuser->id)
-                ->WhereBetween('fecha_ini', [$vec['primer_dia_semana'], $vec['ultimo_dia_semana']])
-                ->selectRaw('fecha_ini, (diurnas + nocturnas) as ordinarias')
-                ->get()->sum('ordinarias');
-//                ->sum('horas_trabajadas');
-        }
-        return $horasemana;
-    }
-
-    private static function HorasDeLasSemanasProximas($ProximasSemanas)
-    { //calcula primer y ultimo dia de las semanas
-        $vectorSemanas = [];
-        $fechaActual = Carbon::now()->addMonths(2);
-
-        for ($i = 0; $i < $ProximasSemanas; $i++) {
-            // Calcular el primer día de la semana
-            $primerDiaSemana = $fechaActual->startOfWeek();
-            $ultimoDiaSemana = clone $primerDiaSemana;
-            $ultimoDiaSemana = $ultimoDiaSemana->endOfWeek();
-
-            // Almacenar el número de la semana y el primer día de la semana en el vector
-            $vectorSemanas[] = [
-                'numero_semana' => $primerDiaSemana->weekOfYear,
-                'anio' => $primerDiaSemana->year,
-                'primer_dia_semana' => $primerDiaSemana->toDateString(),
-                'ultimo_dia_semana' => $ultimoDiaSemana->toDateString(),
-            ];
-            // Moverse a la semana anterior
-            $fechaActual->subWeek();
-        }
-        return $vectorSemanas;
-    }
 
     //:? calcular cuantas horas ha trabajado en esta semana y la pasada
     public static function CalcularPendientesQuicena($Authuser)
