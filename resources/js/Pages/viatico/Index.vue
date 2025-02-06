@@ -11,11 +11,12 @@ import DangerButton from '@/Components/DangerButton.vue';
 import pkg from 'lodash';
 
 import Pagination from '@/Components/Pagination.vue';
-import {ChevronUpDownIcon, PencilIcon, TrashIcon, CheckCircleIcon} from '@heroicons/vue/24/solid';
+import {ChevronUpDownIcon, PencilIcon, TrashIcon, CheckCircleIcon, ShieldExclamationIcon} from '@heroicons/vue/24/solid';
 import Create from '@/Pages/viatico/Create.vue';
 import Edit from '@/Pages/viatico/Edit.vue';
 import Delete from '@/Pages/viatico/Delete.vue';
 import Aprobar from '@/Pages/viatico/Aprobar.vue';
+import Legalizar from '@/Pages/viatico/Legalizar.vue';
 
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
@@ -34,6 +35,8 @@ const props = defineProps({
 
     numberPermissions: Number,
     losSelect: Object,//normally used by headlessui
+    totalsaldo: Number,
+    totallegalizado: Number,
 })
 
 const data = reactive({
@@ -49,6 +52,7 @@ const data = reactive({
     createOpen: false,
     editOpen: false,
     AprobarOpen: false,
+    LegalizarOpen: false,
     deleteOpen: false,
     // deleteBulkOpen: false,
     dataSet: usePage().props.app.perpage,
@@ -97,6 +101,8 @@ const titulos = [
     {order: 'saldo', label: 'saldo', type: 'number'},
     {order: 'descripcion', label: 'descripcion', type: 'text2'},
     {order: 'legalizacion', label: 'legalizacion', type: 'text'},
+    {order: 'valor_legalizacion', label: 'valor_legalizacion', type: 'dinero'},
+    {order: 'descripcion_legalizacion', label: 'descripcion_legalizacion', type: 'text'},
     {order: 'fecha_legalizacion', label: 'fecha_legalizacion', type: 'datetime'},
     {order: 'user_id', label: 'user_id', type: 'foreign', nameid: 'userino'},
     {order: 'centro_costo_id', label: 'centro_costo_id', type: 'foreign', nameid: 'centrou'},
@@ -129,6 +135,10 @@ const titulos = [
                     <Aprobar v-if="can(['isAdmin'])" :titulos="titulos"
                              :numberPermissions="props.numberPermissions" :show="data.AprobarOpen"
                              @close="data.AprobarOpen = false"
+                             :viaticoa="data.viaticoo" :title="props.title" :losSelect=props.losSelect />
+                    <Legalizar v-if="can(['isadministrativo'])" :titulos="titulos"
+                             :numberPermissions="props.numberPermissions" :show="data.LegalizarOpen"
+                             @close="data.LegalizarOpen = false"
                              :viaticoa="data.viaticoo" :title="props.title" :losSelect=props.losSelect />
 
                     <Delete v-if="can(['delete viatico'])" :numberPermissions="props.numberPermissions"
@@ -199,6 +209,11 @@ const titulos = [
                                                     class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.aprobar">
                                             <CheckCircleIcon class="w-4 h-4" />
                                         </InfoButton>
+                                        <InfoButton v-show="can(['isadministrativo'])" type="button" :thecolor="'gray'"
+                                                    @click="(data.LegalizarOpen = true), (data.viaticoo = claseFromController)"
+                                                    class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.legalizar">
+                                            <ShieldExclamationIcon class="w-4 h-4" />
+                                        </InfoButton>
                                         <DangerButton v-show="can(['isSuper'])" type="button"
                                                       @click="(data.deleteOpen = true), (data.viaticoo = claseFromController)"
                                                       class="px-2 py-1.5 rounded-none"
@@ -225,9 +240,9 @@ const titulos = [
                             </td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['descripcion'] }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['legalizacion'] ? '✅': '❌'}}</td>
-                            <td class="whitespace-nowrap py-2 px-2">
-                                {{ formatDate(claseFromController['fecha_legalizacion']) }}
-                            </td>
+                            <td class="whitespace-nowrap py-2 px-2"> {{ formatPesosCol(claseFromController['valor_legalizacion'])}}</td>
+                            <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['descripcion_legalizacion']}}</td>
+                            <td class="whitespace-nowrap py-2 px-2">{{ formatDate(claseFromController['fecha_legalizacion']) }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['userino'] }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['centrou'] }}</td>
                             
@@ -240,7 +255,10 @@ const titulos = [
 <!--                            <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">-->
 <!--                                {{ props.total }}-->
 <!--                            </td>-->
-                            <td><strong>Total saldo: <br></strong> {{ formatPesosCol(totalSaldo) }}</td>
+                            <td><strong>Total saldo: <br></strong> {{ formatPesosCol(totalsaldo) }}</td>
+                            <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
+                            <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
+                            <td><strong>Total legalizado: <br></strong> {{ formatPesosCol(totallegalizado) }}</td>
                         </tr>
                         </tbody>
                     </table>

@@ -19,8 +19,10 @@ class viatico extends Model
         'descripcion',
         'legalizacion',
         'fecha_legalizacion',
-        'user_id',
+        'valor_legalizacion',
+        'descripcion_legalizacion',
         
+        'user_id',
         'centro_costo_id',
     ];
 

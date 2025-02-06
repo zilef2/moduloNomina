@@ -89,7 +89,7 @@ const select = () => {
         <div class="space-y-4">
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">
-                    <PrimaryButton v-show="can(['create role'])" class="rounded-none" @click="data.createOpen = true">
+                    <PrimaryButton  v-show="can(['isSuper'])" class="rounded-none" @click="data.createOpen = true">
                         {{ lang().button.add }} 
                     </PrimaryButton>
                     <Create :show="data.createOpen" @close="data.createOpen = false" :permissions="props.permissions"

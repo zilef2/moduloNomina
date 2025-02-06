@@ -2,10 +2,13 @@
 
 return [
     'label' => [
+		'valor_legalizacion' => 'Valor legalización',
+		'legalizar' => 'Legalizar',
+		'descripcion_legalizacion' => 'Descripcion de la legalización',
 		'valor_consig' => 'Valor Consignado',
 		'consignarViatico' => 'Consignar al Viático',
-		'cc' => 'cc',
-		'gasto' => 'gasto',
+		'cc' => 'Centro de costo',
+		'gasto' => 'Solicitado',
         
 		'fecha_legalizacion' => 'Fecha legalización',
 		'consignarviatico' => 'Consignarviatico',

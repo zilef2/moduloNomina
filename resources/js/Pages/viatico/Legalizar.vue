@@ -6,7 +6,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import {useForm} from '@inertiajs/vue3';
-import {computed, watch, ref, nextTick, onMounted, reactive, watchEffect} from 'vue';
+import {computed,watch,ref,nextTick, onMounted, reactive, watchEffect} from 'vue';
 import "vue-select/dist/vue-select.css";
 import {formatPesosCol} from '@/global.ts';
 
@@ -23,22 +23,22 @@ const props = defineProps({
 const emit = defineEmits(["close"]);
 const data = reactive({
     printForm: [],
-    AutoActualizarse: false, // es true cuando se cierra el modal
+    AutoActualizarse: false,
     valorNumerico: 0,
     valorFormateado: '',
     valorConsig: '0',
-    mensajeError_saldo: '',
 })
 
 
 const justNames = [
-    'valor_consig'
+    'valor_legalizacion',
+    'descripcion_legalizacion',
 ]
 
 const form = useForm({...Object.fromEntries(justNames.map(field => [field, '']))});
 onMounted(() => {
     if (props.numberPermissions > 9) {
-        form.valor_consig = Math.floor(Math.random() * 9 + 1000000)
+        form.valor_legalizacion = Math.floor(Math.random() * 9 + 10000)
         // form.nombre = 'admin orden trabajo ' + (valueRAn);
         // form.codigo = (valueRAn);
         // form.hora_inicial = '0'+valueRAn+':00'//temp
@@ -53,26 +53,29 @@ props.titulos.forEach(names => {
     })
 });
 
-
-//hijo de watch(() => form.valor_consig
+//hijo de watch(() => form.valor_legalizacion
 const validarValor = () => {
-    let estamal = form.valor_consig > props.viaticoa.saldo
+    let estamal = form.valor_legalizacion > props.viaticoa.gasto
     if (estamal) data.mensajeError_saldo = 'Valor a consignar es superior al saldo'
     else data.mensajeError_saldo = ''
     return estamal
 }
-watch(() => form.valor_consig, (newVal) => {
+watch(() => form.valor_legalizacion, (newVal) => {
     validarValor()
 });
 
 watchEffect(() => {
     if (props.show) {
-        data.valorConsig = formatPesosCol(form.valor_consig)
+        data.valorConsig = formatPesosCol(form.valor_legalizacion)
         form.errors = {}
 
-
+        form.valor_legalizacion = form.valor_legalizacion < 0 ? form.valor_legalizacion * -1 : form.valor_legalizacion 
         if (data.AutoActualizarse) {
-
+            form.valor_legalizacion = props.viaticoa?.valor_legalizacion
+            form.valor_legalizacion = props.viaticoa?.valor_legalizacion
+            form.descripcion_legalizacion = props.viaticoa?.descripcion_legalizacion
+            data.valorConsig = formatPesosCol(form.valor_legalizacion)
+            
             data.AutoActualizarse = false
         }
     } else {
@@ -89,9 +92,8 @@ watch(() => props.show, (newVal) => {
     }
 );
 
-
 const update = () => {
-    form.put(route('viaticoupdate2', props.viaticoa?.id), {
+    form.put(route('legalizarviatico', props.viaticoa?.id), {
         preserveScroll: true,
         onSuccess: () => {
             emit("close")
@@ -106,22 +108,6 @@ const update = () => {
     })
 }
 
-
-// <!--<editor-fold desc="selected items">-->
-const selectedUser = computed({
-    get: () => props.losSelect[0].find(user => user.id === form.user_id) || null,
-    set: (user) => {
-        form.user_id = user ? user.id : null;
-    }
-});
-const selectedcc = computed({
-    get: () => props.losSelect[1].find(centro => centro.id === form.centro_costo_id) || null,
-    set: (centro) => {
-        form.centro_costo_id = centro ? centro.id : null;
-    }
-});
-// <!--</editor-fold>-->
-
 const valorConsigInput = ref(null);
 </script>
 
@@ -130,35 +116,40 @@ const valorConsigInput = ref(null);
         <Modal :maxWidth="'xl4'" :show="props.show" @close="emit('close')">
             <form class="p-6" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    Aprobar {{ props.title }}
+                    Legalizar {{ props.title }}
                 </h2>
-                <p class="xs:text-sm md:text-md ">
-                    Al proceder con la acción de "Guardar" en el presente formulario, el/la usuario(a) bajo
-                    que:<br><br>
-                    1. Ha verificado la información registrada en esta solicitud de viático.<br>
-                    2. Certifica que el monto económico especificado ha sido consignado en su totalidad.<br>
-                    3. El monto consignado no deberia superar <b class="text-blue-700">{{ formatPesosCol(props.viaticoa.saldo) }} </b>
-                    <br><br><br>
+                <p class="texto-legal">
+                    Por favor, digite el valor que se ha legalizado con documentos u otras pruebas
                 </p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
                     <div class="">
-                        <InputLabel for="valor_consigid" :value="lang().label['valor_consig']"/>
-                        <TextInput id="valor_consigid" v-model="form.valor_consig"
-                                   :error="form.errors.valor_consig"
-                                   placeholder="valor_consig" type="number"
+                        <InputLabel for="valor_legalizacionid" :value="lang().label['valor_legalizacion']"/>
+                        <TextInput id="valor_legalizacionid" v-model="form.valor_legalizacion"
+                                   :error="form.errors.valor_legalizacion"
+                                   placeholder="valor_legalizacion" type="number"
                                    class="my-2 block w-full"
                                    required
                                    ref="valorConsigInput"
                         />
-                        <InputError :message="form.errors.valor_consig" class="mt-2"/>
-                        <InputError :message="data.mensajeError_saldo" class="mt-2"/>
+                        <InputError :message="form.errors.valor_legalizacion" class="mt-2"/>
                         <label class="my-2 py-4 text-black dark:text-white text-lg"> {{ data.valorConsig }} Pesos
                             colombianos</label>
+                    </div>
+                    <div class="">
+                        <InputLabel for="descripcion_legalizacionid" :value="lang().label['descripcion_legalizacion'] + ' (opcional)'"/>
+                        <TextInput id="descripcion_legalizacionid" v-model="form.descripcion_legalizacion"
+                                   :error="form.errors.descripcion_legalizacion"
+                                   placeholder="descripcion_legalizacion" type="text"
+                                   class="my-2 block w-full"
+                                   required
+                        />
+                        <InputError :message="form.errors.descripcion_legalizacion" class="mt-2"/>
                     </div>
 
                 </div>
                 <div class=" my-8 flex justify-end">
-                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}</SecondaryButton>
+                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
+                    </SecondaryButton>
                     <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="ml-3"
                                    @click="update">
                         {{ form.processing ? lang().button.save + '...' : lang().button.save }}

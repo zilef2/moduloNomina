@@ -29,6 +29,8 @@ let justNames = props.titulos.map((names) => {
         && names['order'] !== 'saldo'
         && names['order'] !== 'user_id'
         && names['order'] !== 'fecha_legalizacion'
+        && names['order'] !== 'valor_legalizacion'
+        && names['order'] !== 'descripcion_legalizacion'
     )
         return names["order"];
 });
@@ -39,6 +41,8 @@ props.titulos.forEach((names) => {
         && names['order'] !== 'saldo'
         && names['order'] !== 'user_id'
         && names['order'] !== 'fecha_legalizacion'
+        && names['order'] !== 'valor_legalizacion'
+        && names['order'] !== 'descripcion_legalizacion'
     )
         printForm.push({
             idd: names["order"],

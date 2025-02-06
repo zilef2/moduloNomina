@@ -32,7 +32,6 @@ return new class extends Migration
                 ->onDelete('cascade'); //cascade, set null, restrict, no action 
             $table->timestamps();
             $table->softDeletes();
-            
         });
     }
 
