@@ -27,18 +27,21 @@ const data = reactive({
 })
 
 //very usefull
-const justNames = props.titulos.map(names => names['order'])
+// const justNames = props.titulos.map(names => names['order'])
+const justNames = [
+    'gasto',
+    'descripcion',
+]
 const form = useForm({...Object.fromEntries(justNames.map(field => [field, '']))});
 onMounted(() => {
     if (props.numberPermissions > 9) {
-        const valueRAn = Math.floor(Math.random() * 9 + 1)
-        form.nombre = 'admin orden trabajo ' + (valueRAn);
-        form.codigo = (valueRAn);
+        // const valueRAn = Math.floor(Math.random() * 9 + 1)
+        // form.nombre = 'admin orden trabajo ' + (valueRAn);
+        // form.codigo = (valueRAn);
         // form.hora_inicial = '0'+valueRAn+':00'//temp
         // form.fecha = '2023-06-01'
     }
 
-    form.user_id
 });
 
 props.titulos.forEach(names => {
@@ -56,16 +59,16 @@ watchEffect(() => {
         if (data.AutoActualizarse) {
 
             form.gasto = props.viaticoa?.gasto
-            form.saldo = props.viaticoa?.saldo
+            // form.saldo = props.viaticoa?.saldo
             form.descripcion = props.viaticoa?.descripcion
-            form.legalizacion = props.viaticoa?.legalizacion
-            form.fecha_legalizacion = props.viaticoa?.fecha_legalizacion
-            form.user_id = props.viaticoa?.user_id
-            form.centro_costo_id = props.viaticoa?.centro_costo_id
+            // form.legalizacion = props.viaticoa?.legalizacion
+            // form.fecha_legalizacion = props.viaticoa?.fecha_legalizacion
+            // form.user_id = props.viaticoa?.user_id
+            // form.centro_costo_id = props.viaticoa?.centro_costo_id
 
-            const datetimeISO = form.fecha_legalizacion; // O puedes usar un string ISO
-            const options = {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'};
-            data.datetime1 = datetimeISO.toLocaleString('es-ES', options);
+            // const datetimeISO = form.fecha_legalizacion; // O puedes usar un string ISO
+            // const options = {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'};
+            // data.datetime1 = datetimeISO.toLocaleString('es-ES', options);
             data.AutoActualizarse = false
 
         }
@@ -89,12 +92,12 @@ const update = () => {
         },
     })
 }
-const selectedUser = computed({
-    get: () => props.losSelect[0].find(user => user.id === form.user_id) || null,
-    set: (user) => {
-        form.user_id = user ? user.id : null;
-    }
-});
+// const selectedUser = computed({
+//     get: () => props.losSelect[0].find(user => user.id === form.user_id) || null,
+//     set: (user) => {
+//         form.user_id = user ? user.id : null;
+//     }
+// });
 const selectedcc = computed({
     get: () => props.losSelect[1].find(centro => centro.id === form.centro_costo_id) || null,
     set: (centro) => {
@@ -111,67 +114,48 @@ const selectedcc = computed({
                     {{ lang().label.edit }} {{ props.title }}
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!--                    <div id="SelectVue" class="">-->
+                    <!--                        <label name="labelSelectVue"> Quien necesita el viático </label>-->
+                    <!--                        <v-select v-model="selectedUser"-->
+                    <!--                                  :options="props.losSelect[0]"-->
+                    <!--                                  label="name"-->
+                    <!--                        ></v-select>-->
+                    <!--                    </div>-->
+                    <!--                    <div id="SelectVue" class="">-->
+                    <!--                        <label name="labelSelectVue2"> Centro de costo </label>-->
+                    <!--                        <v-select v-model="selectedcc"-->
+                    <!--                                  :options="props.losSelect[1]"-->
+                    <!--                                  label="name"-->
+                    <!--                        ></v-select>-->
+                    <!--                    </div>-->
 
 
-                    <div id="SelectVue" class="">
-                        <label name="labelSelectVue"> Quien necesita el viático </label>
-                        <v-select v-model="selectedUser"
-                                  :options="props.losSelect[0]"
-                                  label="name"
-                        ></v-select>
+                    <div class="">
+                        <InputLabel for="gastoid" :value="lang().label['gasto']"/>
+                        <TextInput id="gastoid" v-model="form.gasto"
+                                   :error="form.errors.gasto"
+                                   placeholder="Gasto" type="number"
+                                   class="mt-1 block w-full"
+                                   required/>
+                        <InputError :message="form.errors.gasto" class="mt-2"/>
                     </div>
-                    <div id="SelectVue" class="">
-                        <label name="labelSelectVue2"> Centro de costo </label>
-                        <v-select v-model="selectedcc"
-                                  :options="props.losSelect[1]"
-                                  label="name"
-                        ></v-select>
+                    <div class="">
+                        <InputLabel for="descripcionid" :value="lang().label.descripcion"/>
+                        <TextInput id="descripcionid" v-model="form.descripcion"
+                                   :error="form.errors.descripcion"
+                                   placeholder="Descripcion" type="text"
+                                   class="mt-1 block w-full" required/>
+                        <InputError :message="form.errors.descripcion" class="mt-2"/>
                     </div>
 
-
-                    <div v-for="(atributosform, indice) in data.printForm" :key="indice">
-                        <div v-if="atributosform.type === 'foreign'" class=""></div>
-                        <!--                        <div v-if="atributosform.type === 'id'" id="SelectVue">-->
-                        <!--                            <label name="labelSelectVue"> {{ atributosform.label }} </label>-->
-                        <!--                            <v-select :options="data[atributosform.idd]" label="title" v-model="form[atributosform.idd]"-->
-                        <!--                                      :value="data[atributosform.idd][props.viaticoa.viatico_id]"></v-select>-->
-                        <!--                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>-->
-                        <!--                        </div>-->
-
-                        <div v-else-if="atributosform.type === 'time'" id="SelectVue">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
-                            <TextInput :id="atributosform.idd" v-model="form[atributosform.idd]"
-                                       :error="form.errors[atributosform.idd]"
-                                       :placeholder="atributosform.label" :type="atributosform.type"
-                                       class="mt-1 block w-full"
-                                       required step="3600"/>
-                            <InputError :message="form.errors[atributosform.idd]" class="mt-2"/>
-                        </div>
-                        <!-- datetime -->
-                        <div v-else-if="atributosform.type === 'datetime'">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
-                            <p id="">{{ data.datetime1 }}</p>
-                        </div>
-
-
-                        <div v-else class="">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
-                            <TextInput :id="atributosform.idd" v-model="form[atributosform.idd]"
-                                       :error="form.errors[atributosform.idd]"
-                                       :placeholder="atributosform.label" :type="atributosform.type"
-                                       class="mt-1 block w-full"
-                                       required/>
-                            <InputError :message="form.errors[atributosform.idd]" class="mt-2"/>
-                        </div>
-                    </div>
 
                 </div>
                 <div class=" my-8 flex justify-end">
-                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
-                    </SecondaryButton>
+                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}</SecondaryButton>
                     <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="ml-3"
                                    @click="update">
-                        {{ form.processing ? lang().button.save + '...' : lang().button.save }}
+                        {{ form.processing ? 
+                            lang().button.save + '...' : lang().button.save }}
                     </PrimaryButton>
                 </div>
             </form>

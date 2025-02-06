@@ -350,8 +350,7 @@ export function CalcularAvg(TheArray, NameValue = '', isTime = false) {
             })
         }
     }
-    const result = number_format(sum / TheArray.length, 1, false);
-    return result;
+    return number_format(sum / TheArray.length, 1, false);
 }
 
 export function number_format(amount:any, decimals:number = 0, isPesos = false) {

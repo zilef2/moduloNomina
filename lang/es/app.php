@@ -2,7 +2,8 @@
 
 return [
     'label' => [
-		'consignarViatico' => 'consignarViatico',
+		'valor_consig' => 'Valor Consignado',
+		'consignarViatico' => 'Consignar al Viático',
 		'cc' => 'cc',
 		'gasto' => 'gasto',
         
@@ -250,6 +251,7 @@ return [
         'observaciones' => 'observaciones',
     ],
     'tooltip' => [
+        'aprobar' => 'aprobar',
         'saldo' => 'saldo',
         'Reporte' => 'Reporte',
         'see' => 'Ver',

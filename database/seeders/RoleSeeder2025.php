@@ -11,6 +11,7 @@ class RoleSeeder2025 extends Seeder
     /**
      * Run the database seeds.
      *
+     php artisan db:seed --class=RoleSeeder2025
      * @return void
      */
     public function run(): void

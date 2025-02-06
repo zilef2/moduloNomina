@@ -36,8 +36,9 @@ const props = defineProps({
 let label_diurnas = ref(null)
 
 const HORAS_ESTANDAR = props.ArrayHorasSemanales.HORAS_ORDINARIAS // 8horitas
-const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - HORAS_ESTANDAR //notes: 7jul = 40
+const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - HORAS_ESTANDAR //notes: = 40
 const LimiteHorasTrabajadas = 25
+const Limite_Horas_Dia_Semana = [HORAS_ESTANDAR,(HORAS_ESTANDAR - 2)] //todo: nexttochange: cuando las semanales cambien de 46 horas a 42, seran 3 en vez de 2
 
 
 const emit = defineEmits(["close", "reportFinished"]);
@@ -73,6 +74,7 @@ const data = reactive({
     diaSelected: 0,
     TemporalDiaAnterior: 0,
     debugHorasSemana:0,
+    BoolCentrosNoFactura:false, //permite saber si el centro de costos factura o no
 })
 
 const message = reactive({
@@ -257,6 +259,7 @@ watchEffect(() => {
                             form.nocturnas = dirunasYnocturnas[1];
                             data.BoolCentroNoFactura = true
                             data.mensajeCentroNoFactura = "Este centro no factura"
+                            data.BoolCentrosNoFactura = true
 
                         } else {
                             data.BoolCentroNoFactura = false
@@ -317,6 +320,15 @@ watch(() => form.diurnas, (newX) => {
 })
 watch(() => form.nocturnas, (newX) => {
     data.ordinariasCalculadas = newX + form.diurnas
+    const hoy = new Date();
+    const esSabado = hoy.getDay() === 6;
+    let valormax = esSabado ? Limite_Horas_Dia_Semana[0] : Limite_Horas_Dia_Semana[1]
+    if(data.BoolCentrosNoFactura && form.horas_trabajadas > valormax){
+        data.StringRestriccionNoFActura = 'No se puede reportar mas de '+ valormax +' horas'
+    }else{
+        data.StringRestriccionNoFActura = ''
+        
+    }
 })
 
 
@@ -608,9 +620,9 @@ const formatfin = (date) => {
                 </div> -->
 
                 <div class="flex justify-end">
-                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
-                    </SecondaryButton>
-                    <PrimaryButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
+                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}</SecondaryButton>
+                    <PrimaryButton v-if="data.StringRestriccionNoFActura === ''" 
+                        class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                                    @mouseup="create" @keyup.enter="create">
                         {{ form.processing ? lang().button.add + '...' : lang().button.add }}
                     </PrimaryButton>

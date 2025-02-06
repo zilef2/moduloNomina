@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\EnviarViaticoJob;
+use App\Mail\MailViaticoGenerado;
 use App\Models\CentroCosto;
+use App\Models\consignarViatico;
 use App\Models\User;
 use App\Models\viatico;
 use App\helpers\Myhelp;
@@ -13,18 +16,17 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class ViaticoController extends Controller
-{
+class ViaticoController extends Controller {
     public array $thisAtributos;
     public string $FromController = 'viatico';
 
 
     //<editor-fold desc="Construc | mapea | filtro and dependencia">
-    public function __construct()
-    {
+    public function __construct() {
 //        $this->middleware('permission:create viatico', ['only' => ['create', 'store']]);
 //        $this->middleware('permission:read viatico', ['only' => ['index', 'show']]);
 //        $this->middleware('permission:update viatico', ['only' => ['edit', 'update']]);
@@ -44,22 +46,29 @@ class ViaticoController extends Controller
 //        return $viaticos;
 //    }
 
-    public function PerPageAndPaginate($request,$cotizacions)
-    {
+    //todo: this should be in all my repos
+
+    public function index(Request $request): Response {
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' viaticos '));
+//        $viaticos = $this->Mapear($this->Filtros($request));
+        $viaticos = $this->Filtros($request)->get();
+        $losSelect = $this->Dependencias();
+
         $perPage = $request->has('perPage') ? $request->perPage : 10;
-        $page = request('page', 1); // Current page number
-        $paginated = new LengthAwarePaginator(
-            $cotizacions->forPage($page, $perPage),
-            $cotizacions->count(),
-            $perPage,
-            $page,
-            ['path' => request()->url()]
-        );
-        return $paginated;
+        return Inertia::render($this->FromController . '/Index', [
+            'fromController' => $this->PerPageAndPaginate($request, $viaticos),
+            'total' => $viaticos->count(),
+
+            'breadcrumbs' => [['label' => __('app.label.' . $this->FromController), 'href' => route($this->FromController . '.index')]],
+            'title' => __('app.label.' . $this->FromController),
+            'filters' => $request->all(['search', 'field', 'order']),
+            'perPage' => (int)$perPage,
+            'numberPermissions' => $numberPermissions,
+            'losSelect' => $losSelect ?? [],
+        ]);
     }
-    
-    public function Filtros($request): Builder
-    {
+
+    public function Filtros($request): Builder {
         $viaticos = Viatico::query();
         if ($request->has('search')) {
             $viaticos = $viaticos->where(function ($query) use ($request) {
@@ -74,14 +83,13 @@ class ViaticoController extends Controller
             $viaticos = $viaticos->orderBy($request->field, $request->order);
         } else
             $viaticos = $viaticos->orderBy('updated_at', 'DESC');
-        
+
+
         return $viaticos;
     }
-    
-    
 
-    public function Dependencias()
-    {
+
+    public function Dependencias() {
         $Empleados = User::select('id', 'name')->whereHas('roles', function ($query) {
             return $query->WhereIn('name', ['supervisor', 'administrativo', 'ingeniero', 'empleado']);
         })->get()->toArray();
@@ -93,78 +101,139 @@ class ViaticoController extends Controller
 
     //</editor-fold>
 
-    public function index(Request $request): Response
-    {
-        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' viaticos '));
-//        $viaticos = $this->Mapear($this->Filtros($request));
-        $viaticos = $this->Filtros($request)->get();
-        $losSelect = $this->Dependencias();
-
+    public function PerPageAndPaginate($request, $cotizacions) {
         $perPage = $request->has('perPage') ? $request->perPage : 10;
-        return Inertia::render($this->FromController . '/Index', [
-            'fromController' => $this->PerPageAndPaginate($request,$viaticos),
-            'total' => $viaticos->count(),
-
-            'breadcrumbs' => [['label' => __('app.label.' . $this->FromController), 'href' => route($this->FromController . '.index')]],
-            'title' => __('app.label.' . $this->FromController),
-            'filters' => $request->all(['search', 'field', 'order']),
-            'perPage' => (int)$perPage,
-            'numberPermissions' => $numberPermissions,
-            'losSelect' => $losSelect ?? [],
-        ]);
+        $page = request('page', 1); // Current page number
+        $paginated = new LengthAwarePaginator(
+            $cotizacions->forPage($page, $perPage),
+            $cotizacions->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url()]
+        );
+        return $paginated;
     }
 
-    public function create()
-    {
+    public function store(Request $request): RedirectResponse {
+        $permissions = Myhelp::EscribirEnLog($this, ' Begin STORE:viaticos');
+        DB::beginTransaction();
+//        $no_nada = $request->no_nada['id'];
+        $myuser = Myhelp::AuthU();
+        $jefe = User::Where('name', 'Carlos Daniel Anaya Barrios')->first();
+        $request->merge(['user_id' => $myuser->id]);
+        $request->merge(['centro_costo_id' => $request->centro_costo_id['id']]);
+        $request->merge(['saldo' => $request->gasto]);
+//        $request->merge(['fecha_legalizacion' => Carbon::now()]);
+        $viatico = viatico::create($request->all());
+
+        if ($jefe) {
+
+            $detalle = [
+                'mensaje' => "Se ha generado un nuevo viático por un valor de $request->gasto. 
+                              El solicitante es $myuser->name y el motivo del viaje es $request->descripcion"
+            ];
+
+            EnviarViaticoJob::dispatch('ajelof2@gmail.com', $detalle)->delay(now()->addSeconds(5));
+
+//            EnviarViaticoJob::dispatch($jefe->email, $detalle)->delay(now()->addSeconds(5));
+            $mensaje = "Correo enviado y Viatico ";
+        } else {
+            $mensaje = "El Correo no pudo ser enviado, Viatico ";
+            Myhelp::EscribirEnLog($this, ' ERROR: no se encontro al jefe');
+        }
+        
+        Myhelp::EscribirEnLog($this, 'STORE:viaticos EXITOSO', 'viatico id:' . $viatico->id . ' | ' . $viatico->nombre, false);
+        DB::commit();
+        return back()->with('success', $mensaje . __('app.label.created_successfully', ['name' => $viatico->nombre]));
+
     }
 
     //! STORE - UPDATE - DELETE
     //! STORE functions
 
-    public function store(Request $request): RedirectResponse
-    {
-        $permissions = Myhelp::EscribirEnLog($this, ' Begin STORE:viaticos');
-        DB::beginTransaction();
-//        $no_nada = $request->no_nada['id'];
-        $request->merge(['user_id' => Myhelp::AuthUid()]);
-        $request->merge(['centro_costo_id' => $request->centro_costo_id['id']]);
-        $request->merge(['fecha_legalizacion' => Carbon::now()]);
-        $viatico = viatico::create($request->all());
-
-        DB::commit();
-        Myhelp::EscribirEnLog($this, 'STORE:viaticos EXITOSO', 'viatico id:' . $viatico->id . ' | ' . $viatico->nombre, false);
-        return back()->with('success', __('app.label.created_successfully', ['name' => $viatico->nombre]));
+    public function create() {
     }
 
     //fin store functions
 
-    public function show($id) {}public function edit($id) {}
+    public function show($id) {
+    }
+
+    public function edit($id) {
+    }
+
+    public function viaticoupdate2(Request $request, $id): RedirectResponse {
+        $permissions = Myhelp::EscribirEnLog($this, ' Begin UPDATE:viaticos');
+        DB::beginTransaction();
+        $viatico = viatico::findOrFail($id);
+
+//        if(gettype($request->centro_costo_id) === 'integer'){
+//            $foreign2 = $request->centro_costo_id;
+//        }
+//        else{
+//            $foreign2 = $request->centro_costo_id['id'];
+//        }
+
+
+//        $request->merge(['centro_costo_id' => $foreign2]);
+
+        $now = Carbon::now();
+        $consig = consignarViatico::create([
+            'viatico_id' => $viatico->id,
+            'valor_consig' => $request->valor_consig,
+            'fecha_consig' => $now,
+            'user_id' => Myhelp::AuthUid(),
+        ]);
+
+
+        $viatico->update([
+            'user_id' => Myhelp::AuthUid(),
+            'legalizacion' => 1,
+            'fecha_legalizacion' => $now,
+            'saldo' => $this->getSaldo($viatico),
+        ]);
+
+        DB::commit();
+        Myhelp::EscribirEnLog($this, 'UPDATE:viaticos EXITOSO', 'viatico id:' . $viatico->id . ' | ' . $viatico->nombre, false);
+        return back()->with('success', __('app.label.updated_successfully2', ['nombre' => $viatico->nombre]));
+    }
+
+    //paso2 cuando el admin APRUEBA
 
     public function update(Request $request, $id): RedirectResponse {
         $permissions = Myhelp::EscribirEnLog($this, ' Begin UPDATE:viaticos');
         DB::beginTransaction();
         $viatico = viatico::findOrFail($id);
-        
-        if(gettype($request->user_id) === 'integer'){
-            $foreign1 = $request->user_id;
-        }
-        else{
-            $foreign1 = $request->user_id['id'];
-        }
-        
-        if(gettype($request->centro_costo_id) === 'integer'){
-            $foreign2 = $request->centro_costo_id;
-        }
-        else{
-            $foreign2 = $request->centro_costo_id['id'];
-        }
-        $request->merge(['user_id' => $foreign1]);
-        $request->merge(['centro_costo_id' => $foreign2]);
+
+//        if(gettype($request->user_id) === 'integer'){
+//            $foreign1 = $request->user_id;
+//        }
+//        else{
+//            $foreign1 = $request->user_id['id'];
+//        }
+//        
+//        if(gettype($request->centro_costo_id) === 'integer'){
+//            $foreign2 = $request->centro_costo_id;
+//        }
+//        else{
+//            $foreign2 = $request->centro_costo_id['id'];
+//        }
+
+
+//        $request->merge(['user_id' => $foreign1]);
+//        $request->merge(['centro_costo_id' => $foreign2]);
         $viatico->update($request->all());
 
         DB::commit();
         Myhelp::EscribirEnLog($this, 'UPDATE:viaticos EXITOSO', 'viatico id:' . $viatico->id . ' | ' . $viatico->nombre, false);
         return back()->with('success', __('app.label.updated_successfully2', ['nombre' => $viatico->nombre]));
+    }
+
+    public function getSaldo($viatico): int {
+        $Int_viaticoSuma = (int)consignarViatico::Where('viatico_id', $viatico->id)->sum('valor_consig');
+        $saldo = (int)$viatico->gasto - $Int_viaticoSuma;
+        return $saldo;
+
     }
 
     /**
@@ -174,8 +243,7 @@ class ViaticoController extends Controller
      * @return RedirectResponse
      */
 
-    public function destroy($viaticoid)
-    {
+    public function destroy($viaticoid) {
         $permissions = Myhelp::EscribirEnLog($this, 'DELETE:viaticos');
         $viatico = viatico::find($viaticoid);
         $elnombre = $viatico->nombre;
@@ -184,12 +252,12 @@ class ViaticoController extends Controller
         return back()->with('success', __('app.label.deleted_successfully', ['name' => $elnombre]));
     }
 
-    public function destroyBulk(Request $request)
-    {
+    //FIN : STORE - UPDATE - DELETE
+
+    public function destroyBulk(Request $request) {
         $viatico = viatico::whereIn('id', $request->id);
         $viatico->delete();
         return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
     }
-    //FIN : STORE - UPDATE - DELETE
 
 }

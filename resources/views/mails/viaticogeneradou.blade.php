@@ -1,0 +1,2 @@
+
+<p>{{ $detalle['mensaje'] }}</p>

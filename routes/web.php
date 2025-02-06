@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CentroCostosController;
 use App\Http\Controllers\CentroTableController;
+use App\Http\Controllers\ConsignarViaticoController;
 use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\DeudaSingularController;
 use App\Http\Controllers\ExcelController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ServiciosController;
 use App\Http\Controllers\UbicacionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ViaticoController;
 use App\Http\Controllers\ZipController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -96,8 +98,9 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::resource("/cotizacion", CotizacionController::class);
     Route::put('/cotiza/{id}', [CotizacionController::class, 'update2'])->name('cotizacion.update2');
     Route::get('/deuda', [DeudaSingularController::class, 'index'])->name('deuda.index');
-	Route::resource("/viatico", \App\Http\Controllers\ViaticoController::class);
-	Route::resource("/consignarViatico", \App\Http\Controllers\ConsignarViaticoController::class);
+	Route::resource("/viatico", ViaticoController::class);
+	Route::resource("/consignarViatico", ConsignarViaticoController::class);
+    Route::put('/viaticoupdate2/{id}', [ViaticoController::class, 'viaticoupdate2'])->name('viaticoupdate2');
 	//aquipues
 }); //fin verified
 
