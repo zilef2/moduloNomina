@@ -48,8 +48,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property mixed $roles
  * @property mixed $name
  */
-class User extends Authenticatable
-{
+class User extends Authenticatable {
     use HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes;
 
     /**
@@ -73,62 +72,68 @@ class User extends Authenticatable
         //12 abril
         'numero_contrato',
     ];
-
-    private mixed $salario;
-
     /**
      * * The attributes that should be hidden for serialization. * *
      *
      * @var array<int, string>
      */
     protected $hidden = ['password', 'remember_token'];
+    private mixed $salario;
 
-    public function getFechaIngreso()
-    {
+    public static function UsersWithRol($rol) {
+        return User::whereHas('roles', function ($query) use ($rol) {
+            return $query->where('name', $rol);
+        });
+    }
+
+    public static function UsersWithManyRols($ArrayRoles) {
+        return User::whereHas('roles', function ($query) use ($ArrayRoles) {
+            return $query->whereIn('name', $ArrayRoles);
+        });
+    }
+
+    public static function usuariosConCentros(): array {
+        return self::with('centros:id')
+            ->get()
+            ->mapWithKeys(function ($user) {
+                return [$user->id => $user->centros->pluck('id')->toArray()];
+            })
+            ->toArray();
+    }
+
+    public function getFechaIngreso() {
         return date('d-m-Y', strtotime($this->attributes['fecha_ingreso']));
     }
 
-    public function getCreatedAtAttribute()
-    {
+    public function getCreatedAtAttribute() {
         return date('d-m-Y H:i', strtotime($this->attributes['created_at']));
     }
 
-    public function getUpdatedAtAttribute()
-    {
+    //fin permissions
+
+    public function getUpdatedAtAttribute() {
         return date('d-m-Y H:i', strtotime($this->attributes['updated_at']));
     }
 
-    public function getEmailVerifiedAtAttribute()
-    {
+    public function getEmailVerifiedAtAttribute() {
         return $this->attributes['email_verified_at'] == null ? null : date('d-m-Y H:i', strtotime($this->attributes['email_verified_at']));
     }
 
-    public function getPermissionArray()
-    {
+    public function getPermissionArray() {
         return $this->getAllPermissions()->mapWithKeys(function ($pr) {
             return [$pr['name'] => true];
         });
     }
 
-    //fin permissions
-
-    public function reportes(): HasMany
-    {
+    public function reportes(): HasMany {
         return $this->hasMany('App\Models\Reporte');
     }
 
-    public function cargo(): BelongsTo
-    {
+    public function cargo(): BelongsTo {
         return $this->belongsTo(Cargo::class);
     }
 
-    public function centros(): BelongsToMany
-    {
-        return $this->belongsToMany(CentroCosto::class, 'centro_user');
-    }
-
-    public function ArrayCentrosID()
-    {
+    public function ArrayCentrosID() {
         $result = [];
         if (!$this->centros->isEmpty()) {
             foreach ($this->centros as $centro) {
@@ -138,8 +143,7 @@ class User extends Authenticatable
         return $result;
     }
 
-    public function ArraycentroName($numeroDeCentros = 0): array|string
-    {
+    public function ArraycentroName($numeroDeCentros = 0): array|string {
         if (!$this->centros->isEmpty()) {
             if ($numeroDeCentros != 0) {
                 $arrayNombres = [];
@@ -147,52 +151,44 @@ class User extends Authenticatable
                     $tempCentro = $this->centros->skip($i)->first();
                     if (isset($tempCentro)) {
                         $arrayNombres[] = $this->centros->skip($i)->first()->nombre;
-                    } else {
+                    }
+                    else {
                         break;
                     }
                 }
-            } else {
+            }
+            else {
                 foreach ($this->centros as $index => $centro) {
                     $arrayNombres[] = $centro->nombre;
                 }
             }
             $result = $arrayNombres;
-        } else {
+        }
+        else {
             $result = 'Sin centros';
         }
 
         return $result;
     }
 
-    public static function UsersWithRol($rol)
-    {
-        return User::whereHas('roles', function ($query) use ($rol) {
-            return $query->where('name', $rol);
-        });
-    }
-
-    public static function UsersWithManyRols($ArrayRoles)
-    {
-        return User::whereHas('roles', function ($query) use ($ArrayRoles) {
-            return $query->whereIn('name', $ArrayRoles);
-        });
-    }
-
-    public function TieneEsteCentro($centroid)
-    {
+    public function TieneEsteCentro($centroid) {
         $susCentros = $this->centros()->pluck('centro_costos.id')->toArray();
         $result = in_array($centroid, $susCentros);
 
         return $result;
     }
 
-    public static function usuariosConCentros(): array
-    {
-        return self::with('centros:id')
-            ->get()
-            ->mapWithKeys(function ($user) {
-                return [$user->id => $user->centros->pluck('id')->toArray()];
-            })
-            ->toArray();
+    public function centros(): BelongsToMany {
+        return $this->belongsToMany(CentroCosto::class, 'centro_user');
     }
+
+    public function resetPasswordToCedula(): void {
+        $this->password = \Illuminate\Support\Facades\Hash::make($this->cedula . '*');
+        $this->save();
+    }//        public function resetPassword($id) {
+//        $user = User::findOrFail($id);
+//        $user->resetPasswordToCedula();
+//
+//        return response()->json(['message' => 'Contraseña de '.$user->name.' restablecida correctamente']);
+//    }
 }

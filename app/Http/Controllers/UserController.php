@@ -31,21 +31,18 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use ZipStream\OperationMode;
 
 
-class UserController extends Controller
-{
-    public function __construct()
-    {
+class UserController extends Controller {
+    public function __construct() {
         $this->middleware('permission:create user', ['only' => ['create', 'store']]);
         $this->middleware('permission:read user', ['only' => ['index', 'show']]);
         $this->middleware('permission:update user', ['only' => ['edit', 'update']]);
         $this->middleware('permission:delete user', ['only' => ['destroy', 'destroyBulk']]);
     }
 
-    public function Dashboard()
-    {
+    public function Dashboard() {
         $ListaControladoresYnombreClase = (explode('\\', get_class($this)));
         $nombreC = end($ListaControladoresYnombreClase);
-        Myhelp::EscribirEnLog($this, $nombreC, ' U -> '.Auth::user()->name.' Accedio al dashboard ', false);
+        Myhelp::EscribirEnLog($this, $nombreC, ' U -> ' . Auth::user()->name . ' Accedio al dashboard ', false);
 
         $Authuser = Myhelp::AuthU();
         $userid = $Authuser->id;
@@ -56,12 +53,13 @@ class UserController extends Controller
         if ($numberPermissions === 1) {
             return redirect()->route('Reportes.index')->with('success', 'Bienvenido');
             // $reportes = (int) Reporte::Where('user_id', $Authuser->id)->count();
-        } else {
-            $reportes = (int) Reporte::count();
+        }
+        else {
+            $reportes = (int)Reporte::count();
 
             if ($numberPermissions === 3) {
                 $centroMio = $Authuser->ArrayCentrosID();
-                $reportes = (int) Reporte::WhereIn('centro_costo_id', $centroMio)->count();
+                $reportes = (int)Reporte::WhereIn('centro_costo_id', $centroMio)->count();
 
                 $ultimos5dias = [
                     'Mes pasado' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->where('fecha_ini', '<', Carbon::today()->addMonth(-1))->get()->count(),
@@ -80,7 +78,8 @@ class UserController extends Controller
                     'Mes actual' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereIn('valido', [0, 2])->where('fecha_ini', '>', Carbon::today()->startOfMonth())->get()->count(),
                 ];
 
-            } else {
+            }
+            else {
                 $ultimos5dias = [
                     'Mes pasado' => Reporte::whereValido(1)->where('fecha_ini', '<', Carbon::today()->addMonth(-1))->get()->count(),
 
@@ -108,7 +107,8 @@ class UserController extends Controller
 
                 if ($BooleanreportoHoy !== null) {
                     $trabajadoresHoy[$value->name] = $BooleanreportoHoy->horas_trabajadas;
-                } else {
+                }
+                else {
                     $trabajadoresHoy[$value->name] = 0;
                 }
             }
@@ -118,7 +118,8 @@ class UserController extends Controller
                 $BooleanReporteCentro = Reporte::where('centro_costo_id', $value->id)->whereDate('fecha_fin', Carbon::today())->sum('horas_trabajadas');
                 if ($BooleanReporteCentro !== null) {
                     $centrosHoy[$value->nombre] = $BooleanReporteCentro;
-                } else {
+                }
+                else {
                     $centrosHoy[$value->nombre] = 0;
                 }
             }
@@ -134,9 +135,9 @@ class UserController extends Controller
         return Inertia::render('Dashboard',
             [
                 'versionZilef' => '0.9.1',
-                'users' => (int) User::count(),
-                'roles' => (int) Role::count(),
-                'permissions' => (int) Permission::count(),
+                'users' => (int)User::count(),
+                'roles' => (int)Role::count(),
+                'permissions' => (int)Permission::count(),
                 'reportes' => $reportes,
                 'ultimos5dias' => $ultimos5dias,
                 'diasNovalidos' => $diasNovalidos ?? [],
@@ -148,54 +149,8 @@ class UserController extends Controller
     }
 
     //empieza el index
-    public function MapearClasePP(&$users, $numberPermissions)
-    {
-        $users = $users->get()->map(function ($user) {
-            $user->cc = is_string($user->ArraycentroName()) ? $user->ArraycentroName() : implode(',', $user->ArraycentroName());
 
-            return $user;
-        })->filter();
-    }
-
-    public function Busqueda(UserIndexRequest $request, $isTrashed = false)
-    {
-        if ($isTrashed === 'trashed') {
-            $users = User::query()->with('roles', 'cargo')->onlyTrashed();
-            if ($request->has('search')) {
-                $users->where('name', 'LIKE', '%'.$request->search.'%');
-            }
-        } else {
-            $users = User::query()->with('roles', 'cargo');
-            if ($request->has('search')) {
-                $users->where('name', 'LIKE', '%'.$request->search.'%');
-                $users->orWhere('email', 'LIKE', '%'.$request->search.'%');
-                $users->orWhere('cedula', 'LIKE', '%'.$request->search.'%');
-            }
-        }
-
-        if ($request->has(['field', 'order'])) {
-            //            dd($request->field, $request->order);
-            $users->orderBy($request->field, $request->order);
-        } else {
-            $users->orderByDesc('updated_at');
-
-        }
-
-        if ($request->has(['onlySupervis'])) {
-            $users->whereHas('roles', function ($query) {
-                return $query->where('name', 'supervisor');
-            });
-        }
-        if ($isTrashed === 'trashed') {
-            $users = $users->onlyTrashed();
-        }
-
-        //        MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'users'));
-        return $users;
-    }
-
-    public function index(UserIndexRequest $request)
-    {
+    public function index(UserIndexRequest $request) {
         $permissions = Myhelp::EscribirEnLog($this, ' users');
         $numberPermissions = MyModels::getPermissionToNumber($permissions);
         $users = $this->Busqueda($request);
@@ -246,26 +201,65 @@ class UserController extends Controller
         return Inertia::render('User/Index', [
             'title' => __('app.label.user'),
             'filters' => $request->all(['search', 'field', 'order']),
-            'perPage' => (int) $perPage,
+            'perPage' => (int)$perPage,
             'users' => $paginated,
             'roles' => $roles,
             'cargos' => $cargos,
             'centros' => $centros,
             'sexoSelect' => $sexoSelect,
             'superviNullCentro' => $superviNullCentro,
+            'numberPermissions' => $numberPermissions,
             'breadcrumbs' => [['label' => __('app.label.user'), 'href' => route('user.index')]],
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create() {}
+    public function Busqueda(UserIndexRequest $request, $isTrashed = false) {
+        if ($isTrashed === 'trashed') {
+            $users = User::query()->with('roles', 'cargo')->onlyTrashed();
+            if ($request->has('search')) {
+                $users->where('name', 'LIKE', '%' . $request->search . '%');
+            }
+        }
+        else {
+            $users = User::query()->with('roles', 'cargo');
+            if ($request->has('search')) {
+                $users->where('name', 'LIKE', '%' . $request->search . '%');
+                $users->orWhere('email', 'LIKE', '%' . $request->search . '%');
+                $users->orWhere('cedula', 'LIKE', '%' . $request->search . '%');
+            }
+        }
 
-    public function store(UserStoreRequest $request)
-    {
+        if ($request->has(['field', 'order'])) {
+            //            dd($request->field, $request->order);
+            $users->orderBy($request->field, $request->order);
+        }
+        else {
+            $users->orderByDesc('updated_at');
+
+        }
+
+        if ($request->has(['onlySupervis'])) {
+            $users->whereHas('roles', function ($query) {
+                return $query->where('name', 'supervisor');
+            });
+        }
+        if ($isTrashed === 'trashed') {
+            $users = $users->onlyTrashed();
+        }
+
+        //        MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'users'));
+        return $users;
+    }
+
+    public function MapearClasePP(&$users, $numberPermissions) {
+        $users = $users->get()->map(function ($user) {
+            $user->cc = is_string($user->ArraycentroName()) ? $user->ArraycentroName() : implode(',', $user->ArraycentroName());
+
+            return $user;
+        })->filter();
+    }
+
+    public function store(UserStoreRequest $request) {
         Myhelp::EscribirEnLog($this, 'users');
         DB::beginTransaction();
 
@@ -276,7 +270,7 @@ class UserController extends Controller
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make($request->cedula.'*'),
+                'password' => Hash::make($request->cedula . '*'),
                 // 'password' => Hash::make($request->password),
                 'cargo_id' => $request->cargo,
                 'cedula' => $request->cedula,
@@ -296,16 +290,25 @@ class UserController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
 
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.user')]).$th->getMessage());
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.user')]) . $th->getMessage());
         }
     }
 
-    public function show($id) {}
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create() {
+    }
 
-    public function edit($id) {}
+    public function show($id) {
+    }
 
-    public function update(Request $request, $id)
-    {
+    public function edit($id) {
+    }
+
+    public function update(Request $request, $id) {
         Myhelp::EscribirEnLog($this, 'users');
         DB::beginTransaction();
         try {
@@ -319,7 +322,8 @@ class UserController extends Controller
                     }
                 }
                 $user->centros()->sync($cents);
-            } else {
+            }
+            else {
                 //1-2))update normalito
                 $user->update([
                     'name' => $request->name,
@@ -342,12 +346,11 @@ class UserController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
 
-            return back()->with('error', __('app.label.updated_error', ['name' => $user->name]).$th->getMessage());
+            return back()->with('error', __('app.label.updated_error', ['name' => $user->name]) . $th->getMessage());
         }
     }
 
-    public function destroy(User $user)
-    {
+    public function destroy(User $user) {
         Myhelp::EscribirEnLog($this, 'users');
         try {
             $susReportes = $user->reportes()->get();
@@ -368,15 +371,14 @@ class UserController extends Controller
             //                return back()->with('warning',$mensajeLog);
             //            }
         } catch (\Throwable $th) {
-            $mensajeLog = $th->getMessage().' - File:'.$th->getFile().' - LINE:'.$th->getLine();
+            $mensajeLog = $th->getMessage() . ' - File:' . $th->getFile() . ' - LINE:' . $th->getLine();
             Myhelp::EscribirEnLog($this, 'DELETE users', $mensajeLog);
 
-            return back()->with('error', __('app.label.deleted_error', ['name' => $user->name]).$mensajeLog);
+            return back()->with('error', __('app.label.deleted_error', ['name' => $user->name]) . $mensajeLog);
         }
     }
 
-    public function Recontratar($userid)
-    {
+    public function Recontratar($userid) {
         $user = User::withTrashed()->Where('id', $userid)->first();
         Myhelp::EscribirEnLog($this, 'users Recontratar ');
         try {
@@ -384,25 +386,23 @@ class UserController extends Controller
 
             return back()->with('success', __('app.label.recontratado_successfully', ['name' => $user->name]));
         } catch (\Throwable $th) {
-            return back()->with('error', __('app.label.deleted_error', ['name' => $user->name]).$th->getMessage());
+            return back()->with('error', __('app.label.deleted_error', ['name' => $user->name]) . $th->getMessage());
         }
     }
 
-    public function destroyBulk(Request $request)
-    {
+    public function destroyBulk(Request $request) {
         Myhelp::EscribirEnLog($this, ' |users Bulk| ');
         try {
             $user = User::whereIn('id', $request->id);
             $user->delete();
 
-            return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id).' '.__('app.label.user')]));
+            return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
         } catch (\Throwable $th) {
-            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id).' '.__('app.label.user')]).$th->getMessage());
+            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.user')]) . $th->getMessage());
         }
     }
 
-    public function FunctionUploadFromEx(Request $request)
-    {
+    public function FunctionUploadFromEx(Request $request) {
         Myhelp::EscribirEnLog($this, 'users FunctionUploadFromEx');
         //        $usersQuery = User::Select('id','name','cedula','cargo_id','salario')->WhereHas("roles", function($q){
         $usersQuery = User::query()->WhereHas('roles', function ($q) {
@@ -417,9 +417,9 @@ class UserController extends Controller
         $iniFormat = '';
         $finFormat = '';
         if ($request->quincena && $request->fecha_ini) {
-            $quincena = (int) ($request->quincena);
-            $year = (int) ($request->fecha_ini['year']);
-            $month = (int) ($request->fecha_ini['month']) + 1;
+            $quincena = (int)($request->quincena);
+            $year = (int)($request->fecha_ini['year']);
+            $month = (int)($request->fecha_ini['month']) + 1;
             $NumReportesIniFin = $this->CalcularIniFinQuincena($quincena, $month, $year);
             $iniFormat = Carbon::parse($NumReportesIniFin['ini'])->format('d-m-Y');
             $finFormat = Carbon::parse($NumReportesIniFin['fin'])->format('d-m-Y');
@@ -444,115 +444,16 @@ class UserController extends Controller
         ]);
     }
 
-    public function FunctionUploadFromExPost(Request $request) //import
-    {
-        Myhelp::EscribirEnLog($this, 'users FunctionUploadFromExPost');
-        $exten = $request->archivo1->getClientOriginalExtension();
-        // Validar que el archivo es de Excel
-        if ($exten != 'xlsx' && $exten != 'xls') {
-            return back()->with('warning', 'El archivo debe ser de Excel');
-        }
-        $pesoKilobyte = ((int) ($request->archivo1->getSize())) / (1024);
-        if ($pesoKilobyte > 1256) { //debe pesar menos de 1MB +-
-            return back()->with('warning', 'El archivo debe pesar menos de 1MB');
-        }
-
-        try {
-            $import = new UsersImport;
-            $import->import($request->archivo1);
-
-            $CountFilas = session('CountFilas');
-            $usuariosActualizados = session('usuariosActualizados', []);
-            $countNoleidos = session('countNoleidos', 0);
-            $countNoCargo = session('countNoCargo', 0);
-            $countSex = session('countSex', 0);
-            $countCedulaRepetida = session('countCedulaRepetida', 0);
-
-            session(['CountFilas' => 0]);
-            session(['countNoleidos' => 0]);
-            session(['countNoCargo' => 0]);
-            session(['countSex' => 0]);
-            session(['usuariosActualizados' => []]);
-            if ($countNoleidos == 0 && $countNoCargo == 0 && $countSex == 0 && $countCedulaRepetida == 0) {
-                $messageSuccess1 = 'Usuarios nuevos: '.$CountFilas;
-            } else {
-
-                $messageSuccess1 = 'Usuarios nuevos: '.$CountFilas.
-                '.  Hubo '.($countNoleidos).' no leidas, ';
-
-                $partSuccess1 = $countNoCargo > 0 ? $countNoCargo.' con cargo erroneo, ' : '';
-                $messageSuccess1 .= $partSuccess1;
-
-                $partSuccess1 = $countSex > 0 ? $countSex.' genero mal escrito, ' : '';
-                $messageSuccess1 .= $partSuccess1;
-
-                $partSuccess1 = $countCedulaRepetida > 0 ? $countCedulaRepetida.' identificacion mal escrita, ' : '';
-                $messageSuccess1 .= $partSuccess1;
-            }
-            if (count($usuariosActualizados) > 0) {
-                $StringUsuariosRep = implode(', ', $usuariosActualizados);
-                session(['countCedulaRepetida' => 0]);
-
-                return back()->with('success', $messageSuccess1)
-                    ->with('warning', count($usuariosActualizados).' Usuarios actualizados: '.$StringUsuariosRep);
-            } else {
-                return back()->with('success', $messageSuccess1);
-            }
-
-        } catch (ValidationException $e) {
-            $failures = $e->failures();
-            $lasRowMalas = [];
-            foreach ($failures as $failure) {
-                $lasRowMalas[] = $failure->row(); // row that went wrong
-                // $failure->attribute(); // either heading key (if using heading row concern) or column index
-                // $failure->errors(); // Actual error messages from Laravel validator
-                // $failure->values(); // The values of the row that has failed.
-            }
-            $StringlasRowMalas = implode(', ', $lasRowMalas);
-            session(['CountFilas' => 0]);
-            session(['countNoleidos' => 0]);
-            session(['usuariosActualizados' => []]);
-
-            // if (config('app.env') === 'production') {
-            return back()->with('warning', 'Error Excel. '.$e->getMessage().'. filas con errores: '.$StringlasRowMalas);
-            // }else{
-            //     return back()
-            //     ->with('error', 'Error en el proceso de Excel. ' . $lasRowMalas)
-            // }
-        }
-    }
-
-    //exportar el formato unico de ECnomina
-    public function export(Request $request)
-    {
-        Myhelp::EscribirEnLog($this, 'users export');
-        $ArrayDatesFest = session('datesFest');
-        $quincena = (int) ($request->quincena);
-
-        $year = (int) ($request->year);
-        $month = (int) ($request->month) + 1;
-        $NumReportesIniFin = $this->CalcularIniFinQuincena($quincena, $month, $year);
-        $NumeroDiasFestivos = (int) ($request->NumeroDiasFestivos);
-        if ($NumReportesIniFin['NumReportes'] > 0) {
-            return Excel::download(new UsersExport($NumReportesIniFin['ini'], $NumReportesIniFin['fin'], $NumeroDiasFestivos, $ArrayDatesFest),
-                ''.$year.'Quincena'.$quincena.'DelMes'.$month.'.xlsx'
-            );
-        } else {
-            return redirect()->route('user.uploadexcel')->with('warning', 'No hay reportes, en el rango de fechas seleccionadas');
-        }
-        // return view('reporte1temp',$ini,$fin);
-    }
-
-    private function CalcularIniFinQuincena($quincena, $month, $year)
-    {
-        $ini = Carbon::createFromFormat('d/m/Y', '1/'.$month.'/'.$year)->setHour(0)->setminutes(0);
-        $fin = Carbon::createFromFormat('d/m/Y', '1/'.$month.'/'.$year)->setHour(23)->setminutes(0);
+    private function CalcularIniFinQuincena($quincena, $month, $year) {
+        $ini = Carbon::createFromFormat('d/m/Y', '1/' . $month . '/' . $year)->setHour(0)->setminutes(0);
+        $fin = Carbon::createFromFormat('d/m/Y', '1/' . $month . '/' . $year)->setHour(23)->setminutes(0);
         if ($quincena == 1) {
             $fin->addDays(14); //antes era 12
-        } else {
+        }
+        else {
             $ini->addDays(15); //
             $fin->addMonths(1)->addDays(-1); //antes era -4
-            $nombreDiaSemana = (int) ($fin->format('d'));
+            $nombreDiaSemana = (int)($fin->format('d'));
 
             if ($nombreDiaSemana == 31) {
                 $fin->addDays(-1);
@@ -585,21 +486,144 @@ class UserController extends Controller
         ];
     }
 
-    private function SeeNumbersOfReporters(Request $request)
+    //exportar el formato unico de ECnomina
+
+    public function FunctionUploadFromExPost(Request $request) //import
     {
+        Myhelp::EscribirEnLog($this, 'users FunctionUploadFromExPost');
+        $exten = $request->archivo1->getClientOriginalExtension();
+        // Validar que el archivo es de Excel
+        if ($exten != 'xlsx' && $exten != 'xls') {
+            return back()->with('warning', 'El archivo debe ser de Excel');
+        }
+        $pesoKilobyte = ((int)($request->archivo1->getSize())) / (1024);
+        if ($pesoKilobyte > 1256) { //debe pesar menos de 1MB +-
+            return back()->with('warning', 'El archivo debe pesar menos de 1MB');
+        }
+
+        try {
+            $import = new UsersImport;
+            $import->import($request->archivo1);
+
+            $CountFilas = session('CountFilas');
+            $usuariosActualizados = session('usuariosActualizados', []);
+            $countNoleidos = session('countNoleidos', 0);
+            $countNoCargo = session('countNoCargo', 0);
+            $countSex = session('countSex', 0);
+            $countCedulaRepetida = session('countCedulaRepetida', 0);
+
+            session(['CountFilas' => 0]);
+            session(['countNoleidos' => 0]);
+            session(['countNoCargo' => 0]);
+            session(['countSex' => 0]);
+            session(['usuariosActualizados' => []]);
+            if ($countNoleidos == 0 && $countNoCargo == 0 && $countSex == 0 && $countCedulaRepetida == 0) {
+                $messageSuccess1 = 'Usuarios nuevos: ' . $CountFilas;
+            }
+            else {
+
+                $messageSuccess1 = 'Usuarios nuevos: ' . $CountFilas .
+                    '.  Hubo ' . ($countNoleidos) . ' no leidas, ';
+
+                $partSuccess1 = $countNoCargo > 0 ? $countNoCargo . ' con cargo erroneo, ' : '';
+                $messageSuccess1 .= $partSuccess1;
+
+                $partSuccess1 = $countSex > 0 ? $countSex . ' genero mal escrito, ' : '';
+                $messageSuccess1 .= $partSuccess1;
+
+                $partSuccess1 = $countCedulaRepetida > 0 ? $countCedulaRepetida . ' identificacion mal escrita, ' : '';
+                $messageSuccess1 .= $partSuccess1;
+            }
+            if (count($usuariosActualizados) > 0) {
+                $StringUsuariosRep = implode(', ', $usuariosActualizados);
+                session(['countCedulaRepetida' => 0]);
+
+                return back()->with('success', $messageSuccess1)
+                    ->with('warning', count($usuariosActualizados) . ' Usuarios actualizados: ' . $StringUsuariosRep);
+            }
+            else {
+                return back()->with('success', $messageSuccess1);
+            }
+
+        } catch (ValidationException $e) {
+            $failures = $e->failures();
+            $lasRowMalas = [];
+            foreach ($failures as $failure) {
+                $lasRowMalas[] = $failure->row(); // row that went wrong
+                // $failure->attribute(); // either heading key (if using heading row concern) or column index
+                // $failure->errors(); // Actual error messages from Laravel validator
+                // $failure->values(); // The values of the row that has failed.
+            }
+            $StringlasRowMalas = implode(', ', $lasRowMalas);
+            session(['CountFilas' => 0]);
+            session(['countNoleidos' => 0]);
+            session(['usuariosActualizados' => []]);
+
+            // if (config('app.env') === 'production') {
+            return back()->with('warning', 'Error Excel. ' . $e->getMessage() . '. filas con errores: ' . $StringlasRowMalas);
+            // }else{
+            //     return back()
+            //     ->with('error', 'Error en el proceso de Excel. ' . $lasRowMalas)
+            // }
+        }
+    }
+
+    public function export(Request $request) {
+        Myhelp::EscribirEnLog($this, 'users export');
+        $ArrayDatesFest = session('datesFest');
+        $quincena = (int)($request->quincena);
+
+        $year = (int)($request->year);
+        $month = (int)($request->month) + 1;
+        $NumReportesIniFin = $this->CalcularIniFinQuincena($quincena, $month, $year);
+        $NumeroDiasFestivos = (int)($request->NumeroDiasFestivos);
+        if ($NumReportesIniFin['NumReportes'] > 0) {
+            return Excel::download(new UsersExport($NumReportesIniFin['ini'], $NumReportesIniFin['fin'], $NumeroDiasFestivos, $ArrayDatesFest),
+                '' . $year . 'Quincena' . $quincena . 'DelMes' . $month . '.xlsx'
+            );
+        }
+        else {
+            return redirect()->route('user.uploadexcel')->with('warning', 'No hay reportes, en el rango de fechas seleccionadas');
+        }
+        // return view('reporte1temp',$ini,$fin);
+    }
+
+    public function getNumReportesSiigo(Request $request) {
+        $NumReporteSigo = $this->SeeNumbersOfReporters($request);
+        $ini = $NumReporteSigo['ini'];
+        $fin = $NumReporteSigo['fin'];
+
+        return Inertia::render('User/uploadFromExcel', [
+            'title' => __('app.label.user'),
+            'breadcrumbs' => [['label' => __('app.label.user'), 'href' => route('user.index')]],
+            // 'NumUsers'          => $NumUsers,
+            'NumReportes' => $NumReportesIniFin['NumReportes'] ?? 0,
+            'NumReportesRecha' => $NumReportesIniFin['NumReportesRecha'] ?? 0,
+            'NumReportesSinval' => $NumReportesIniFin['NumReportesSinval'] ?? 0,
+            'ini' => $ini,
+            'fin' => $fin,
+            // 'haySinsalario'     => $haySinsalario,
+            'NumReportesSigo' => $NumReporteSigo['NumReportesSigo'] ?? 0,
+            'NumReportesRechaSigo' => $NumReporteSigo['NumReportesRechaSigo'] ?? 0,
+            'NumReportesSinvalSigo' => $NumReporteSigo['NumReportesSinvalSigo'] ?? 0,
+        ]);
+    }
+
+    private function SeeNumbersOfReporters(Request $request) {
         Myhelp::EscribirEnLog($this, ' | getNumReportesSiigo | ');
 
-        $quincena = (int) ($request->quincena);
-        $year = (int) ($request->year);
-        $month = (int) ($request->month) + 1;
-        $ini = Carbon::createFromFormat('d/m/Y', '1/'.$month.'/'.$year)->setHour(0);
-        $fin = Carbon::createFromFormat('d/m/Y', '1/'.$month.'/'.$year)->setHour(23);
+        $quincena = (int)($request->quincena);
+        $year = (int)($request->year);
+        $month = (int)($request->month) + 1;
+        $ini = Carbon::createFromFormat('d/m/Y', '1/' . $month . '/' . $year)->setHour(0);
+        $fin = Carbon::createFromFormat('d/m/Y', '1/' . $month . '/' . $year)->setHour(23);
 
         //? NOTE:: values 15-30
         if ($quincena == 1) {
             // $ini->addDays(-3);
             $fin->addDays(14); //antes era 12
-        } else {
+        }
+        else {
             $ini->addDays(15);
             $fin->addMonths(1)->addDays(-1); //antes era -4
         }
@@ -637,31 +661,8 @@ class UserController extends Controller
         return $NumReporteSigo;
     }
 
-    public function getNumReportesSiigo(Request $request)
-    {
-        $NumReporteSigo = $this->SeeNumbersOfReporters($request);
-        $ini = $NumReporteSigo['ini'];
-        $fin = $NumReporteSigo['fin'];
-
-        return Inertia::render('User/uploadFromExcel', [
-            'title' => __('app.label.user'),
-            'breadcrumbs' => [['label' => __('app.label.user'), 'href' => route('user.index')]],
-            // 'NumUsers'          => $NumUsers,
-            'NumReportes' => $NumReportesIniFin['NumReportes'] ?? 0,
-            'NumReportesRecha' => $NumReportesIniFin['NumReportesRecha'] ?? 0,
-            'NumReportesSinval' => $NumReportesIniFin['NumReportesSinval'] ?? 0,
-            'ini' => $ini,
-            'fin' => $fin,
-            // 'haySinsalario'     => $haySinsalario,
-            'NumReportesSigo' => $NumReporteSigo['NumReportesSigo'] ?? 0,
-            'NumReportesRechaSigo' => $NumReporteSigo['NumReportesRechaSigo'] ?? 0,
-            'NumReportesSinvalSigo' => $NumReporteSigo['NumReportesSinvalSigo'] ?? 0,
-        ]);
-    }
-
-    public function downloadsigo(Request $request): BinaryFileResponse|RedirectResponse
-    {
-        $NumeroDiasFestivos = (int) ($request->NumeroDiasFestivos);
+    public function downloadsigo(Request $request): BinaryFileResponse|RedirectResponse {
+        $NumeroDiasFestivos = (int)($request->NumeroDiasFestivos);
         $NumReporteSigo = $this->SeeNumbersOfReporters($request);
 
         $ini = $NumReporteSigo['ini'];
@@ -672,7 +673,7 @@ class UserController extends Controller
             $year = $NumReporteSigo['year'];
             $month = $NumReporteSigo['month'];
 
-            
+
             return Excel::download(
                 new SiigoExport($ini, $fin, $NumeroDiasFestivos),
                 'Siigo ' . $year . 'Quincena' . $quincena . 'DelMes' . $month . '.xlsx'
@@ -681,15 +682,14 @@ class UserController extends Controller
 
 
         return redirect()->route('user.uploadexcel')->with('warning',
-            'El numero de reportes en esa quincena es 0. '.
-            'formato de la fecha: Año - Mes - dia. '.
-            'fecha inicial: '.$ini->format('Y-m-d').' - '.
-            'fecha final: '.$fin->format('Y-m-d')
+            'El numero de reportes en esa quincena es 0. ' .
+            'formato de la fecha: Año - Mes - dia. ' .
+            'fecha inicial: ' . $ini->format('Y-m-d') . ' - ' .
+            'fecha final: ' . $fin->format('Y-m-d')
         );
     }
 
-    public function showReporte($id)
-    {
+    public function showReporte($id) {
         Myhelp::EscribirEnLog($this, 'users showreporte');
         // $centroCostos = centroCosto::findOrFail($id);
         $Reportes = Reporte::query();
@@ -712,7 +712,8 @@ class UserController extends Controller
         }
 
         if ($permissions === 'empleado') { //NO admin | administrativo
-        } else { // not empleado
+        }
+        else { // not empleado
             // $ReportesEsteMes = Reporte::WhereMonth('fecha_ini',$esteMes)->get()->count();
             $titulo = $this->CalcularTituloQuincena($permissions);
 
@@ -726,7 +727,7 @@ class UserController extends Controller
             // ];
             $nombresTabla = [//0: como se ven //1 como es la BD
 
-                ['Acciones', '#', 'Centro costo', 'Trabajador', 'valido',   'inicio', 'fin', 'horas trabajadas',  'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', 'observaciones'],
+                ['Acciones', '#', 'Centro costo', 'Trabajador', 'valido', 'inicio', 'fin', 'horas trabajadas', 'diurnas', 'nocturnas', 'extra diurnas', 'extra nocturnas', 'dominical diurno', 'dominical nocturno', 'dominical extra diurno', 'dominical extra nocturno', 'observaciones'],
                 ['b_valido', 't_fecha_ini', 't_fecha_fin', 'i_horas_trabajadas', 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno', 's_observaciones'], //m for money || t for datetime || d date || i for integer || s string || b boolean
                 [null, null, null, null, 'b_valido', 't_fecha_ini', 't_fecha_fin', 'i_horas_trabajadas', 'i_diurnas', 'i_nocturnas', 'i_extra_diurnas', 'i_extra_nocturnas', 'i_dominical_diurno', 'i_dominical_nocturno', 'i_dominical_extra_diurno', 'i_dominical_extra_nocturno', 's_observaciones'], //m for money || t for datetime || d date || i for integer || s string || b boolean
             ];
@@ -740,7 +741,7 @@ class UserController extends Controller
             $diasSemana = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'];
             foreach ($quincena as $key => $value) {
                 // dd($value->fecha_ini);
-                $laKey = $diasSemana[$key].Carbon::createFromFormat('Y-m-d H:i:s', $value->fecha_ini)->format('d');
+                $laKey = $diasSemana[$key] . Carbon::createFromFormat('Y-m-d H:i:s', $value->fecha_ini)->format('d');
                 // dd($laKey);
                 $quincena[$laKey] = $value->horas_trabajadas;
                 unset($quincena[$key]);
@@ -757,7 +758,7 @@ class UserController extends Controller
         return Inertia::render('Reportes/Index', [ //carpeta
             'title' => $titulo,
             'filters' => null,
-            'perPage' => (int) $perPage,
+            'perPage' => (int)$perPage,
             'fromController' => $Reportes->paginate($perPage),
             'breadcrumbs' => [['label' => __('app.label.Reportes'), 'href' => route('Reportes.index')]],
             'nombresTabla' => $nombresTabla,
@@ -772,8 +773,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function CalcularTituloQuincena($permissions)
-    {
+    public function CalcularTituloQuincena($permissions) {
         $esteMes = date('m');
         $diaquincena = date('d');
         if ($permissions === 'empleado') { //NO admin | administrativo
@@ -782,26 +782,28 @@ class UserController extends Controller
                 $horasTrabajadas = Reporte::WhereMonth('fecha_ini', $esteMes)->WhereDay('fecha_ini', '<=', 15)
                     ->where('user_id', $userid)
                     ->sum('horas_trabajadas');
-            } else {
+            }
+            else {
                 $horasTrabajadas = Reporte::WhereMonth('fecha_ini', $esteMes)->WhereDay('fecha_ini', '>', 15)
                     ->where('user_id', $userid)
                     ->sum('horas_trabajadas');
             }
-        } else {
+        }
+        else {
             if ($diaquincena <= 15) {
                 $horasTrabajadas = Reporte::WhereMonth('fecha_ini', $esteMes)->WhereDay('fecha_ini', '<=', 15)
                     ->sum('horas_trabajadas');
-            } else {
+            }
+            else {
                 $horasTrabajadas = Reporte::WhereMonth('fecha_ini', $esteMes)->WhereDay('fecha_ini', '>', 15)
                     ->sum('horas_trabajadas');
             }
         }
 
-        return 'Horas trabajadas quincena: '.$horasTrabajadas;
+        return 'Horas trabajadas quincena: ' . $horasTrabajadas;
     }
 
-    public function IndexTrashed(UserIndexRequest $request)
-    {
+    public function IndexTrashed(UserIndexRequest $request) {
         $permissions = Myhelp::EscribirEnLog($this, ' users');
         $numberPermissions = MyModels::getPermissionToNumber($permissions);
         $users = $this->Busqueda($request, 'trashed');
@@ -834,7 +836,7 @@ class UserController extends Controller
         return Inertia::render('User/IndeDeleted', [
             'title' => __('app.label.user'),
             'filters' => $request->all(['search', 'field', 'order']),
-            'perPage' => (int) $perPage,
+            'perPage' => (int)$perPage,
             'users' => $paginated,
             'roles' => $roles,
             'cargos' => $cargos,
@@ -843,16 +845,28 @@ class UserController extends Controller
         ]);
     }
 
-    public function userdestroyDefinitive(Request $request)
-    {
+    public function userdestroyDefinitive(Request $request) {
         Myhelp::EscribirEnLog($this, ' | Deleting definitive users Bulk| ');
         try {
             $user = User::where('id', $request->id);
             $user->forceDelete();
 
-            return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id).' '.__('app.label.user')]));
+            return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
         } catch (\Throwable $th) {
-            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id).' '.__('app.label.user')]).$th->getMessage());
+            return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.user')]) . $th->getMessage());
         }
+    }
+
+    public function resetPassword($id): \Illuminate\Http\JsonResponse {
+        $userauthid = Myhelp::AuthUid();
+        if (1 === $userauthid) {
+            $user = User::findOrFail($id);
+            $user->resetPasswordToCedula();
+            return response()->json(['message' => 'Contraseña de ' . $user->name . ' restablecida correctamente']);
+        }
+        else {
+            return response()->json(['message' => 'Contraseña restablecida correctamente']);
+        }
+
     }
 }

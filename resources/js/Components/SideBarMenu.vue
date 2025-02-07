@@ -29,7 +29,7 @@ const ButtonsAdministrativo = [ //SAME AS WEB.PHP
 	//aquipuesSide
 ];
 const ButtonsInformes = [ //SAME AS WEB.PHP
-    'deuda',
+    // 'deuda',
 ];
 
 </script>

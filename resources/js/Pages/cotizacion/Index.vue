@@ -20,7 +20,7 @@ import Delete from '@/Pages/cotizacion/Delete.vue';
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
 
-import {formatDate, number_format} from '@/global.ts';
+import {formatDate2,formatDateTime, number_format} from '@/global.ts';
 
 const {_, debounce, pickBy} = pkg
 const props = defineProps({
@@ -35,6 +35,8 @@ const props = defineProps({
     numberPermissions: Number,
     losSelect: Object,//normally used by headlessui
     CentrosRepetidos: Array,
+    consecutivoCotizacion: Number,
+    cotizacionInicial2: Number,
 })
 
 const data = reactive({
@@ -130,6 +132,8 @@ const titulos = [
                             :title="props.title"
                             :losSelect=props.losSelect
                             :CentrosRepetidos=props.CentrosRepetidos
+                            :consecutivoCotizacion=props.consecutivoCotizacion
+                            :cotizacionInicial2=props.cotizacionInicial2
                     />
 
                     <Edit v-if="can(['update cotizacion'])" :titulos="titulos"
@@ -230,8 +234,8 @@ const titulos = [
                                 <span v-if="titulo['type'] === 'text'"> {{ claseFromController[titulo['order']] }} </span>
                                 <span v-if="titulo['type'] === 'number'"> {{ number_format(claseFromController[titulo['order']], 0, false) }} </span>
                                 <span v-if="titulo['type'] === 'dinero'"> {{ number_format(claseFromController[titulo['order']], 0, true) }} </span>
-                                <span v-if="titulo['type'] === 'date'"> {{ formatDate(claseFromController[titulo['order']], false) }} </span>
-                                <span v-if="titulo['type'] === 'datetime'"> {{ formatDate(claseFromController[titulo['order']], true) }} </span>
+                                <span v-if="titulo['type'] === 'date'"> {{ formatDate2(claseFromController[titulo['order']], false) }} </span>
+                                <span v-if="titulo['type'] === 'datetime'"> {{ formatDateTime(claseFromController[titulo['order']], true) }} </span>
                                 <span v-if="titulo['type'] === 'id'">
                                     {{claseFromController[titulo['order']+'2']}}
                                 </span>

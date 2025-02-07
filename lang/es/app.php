@@ -9,6 +9,7 @@ return [
 		'consignarViatico' => 'Consignar al Viático',
 		'cc' => 'Centro de costo',
 		'gasto' => 'Solicitado',
+		'consignaciona' => 'Consignaciones',
         
 		'fecha_legalizacion' => 'Fecha legalización',
 		'consignarviatico' => 'Consignarviatico',

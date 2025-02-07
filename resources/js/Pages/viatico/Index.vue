@@ -42,6 +42,7 @@ const props = defineProps({
 const data = reactive({
     params: {
         search: props.filters.search,
+        search2: props.filters.search2,
         field: props.filters.field,
         order: props.filters.order,
         perPage: props.perPage,
@@ -97,9 +98,10 @@ const totalSaldo = computed(() => {
 // text // number // dinero // date // datetime // foreign
 const titulos = [
     // { order: 'codigo', label: 'codigo', type: 'text' },
-    {order: 'gasto', label: 'gasto', type: 'number'},
-    {order: 'saldo', label: 'saldo', type: 'number'},
     {order: 'descripcion', label: 'descripcion', type: 'text2'},
+    {order: 'gasto', label: 'gasto', type: 'number'},
+    {order: 'consignaciona', label: 'consignaciona', type: 'number'},
+    {order: 'saldo', label: 'saldo', type: 'number'},
     {order: 'legalizacion', label: 'legalizacion', type: 'text'},
     {order: 'valor_legalizacion', label: 'valor_legalizacion', type: 'dinero'},
     {order: 'descripcion_legalizacion', label: 'descripcion_legalizacion', type: 'text'},
@@ -147,8 +149,8 @@ const titulos = [
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="flex justify-between p-2">
-                    <div class="flex space-x-2">
+                <div class="grid grid-cols-5 justify-between p-2">
+                    <div class="flex gap-2 ">
                         <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet" />
                         <!-- <DangerButton @click="data.deleteBulkOpen = true"
                             v-show="data.selectedId.length != 0 && can(['delete viatico'])" class="px-3 py-1.5"
@@ -156,8 +158,14 @@ const titulos = [
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton> -->
                     </div>
+                    <div class="col-span-2"></div>
+                    <div class="inline-flex ">
+                        
                     <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"
-                               class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg" placeholder="Nombre, codigo" />
+                               class="block w-4/6 md:w-3/6 lg:w-full mx-1 rounded-lg" placeholder="Descripción" />
+                    <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search2" type="text"
+                               class="block w-4/6 md:w-3/6 lg:w-full mx-1 rounded-lg" placeholder="Persona" />
+                    </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table v-if="props.total > 0" class="w-full">
@@ -170,11 +178,6 @@ const titulos = [
 
 <!--                            <th class="px-2 py-4 text-center">#</th>-->
                             
-                            <th class="px-2 py-4 cursor-pointer" v-on:click="order('')">
-                                <div class="flex justify-between items-center"> <span>Consignaciones</span>
-                                    <ChevronUpDownIcon class="w-4 h-4" />
-                                </div>
-                            </th>
                             <th v-for="titulo in titulos" class="px-2 py-4 cursor-pointer"
                                 v-on:click="order(titulo['order'])">
                                 <div class="flex justify-between items-center">
@@ -226,19 +229,19 @@ const titulos = [
 
 <!--{{claseFromController}}-->
 <!--                            <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++indexu }}</td>-->
+                            <td class="min-w-[440px] py-2 px-2"> {{ claseFromController['descripcion'] }}</td>
+                            <td class="whitespace-nowrap py-2 px-2">
+                                {{ formatPesosCol(claseFromController['gasto']) }}
+                            </td>
                             <td class="whitespace-nowrap py-2 px-2">
                                 <p v-for="item in claseFromController['consignaciona']" :key="item.id" 
                                    class="whitespace-nowrap py-2 px-2">
                                     {{ formatPesosCol(item) }}
                                 </p>
                             </td>
-                            <td class="whitespace-nowrap py-2 px-2">
-                                {{ formatPesosCol(claseFromController['gasto']) }}
-                            </td>
                             <td class="whitespace-nowrap py-2 px-8">
                                 {{ formatPesosCol(claseFromController['saldo']) }}
                             </td>
-                            <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['descripcion'] }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['legalizacion'] ? '✅': '❌'}}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ formatPesosCol(claseFromController['valor_legalizacion'])}}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['descripcion_legalizacion']}}</td>

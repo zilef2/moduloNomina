@@ -20,6 +20,8 @@ const props = defineProps({
     losSelect: Object,
     numberPermissions: Number,
     CentrosRepetidos: Array,
+    consecutivoCotizacion: Number,
+    cotizacionInicial2: Number,
 
 })
 const emit = defineEmits(["close"]);
@@ -40,15 +42,18 @@ justNames = justNames.filter(item => item !== undefined);
 const form = useForm({...Object.fromEntries(justNames.map(field => [field, '']))});
 
 onMounted(() => {
+    let fecha1 = new Date()
+    let aniofecha1 = fecha1.getFullYear()
+    form.numero_cot = ('PE '+aniofecha1+'-'+props.consecutivoCotizacion);
     if (props.numberPermissions > 9) {
-
         const valueRAn = Math.floor(Math.random() * (900) + 1)
-        form.numero_cot = (valueRAn);
         form.descripcion_cot = "holi" + (valueRAn);
         form.precio_cot = (valueRAn) * 1000;
         // form.hora_inicial = '0'+valueRAn+':00'//temp
         // form.fecha = '2023-06-01'
 
+    }else{
+        
     }
 });
 
@@ -108,9 +113,11 @@ const sexos = [{label: 'Masculino', value: 0}, {label: 'Femenino', value: 1}];
     <section class="space-y-6">
         <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl7'">
             <form class="px-6 pt-4 pb-48" @submit.prevent="create">
-                <h2 class="mb-8 text-lg font-medium text-gray-900 dark:text-gray-100">
+                <h2 class="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">
                     {{ lang().label.adda }} {{ props.title }}
                 </h2>
+                <p class="my-1 text-md text-gray-800 dark:text-gray-50">Contador inicial: 7334</p>
+                <p class="mb-4 text-md text-gray-800 dark:text-gray-50">Numero de cotizaciones realizadas: {{ props.cotizacionInicial2 }}</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
                     <div v-for="(atributosform, indice) in printForm" :key="indice"
                          :class="atributosform.type === 'id' ? 'col-span-2' : 'bg-blue-50/50'"

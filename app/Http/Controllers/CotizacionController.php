@@ -20,6 +20,10 @@ class CotizacionController extends Controller {
 
     //<editor-fold desc="Construc | mapea | filtro and dependencia">
     public function __construct() {
+        $this->cotizacionInicial = 7334;
+
+
+        
 //        $this->middleware('permission:create cotizacion', ['only' => ['create', 'store']]);
 //        $this->middleware('permission:read cotizacion', ['only' => ['index', 'show']]);
 //        $this->middleware('permission:update cotizacion', ['only' => ['edit', 'update']]);
@@ -71,15 +75,13 @@ class CotizacionController extends Controller {
         return $dependexsSelect;
     }
 
-    public function CentrosRepetidos(): array {
-        $centrosNombres = CentroCosto::pluck('nombre')->toArray();
-        return $centrosNombres;
-    }
-
-
+    public function CentrosRepetidos(): array {return CentroCosto::pluck('nombre')->toArray();}
     //</editor-fold>
-
     public function index(Request $request) {
+        $cotizacionInicial2 = Cotizacion::count();
+        $consecutivoCotizacion = $cotizacionInicial2 + $this->cotizacionInicial;
+        
+        
         $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' cotizacions '));
         $this->Filtros($cotizacions, $request);
         $cotizacions = $this->Mapear($cotizacions);
@@ -106,6 +108,8 @@ class CotizacionController extends Controller {
             'numberPermissions' => $numberPermissions,
             'losSelect' => $losSelect,
             'CentrosRepetidos' => $this->CentrosRepetidos(),
+            'consecutivoCotizacion' => $consecutivoCotizacion,
+            'cotizacionInicial2' => $cotizacionInicial2,
         ]);
     }
 
@@ -154,8 +158,9 @@ class CotizacionController extends Controller {
         return back()->with('success', __('app.label.updated_successfully2', ['numero_cot' => $cotizacion->numero_cot]));
     }
 
+    //generar centro de costo
     public function update2(Request $request, $id) {
-        Myhelp::EscribirEnLog($this, ' Begin UPDATE:cotizacions');
+        Myhelp::EscribirEnLog($this, ' Begin update2:cotizacions');
         DB::beginTransaction();
         $cotizacion = cotizacion::findOrFail($id);
         $centro = centrocosto::create([

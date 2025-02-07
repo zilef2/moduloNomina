@@ -153,21 +153,25 @@ export function formatToVue(date): String {
     return `${day}/${month}/${year}`;
 }
 
-export function formatDate(date, isDateTime: string): string {
+export function formatDate(date, isDateTime: string): string { //todo: no aceptara mas datetime
     if (isNullOrUndef(date)) return '';
     let validDate = new Date(date)
+
     // validDate = new Date(validDate.getTime() + (5 * 60 * 60 * 1000)) //correccion con GTM -5
     const day = validDate.getDate().toString().padStart(2, "0");
     // const day = validDate.getUTCDate().toString().padStart(2, "0");
 
+    // const day = validDate.getUTCDate().toString().padStart(2, "0");
+
+
     // getMonthName(1)); // January
     const month = monthName((validDate.getMonth() + 1).toString().padStart(2, "0"));
     let year = validDate.getFullYear();
-    
-    // console.log("=>(global.ts:162) day", day);
-    // console.log("=>(global.ts:165) month", month);
-    // console.log("=>(global.ts:167) year", year);
-    
+
+    console.log("=>(global.ts:162) day", day);
+    console.log("=>(global.ts:165) month", month);
+    console.log("=>(global.ts:167) year", year);
+
     let anioActual = new Date().getFullYear();
     if (isDateTime == 'conLaHora') {
 
@@ -175,22 +179,79 @@ export function formatDate(date, isDateTime: string): string {
         const AMPM = hora >= 12 ? ' PM' : ' AM';
         hora = hora % 12 || 12;
         let hourAndtime = hora + ':' + (validDate.getMinutes() < 10 ? '0' : '') + validDate.getMinutes() + AMPM;
-        
+
         if (anioActual == year) {
             return `${day}-${month} | ${hourAndtime}`;
         } else {
             let Stringyear = year.toString().slice(-2);
             return `${day}-${month}-${Stringyear} | ${hourAndtime}`;
         }
-       
-    } 
-    else {
+
+    } else {
         if (anioActual == year) {
             return `${day}-${month}`;
         } else {
             let Stringyear = year.toString().slice(-2);
             return `${day}-${month}-${Stringyear}`;
         }
+    }
+}
+
+export function formatDate2(date): string { //todo: no aceptara mas datetime
+    if (isNullOrUndef(date)) return '';
+    let validDate = new Date(date)
+
+    // validDate = new Date(validDate.getTime() + (5 * 60 * 60 * 1000)) //correccion con GTM -5
+    // const day = validDate.getDate().toString().padStart(2, "0");
+    const day = validDate.getUTCDate().toString().padStart(2, "0");
+
+    // const day = validDate.getUTCDate().toString().padStart(2, "0");
+
+
+    // getMonthName(1)); // January
+    const month = monthName((validDate.getMonth() + 1).toString().padStart(2, "0"));
+    let year = validDate.getFullYear();
+
+    console.log("=>(global.ts:162) day", day);
+    console.log("=>(global.ts:165) month", month);
+    console.log("=>(global.ts:167) year", year);
+
+    let anioActual = new Date().getFullYear();
+    if (anioActual == year) {
+        return `${day}-${month}`;
+    } else {
+        let Stringyear = year.toString().slice(-2);
+        return `${day}-${month}-${Stringyear}`;
+    }
+}
+
+export function formatDateTime(datetime): string {
+    if (isNullOrUndef(datetime)) return '';
+    let validDate = new Date(datetime)
+    // validDate = new Date(validDate.getTime() + (5 * 60 * 60 * 1000)) //correccion con GTM -5
+    const day = validDate.getDate().toString().padStart(2, "0");
+
+
+    // getMonthName(1)); // January
+    const month = monthName((validDate.getMonth() + 1).toString().padStart(2, "0"));
+    let year = validDate.getFullYear();
+
+    console.log("=>(global.ts:162) day", day);
+    console.log("=>(global.ts:165) month", month);
+    console.log("=>(global.ts:167) year", year);
+
+    let anioActual = new Date().getFullYear();
+
+    let hora = validDate.getHours();
+    const AMPM = hora >= 12 ? ' PM' : ' AM';
+    hora = hora % 12 || 12;
+    let hourAndtime = hora + ':' + (validDate.getMinutes() < 10 ? '0' : '') + validDate.getMinutes() + AMPM;
+
+    if (anioActual == year) {
+        return `${day}-${month} | ${hourAndtime}`;
+    } else {
+        let Stringyear = year.toString().slice(-2);
+        return `${day}-${month}-${Stringyear} | ${hourAndtime}`;
     }
 }
 
@@ -353,7 +414,7 @@ export function CalcularAvg(TheArray, NameValue = '', isTime = false) {
     return number_format(sum / TheArray.length, 1, false);
 }
 
-export function number_format(amount:any, decimals:number = 0, isPesos = false) {
+export function number_format(amount: any, decimals: number = 0, isPesos = false) {
     if (typeof amount !== 'string' && typeof amount !== 'number') return '0';
 
     // Convertir a string y asegurarse de que el signo negativo no se elimine
@@ -364,7 +425,7 @@ export function number_format(amount:any, decimals:number = 0, isPesos = false) 
 
     // Formatear el número con la cantidad de decimales deseada
     let num2 = num.toFixed(decimals);
-    
+
     let [integerPart, decimalPart] = num2.split('.');
 
     // Agregar separadores de miles con un regex

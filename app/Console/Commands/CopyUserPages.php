@@ -14,46 +14,18 @@ use Illuminate\Support\Str;
 php artisan make:command copy:u
 */
 
-class CopyUserPages extends Command
-{
+class CopyUserPages extends Command {
     use Constants;
 
-    protected function generateAttributes(): array
-    {
-        //TODO: poner estos en index.vue con su respectivo tipo de dato: 
-        // text // number // dinero // date // datetime // foreign
-        //TODO: hacer otro array para las clavesForaneas 
-
-        return [
-            'ninini' => 'date',
-        ];
-        /*
-//            'valor_consig' => 'biginteger',
-//            'texto' => 'text',
-//            'fecha_legalizacion' => 'datetime',
-//            'descripcion' => 'text',
-//            'precio' => 'decimal',
-        */
-    }
-
-    protected function generateForeign(): array
-    {
-        return [
-            'viatico_id' => 'viatico_id',
-        ];
-    }
-
+    const string MSJ_EXITO = ' fue realizada con exito ';
+    const string MSJ_FALLO = ' Fallo';
+    public string $generando;
     protected $signature = 'copy:u';
     protected $description = 'Copia de la entidad generica';
     protected int $contadorMetodos;
-    public string $generando;
-    const string MSJ_EXITO = ' fue realizada con exito ';
-    const string MSJ_FALLO = ' Fallo';
 
-    public function handle(): int
-    {
+    public function handle(): int {
         try {
-            //TODO: hay que validar primero
             $this->generando = self::getMessage('generando');
 
             $this->contadorMetodos = 0;
@@ -66,57 +38,76 @@ class CopyUserPages extends Command
             }
 
             $this->MetodologiaInicial($modelName, 'generic', '');
+            $this->AddAttributesVue($modelName);
             $this->Paso2($modelName, $submetodo);
 
-        
+
             $this->info(Artisan::call('optimize'));
             $this->info(Artisan::call('optimize:clear'));
             $this->info('FINISH');
+            return 1;
         } catch (Exception $e) {
             $this->error(
                 "FALLO CONTADOR: " . $this->contadorMetodos .
                 "FALLO Lenguaje: " . $submetodo['Lenguaje'] .
                 " excepcion: " . $e->getMessage());
-
-        }
-
-        return 1;
-    }
-
-
-    private function Paso2($modelName, &$submetodo): int
-    {
-        //estos metodos para abajo tienen validacion
-        if ($this->DoWebphp($modelName)) {
-
-            $this->info('DoWebphp' . self::MSJ_EXITO);
-            $this->contadorMetodos++;
-        } else {
-            $this->error('DoWebphp ' . self::MSJ_FALLO);
             return 0;
         }
 
+    }
 
-        if ($this->L2_LenguajeInsert($modelName, $submetodo) === 0) return 0;
+    /**
+     * @param mixed $modelName
+     * @param string $plantillaActual
+     * @param mixed $depende
+     * @return int
+     */
+    public function MetodologiaInicial(mixed $modelName, string $plantillaActual, mixed $depende): int {
+        $this->warn("Empezando make:model");
+        Artisan::call('make:model', ['name' => $modelName, '--all' => true]);
+
+        //comandos de dependencias
+        $this->warn("Empezando copies");
+        Artisan::call('copy:f');// Commands/WriteFillable.php
+        $this->warn("Ahora Lang");
+        Artisan::call('lang:u ' . $modelName);
 
 
-        if ($this->DoSideBar($modelName)) {
+        $RealizoVueConExito = $this->MakeVuePages($plantillaActual, $modelName);
+        $mensaje = $RealizoVueConExito ? self::getMessage('generando') . ' Vuejs' . self::MSJ_EXITO
+            : self::getMessage('generando') . ' Vuejs' . self::getMessage('fallo');
+        $this->info($mensaje);
 
-            $this->info('DoSideBar' . self::MSJ_EXITO);
-            $this->contadorMetodos++;
-        } else {
-            $this->error('DoSideBar ' . self::MSJ_FALLO);
-            return 0;
-        }
-        $this->DoFillable($modelName);
-        $this->contadorMetodos++;
-        $this->updateMigration($modelName);
-        $this->contadorMetodos++;
+
+        $RealizoControllerConExito = $this->MakeControllerPages($plantillaActual, $modelName);
+        $mensaje = $RealizoControllerConExito ? self::getMessage('generando') . 'el controlador' . self::MSJ_EXITO
+            : self::getMessage('generando') . ' controlador ' . self::getMessage('fallo');
+        $this->info($mensaje);
+
+
+        if ($RealizoControllerConExito || $RealizoVueConExito)
+            $this->replaceWordInFiles($plantillaActual,
+                [
+                    'vue' => $RealizoVueConExito,
+                    'controller' => $RealizoControllerConExito
+                ]
+                , $modelName, $depende);
         return 1;
     }
 
-    private function MakeControllerPages($plantillaActual, $modelName): bool
-    {
+    private function MakeVuePages($plantillaActual, $modelName): bool {
+        $sourcePath = base_path('resources/js/Pages/' . $plantillaActual);
+        $destinationPath = base_path("resources/js/Pages/$modelName");
+
+        if (File::exists($destinationPath)) {
+            $this->warn("La carpeta de destino '$modelName' ya existe.");
+            return false;
+        }
+        File::copyDirectory($sourcePath, $destinationPath);
+        return true;
+    }
+
+    private function MakeControllerPages($plantillaActual, $modelName): bool {
         $folderMayus = ucfirst($modelName);
         $sourcePath = base_path('app/Http/Controllers/' . $plantillaActual . 'Controller.php');
         $destinationPath = base_path("app/Http/Controllers/" . $folderMayus . "sController.php");
@@ -132,21 +123,7 @@ class CopyUserPages extends Command
         return true;
     }
 
-    private function MakeVuePages($plantillaActual, $modelName): bool
-    {
-        $sourcePath = base_path('resources/js/Pages/' . $plantillaActual);
-        $destinationPath = base_path("resources/js/Pages/$modelName");
-
-        if (File::exists($destinationPath)) {
-            $this->warn("La carpeta de destino '$modelName' ya existe.");
-            return false;
-        }
-        File::copyDirectory($sourcePath, $destinationPath);
-        return true;
-    }
-
-    private function replaceWordInFiles($oldWord, $permiteRemplazo, $modelName, $depende): int
-    {
+    private function replaceWordInFiles($oldWord, $permiteRemplazo, $modelName, $depende): int {
         $folderMayus = ucfirst($modelName);
         $files = File::allFiles(base_path("resources/js/Pages/$modelName"));
         $controller = base_path("app/Http/Controllers/$folderMayus" . 'Controller.php');
@@ -178,8 +155,227 @@ class CopyUserPages extends Command
         return 1;
     }
 
-    protected function DoFillable($modelName): int
-    {
+    private function AddAttributesVue($modelName): int {
+        $vueFilePath = resource_path("js/Pages/$modelName/Index.vue");
+
+        if (!File::exists($vueFilePath)) {
+            $this->error('El archivo Index.vue no existe.');
+            return 0;
+        }
+
+        $content = File::get($vueFilePath);
+
+        // Convertir los atributos en formato Vue
+        $titulosArray = collect($this->generateAttributes())->map(function ($type, $key) {
+            return "    { order: '$key', label: '$key', type: '$type' },";
+        })->implode("\n");
+
+        // Expresión regular para encontrar la sección `const titulos = [`
+        $pattern = '/const titulos = \[\s*([\s\S]*?)\s*\];/';
+
+        // Reemplazar con los nuevos valores
+        $replacement = "const titulos = [\n$titulosArray\n];";
+
+        $newContent = preg_replace($pattern, $replacement, $content);
+
+        if ($newContent) {
+            File::put($vueFilePath, $newContent);
+            $this->info('Archivo Index.vue actualizado correctamente.');
+        }
+        else {
+            $this->error('No se pudo actualizar Index.vue.');
+            return 0;
+        }
+        return 1;
+    }
+
+    protected function generateAttributes(): array {
+        //notacion de notas: //todo: nexttochange: //todo: sync:
+        //TODO: probando
+        // text // number // dinero // date // datetime // foreign
+        //TODO: hacer otro array para las clavesForaneas 
+
+        return [//ready to material
+            'nombre' => 'text',
+            'unidad' => 'text',
+            'cantidad' => 'number',
+            'precio_unitario' => 'number',
+            'fecha_adquisicion' => 'number',
+            'miniatura' => 'text',
+            'stock_minimo' => 'number',
+            'ubicacion' => 'text',
+        ];
+
+        /*
+//            'valor_consig' => 'biginteger',
+//            'texto' => 'text',
+//            'fecha_legalizacion' => 'datetime',
+//            'descripcion' => 'text',
+//            'precio' => 'decimal',
+        */
+    }
+
+    private function Paso2($modelName, &$submetodo): int {
+        //estos metodos para abajo tienen validacion
+        if ($this->DoWebphp($modelName)) {
+
+            $this->info('DoWebphp' . self::MSJ_EXITO);
+            $this->contadorMetodos++;
+        }
+        else {
+            $this->error('DoWebphp ' . self::MSJ_FALLO);
+            return 0;
+        }
+
+
+        if ($this->L2_LenguajeInsert($modelName, $submetodo) === 0) return 0;
+
+
+        if ($this->DoSideBar($modelName)) {
+
+            $this->info('DoSideBar' . self::MSJ_EXITO);
+            $this->contadorMetodos++;
+        }
+        else {
+            $this->error('DoSideBar ' . self::MSJ_FALLO);
+            return 0;
+        }
+        $this->DoFillable($modelName);
+        $this->contadorMetodos++;
+        $this->updateMigration($modelName);
+        $this->contadorMetodos++;
+        return 1;
+    }
+
+    private function DoWebphp($resource): int {
+        $directory = 'routes';
+        $files = glob($directory . '/*.php');
+
+        $insertable = "Route::resource(\"/$resource\", \\App\\Http\\Controllers\\" . ucfirst($resource) . "Controller::class);\n\t//aquipues";
+
+        $pattern = '/\/\/aquipues/';
+
+        $contadorVerificador = 0;
+        foreach ($files as $file) {
+            $content = file_get_contents($file);
+            $contadorVerificador++;
+
+            if (!str_contains($content, $pattern)) {
+                $content2 = preg_replace($pattern, $insertable, $content);
+//                $content2 = preg_replace($pattern, "$0$insertable", $content);
+                file_put_contents($file, $content2);
+                if ($content == $content2)
+                    $this->info("Routes Actualizado: $file\n");
+                else
+                    $this->info("Routes sin cambios: $file\n");
+            }
+            else {
+                $this->error("No existe aquipues en: $file\n");
+                $contadorVerificador = 0;
+                break;
+            }
+        }
+        return $contadorVerificador;
+    }
+
+    public function L2_LenguajeInsert($modelName, &$submetodo): int {
+        if ($this->DoAppLenguaje($modelName)) {
+            $submetodo['Lenguaje'] = 0;
+            $this->info('DoAppLenguaje' . self::MSJ_EXITO);
+            $this->contadorMetodos++;
+
+            foreach ($this->generateAttributes() as $key => $generateAttribute) {
+                $this->DoAppLenguaje($key);
+                $submetodo['Lenguaje']++;
+            }
+            foreach ($this->generateForeign() as $generateAttribute) {
+                $this->DoAppLenguaje($generateAttribute, 'mochar_id');
+                $submetodo['Lenguaje']++;
+            }
+
+            return 1;
+        }
+        else {
+            $this->error('DoAppLenguaje ' . self::MSJ_FALLO);
+            $this->error('$this->contadorMetodos = ' . $this->contadorMetodos);
+            $this->error('$submetodo = ' . $submetodo['Lenguaje']);
+            return 0;
+        }
+    }
+
+    private function DoAppLenguaje($resource, $mochar = 'no'): int {
+        $directory = 'lang/es/app.php';
+        $files = glob($directory);
+
+        if ($mochar == 'mochar_id') {
+            $resource_Sin_Id = substr($resource, 0, -3);
+            $insertable = "'$resource' => '$resource_Sin_Id',\n\t\t//aquipues";
+        }
+        else {
+            $insertable = "'$resource' => '$resource',\n\t\t//aquipues";
+        }
+        $pattern = '/\/\/aquipues/';
+        $contadorVerificador = 0;
+        foreach ($files as $file) {
+            $contadorVerificador++;
+            $content = file_get_contents($file);
+            if (!str_contains($content, $pattern)) {
+                $content2 = preg_replace($pattern, $insertable, $content);
+                // $content2 = preg_replace($pattern, "$0$insertable", $content);
+                file_put_contents($file, $content2);
+                if ($content == $content2)
+                    $this->info("Language Actualizado: $file\n");
+                else
+                    $this->info("Language sin cambios: $file\n");
+            }
+            else {
+                $this->error("No existe aquipues en: $file\n");
+                $contadorVerificador = 0;
+                break;
+            }
+        }
+        return $contadorVerificador;
+
+    }
+
+    protected function generateForeign(): array {
+        return [
+//            'viatico_id' => 'viatico_id',
+        ];
+    }
+
+    private function DoSideBar($resource): int {
+        $directory = 'resources/js/Components/SideBarMenu.vue';
+        $files = glob($directory);
+
+        $insertable = "'" . $resource . "',\n\t//aquipuesSide";
+        $pattern = '/\/\/aquipuesSide/';
+
+        $contadorVerificador = 0;
+        foreach ($files as $file) {
+            $content = file_get_contents($file);
+
+            if (!str_contains($content, $pattern)) {
+                $contadorVerificador++;
+                $content2 = preg_replace($pattern, $insertable, $content);
+                //$content2 = preg_replace($pattern, "$0$insertable", $content);
+                file_put_contents($file, $content2);
+                if ($content != $content2)
+                    $this->info("SideBarMenu.vue Actualizado: $file\n");
+                else
+                    $this->info("SideBarMenu.vue sin cambios: $file\n"); //todo: revisar si ya existe
+            }
+            else {
+                $this->error("No existe aquipues en: $file\n");
+                $contadorVerificador = 0;
+                break;
+            }
+        }
+
+        return $contadorVerificador;
+    }
+
+    protected function DoFillable($modelName): int {
         $attributes = array_merge($this->generateAttributes(), $this->generateForeign());
 
         // Generar el fillable
@@ -226,106 +422,7 @@ class CopyUserPages extends Command
         return 1;
     }
 
-
-    private function DoAppLenguaje($resource, $mochar = 'no'): int
-    {
-        $directory = 'lang/es/app.php';
-        $files = glob($directory);
-
-        if ($mochar == 'mochar_id') {
-            $resource_Sin_Id = substr($resource, 0, -3);
-            $insertable = "'$resource' => '$resource_Sin_Id',\n\t\t//aquipues";
-        } else {
-            $insertable = "'$resource' => '$resource',\n\t\t//aquipues";
-        }
-        $pattern = '/\/\/aquipues/';
-        $contadorVerificador = 0;
-        foreach ($files as $file) {
-            $contadorVerificador++;
-            $content = file_get_contents($file);
-            if (!str_contains($content, $pattern)) {
-                $content2 = preg_replace($pattern, $insertable, $content);
-                // $content2 = preg_replace($pattern, "$0$insertable", $content);
-                file_put_contents($file, $content2);
-                if ($content == $content2)
-                    $this->info("Language Actualizado: $file\n");
-                else
-                    $this->info("Language sin cambios: $file\n");
-            } else {
-                $this->error("No existe aquipues en: $file\n");
-                $contadorVerificador = 0;
-                break;
-            }
-        }
-        return $contadorVerificador;
-
-    }
-
-
-    private function DoWebphp($resource): int
-    {
-        $directory = 'routes';
-        $files = glob($directory . '/*.php');
-
-        $insertable = "Route::resource(\"/$resource\", \\App\\Http\\Controllers\\" . ucfirst($resource) . "Controller::class);\n\t//aquipues";
-
-        $pattern = '/\/\/aquipues/';
-
-        $contadorVerificador = 0;
-        foreach ($files as $file) {
-            $content = file_get_contents($file);
-            $contadorVerificador++;
-
-            if (!str_contains($content, $pattern)) {
-                $content2 = preg_replace($pattern, $insertable, $content);
-//                $content2 = preg_replace($pattern, "$0$insertable", $content);
-                file_put_contents($file, $content2);
-                if ($content == $content2)
-                    $this->info("Routes Actualizado: $file\n");
-                else
-                    $this->info("Routes sin cambios: $file\n");
-            } else {
-                $this->error("No existe aquipues en: $file\n");
-                $contadorVerificador = 0;
-                break;
-            }
-        }
-        return $contadorVerificador;
-    }
-
-    private function DoSideBar($resource): int
-    {
-        $directory = 'resources/js/Components/SideBarMenu.vue';
-        $files = glob($directory);
-
-        $insertable = "'" . $resource . "',\n\t//aquipuesSide";
-        $pattern = '/\/\/aquipuesSide/';
-
-        $contadorVerificador = 0;
-        foreach ($files as $file) {
-            $content = file_get_contents($file);
-
-            if (!str_contains($content, $pattern)) {
-                $contadorVerificador++;
-                $content2 = preg_replace($pattern, $insertable, $content);
-                //$content2 = preg_replace($pattern, "$0$insertable", $content);
-                file_put_contents($file, $content2);
-                if ($content != $content2)
-                    $this->info("SideBarMenu.vue Actualizado: $file\n");
-                else
-                    $this->info("SideBarMenu.vue sin cambios: $file\n"); //todo: revisar si ya existe
-            } else {
-                $this->error("No existe aquipues en: $file\n");
-                $contadorVerificador = 0;
-                break;
-            }
-        }
-
-        return $contadorVerificador;
-    }
-
-    protected function updateMigration($modelName): int
-    {
+    protected function updateMigration($modelName): int {
         $atributos = $this->generateAttributes();
         $migrationFile = collect(glob(database_path('migrations/*.php')))
             ->first(fn($file) => str_contains($file, 'create_' . Str::snake(Str::plural($modelName)) . '_table'));
@@ -347,69 +444,5 @@ class CopyUserPages extends Command
         return 1;
     }
 
-    /**
-     * @param mixed $modelName
-     * @param string $plantillaActual
-     * @param mixed $depende
-     * @return int
-     */
-    public function MetodologiaInicial(mixed $modelName, string $plantillaActual, mixed $depende): int
-    {
-        $this->warn("Empezando make:model");
-        Artisan::call('make:model', ['name' => $modelName, '--all' => true]);
-
-        //comandos de dependencias
-        $this->warn("Empezando copies");
-        Artisan::call('copy:f');// Commands/WriteFillable.php
-        $this->warn("Ahora Lang");
-        Artisan::call('lang:u ' . $modelName);
-
-
-        $RealizoVueConExito = $this->MakeVuePages($plantillaActual, $modelName);
-        $mensaje = $RealizoVueConExito ? self::getMessage('generando') . ' Vuejs' . self::MSJ_EXITO
-            : self::getMessage('generando') . ' Vuejs' . self::getMessage('fallo');
-        $this->info($mensaje);
-
-
-        $RealizoControllerConExito = $this->MakeControllerPages($plantillaActual, $modelName);
-        $mensaje = $RealizoControllerConExito ? self::getMessage('generando') . 'el controlador' . self::MSJ_EXITO
-            : self::getMessage('generando') . ' controlador ' . self::getMessage('fallo');
-        $this->info($mensaje);
-
-
-        if ($RealizoControllerConExito || $RealizoVueConExito)
-            $this->replaceWordInFiles($plantillaActual,
-                [
-                    'vue' => $RealizoVueConExito,
-                    'controller' => $RealizoControllerConExito
-                ]
-                , $modelName, $depende);
-        return 1;
-    }
-
-    public function L2_LenguajeInsert($modelName, &$submetodo): int
-    {
-        if ($this->DoAppLenguaje($modelName)) {
-            $submetodo['Lenguaje'] = 0;
-            $this->info('DoAppLenguaje' . self::MSJ_EXITO);
-            $this->contadorMetodos++;
-
-            foreach ($this->generateAttributes() as $key => $generateAttribute) {
-                $this->DoAppLenguaje($key);
-                $submetodo['Lenguaje']++;
-            }
-            foreach ($this->generateForeign() as $generateAttribute) {
-                $this->DoAppLenguaje($generateAttribute, 'mochar_id');
-                $submetodo['Lenguaje']++;
-            }
-
-            return 1;
-        } else {
-            $this->error('DoAppLenguaje ' . self::MSJ_FALLO);
-            $this->error('$this->contadorMetodos = ' . $this->contadorMetodos);
-            $this->error('$submetodo = ' . $submetodo['Lenguaje']);
-            return 0;
-        }
-    }
 
 }

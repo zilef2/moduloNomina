@@ -49,7 +49,7 @@ class CentroTableController extends Controller
                 'month' => date('m'),
                 'year' => date('Y'),
             ];
-            $opcionQuincena = 3; //todo el mes
+            $opcionQuincena = 3; //el mes completo
         }
         $elSelect = [
             'user_id',

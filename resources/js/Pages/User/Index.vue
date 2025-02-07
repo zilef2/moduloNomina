@@ -36,6 +36,7 @@ const props = defineProps({
     sexoSelect: Object,
     onlySupervis: Number,
     superviNullCentro: Number,
+    numberPermissions: Number,
 })
 const data = reactive({
     params: {
@@ -286,6 +287,7 @@ data.params.onlySupervis = data.params.onlySupervis === null ? false : data.para
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     {{ user.cedula }}
+                                    <span v-if="props.numberPermissions > 9"> -- {{user.id}}</span>
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     {{ user.numero_contrato }}

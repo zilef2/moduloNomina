@@ -122,16 +122,13 @@ const update2 = () => {
 
                 </div>
                 <div class=" my-8 flex justify-end">
-                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{
-                            lang().button.close
-                        }}
-                    </SecondaryButton>
-                    <PrimaryButton v-if="cotizaciona.centro_costo_id" class="ml-3"
+                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}</SecondaryButton>
+                    <PrimaryButton v-if="!cotizaciona.centro_costo_id" class="ml-3"
                                    :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                                    @click="update">
                         {{ form.processing ? lang().button.save + '...' : lang().button.save }}
                     </PrimaryButton>
-                    <PrimaryButton v-else class="ml-3" :class="{ 'opacity-25': form.processing }"
+                    <PrimaryButton v-if="!cotizaciona.centro_costo_id" class="ml-3" :class="{ 'opacity-25': form.processing }"
                                    :disabled="form.processing"
                                    @click="update2">
                         Generar Centro de costo
