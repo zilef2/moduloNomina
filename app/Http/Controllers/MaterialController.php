@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\generic;
+use App\Models\material;
 use App\helpers\Myhelp;
 use App\helpers\MyModels;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,34 +13,22 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class geenericController extends Controller
+class MaterialController extends Controller
 {
     public array $thisAtributos;
-    public string $FromController = 'generic';
+    public string $FromController = 'material';
 
 
     //<editor-fold desc="Construc | mapea | filtro and dependencia">
     public function __construct() {
-//        $this->middleware('permission:create generic', ['only' => ['create', 'store']]);
-//        $this->middleware('permission:read generic', ['only' => ['index', 'show']]);
-//        $this->middleware('permission:update generic', ['only' => ['edit', 'update']]);
-//        $this->middleware('permission:delete generic', ['only' => ['destroy', 'destroyBulk']]);
-        $this->thisAtributos = (new generic())->getFillable(); //not using
+//        $this->middleware('permission:create material', ['only' => ['create', 'store']]);
+//        $this->middleware('permission:read material', ['only' => ['index', 'show']]);
+//        $this->middleware('permission:update material', ['only' => ['edit', 'update']]);
+//        $this->middleware('permission:delete material', ['only' => ['destroy', 'destroyBulk']]);
+        $this->thisAtributos = (new material())->getFillable(); //not using
     }
 
 
-    public function Mapear()
-    {
-        $generics = generic::query();
-        $generics = $generics->get()->map(function ($generic) {
-//            $genericdep = $generic->user;
-//            if ($genericdep) $generic->user_id['nombre'] = $generic->user->nombre;
-//            else $generic->user_id['nombre'] = '';
-            return $generic;
-        });
-        return $generics;
-    }
-    
      public function PerPageAndPaginate($request,$cotizacions)
     {
         $perPage = $request->has('perPage') ? $request->perPage : 10;
@@ -55,10 +43,10 @@ class geenericController extends Controller
         return $paginated;
     }
     
-    public function Filtros(&$generics,$request): Builder {
-        $generics = generic::query();
+    public function Filtros($request): Builder {
+        $materials = material::query();
         if ($request->has('search')) {
-            $generics = $generics->where(function ($query) use ($request) {
+            $materials = $materials->where(function ($query) use ($request) {
                 $query->where('nombre', 'LIKE', "%" . $request->search . "%")
                     //                    ->orWhere('codigo', 'LIKE', "%" . $request->search . "%")
                     //                    ->orWhere('identificacion', 'LIKE', "%" . $request->search . "%")
@@ -67,35 +55,35 @@ class geenericController extends Controller
         }
 
         if ($request->has(['field', 'order'])) {
-            $generics = $generics->orderBy($request->field, $request->order);
+            $materials = $materials->orderBy($request->field, $request->order);
         }else
-            $generics = $generics->orderBy('updated_at', 'DESC');
-        return $generics;
+            $materials = $materials->orderBy('updated_at', 'DESC');
+        
+        return $materials;
     }
-    
 //    public function Dependencias()
 //    {
-//        $dependexsSelect = deependex::all('id','nombre as name')->toArray();
-//        array_unshift($dependexsSelect,["name"=>"Seleccione un dependex",'id'=>0]);
+//        $no_nadasSelect = No_nada::all('id','nombre as name')->toArray();
+//        array_unshift($no_nadasSelect,["name"=>"Seleccione un no_nada",'id'=>0]);
         
 //        $ejemploSelec = CentroCosto::all('id', 'nombre as name')->toArray();
 //        array_unshift($ejemploSelec, ["name" => "Seleccione un ejemploSelec", 'id' => 0]);
-//        return [$dependexsSelect];
-//        return [$dependexsSelect,$ejemploSelec];
+//        return [$no_nadasSelect];
+//        return [$no_nadasSelect,$ejemploSelec];
 //    }
     
     //</editor-fold>
 
     public function index(Request $request) {
-        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' generics '));
-        $generics = $this->Filtros($request);
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' materials '));
+        $materials = $this->Filtros($request)->get();
 //        $losSelect = $this->Dependencias();
 
 
         $perPage = $request->has('perPage') ? $request->perPage : 10;
         return Inertia::render($this->FromController.'/Index', [
-            'fromController' => $this->PerPageAndPaginate($request,$generics),
-            'total'                 => $generics->count(),
+            'fromController' => $this->PerPageAndPaginate($request,$materials),
+            'total'                 => $materials->count(),
 
             'breadcrumbs'           => [['label' => __('app.label.'.$this->FromController), 'href' => route($this->FromController.'.index')]],
             'title'                 => __('app.label.'.$this->FromController),
@@ -112,30 +100,30 @@ class geenericController extends Controller
     //! STORE functions
 
     public function store(Request $request): RedirectResponse{
-        $permissions = Myhelp::EscribirEnLog($this, ' Begin STORE:generics');
+        $permissions = Myhelp::EscribirEnLog($this, ' Begin STORE:materials');
         DB::beginTransaction();
-//        $dependex = $request->dependex['id'];
-//        $request->merge(['dependex_id' => $request->dependex['id']]);
-        $generic = generic::create($request->all());
+//        $no_nada = $request->no_nada['id'];
+//        $request->merge(['no_nada_id' => $request->no_nada['id']]);
+        $material = material::create($request->all());
 
         DB::commit();
-        Myhelp::EscribirEnLog($this, 'STORE:generics EXITOSO', 'generic id:' . $generic->id . ' | ' . $generic->nombre, false);
-        return back()->with('success', __('app.label.created_successfully', ['name' => $generic->nombre]));
+        Myhelp::EscribirEnLog($this, 'STORE:materials EXITOSO', 'material id:' . $material->id . ' | ' . $material->nombre, false);
+        return back()->with('success', __('app.label.created_successfully', ['name' => $material->nombre]));
     }
     //fin store functions
 
     public function show($id){}public function edit($id){}
 
     public function update(Request $request, $id): RedirectResponse{
-        $permissions = Myhelp::EscribirEnLog($this, ' Begin UPDATE:generics');
+        $permissions = Myhelp::EscribirEnLog($this, ' Begin UPDATE:materials');
         DB::beginTransaction();
-        $generic = generic::findOrFail($id);
-//        $request->merge(['dependex_id' => $request->dependex['id']]);
-        $generic->update($request->all());
+        $material = material::findOrFail($id);
+//        $request->merge(['no_nada_id' => $request->no_nada['id']]);
+        $material->update($request->all());
 
         DB::commit();
-        Myhelp::EscribirEnLog($this, 'UPDATE:generics EXITOSO', 'generic id:' . $generic->id . ' | ' . $generic->nombre , false);
-        return back()->with('success', __('app.label.updated_successfully2', ['nombre' => $generic->nombre]));
+        Myhelp::EscribirEnLog($this, 'UPDATE:materials EXITOSO', 'material id:' . $material->id . ' | ' . $material->nombre , false);
+        return back()->with('success', __('app.label.updated_successfully2', ['nombre' => $material->nombre]));
     }
 
     /**
@@ -145,18 +133,18 @@ class geenericController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      */
 
-    public function destroy($genericid){
-        $permissions = Myhelp::EscribirEnLog($this, 'DELETE:generics');
-        $generic = generic::find($genericid);
-        $elnombre = $generic->nombre;
-        $generic->delete();
-        Myhelp::EscribirEnLog($this, 'DELETE:generics', 'generic id:' . $generic->id . ' | ' . $generic->nombre . ' borrado', false);
+    public function destroy($materialid){
+        $permissions = Myhelp::EscribirEnLog($this, 'DELETE:materials');
+        $material = material::find($materialid);
+        $elnombre = $material->nombre;
+        $material->delete();
+        Myhelp::EscribirEnLog($this, 'DELETE:materials', 'material id:' . $material->id . ' | ' . $material->nombre . ' borrado', false);
         return back()->with('success', __('app.label.deleted_successfully', ['name' => $elnombre]));
     }
 
     public function destroyBulk(Request $request){
-        $generic = generic::whereIn('id', $request->id);
-        $generic->delete();
+        $material = material::whereIn('id', $request->id);
+        $material->delete();
         return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
     }
     //FIN : STORE - UPDATE - DELETE

@@ -33,12 +33,17 @@ const props = defineProps({
     ArrayHorasSemanales: Object,//[]
     ArrayCentrosNoFactura: Object,//[]
 })
+
+//theconfig
 let label_diurnas = ref(null)
 
 const HORAS_ESTANDAR = props.ArrayHorasSemanales.HORAS_ORDINARIAS // 8horitas
 const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - HORAS_ESTANDAR //notes: = 40
+console.log("=>(Create.vue:42) props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES", props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES);
+console.log("=>(Create.vue:42) HORAS_SEMANALES_MENOS_ESTANDAR", HORAS_SEMANALES_MENOS_ESTANDAR);
 const LimiteHorasTrabajadas = 25
-const Limite_Horas_Dia_Semana = [HORAS_ESTANDAR,(HORAS_ESTANDAR - 2)] //todo: nexttochange: cuando las semanales cambien de 46 horas a 42, seran 3 en vez de 2
+
+const Limite_Horas_Dia_Semana = [HORAS_ESTANDAR, (HORAS_ESTANDAR - 2)] //todo: nexttochange: cuando las semanales cambien de 46 horas a 42, seran 3 en vez de 2
 
 
 const emit = defineEmits(["close", "reportFinished"]);
@@ -52,7 +57,7 @@ const data = reactive({
     MensajeError: '',
     MostrarConsole: {
         watchEffect: false,
-        CuandoEiezaExtra: 1,
+        CuandoEiezaExtra: false,
         dia: false,
         noche: false,
         extradia: false,
@@ -62,7 +67,7 @@ const data = reactive({
         terminaLunes: false,
         EsFestivo: false,
 
-        MostrarTrabajadaSemana: 1,
+        MostrarTrabajadaSemana: false,
         MostrarAlmuersini: false,
         ValorRealalmuerzo: 0,
     },
@@ -73,8 +78,9 @@ const data = reactive({
     Horas1159: props.ArrayOrdinarias.length > 1,
     diaSelected: 0,
     TemporalDiaAnterior: 0,
-    debugHorasSemana:0,
-    BoolCentrosNoFactura:false, //permite saber si el centro de costos factura o no
+    debugHorasSemana: 0,
+    BoolCentrosNoFactura: false, //permite saber si el centro de costos factura o no
+    StringRestriccionNoFActura: '',
 })
 
 const message = reactive({
@@ -190,11 +196,11 @@ watchEffect(() => {
             let fin = Date.parse(form.fecha_fin);
 
             let WeekN = weekNumber(new Date(form.fecha_ini))
-            if (data.MostrarConsole.MostrarTrabajadaSemana){
-                
+            if (data.MostrarConsole.MostrarTrabajadaSemana) {
+
                 console.log("=>(Create.vue:190) WeekN", WeekN);
                 console.log("=>(data.TrabajadasHooy", data.TrabajadasHooy);
-            } 
+            }
 
             // 38 => 46 - 8
             data.TrabajadasSemana = props.HorasDeCadaSemana[WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
@@ -313,6 +319,8 @@ let calcularSinExtras = (Inicio, Fin) => {
 
 watch(() => form.centro_costo_id, (newX) => {
     localStorage.setItem('centroCostoId', newX)
+    data.BoolCentrosNoFactura = (props.ArrayCentrosNoFactura.includes(parseInt(newX)))
+    analisarSiFactura()
 })
 
 watch(() => form.diurnas, (newX) => {
@@ -320,16 +328,29 @@ watch(() => form.diurnas, (newX) => {
 })
 watch(() => form.nocturnas, (newX) => {
     data.ordinariasCalculadas = newX + form.diurnas
-    const hoy = new Date();
-    const esSabado = hoy.getDay() === 6;
-    let valormax = esSabado ? Limite_Horas_Dia_Semana[0] : Limite_Horas_Dia_Semana[1]
-    if(data.BoolCentrosNoFactura && form.horas_trabajadas > valormax){
-        data.StringRestriccionNoFActura = 'No se puede reportar mas de '+ valormax +' horas'
-    }else{
-        data.StringRestriccionNoFActura = ''
-        
-    }
 })
+
+watch(() => form.horas_trabajadas, (newX) => {
+    // const hoy = new Date();
+    console.clear()
+    analisarSiFactura()
+})
+
+function analisarSiFactura() {
+
+    if (data.BoolCentrosNoFactura) {
+        let hoy = new Date(form.fecha_ini)
+        let esSabado = hoy.getDay() === 6;
+        let valormax = esSabado ? Limite_Horas_Dia_Semana[1] : Limite_Horas_Dia_Semana[0] //[8,6]
+        if (form.horas_trabajadas > valormax) {
+            data.StringRestriccionNoFActura = 'No se puede reportar mas de ' + valormax + ' horas'
+        } else {
+            data.StringRestriccionNoFActura = ''
+        }
+    } else {
+        data.StringRestriccionNoFActura = ''
+    }
+}
 
 
 watch(() => form.fecha_ini, (newX) => {
@@ -352,7 +373,8 @@ watch(() => form.fecha_fin, (newX) => {
 
         if (data.estado2359) {
             form.horas_trabajadas++
-            if (form.nocturnas < 8 && form.nocturnas >= 0) { //todo: solo se verifica que no se pase de 8 horas nocturnas. deberia verificar con CUANDOEMPIEZANOCTURNAS
+            if (form.nocturnas < 8 && form.nocturnas >= 0) {
+                //todo: solo se verifica que no se pase de 8 horas nocturnas. deberia verificar con CUANDOEMPIEZANOCTURNAS
                 form.nocturnas++
             } else
                 form.extra_nocturnas++
@@ -379,7 +401,7 @@ const create = () => {
             console.log("111) ArrayHorasSemanales['s_Dias_gabela']", props.ArrayHorasSemanales['s_Dias_gabela']);
             console.log("222) props.ArrayHorasSemanales['s_Dias_gabela']", typeof (props.ArrayHorasSemanales['s_Dias_gabela']));
             let validacionNoMasDe3Dias
-            if(props.numberPermissions > 9) validacionNoMasDe3Dias = 'ok'
+            if (props.numberPermissions > 9) validacionNoMasDe3Dias = 'ok'
             else validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini, props.ArrayHorasSemanales['s_Dias_gabela'])
             console.log("=>(Create.vue:302) validacionNoMasDe3Dias", validacionNoMasDe3Dias);
             if (data.respuestaSeguro && validacionNoMasDe3Dias === 'ok') {
@@ -620,12 +642,16 @@ const formatfin = (date) => {
                 </div> -->
 
                 <div class="flex justify-end">
-                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}</SecondaryButton>
-                    <PrimaryButton v-if="data.StringRestriccionNoFActura === ''" 
-                        class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
+                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{
+                            lang().button.close
+                        }}
+                    </SecondaryButton>
+                    <PrimaryButton v-if="data.StringRestriccionNoFActura === ''"
+                                   class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                                    @mouseup="create" @keyup.enter="create">
                         {{ form.processing ? lang().button.add + '...' : lang().button.add }}
                     </PrimaryButton>
+                    <p v-else>{{ data.StringRestriccionNoFActura }}</p>
                 </div>
                 <div class="flex justify-end my-3">
                     <p v-if="props.ArrayOrdinarias[props.ArrayOrdinarias.length] > 8" class="mx-2">Hay pendientes
@@ -651,7 +677,7 @@ const formatfin = (date) => {
                     <p v-if="data.debugHorasSemana" class="mx-2 text-amber-700 bg-amber-400/10 rounded-2xl">
                         <small v-if="numberPermissions > 8">{{ data.debugHorasSemana }}</small>
                     </p>
-                    
+
                 </div>
             </form>
         </Modal>

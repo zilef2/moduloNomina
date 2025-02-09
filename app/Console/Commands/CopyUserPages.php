@@ -24,6 +24,26 @@ class CopyUserPages extends Command {
     protected $description = 'Copia de la entidad generica';
     protected int $contadorMetodos;
 
+    
+     protected function generateAttributes(): array {
+        //notacion de notas: //todo: nexttochange: //todo: sync:
+        //TODO: probando
+        // text // number // dinero // date // datetime // foreign
+        //TODO: hacer otro array para las clavesForaneas 
+
+        return [//ready to material
+            'nombre' => 'text',
+        ];
+
+        /*
+//            'valor_consig' => 'biginteger',
+//            'texto' => 'text',
+//            'fecha_legalizacion' => 'datetime',
+//            'descripcion' => 'text',
+//            'precio' => 'decimal',
+        */
+    }
+    
     public function handle(): int {
         try {
             $this->generando = self::getMessage('generando');
@@ -187,32 +207,6 @@ class CopyUserPages extends Command {
             return 0;
         }
         return 1;
-    }
-
-    protected function generateAttributes(): array {
-        //notacion de notas: //todo: nexttochange: //todo: sync:
-        //TODO: probando
-        // text // number // dinero // date // datetime // foreign
-        //TODO: hacer otro array para las clavesForaneas 
-
-        return [//ready to material
-            'nombre' => 'text',
-            'unidad' => 'text',
-            'cantidad' => 'number',
-            'precio_unitario' => 'number',
-            'fecha_adquisicion' => 'number',
-            'miniatura' => 'text',
-            'stock_minimo' => 'number',
-            'ubicacion' => 'text',
-        ];
-
-        /*
-//            'valor_consig' => 'biginteger',
-//            'texto' => 'text',
-//            'fecha_legalizacion' => 'datetime',
-//            'descripcion' => 'text',
-//            'precio' => 'decimal',
-        */
     }
 
     private function Paso2($modelName, &$submetodo): int {
@@ -433,6 +427,7 @@ class CopyUserPages extends Command {
         }
 
         $columns = collect($atributos)->map(function ($type, $name) {
+            if($type === 'number')$type = 'integer';
             return "\$table->$type('$name');";
         })->implode("\n            ");
 

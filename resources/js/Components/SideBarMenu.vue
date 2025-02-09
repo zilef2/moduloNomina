@@ -26,6 +26,7 @@ const ButtonsAdministrativo = [ //SAME AS WEB.PHP
     'cotizacion',
     'viatico',
 	// 'consignarViatico',
+	'material',
 	//aquipuesSide
 ];
 const ButtonsInformes = [ //SAME AS WEB.PHP

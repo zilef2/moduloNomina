@@ -41,7 +41,8 @@ class Permission extends ModelsPermission
 {
     use HasFactory;
     protected $fillable = [
-        'id',
+        'name',
+        'guard_name',
     ];
 
 

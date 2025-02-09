@@ -12,7 +12,16 @@ return [
 		'consignaciona' => 'Consignaciones',
         
 		'fecha_legalizacion' => 'Fecha legalización',
-		'consignarviatico' => 'Consignarviatico',
+		'consignarviatico' => 'Consignar',
+		'material' => 'Material',
+		'materials' => 'Materiales',
+		'nombre' => 'nombre',
+		'unidad_de_medida' => 'Unidad de medida',
+		'cantidad' => 'Cantidad',
+		'precio_unitario' => 'Precio unitario',
+		'fecha_adquisicion' => 'Fecha adquisicion',
+		'miniatura' => 'Miniatura',
+		'stock_minimo' => 'Stock minimo',
 		//aquipues
         
         'viatico' => 'viático',
@@ -187,7 +196,7 @@ return [
         'prestamosayer' => 'Prestamosayer',
         'cotizacion' => 'Cotizacion',
         'role' => 'Rol',
-        'ubicacion' => 'Rol',
+        'ubicacion' => 'Ubicacion',
 		'consignarViatico' => 'Consignar',
 		'cc' => 'Centro',
 		'gasto' => 'Gasto',
@@ -196,6 +205,14 @@ return [
 		'legalizacion' => 'LegalizaciÓn',
 		'fecha_legalizacion' => 'Fecha legalizacion',
 		'consignarviatico' => 'Consignar',
+		'material' => 'Material',
+		'nombre' => 'nombre',
+		'unidad_de_medida' => 'unidad_de_medida',
+		'cantidad' => 'cantidad',
+		'precio_unitario' => 'precio_unitario',
+		'fecha_adquisicion' => 'fecha_adquisicion',
+		'miniatura' => 'miniatura',
+		'stock_minimo' => 'stock_minimo',
 		//aquipues
     ],
     'button' => [
@@ -285,6 +302,10 @@ return [
     ],
     'permissions' => [
         //aquipermissionpues
+        'delete material' => 'Borrar material',
+        'update material' => 'Actualizar material',
+        'read material' => 'Leer material',
+        'create material' => 'Crear material',
         'delete user' => 'Borrar usuarios',
         'update user' => 'Actualizar usuarios',
         'read user' => 'Leer usuarios',
