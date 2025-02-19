@@ -15,20 +15,23 @@ return new class extends Migration {
             $table->text('unidad_de_medida');
             $table->integer('cantidad');
             $table->integer('precio_unitario');
-            $table->integer('fecha_adquisicion');
+            $table->dateTime('fecha_adquisicion');
             $table->text('miniatura');
             $table->integer('stock_minimo');
             $table->text('ubicacion');
             $table->id();
             $table->timestamps();
         });
-
         $generic = 'material';
         Permission::firstOrCreate(['name' => 'delete '.$generic],['guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'update '.$generic],['guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'read '.$generic],['guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'create '.$generic],['guard_name' => 'web']);
         
+        
+        Schema::table('parametros', function (Blueprint $table) {
+            $table->integer('minimo_material');
+        });
     }
 
     /**

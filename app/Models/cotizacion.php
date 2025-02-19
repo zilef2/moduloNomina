@@ -15,13 +15,42 @@ class cotizacion extends Model
     use HasFactory;
 
     protected $fillable = [
-        'numero_cot',
+        'numero_cot', //cotizacion
         'descripcion_cot',
-        'precio_cot',
+        'precio_cot', //antes del iva
         'aprobado_cot',
-        'fecha_aprobacion_cot',
+        'fecha_aprobacion_cot', //FECHA_SOLICITUD
         'centro_costo_id',
+        
+        'estado_cliente',
+        'estado',
+        'factura',
+        'fecha_factura',
+        'mes_pedido',
+        'lugar',
+        'tipo',
+        'tipo_de_mantenimiento',
+        'por_a',
+        'por_i',
+        'por_u',
+        'admi',
+        'impr',
+        'util',
+        'subtotal',
+        'iva',
+        'total',
+        'persona_que_realiza_la_pe',
+        'cliente',
+        'persona_que_solicita_la_propuesta_economica',
+        'orden_de_compra',
+        'hes',
+        'observaciones',
     ];
+    //19feb2025
+    /*
+     * estos cambios implican una lista de clientes y TIPO DE MANTENIMIENTO 
+
+     */
 
     public function centro(): BelongsTo
     {

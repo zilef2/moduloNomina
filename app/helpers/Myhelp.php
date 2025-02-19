@@ -1,7 +1,9 @@
 <?php
 
 namespace App\helpers;
-
+/*
+ * updatingDate
+ */
 use App\Models\Reporte;
 use App\Models\User;
 use Carbon\Carbon;
@@ -151,6 +153,14 @@ class Myhelp
             ->get()->sum('ordinarias');
 
         return $ArrayOrdinarias;
+    }
+    
+    
+    public function updatingDate($date) {
+        if ($date === null || $date == '1969-12-31') {
+            return null;
+        }
+        return date('Y-m-d H:i:s', strtotime($date));
     }
 
 } ?>

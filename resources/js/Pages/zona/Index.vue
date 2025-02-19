@@ -13,9 +13,9 @@ import pkg from 'lodash';
 import Pagination from '@/Components/Pagination.vue';
 import {ChevronUpDownIcon, PencilIcon, TrashIcon} from '@heroicons/vue/24/solid';
 // import { CursorArrowRippleIcon, ChevronUpDownIcon,QuestionMarkCircleIcon, EyeIcon, PencilIcon, TrashIcon, UserGroupIcon } from '@heroicons/vue/24/solid';
-import Create from '@/Pages/generic/Create.vue';
-import Edit from '@/Pages/generic/Edit.vue';
-import Delete from '@/Pages/generic/Delete.vue';
+import Create from '@/Pages/zona/Create.vue';
+import Edit from '@/Pages/zona/Edit.vue';
+import Delete from '@/Pages/zona/Delete.vue';
 
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
@@ -43,7 +43,7 @@ const data = reactive({
         order: props.filters.order,
         perPage: props.perPage,
     },
-    generico: null,
+    zonao: null,
     selectedId: [],
     multipleSelect: false,
     createOpen: false,
@@ -61,7 +61,7 @@ const order = (field) => {
 
 watch(() => _.cloneDeep(data.params), debounce(() => {
     let params = pickBy(data.params)
-    router.get(route("generic.index"), params, {
+    router.get(route("zona.index"), params, {
         replace: true,
         preserveState: true,
         preserveScroll: true,
@@ -72,8 +72,8 @@ const selectAll = (event) => {
     if (event.target.checked === false) {
         data.selectedId = []
     } else {
-        props.fromController?.data.forEach((generic) => {
-            data.selectedId.push(generic.id)
+        props.fromController?.data.forEach((zona) => {
+            data.selectedId.push(zona.id)
         })
     }
 }
@@ -86,11 +86,11 @@ const select = () => data.multipleSelect = props.fromController?.data.length ===
 // watchEffect(() => { })
 
 
-// text - string // number // dinero // date // datetime // foreign
+// text // number // dinero // date // datetime // foreign
 const titulos = [
-    // { order: 'codigo', label: 'codigo', type: 'text' },
-    { order: 'nombre', label: 'nombre', type: 'text' },
-  // { order: 'inventario', label: 'inventario', type: 'foreign',nameid:'userino'},
+    { order: 'nombre', label: 'nombre', type: 'string' },
+    // { order: 'nombre2', label: 'nombre2', type: 'string' },
+    // { order: 'codigo', label: 'codigo', type: 'string' },
 ];
 
 </script>
@@ -105,20 +105,20 @@ const titulos = [
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">
                     <PrimaryButton class="rounded-none" @click="data.createOpen = true"
-                        v-if="can(['create generic'])">
+                        v-if="can(['create zona'])">
                         {{ lang().button.new }}
                     </PrimaryButton>
 
-                    <Create v-if="can(['create generic'])" :numberPermissions="props.numberPermissions"
+                    <Create v-if="can(['create zona'])" :numberPermissions="props.numberPermissions"
                         :titulos="titulos" :show="data.createOpen" @close="data.createOpen = false" :title="props.title"
                         :losSelect=props.losSelect />
 
-                    <Edit v-if="can(['update generic'])" :titulos="titulos"
+                    <Edit v-if="can(['update zona'])" :titulos="titulos"
                         :numberPermissions="props.numberPermissions" :show="data.editOpen" @close="data.editOpen = false"
-                        :generica="data.generico" :title="props.title" :losSelect=props.losSelect />
+                        :zonaa="data.zonao" :title="props.title" :losSelect=props.losSelect />
 
-                    <Delete v-if="can(['delete generic'])" :numberPermissions="props.numberPermissions"
-                        :show="data.deleteOpen" @close="data.deleteOpen = false" :generica="data.generico"
+                    <Delete v-if="can(['delete zona'])" :numberPermissions="props.numberPermissions"
+                        :show="data.deleteOpen" @close="data.deleteOpen = false" :zonaa="data.zonao"
                         :title="props.title" />
                 </div>
             </div>
@@ -127,7 +127,7 @@ const titulos = [
                     <div class="flex space-x-2">
                         <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet" />
                         <!-- <DangerButton @click="data.deleteBulkOpen = true"
-                            v-show="data.selectedId.length != 0 && can(['delete generic'])" class="px-3 py-1.5"
+                            v-show="data.selectedId.length != 0 && can(['delete zona'])" class="px-3 py-1.5"
                             v-tooltip="lang().tooltip.delete_selected">
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton> -->
@@ -165,21 +165,21 @@ const titulos = [
                                 class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
 
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
-                                    <input
-                                        class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary dark:text-primary shadow-sm focus:ring-primary/80 dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-primary dark:checked:border-primary"
-                                        type="checkbox" @change="select" :value="claseFromController.id"
-                                        v-model="data.selectedId" />
+<!--                                    <input-->
+<!--                                        class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary dark:text-primary shadow-sm focus:ring-primary/80 dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-primary dark:checked:border-primary"-->
+<!--                                        type="checkbox" @change="select" :value="claseFromController.id"-->
+<!--                                        v-model="data.selectedId" />-->
                                 </td>
                                 <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 w-12 px-2 sm:py-3">
                                     <div class="flex justify-center items-center">
                                         <div class="rounded-md overflow-hidden">
-                                            <InfoButton v-show="can(['update generic'])" type="button"
-                                                @click="(data.editOpen = true), (data.generico = claseFromController)"
+                                            <InfoButton v-show="can(['update zona'])" type="button"
+                                                @click="(data.editOpen = true), (data.zonao = claseFromController)"
                                                 class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
                                                 <PencilIcon class="w-4 h-4" />
                                             </InfoButton>
-                                            <DangerButton v-show="can(['delete generic'])" type="button"
-                                                @click="(data.deleteOpen = true), (data.generico = claseFromController)"
+                                            <DangerButton v-show="can(['delete zona'])" type="button"
+                                                @click="(data.deleteOpen = true), (data.zonao = claseFromController)"
                                                 class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.delete">
                                                 <TrashIcon class="w-4 h-4" />
                                             </DangerButton>

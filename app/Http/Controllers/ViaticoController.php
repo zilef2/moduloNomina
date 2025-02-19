@@ -129,21 +129,18 @@ class ViaticoController extends Controller {
         DB::beginTransaction();
 //        $no_nada = $request->no_nada['id'];
         $myuser = Myhelp::AuthU();
-        $jefe = User::Where('name', 'Carlos Daniel Anaya Barrios')->first();
         $request->merge(['user_id' => $myuser->id]);
         $request->merge(['centro_costo_id' => $request->centro_costo_id['id']]);
         $request->merge(['saldo' => $request->gasto]);
 //        $request->merge(['fecha_legalizacion' => Carbon::now()]);
         $viatico = viatico::create($request->all());
 
+        $jefe = User::Where('name', 'Carlos Daniel Anaya Barrios')->first();
         if ($jefe) {
-
             $detalle = [
                 'mensaje' => "Se ha generado un nuevo viático por un valor de $request->gasto. 
                               El solicitante es $myuser->name y el motivo del viaje es $request->descripcion"
             ];
-
-
             if (\Illuminate\Support\Facades\App::environment('production')) {
                 EnviarViaticoJob::dispatch($jefe->email, $detalle)->delay(now()->addSeconds(5));
             }

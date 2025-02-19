@@ -98,15 +98,16 @@ const totalSaldo = computed(() => {
 // text // number // dinero // date // datetime // foreign
 const titulos = [
     // { order: 'codigo', label: 'codigo', type: 'text' },
+    {order: 'user_id', label: 'user_id', type: 'foreign', nameid: 'userino'},
     {order: 'descripcion', label: 'descripcion', type: 'text2'},
     {order: 'gasto', label: 'gasto', type: 'number'},
     {order: 'consignaciona', label: 'consignaciona', type: 'number'},
+    {order: 'fechaconsig', label: 'fechaconsig', type: 'date'},
     {order: 'saldo', label: 'saldo', type: 'number'},
     {order: 'legalizacion', label: 'legalizacion', type: 'text'},
     {order: 'valor_legalizacion', label: 'valor_legalizacion', type: 'dinero'},
     {order: 'descripcion_legalizacion', label: 'descripcion_legalizacion', type: 'text'},
     {order: 'fecha_legalizacion', label: 'fecha_legalizacion', type: 'datetime'},
-    {order: 'user_id', label: 'user_id', type: 'foreign', nameid: 'userino'},
     {order: 'centro_costo_id', label: 'centro_costo_id', type: 'foreign', nameid: 'centrou'},
     // { order: 'inventario', label: 'inventario', type: 'foreign',nameid:'nombre'},
 ];
@@ -229,6 +230,7 @@ const titulos = [
 
 <!--{{claseFromController}}-->
 <!--                            <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++indexu }}</td>-->
+                            <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['userino'] }}</td>
                             <td class="min-w-[440px] py-2 px-2"> {{ claseFromController['descripcion'] }}</td>
                             <td class="whitespace-nowrap py-2 px-2">
                                 {{ formatPesosCol(claseFromController['gasto']) }}
@@ -239,6 +241,12 @@ const titulos = [
                                     {{ formatPesosCol(item) }}
                                 </p>
                             </td>
+                            <td class="whitespace-nowrap py-2 px-2">
+                                <p v-for="item in claseFromController['fechaconsig']" :key="item.id" 
+                                   class="whitespace-nowrap py-2 px-2">
+                                    {{ formatDate(item) }}
+                                </p>
+                            </td>
                             <td class="whitespace-nowrap py-2 px-8">
                                 {{ formatPesosCol(claseFromController['saldo']) }}
                             </td>
@@ -246,7 +254,6 @@ const titulos = [
                             <td class="whitespace-nowrap py-2 px-2"> {{ formatPesosCol(claseFromController['valor_legalizacion'])}}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['descripcion_legalizacion']}}</td>
                             <td class="whitespace-nowrap py-2 px-2">{{ formatDate(claseFromController['fecha_legalizacion']) }}</td>
-                            <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['userino'] }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['centrou'] }}</td>
                             
                         </tr>
@@ -255,11 +262,14 @@ const titulos = [
                             <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
                             <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
                             <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
+                            <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
+                            <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
+                            <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
+                            <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
 <!--                            <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">-->
 <!--                                {{ props.total }}-->
 <!--                            </td>-->
-                            <td><strong>Total saldo: <br></strong> {{ formatPesosCol(totalsaldo) }}</td>
-                            <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
+<!--                            <td><strong>Total saldo: <br></strong> {{ formatPesosCol(totalSaldo) }}</td>-->
                             <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
                             <td><strong>Total legalizado: <br></strong> {{ formatPesosCol(totallegalizado) }}</td>
                         </tr>

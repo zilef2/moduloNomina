@@ -27,12 +27,12 @@ class CopyUserPages extends Command {
     
      protected function generateAttributes(): array {
         //notacion de notas: //todo: nexttochange: //todo: sync:
-        //TODO: probando
         // text // number // dinero // date // datetime // foreign
         //TODO: hacer otro array para las clavesForaneas 
 
         return [//ready to material
-            'nombre' => 'text',
+            'nombre' => 'string',
+            'codigo' => 'string',
         ];
 
         /*

@@ -36,6 +36,7 @@ use Spatie\Permission\Models\Permission as ModelsPermission;
  * @method \Illuminate\Database\Eloquent\Relations\BelongsTo belongsTo(string $related, string $foreignKey = null, string $ownerKey = null)
  * @method \Illuminate\Database\Eloquent\Relations\HasMany hasMany(string $related, string $foreignKey = null, string $localKey = null)
  * @method \Illuminate\Database\Eloquent\Relations\BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null, string $relatedPivotKey = null)
+ * @method static firstOrCreate(string[] $array, string[] $array1)
  */
 class Permission extends ModelsPermission
 {

@@ -2,6 +2,33 @@
 
 return [
     'label' => [
+		'zona' => 'Zona',
+        
+        //cotizacion
+        'estado_cliente' => 'Estado cliente',
+        'estado' => 'Estado',
+        'factura' => 'Factura',
+        'fecha_factura' => 'Fecha factura',
+        'mes_pedido' => 'Mes pedido',
+        'lugar' => 'Lugar',
+        'tipo' => 'Tipo',
+        'tipo_de_mantenimiento' => 'Tipo de mantenimiento',
+        'por_a' => '%a',
+        'por_i' => '%i',
+        'por_u' => '%u',
+        'admi' => 'Admi',
+        'impr' => 'Impr',
+        'util' => 'Util',
+        'subtotal' => 'Subtotal',
+        'iva' => 'Iva',
+        'total' => 'Total',
+        'persona_que_realiza_la_pe' => 'Persona realiza la pe',
+        'persona_que_solicita_la_propuesta_economica' => 'Persona solicita la pe',
+        'orden_de_compra' => 'Orden de compra',
+        'hes' => 'HES',
+        //fin cotizacion
+        
+		'fechaconsig' => 'Fecha consignación',
 		'valor_legalizacion' => 'Valor legalización',
 		'legalizar' => 'Legalizar',
 		'descripcion_legalizacion' => 'Descripcion de la legalización',
@@ -22,6 +49,9 @@ return [
 		'fecha_adquisicion' => 'Fecha adquisicion',
 		'miniatura' => 'Miniatura',
 		'stock_minimo' => 'Stock minimo',
+		'zona' => 'Zona',
+		'nombre2' => 'Nombre opcional',
+		'codigo' => 'codigo',
 		//aquipues
         
         'viatico' => 'viático',
@@ -33,7 +63,7 @@ return [
         'cotizacion' => 'Cotización',
         'numero_cot' => 'Número',
         'descripcion_cot' => 'Descripción',
-        'precio_cot' => 'Precio',
+        'precio_cot' => 'Antes del iva',
         'aprobado_cot' => 'Aprobado',
         'fecha_aprobacion_cot' => 'Fecha aprobación',
 
@@ -213,6 +243,9 @@ return [
 		'fecha_adquisicion' => 'fecha_adquisicion',
 		'miniatura' => 'miniatura',
 		'stock_minimo' => 'stock_minimo',
+		'zona' => 'Zona',
+		'nombre2' => 'Nombre opcional',
+		'codigo' => 'Código',
 		//aquipues
     ],
     'button' => [
@@ -302,10 +335,15 @@ return [
     ],
     'permissions' => [
         //aquipermissionpues
+        'delete zona' => 'Borrar zona',
+        'update zona' => 'Actualizar zona',
+        'read zona' => 'Leer zona',
+        'create zona' => 'Crear zona',
         'delete material' => 'Borrar material',
         'update material' => 'Actualizar material',
         'read material' => 'Leer material',
         'create material' => 'Crear material',
+        
         'delete user' => 'Borrar usuarios',
         'update user' => 'Actualizar usuarios',
         'read user' => 'Leer usuarios',

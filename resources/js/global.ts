@@ -168,7 +168,7 @@ export function formatDate(date, isDateTime: string): string { //todo: no acepta
     const month = monthName((validDate.getMonth() + 1).toString().padStart(2, "0"));
     let year = validDate.getFullYear();
 
-    console.table([day,month,year]);
+    // console.table([day,month,year]);
     // console.log("=>(global.ts:162) day", day);
     // console.log("=>(global.ts:165) month", month);
     // console.log("=>(global.ts:167) year", year);
@@ -213,9 +213,9 @@ export function formatDate2(date): string { //todo: no aceptara mas datetime
     const month = monthName((validDate.getMonth() + 1).toString().padStart(2, "0"));
     let year = validDate.getFullYear();
 
-    console.log("=>(global.ts:162) day", day);
-    console.log("=>(global.ts:165) month", month);
-    console.log("=>(global.ts:167) year", year);
+    // console.log("=>(global.ts:162) day", day);
+    // console.log("=>(global.ts:165) month", month);
+    // console.log("=>(global.ts:167) year", year);
 
     let anioActual = new Date().getFullYear();
     if (anioActual == year) {

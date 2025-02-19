@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Http\Controllers\CentroTableController;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 /**
- * @method static \Illuminate\Database\Eloquent\Collection all()
+ * @method static Collection all()
  * @method static Model|static find($id)
  * @method static Model|static findOrFail($id)
  * @method static Model|static first()
@@ -20,7 +21,7 @@ use Illuminate\Support\Facades\DB;
  * @method static Model|static updateOrCreate(array $attributes, array $values = [])
  * @method static Model|static create(array $attributes)
  * @method static Model|static make(array $attributes = [])
- * @method static \Illuminate\Database\Eloquent\Collection|static get()
+ * @method static Collection|static get()
  * @method static bool|null forceDelete()
  * @method static Builder|static query()
  * @method static Builder|static where($column, $operator = null, $value = null, $boolean = 'and')
@@ -41,8 +42,7 @@ use Illuminate\Support\Facades\DB;
  * @method BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null, string $relatedPivotKey = null)
  * @method static selectRaw(string $string)
  */
-class CentroCosto extends Model
-{
+class CentroCosto extends Model {
     use HasFactory;
 
     protected $fillable = [
@@ -55,28 +55,29 @@ class CentroCosto extends Model
     ];
 
 
-    public function reportes(): HasMany{
+    public function reportes(): HasMany {
         return $this->hasMany(Reporte::class);
     }
 
-    public function users(): BelongsToMany{
+    public function users(): BelongsToMany {
         return $this->BelongstoMany(User::class, 'centro_user');
     }
 
-    public function ArrayListaSupervisores($supervisores): array{
-        $centroid = $this->id;
-        $result = $supervisores->map(function ($user) use ($centroid) {
+    public function ArrayListaSupervisores($supervisores): array {
+        $centroid = (int)$this->id;
+        return $supervisores->map(function (User $user) use ($centroid) {
             if ($user->TieneEsteCentro($centroid)) {
                 return $user->name;
             }
             return null;
         })->filter()->toArray();
-
-        return $result;
     }
 
-    public function ArraySupervisores($centroid, $PosiblesSupervisores): array
-    {
+
+    /**
+     * @param Collection<int, User> $PosiblesSupervisores
+     */
+    public function ArraySupervisores($centroid, Collection $PosiblesSupervisores): array {
         $result = [];
         if ($PosiblesSupervisores->count()) {
             foreach ($PosiblesSupervisores as $supervisor) {
@@ -87,8 +88,7 @@ class CentroCosto extends Model
         return array_unique($result);
     }
 
-    public function ArraySupervIDs(): array
-    {
+    public function ArraySupervIDs(): array {
         $centroid = $this->id;
         $supervisores = User::UsersWithRol('supervisor')->get();
         $result = $supervisores->map(function ($user) use ($centroid) {
@@ -103,8 +103,7 @@ class CentroCosto extends Model
     }
 
     //deep2 |
-    public function actualizarEstimado($anio, $mes,$parametros): void
-    {
+    public function actualizarEstimado($anio, $mes, $parametros): void {
         $elSelect = [
             'user_id',
             DB::raw('COUNT(*) as total'),
@@ -127,10 +126,10 @@ class CentroCosto extends Model
             ->Where('valido', 1)
             ->groupBy('user_id')
             ->get();
-        
+
         $CTC = new CentroTableController();
-        [$Reportes,$mano_obra_estimada] = $CTC->MultiplicarPorSalario($Reportes,$this->id);
-        
+        [$Reportes, $mano_obra_estimada] = $CTC->MultiplicarPorSalario($Reportes, $this->id);
+
         $this->update([
             'mano_obra_estimada' => $mano_obra_estimada,
         ]);

@@ -27,6 +27,8 @@ const data = reactive({
         searchh2: props.filters?.searchh2,
         searchh3: props.filters?.searchh3,
         searchh4: props.filters?.searchh4,
+        searchh5: props.filters?.searchh5,
+        searchh6: props.filters?.searchh6,
 
     },
 })
@@ -54,7 +56,9 @@ watchEffect(() => {
     data.params.searchh1 = props.filters?.searchh1
     data.params.searchh2 = props.filters?.searchh2
     data.params.searchh3 = props.filters?.searchh3 //searchNeativos
-    data.params.searchh4 = props.filters?.searchh4 //searchNeativos
+    data.params.searchh4 = props.filters?.searchh4
+    data.params.searchh5 = props.filters?.searchh5
+    data.params.searchh6 = props.filters?.searchh6
 })
 </script>
 <template>

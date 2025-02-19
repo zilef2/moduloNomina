@@ -61,5 +61,7 @@ class Parametro extends Model
         'porcentaje_dominical_extra_nocturno',
 
         // 'porcentaje_salud_pension', actualmente = 0.04
+        
+        'minimo_material',
     ];
 }

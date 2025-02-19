@@ -104,6 +104,7 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::put('/legalizarviatico/{id}', [ViaticoController::class, 'legalizarviatico'])->name('legalizarviatico');
     Route::get('/resetPassword/{id}', [UserController::class, 'resetPassword'])->name('resetPassword');
 	Route::resource("/material", \App\Http\Controllers\MaterialController::class);
+	Route::resource("/zona", \App\Http\Controllers\ZonaController::class);
 	//aquipues
 }); //fin verified
 

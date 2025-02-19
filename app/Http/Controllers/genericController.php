@@ -41,13 +41,13 @@ class geenericController extends Controller
         return $generics;
     }
     
-     public function PerPageAndPaginate($request,$cotizacions)
+     public function PerPageAndPaginate($request,$generics)
     {
         $perPage = $request->has('perPage') ? $request->perPage : 10;
         $page = request('page', 1); // Current page number
         $paginated = new LengthAwarePaginator(
-            $cotizacions->forPage($page, $perPage),
-            $cotizacions->count(),
+            $generics->forPage($page, $perPage),
+            $generics->count(),
             $perPage,
             $page,
             ['path' => request()->url()]
@@ -55,7 +55,7 @@ class geenericController extends Controller
         return $paginated;
     }
     
-    public function Filtros(&$generics,$request): Builder {
+    public function Filtros($request): Builder {
         $generics = generic::query();
         if ($request->has('search')) {
             $generics = $generics->where(function ($query) use ($request) {

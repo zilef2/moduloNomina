@@ -395,7 +395,6 @@ class ReportesController extends Controller {
         if ($date === null || $date == '1969-12-31') {
             return null;
         }
-
         return date('Y-m-d H:i:s', strtotime($date));
     }
 

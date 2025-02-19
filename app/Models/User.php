@@ -133,7 +133,7 @@ class User extends Authenticatable {
         return $this->belongsTo(Cargo::class);
     }
 
-    public function ArrayCentrosID() {
+    public function ArrayCentrosID(): array {
         $result = [];
         if (!$this->centros->isEmpty()) {
             foreach ($this->centros as $centro) {
@@ -141,6 +141,12 @@ class User extends Authenticatable {
             }
         }
         return $result;
+    }
+
+    public function NotMyCentros(): array {
+        $misCentrosIDs = $this->centros->pluck('id')->toArray();
+
+        return CentroCosto::whereNotIn('id', $misCentrosIDs)->get()->toArray();
     }
 
     public function ArraycentroName($numeroDeCentros = 0): array|string {

@@ -94,13 +94,6 @@ const select = () => {
 // watchEffect(() => {})
 
 // text // number // dinero // date // datetime // foreign
-const fillable = [
-    'numero_cot',
-    'descripcion_cot',
-    'precio_cot',
-    'aprobado_cot',
-    'fecha_aprobacion_cot'
-];
 const titulos = [
     // { order: 'codigo', label: 'codigo', type: 'text' },
     {order: 'numero_cot', label: 'numero_cot', type: 'text'},
@@ -108,8 +101,31 @@ const titulos = [
     {order: 'descripcion_cot', label: 'descripcion_cot', type: 'text'},
     {order: 'precio_cot', label: 'precio_cot', type: 'number'},
     {order: 'fecha_aprobacion_cot', label: 'fecha_aprobacion_cot', type: 'date'},
-    // {order: 'aprobado_cot', label: 'aprobado_cot', type: 'text'},
-    // {order: 'fecha_aprobacion_cot', label: 'fecha_aprobacion_cot', type: 'text'},
+    
+    
+    {order: 'estado_cliente', label: 'estado_cliente', type: 'text'},
+    {order: 'estado', label: 'estado', type: 'text'},
+    {order: 'factura', label: 'factura', type: 'text'},
+    {order: 'fecha_factura', label: 'fecha_factura', type: 'date'},
+    {order: 'mes_pedido', label: 'mes_pedido', type: 'text'},
+    {order: 'lugar', label: 'lugar', type: 'text'},
+    {order: 'tipo', label: 'tipo', type: 'text'},
+    {order: 'tipo_de_mantenimiento', label: 'tipo_de_mantenimiento', type: 'text'},
+    {order: 'por_a', label: 'por_a', type: 'number'},
+    {order: 'por_i', label: 'por_i', type: 'number'},
+    {order: 'por_u', label: 'por_u', type: 'number'},
+    {order: 'admi', label: 'admi', type: 'number'},
+    {order: 'impr', label: 'impr', type: 'number'},
+    {order: 'util', label: 'util', type: 'number'},
+    {order: 'subtotal', label: 'subtotal', type: 'number'},
+    {order: 'iva', label: 'iva', type: 'number'},
+    {order: 'total', label: 'total', type: 'number'},
+    {order: 'persona_que_realiza_la_pe', label: 'persona_que_realiza_la_pe', type: 'text'},
+    {order: 'cliente', label: 'cliente', type: 'text'},
+    {order: 'persona_que_solicita_la_propuesta_economica', label: 'persona_que_solicita_la_propuesta_economica', type: 'text'},
+    {order: 'orden_de_compra', label: 'orden_de_compra', type: 'text'},
+    {order: 'hes', label: 'hes', type: 'text'},
+    {order: 'observaciones', label: 'observaciones', type: 'text'},
 ];
 
 </script>

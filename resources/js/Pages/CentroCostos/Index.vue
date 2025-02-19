@@ -32,9 +32,9 @@ const props = defineProps({
 
 const data = reactive({
     params: {
-        search: props.filters?.search,
-        searchSCC: props.filters?.searchSCC,
-        searchh2: props.filters?.searchh2, //ver todos
+        search: props.filters?.search, //por nombre o descrip
+        searchSCC: props.filters?.searchSCC, //por supervisor
+        searchh2: props.filters?.searchh2, //ver todos (solo super)
         field: props.filters?.field,
         order: props.filters?.order,
         perPage: props.perPage,
@@ -64,7 +64,6 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
         preserveScroll: true,
     })
 }, 150))
-
 
 </script>
 

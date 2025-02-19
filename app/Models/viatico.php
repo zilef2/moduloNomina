@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class viatico extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $appends = ['userino','centrou','consignaciona'];
+    protected $appends = ['userino','centrou','consignaciona','fechaconsig'];
     protected $fillable = [
         'gasto',
         'saldo',
@@ -57,6 +57,16 @@ class viatico extends Model
             return $this->consignacion ? $arrayConsignaciones : ['0'];
         }else{
             return ['0'];
+        }
+    }
+    
+    public function getFechaconsigAttribute():array
+    {
+        $arrayConsignaciones = $this->consignacion->pluck('created_at')->toarray();
+        if(gettype($arrayConsignaciones) == 'array'){
+            return $this->consignacion ? $arrayConsignaciones : ['-'];
+        }else{
+            return ['-'];
         }
     }
 }

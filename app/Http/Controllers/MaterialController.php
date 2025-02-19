@@ -104,6 +104,9 @@ class MaterialController extends Controller
         DB::beginTransaction();
 //        $no_nada = $request->no_nada['id'];
 //        $request->merge(['no_nada_id' => $request->no_nada['id']]);
+        
+        $fecha_adquisicion = (new \App\helpers\Myhelp)->updatingDate($request->fecha_adquisicion);
+        $request->merge(['fecha_adquisicion' => $fecha_adquisicion]);
         $material = material::create($request->all());
 
         DB::commit();
@@ -118,7 +121,8 @@ class MaterialController extends Controller
         $permissions = Myhelp::EscribirEnLog($this, ' Begin UPDATE:materials');
         DB::beginTransaction();
         $material = material::findOrFail($id);
-//        $request->merge(['no_nada_id' => $request->no_nada['id']]);
+        $fecha_adquisicion = (new \App\helpers\Myhelp)->updatingDate($request->fecha_adquisicion);
+        $request->merge(['fecha_adquisicion' => $fecha_adquisicion]);
         $material->update($request->all());
 
         DB::commit();
