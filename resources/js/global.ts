@@ -153,6 +153,28 @@ export function formatToVue(date): String {
     return `${day}/${month}/${year}`;
 }
 
+export function Date_to_html(date: Date): String {
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+        return ''
+    }
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    return `${day}-${month}-${year}`;
+}
+
+export function Now_Date_to_html(): String {
+    let hoy = new Date();
+    let day = hoy.getDate();
+    let day2: string = day < 10 ? '0' + day : day + '';
+    let month: number = hoy.getMonth() + 1;
+    let month2: string = month < 10 ? '0' + month : month + '';
+    let year = hoy.getFullYear();
+
+    return `${year}-${month2}-${day2}`;
+}
+
 export function formatDate(date, isDateTime: string): string { //todo: no aceptara mas datetime
     if (isNullOrUndef(date)) return '';
     let validDate = new Date(date)
@@ -198,10 +220,16 @@ export function formatDate(date, isDateTime: string): string { //todo: no acepta
     }
 }
 
-export function formatDate2(date): string { //todo: no aceptara mas datetime
+export function formatDate2(date:string): string { //todo: no aceptara mas datetime
     if (isNullOrUndef(date)) return '';
-    let validDate = new Date(date)
+    // let validDate = new Date(date)
+    const parts = date.split("-");
 
+    const validDate = new Date(
+        parseInt(parts[0]),  // Año
+        parseInt(parts[1]) - 1,  // Mes (0 indexado)
+        parseInt(parts[2])   // Día
+    );
     // validDate = new Date(validDate.getTime() + (5 * 60 * 60 * 1000)) //correccion con GTM -5
     // const day = validDate.getDate().toString().padStart(2, "0");
     const day = validDate.getUTCDate().toString().padStart(2, "0");
@@ -210,11 +238,14 @@ export function formatDate2(date): string { //todo: no aceptara mas datetime
 
 
     // getMonthName(1)); // January
-    const month = monthName((validDate.getMonth() + 1).toString().padStart(2, "0"));
+    // const month = monthName((validDate.getMonth() + 1).toString().padStart(2, "0"));
+    const month = monthName((validDate.getUTCMonth() + 1).toString().padStart(2, "0"));
+
     let year = validDate.getFullYear();
 
     // console.log("=>(global.ts:162) day", day);
     // console.log("=>(global.ts:165) month", month);
+    // console.log("=>(global.ts:220) date", date);
     // console.log("=>(global.ts:167) year", year);
 
     let anioActual = new Date().getFullYear();

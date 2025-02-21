@@ -26,7 +26,11 @@ class CopyUserPages extends Command {
 
     
      protected function generateAttributes(): array {
-        //notacion de notas: //todo: nexttochange: //todo: sync:
+        //notacion de notas:
+         // //todo:
+         // nexttochange:
+         // //todo: sync:
+         // todo: torescue: añadir a los demas repos
         // text // number // dinero // date // datetime // foreign
         //TODO: hacer otro array para las clavesForaneas 
 

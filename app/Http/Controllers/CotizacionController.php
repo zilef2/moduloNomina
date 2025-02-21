@@ -18,77 +18,24 @@ class CotizacionController extends Controller {
     public $thisAtributos, $FromController = 'cotizacion';
 
 
-    //<editor-fold desc="Construc | mapea | filtro and dependencia">
+    //<editor-fold desc="Construc | mapea | filtro, order and dependencia">
     public function __construct() {
         $this->cotizacionInicial = 7334;
-
-
-        
-//        $this->middleware('permission:create cotizacion', ['only' => ['create', 'store']]);
-//        $this->middleware('permission:read cotizacion', ['only' => ['index', 'show']]);
-//        $this->middleware('permission:update cotizacion', ['only' => ['edit', 'update']]);
-//        $this->middleware('permission:delete cotizacion', ['only' => ['destroy', 'destroyBulk']]);
         $this->thisAtributos = (new cotizacion())->getFillable(); //not using
     }
 
-
-    public function Mapear($cotizacions) {
-        $cotizacions = $cotizacions->get()->map(function ($cotizacion) {
-            $cotizacion->centro_costo_id2 = $cotizacion->centro;
-            if ($cotizacion->centro_costo_id2) $cotizacion->centro_costo_id2 = $cotizacion->centro_costo_id2->nombre;
-
-            return $cotizacion;
-        });
-        return $cotizacions;
-    }
-
-    public function Filtros(&$cotizacions, $request) {
-        $cotizacions = cotizacion::query();
-        if ($request->has('search')) {
-            $cotizacions = $cotizacions->where(function ($query) use ($request) {
-                $query->where('numero_cot', 'LIKE', "%" . $request->search . "%")
-                    //                    ->orWhere('codigo', 'LIKE', "%" . $request->search . "%")
-                    //                    ->orWhere('identificacion', 'LIKE', "%" . $request->search . "%")
-                ;
-            });
-        }
-
-        if ($request->has(['field', 'order'])) {
-            $cotizacions = $cotizacions->orderBy($request->field, $request->order);
-        } else
-            $cotizacions = $cotizacions->orderBy('updated_at', 'DESC');
-    }
-
-    public function Dependencias() {
-//        $dependexsSelect = CentroCosto::all('id as value','nombre as label')->toArray();
-        $dependexsSelect = CentroCosto::all(['id as value', 'nombre', 'descripcion'])
-            ->map(function ($item) {
-                return [
-                    'value' => $item->value,
-                    'label' => ($item->nombre ?? '') . ' - ' . mb_substr($item->descripcion ?? '', 0, 17),
-                ];
-            })
-            ->toArray();
-
-
-        array_unshift($dependexsSelect, ["label" => "Seleccione un centro de costo", 'value' => 0]);
-        return $dependexsSelect;
-    }
-
-    public function CentrosRepetidos(): array {return CentroCosto::pluck('nombre')->toArray();}
-    //</editor-fold>
     public function index(Request $request) {
         $cotizacionInicial2 = Cotizacion::count();
         $consecutivoCotizacion = $cotizacionInicial2 + $this->cotizacionInicial;
-        
-        
+
+
         $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' cotizacions '));
         $this->Filtros($cotizacions, $request);
         $cotizacions = $this->Mapear($cotizacions);
         $losSelect = $this->Dependencias();
 
 
-        $perPage = $request->has('perPage') ? $request->perPage : 10;
+        $perPage = $request->has('perPage') ? $request->perPage : 50;
         $page = request('page', 1); // Current page number
         $paginated = new LengthAwarePaginator(
             $cotizacions->forPage($page, $perPage),
@@ -113,29 +60,112 @@ class CotizacionController extends Controller {
         ]);
     }
 
-    public function create() {
+    public function Filtros(&$cotizacions, $request) {
+        $cotizacions = cotizacion::query();
+        if ($request->has('search')) {
+            $cotizacions = $cotizacions->where(function ($query) use ($request) {
+                $query->where('numero_cot', 'LIKE', "%" . $request->search . "%")
+                    //                    ->orWhere('codigo', 'LIKE', "%" . $request->search . "%")
+                    //                    ->orWhere('identificacion', 'LIKE', "%" . $request->search . "%")
+                ;
+            });
+        }
+        if ($request->has('search2')) {
+            $cotizacions = $cotizacions->where(function ($query) use ($request) {
+                $query->where('descripcion_cot', 'LIKE', "%" . $request->search2 . "%");
+            });
+        }
+        if ($request->has('search3')) {
+            $cotizacions = $cotizacions->where(function ($query) use ($request) {
+                $query->where('fecha_aprobacion_cot', 'LIKE', "%" . $request->search3 . "%");
+            });
+        }
+        if ($request->has('search4')) {
+            $cotizacions = $cotizacions->where(function ($query) use ($request) {
+                $query->whereRaw("numero_cot REGEXP '^[0-9]+$'");
+            });
+        }
+
+
+        $this->Order($cotizacions, $request);
+    }
+
+    public function Order(&$cotizacions, $request) {
+        if ($request->has(['field', 'order'])) {
+            if ($request->field == 'centro_costo') {
+                $cotizacions = $cotizacions
+                    ->join('centros_costos', 'cotizacions.centro_costo_id', '=', 'centros_costos.id')
+                    ->orderBy('centros_costos.nombre', $request->order)
+                    ->select('cotizacions.*');
+            }
+            else {
+
+                $cotizacions = $cotizacions->orderBy($request->field, $request->order);
+            }
+        }
+        else {
+            $cotizacions = $cotizacions->orderBy('updated_at', 'DESC');
+        }
+    }
+
+    public function Mapear($cotizacions) {
+        $cotizacions = $cotizacions->get()->map(function ($cotizacion) {
+            $cotizacion->centro_costo_id2 = $cotizacion->centro;
+            if ($cotizacion->centro_costo_id2) $cotizacion->centro_costo_id2 = $cotizacion->centro_costo_id2->nombre;
+
+            return $cotizacion;
+        });
+        return $cotizacions;
+    }
+
+    public function Dependencias() { //todo: torescue:
+        $dependexsSelect = CentroCosto::all(['id as value', 'nombre', 'descripcion'])
+            ->map(function ($item) {
+                $descrip = $item->descripcion == '' ? ' - No descripción ' : ' - '.mb_substr($item->descripcion, 0, 17);
+                return [
+                    'value' => $item->value,
+                    'label' => ($item->nombre ?? '') . $descrip
+                ];
+            })->toArray();
+
+        array_unshift($dependexsSelect, ["label" => "Seleccione un centro de costo", 'value' => 0]);
+        return [
+            'centros' => $dependexsSelect,
+        ];
+    }
+
+    //</editor-fold>
+
+    public function CentrosRepetidos(): array {
+        return CentroCosto::pluck('nombre')->toArray();
+    }
+
+    public function store(Request $request): RedirectResponse {
+        $permissions = Myhelp::EscribirEnLog($this, ' Begin STORE:cotizacions');
+        DB::beginTransaction();
+        $request->merge(['aprobado_cot' => false]);
+        $request->merge(['user_id' => Myhelp::AuthUid()]);
+        $request->merge(['precio_cot' => str_replace(".", "", $request->precio_cot)]);
+        $this->SonSelect($request,[
+            'centro_costo_id',
+            'estado_cliente',
+            'estado',
+            'mes_pedido',
+            'tipo',
+            'tipo_de_mantenimiento',
+        ]);
+        $cotizacion = cotizacion::create($request->all());
+        Cache::forget('centro_costos'); // Borra la caché normal para búsquedas nuevas
+
+        DB::commit();
+        Myhelp::EscribirEnLog($this, 'STORE:cotizacions EXITOSO', 'permissions = '.$permissions.' | cotizacion id:' . $cotizacion->id . ' | ' . $cotizacion->numero_cot, false);
+        return back()->with('success', __('app.label.created_successfully', ['name' => $cotizacion->numero_cot]));
     }
 
     //! STORE - UPDATE - DELETE
     //! STORE functions
 
-    public function store(Request $request): RedirectResponse {
-        $permissions = Myhelp::EscribirEnLog($this, ' Begin STORE:cotizacions');
-        DB::beginTransaction();
-//        $dependex = $request->dependex['id'];
-//        $request->merge(['dependex_id' => $request->dependex['id']]);
-
-//        $request->merge(['centro_costo_id' => null]);
-        $request->merge(['aprobado_cot' => false]);
-//        $request->merge(['fecha_aprobacion_cot' => Carbon::now()]);
-        $request->merge(['user_id' => Myhelp::AuthUid()]);
-        $request->merge(['precio_cot' => str_replace(".", "", $request->precio_cot)]);
-        $cotizacion = cotizacion::create($request->all());
-        Cache::forget('centro_costos'); // Borra la caché normal para búsquedas nuevas
-
-        DB::commit();
-        Myhelp::EscribirEnLog($this, 'STORE:cotizacions EXITOSO', 'cotizacion id:' . $cotizacion->id . ' | ' . $cotizacion->numero_cot, false);
-        return back()->with('success', __('app.label.created_successfully', ['name' => $cotizacion->numero_cot]));
+    public function create() {
     }
 
     //fin store functions
@@ -146,20 +176,7 @@ class CotizacionController extends Controller {
     public function edit($id) {
     }
 
-    public function update(Request $request, $id) {
-        Myhelp::EscribirEnLog($this, ' Begin UPDATE:cotizacions');
-        DB::beginTransaction();
-        $cotizacion = cotizacion::findOrFail($id);
-//        $request->merge(['dependex_id' => $request->dependex['id']]);
-        $cotizacion->update($request->all());
-
-        DB::commit();
-        Myhelp::EscribirEnLog($this, 'UPDATE:cotizacions EXITOSO', 'cotizacion id:' . $cotizacion->id . ' | ' . $cotizacion->numero_cot, false);
-        return back()->with('success', __('app.label.updated_successfully2', ['numero_cot' => $cotizacion->numero_cot]));
-    }
-
-    //generar centro de costo
-    public function update2(Request $request, $id) {
+    public function update2(Request $request, $id) { 
         Myhelp::EscribirEnLog($this, ' Begin update2:cotizacions');
         DB::beginTransaction();
         $cotizacion = cotizacion::findOrFail($id);
@@ -178,6 +195,45 @@ class CotizacionController extends Controller {
         DB::commit();
         Myhelp::EscribirEnLog($this, 'UPDATE:cotizacions EXITOSO', 'cotizacion id:' . $cotizacion->id . ' | ' . $cotizacion->numero_cot, false);
         return back()->with('success', __('app.label.updated_successfully', ['name' => $cotizacion->numero_cot]));
+    }
+    
+    public function update3(Request $request, $id): RedirectResponse { 
+        Myhelp::EscribirEnLog($this, ' Begin update3:cotizacions se ha facturao chaval');
+        DB::beginTransaction();
+        $cotizacion = cotizacion::findOrFail($id);
+        $centro = centrocosto::findOrFail($cotizacion->centro_costo_id);
+        $centro->update(['activo' => 0]);
+        $cotizacion->update([
+            'factura' => $request->factura,
+            'fecha_factura' => $request->fecha_factura,
+        ]);
+
+        DB::commit();
+        Myhelp::EscribirEnLog($this, 'UPDATE:EXITOSO', 'cotizacion id:' . $cotizacion->id . ' | centro id: ' . $centro->id, false);
+        return back()->with('success', __('app.label.updated_successfully', ['name' => $cotizacion->numero_cot]));
+    }
+
+    //generar centro de costo
+
+    public function update(Request $request, $id) {
+        Myhelp::EscribirEnLog($this, ' Begin UPDATE:cotizacions');
+        DB::beginTransaction();
+        $cotizacion = cotizacion::findOrFail($id);
+        
+        $request->merge(['precio_cot' => str_replace(".", "", $request->precio_cot)]);
+        $this->SonSelect($request,[
+            'centro_costo_id',
+            'estado_cliente',
+            'estado',
+            'mes_pedido',
+            'tipo',
+            'tipo_de_mantenimiento',
+        ]);
+        $cotizacion->update($request->all());
+
+        DB::commit();
+        Myhelp::EscribirEnLog($this, 'UPDATE:cotizacions EXITOSO', 'cotizacion id:' . $cotizacion->id . ' | ' . $cotizacion->numero_cot, false);
+        return back()->with('success', __('app.label.updated_successfully2', ['numero_cot' => $cotizacion->numero_cot]));
     }
 
     /**
@@ -202,5 +258,11 @@ class CotizacionController extends Controller {
         return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
     }
     //FIN : STORE - UPDATE - DELETE
+    private function SonSelect(Request $request, array $selectinput) {
+        foreach ($selectinput as $index => $item) {
+            $valor = $request->{$item}['value'] ?? null;
+            $request->merge([$item => $valor]);
+        }
+    }
 
 }

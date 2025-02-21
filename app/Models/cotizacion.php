@@ -19,13 +19,14 @@ class cotizacion extends Model
         'descripcion_cot',
         'precio_cot', //antes del iva
         'aprobado_cot',
-        'fecha_aprobacion_cot', //FECHA_SOLICITUD
+        'fecha_aprobacion_cot',
         'centro_costo_id',
         
         'estado_cliente',
         'estado',
         'factura',
         'fecha_factura',
+        'fecha_solicitud',
         'mes_pedido',
         'lugar',
         'tipo',

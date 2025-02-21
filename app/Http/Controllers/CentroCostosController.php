@@ -28,7 +28,7 @@ class CentroCostosController extends Controller {
         session(['parametros' => Parametro::Find(1)]);
         $this->minutosActualizarPresupueto =
 //            1;
-            60 * 9;
+            60 * 5;
         $this->centroCostosAll = CentroCosto::all();
         $this->parametros = Parametro::find(1);
         $this->limitadorCentrosParaVer = 2400;
@@ -41,7 +41,6 @@ class CentroCostosController extends Controller {
         //<editor-fold desc="serach, order, mapear y paginar">
         $perPage = $request->has('perPage') ? $request->perPage : 5;
         $centroCostos = $this->MapearClasePP($numberPermissions, $request);
-        $nombresTabla = $this->getNombresTabla();
 
         $page = request('page', 1); // Current page number
         $paginated = new LengthAwarePaginator(
@@ -62,7 +61,7 @@ class CentroCostosController extends Controller {
             'filters' => $request->all(['search', 'field', 'order', 'searchh2', 'searchSCC']),
             'perPage' => (int)$perPage,
             'fromController' => $paginated,
-            'nombresTabla' => $nombresTabla,
+            'nombresTabla' => $this->getNombresTabla(),
             'listaSupervisores' => $listaSupervisores,
             'numberPermissions' => $numberPermissions,
         ]);
@@ -90,17 +89,17 @@ class CentroCostosController extends Controller {
         $centroCostos = centroCosto::query();
 
         $this->limitadorCentrosParaVer = 2400;
-        
+
         $AUuser = Myhelp::AuthU();
 
         $busqueda = false;
         $searchSCC = $request->has('searchSCC');
 
-        if ($request->search || $searchSCC) {
+        if ($request->search || $searchSCC || $request->search2) {
             $busqueda = true;
             if (!Cache::has('centro_costos_busqueda')) {
-            }
                 $this->actualizarcache();
+            }
             $centroCostos->orderBy('created_at', 'DESC');
         }
         else {
@@ -123,18 +122,23 @@ class CentroCostosController extends Controller {
         $supervisores = User::UsersWithRol('supervisor')->get();
         $NotMyCentros = $AUuser->NotMyCentros();
 
-        if ($request->has(['searchSCC'])
+        if (
+            $request->has(['searchSCC'])
             || $request->has(['searchh2'])
             || $request->has(['search'])
         ) {
             $this->actualizarcache();
         }
-        
+
         if ($busqueda) {
-//            $centroCostos = $centroCostos->filter(function ($centro) use ($request) {
-            $centroCostos = $centroCostos->Where('nombre', 'like', '%' . $request->search . '%');
+            if ($request->search)
+                $centroCostos = $centroCostos->Where('nombre', 'like', '%' . $request->search . '%');
+            if ($request->search2)
+                $centroCostos = $centroCostos->whereHas('zona', function ($query) use ($request) {
+                    $query->where('nombre', 'like', '%' . $request->search2 . '%');
+                });
         }
-       
+
         $centroCostos = Cache::remember('centro_costos', $this->minutosActualizarPresupueto, function ()
         use ($centroCostos, $numberPermissions, $AUuser, $supervisores, $NotMyCentros) {
 
@@ -153,7 +157,7 @@ class CentroCostosController extends Controller {
 //                });
                 $ArrayListaSupervi = $centroCosto->ArrayListaSupervisores($supervisores);
 
-                $centroCosto->cuantoshijos = count($centroCosto->users);
+                $centroCosto->cuantoshijos = count($ArrayListaSupervi);
                 $centroCosto->todos = $centroCosto->ArraySupervIDs();
                 $centroCosto->supervi = implode(',', $ArrayListaSupervi);
 
@@ -162,12 +166,12 @@ class CentroCostosController extends Controller {
             })->filter();
         });
 
-        
+
         if ($searchSCC) {
             $PosiblesSupervisores = User::UsersWithRol('supervisor')
                 ->Where('name', 'like', '%' . $request->searchSCC . '%')
                 ->get();
-            
+
             //se filtra los cc asociados el authUser
             $centroCostos = $centroCostos->filter(function (CentroCosto $centro) use ($PosiblesSupervisores) {
                 $ArrrayCentrosids = $centro->ArraySupervisores($centro->id, $PosiblesSupervisores);
@@ -207,8 +211,8 @@ class CentroCostosController extends Controller {
         }
         else {
             $nombresTabla = [//[0]: como se ven //[1] como es la BD
-                ['Acciones', '#', 'nombre', 'Mano obra estimada', 'usuarios', 'Supervisor', 'activo', 'Facturar', 'descripcion', 'clasificacion'],
-                [null, null, 'nombre', 'mano_obra_estimada', null, null, 'activo', 'ValidoParaFacturar', 'descripcion', 'clasificacion'],
+                ['Acciones', '#', 'nombre', 'Mano obra estimada', 'zona', 'Supervisores', 'activo', 'Facturar', 'descripcion', 'clasificacion', '# usuarios'],
+                [null, null, 'nombre', 'mano_obra_estimada', 'zouna', null, 'activo', 'ValidoParaFacturar', 'descripcion', 'clasificacion', null],
             ];
         }
         return $nombresTabla;
@@ -400,6 +404,7 @@ class CentroCostosController extends Controller {
             $centroCosto->descripcion = $request->descripcion;
             $centroCosto->clasificacion = $request->clasificacion;
             $centroCosto->ValidoParaFacturar = $request->ValidoParaFacturar;
+            $centroCosto->zona = $request->zona;
             $centroCosto->save();
             $IDsSeleccionados = [];
             foreach ($request->listaSupervisores as $index => $supervisor) {

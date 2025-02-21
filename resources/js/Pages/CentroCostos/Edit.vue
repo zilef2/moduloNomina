@@ -124,17 +124,22 @@ const update = () => {
                     <div>
                         <InputLabel ref="nombre" for="nombre" :value="lang().label.name" />
                         <TextInput id="nombre" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.nombre"
-                            :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas" />
+                            :placeholder="lang().placeholder.nombre" :error="form.errors.nombre" />
+                    </div>
+                    <div>
+                        <InputLabel ref="zona" for="zona" :value="lang().label.zona" />
+                        <TextInput id="zona" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.zona"
+                            :placeholder="lang().placeholder.zona" :error="form.errors.zona" />
                     </div>
                     <div>
                         <InputLabel ref="descripcion" for="descripcion" :value="lang().label.descripcion" />
                         <TextInput id="descripcion" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.descripcion"
-                            :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas" />
+                            :placeholder="lang().placeholder.descripcion" :error="form.errors.descripcion" />
                     </div>
                     <div>
                         <InputLabel ref="clasificacion" for="clasificacion" :value="lang().label.clasificacion" />
                         <TextInput id="clasificacion" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.clasificacion"
-                            :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas" />
+                            :placeholder="lang().placeholder.clasificacion" :error="form.errors.clasificacion" />
                     </div>
                     <div class="col-span-2 w-full">
                         <InputLabel for="users" :value="lang().label.supervisores"/>

@@ -97,6 +97,7 @@ Route::middleware('auth', 'verified')->group(function () {
 
     Route::resource("/cotizacion", CotizacionController::class);
     Route::put('/cotiza/{id}', [CotizacionController::class, 'update2'])->name('cotizacion.update2');
+    Route::put('/cotiza3/{id}', [CotizacionController::class, 'update3'])->name('cotizacion.update3');
     Route::get('/deuda', [DeudaSingularController::class, 'index'])->name('deuda.index');
 	Route::resource("/viatico", ViaticoController::class);
 	Route::resource("/consignarViatico", ConsignarViaticoController::class);

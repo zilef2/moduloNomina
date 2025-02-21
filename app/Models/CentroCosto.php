@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +38,7 @@ use Illuminate\Support\Facades\DB;
  * @method static Builder|static oldest($column = 'created_at')
  * @method static Builder|static paginate($perPage = 15, $columns = ['*'], $pageName = 'page')
  * @method static Builder|static simplePaginate($perPage = 15, $columns = ['*'], $pageName = 'page')
- * @method \Illuminate\Database\Eloquent\Relations\BelongsTo belongsTo(string $related, string $foreignKey = null, string $ownerKey = null)
+ * @method BelongsTo belongsTo(string $related, string $foreignKey = null, string $ownerKey = null)
  * @method HasMany hasMany(string $related, string $foreignKey = null, string $localKey = null)
  * @method BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null, string $relatedPivotKey = null)
  * @method static selectRaw(string $string)
@@ -52,7 +53,9 @@ class CentroCosto extends Model {
         'descripcion',
         'clasificacion',
         'ValidoParaFacturar',
+        'zona_id',
     ];
+    protected $appends = ['zouna'];
 
 
     public function reportes(): HasMany {
@@ -61,6 +64,13 @@ class CentroCosto extends Model {
 
     public function users(): BelongsToMany {
         return $this->BelongstoMany(User::class, 'centro_user');
+    }
+    public function zona(): BelongsTo {
+        return $this->BelongsTo(zona::class);
+    }
+    
+    public function getZounaAttribute(): string {
+        return $this->zona ? $this->zona->nombre : '';
     }
 
     public function ArrayListaSupervisores($supervisores): array {

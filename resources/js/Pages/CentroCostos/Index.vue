@@ -114,6 +114,8 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                     <div class="flex gap-2">
                         <TextInput v-model="data.params.search" type="text" class="block w-1/2 rounded-lg"
                                    :placeholder="lang().placeholder.searchCC"/>
+                        <TextInput v-model="data.params.search2" type="text" class="block w-1/2 rounded-lg"
+                                   placeholder="Zona"/>
                         <TextInput v-model="data.params.searchSCC" type="text" class="block w-1/2 rounded-lg"
                                    :placeholder="lang().placeholder.searchSupervisorCC"/>
                     </div>
@@ -167,19 +169,15 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                             </td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ parseInt(index, 10) + 1 }}</td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.nombre) }}</td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                {{ formatPesosCol(clasegenerica.mano_obra_estimada) }}
-                            </td>
-                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                {{ (clasegenerica.cuantoshijos) }}
-                            </td>
+                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ formatPesosCol(clasegenerica.mano_obra_estimada) }}</td>
+                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.zona) }}</td>
+                           
                             <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                 <p v-for="(superv, inde) in clasegenerica.supervi.split(',')" :key="inde">
                                     <span v-if="superv.trim()">{{ inde + 1 + ') ' + superv }}</span>
                                     <span v-else class="border-b-blue-300 border-2">Sin supervisor</span>
                                 </p>
                             </td>
-                            <!--                                <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">({{clasegenerica.supervi.split(',').length}}) {{ (clasegenerica.supervi) }} </td>-->
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{
                                     (clasegenerica.activo ? '✅' : '❌')
                                 }}
@@ -189,7 +187,9 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                             </td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.descripcion) }}</td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.clasificacion) }}</td>
-                            <!--                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.ValidoParaFacturar) }} </td>-->
+                             <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                {{ (clasegenerica.cuantoshijos) }}
+                            </td>
                         </tr>
                         </tbody>
                     </table>

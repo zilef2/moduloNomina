@@ -5,6 +5,7 @@ return [
 		'zona' => 'Zona',
         
         //cotizacion
+        'fecha_solicitud' => 'Fecha solicitud',
         'estado_cliente' => 'Estado cliente',
         'estado' => 'Estado',
         'factura' => 'Factura',
@@ -65,7 +66,7 @@ return [
         'descripcion_cot' => 'Descripción',
         'precio_cot' => 'Antes del iva',
         'aprobado_cot' => 'Aprobado',
-        'fecha_aprobacion_cot' => 'Fecha aprobación',
+        'fecha_aprobacion_cot' => 'Fecha solicitud',
 
 
         //parametros
@@ -305,6 +306,7 @@ return [
         'observaciones' => 'observaciones',
     ],
     'tooltip' => [
+        'update2_cotizacion' => 'Facturar',
         'aprobar' => 'aprobar',
         'saldo' => 'saldo',
         'Reporte' => 'Reporte',
@@ -383,8 +385,8 @@ return [
 
         'delete cotizacion' => 'Borrar cotización',
         'update cotizacion' => 'Actualizar cotización',
-        'update2 cotizacion' => 'Actualizar 2 cotización',
-        'update3 cotizacion' => 'Actualizar 3 cotización',
+        'update2 cotizacion' => 'Generar centro (cotización)',
+        'update3 cotizacion' => 'Facturar cotización',
         'read cotizacion' => 'Leer cotización',
         'create cotizacion' => 'Crear cotización',
 
