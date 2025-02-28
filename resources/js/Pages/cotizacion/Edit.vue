@@ -110,21 +110,21 @@ watchEffect(() => {
     }
 })
 
-function recuperarLosSelect(){
-    form.centro_costo_id = props.losSelect["centros"].find((centro) =>{
+function recuperarLosSelect() {
+    form.centro_costo_id = props.losSelect["centros"].find((centro) => {
         return centro.value === props.cotizaciona.centro_costo_id
     })
-    
-        console.log("=>(Edit.vue:122) props.cotizaciona.mes_pedido", props.cotizaciona.mes_pedido);
-    form.mes_pedido = data.listas.mes_pedido.find((item) =>{
+
+    console.log("=>(Edit.vue:122) props.cotizaciona.mes_pedido", props.cotizaciona.mes_pedido);
+    form.mes_pedido = data.listas.mes_pedido.find((item) => {
         console.log("=>(mes) item.value", item.value);
         return item.value === props.cotizaciona.mes_pedido
     })
-    
-    form.estado_cliente = data.listas.estado_cliente.find((item) =>item.value === props.cotizaciona.estado_cliente)
-    form.estado = data.listas.estado.find((item) =>item.value === props.cotizaciona.estado)
-    form.tipo = data.listas.tipo.find((item) =>item.value === props.cotizaciona.tipo)
-    form.tipo_de_mantenimiento = data.listas.tipo_de_mantenimiento.find((item) =>item.value === props.cotizaciona.tipo_de_mantenimiento)
+
+    form.estado_cliente = data.listas.estado_cliente.find((item) => item.value === props.cotizaciona.estado_cliente)
+    form.estado = data.listas.estado.find((item) => item.value === props.cotizaciona.estado)
+    form.tipo = data.listas.tipo.find((item) => item.value === props.cotizaciona.tipo)
+    form.tipo_de_mantenimiento = data.listas.tipo_de_mantenimiento.find((item) => item.value === props.cotizaciona.tipo_de_mantenimiento)
 }
 
 const update = () => {
@@ -176,34 +176,34 @@ const formattedPrice = computed({
                         <TextInput v-model="form.numero_cot" :error="form.errors.numero_cot" :placeholder="lang().label.numero_cot" class="mt-1 block w-full"
                                    required type="text"/>
                     </div>
-<!--                    <div class="rounded-xl">-->
-<!--                        <label name="centro_costo_id">{{ lang().label.centro_costo_id }}</label>-->
-<!--                        <v-select v-model="form.centro_costo_id" :options="props.losSelect['centros']"-->
-<!--                                  label="label"-->
-<!--                        ></v-select>-->
-<!--                    </div>-->
+                    <!--                    <div class="rounded-xl">-->
+                    <!--                        <label name="centro_costo_id">{{ lang().label.centro_costo_id }}</label>-->
+                    <!--                        <vSelect v-model="form.centro_costo_id" :options="props.losSelect['centros']"-->
+                    <!--                                  label="label"-->
+                    <!--                        ></vSelect>-->
+                    <!--                    </div>-->
 
                     <div class="rounded-xl"><label name="estado_cliente">
                         {{ lang().label.estado_cliente }}
                     </label>
-                        <v-select v-model="form.estado_cliente" :options="[
+                        <vSelect v-model="form.estado_cliente" :options="[
                                               {value:'Por aprobar',label:'Por aprobar'},
                                               {value:'Aprobado',label:'Aprobado'},
                                               {value:'Negado',label:'Negado'}
                                           ]"
-                                  label="label"
-                        ></v-select>
+                                 label="label"
+                        ></vSelect>
                     </div>
                     <div class="rounded-xl"><label name="estado">
                         {{ lang().label.estado }}
                     </label>
-                        <v-select v-model="form.estado" :options="[
+                        <vSelect v-model="form.estado" :options="[
                                               {value: 'Por ejecutar',label:'Por ejecutar'},
                                               {value: 'En ejecucion',label:'En ejecución'},
                                               {value: 'Ejecutado',label:'Ejecutado'},
                                           ]"
-                                  label="label"
-                        ></v-select>
+                                 label="label"
+                        ></vSelect>
                     </div>
 
 
@@ -216,7 +216,7 @@ const formattedPrice = computed({
                     </div>
                     <div class="rounded-xl">
                         <label name="mes_pedido">{{ lang().label.mes_pedido }}</label>
-                        <v-select v-model="form.mes_pedido" :options="[
+                        <vSelect v-model="form.mes_pedido" :options="[
                                     {value:'Enero',label:'Enero'},
                                     {value:'Febrero',label:'Febrero'},
                                     {value:'Marzo',label:'Marzo'},
@@ -230,8 +230,8 @@ const formattedPrice = computed({
                                     {value:'Noviembre',label:'Noviembre'},
                                     {value:'Diciembre',label:'Diciembre'},
                                   ]"
-                                  label="label"
-                        ></v-select>
+                                 label="label"
+                        ></vSelect>
                     </div>
 
                     <div class="rounded-xl"><label name="lugar"> {{ lang().label.lugar }} </label>
@@ -239,31 +239,32 @@ const formattedPrice = computed({
                                    required type="text"/>
                     </div>
                     <div class="rounded-xl"><label name="descripcion_cot"> {{ lang().label.descripcion_cot }} </label>
-                        <TextInput v-model="form.descripcion_cot" 
-                                   :error="form.errors.descripcion_cot" 
+                        <TextInput v-model="form.descripcion_cot"
+                                   :error="form.errors.descripcion_cot"
                                    :placeholder="lang().label.descripcion_cot" class="mt-1 block w-full"
                                    required type="text"/>
                     </div>
-                    <div class="rounded-xl"><label name="tipo">
-                        {{ lang().label.tipo }}
-                    </label>
-                        <v-select v-model="form.tipo" :options="[
+                    <div class="rounded-xl">
+                        <label name="tipo">
+                            {{ lang().label.tipo }}
+                        </label>
+                        <vSelect v-model="form.tipo" :options="[
                                               {value: 'Mantenimiento',label:'Mantenimiento'},
                                               {value: 'Servicio',label:'Servicio'},
                                               {value: 'Proyecto',label:'Proyecto'},
                                           ]"
-                                  label="label"
-                        ></v-select>
+                                 label="label"
+                        ></vSelect>
                     </div>
                     <div v-if="form.tipo?.value ==='Mantenimiento'" class="rounded-xl"><label
                         name="tipo_de_mantenimiento">
                         {{ lang().label.tipo_de_mantenimiento }}
                     </label>
-                        <v-select v-model="form.tipo_de_mantenimiento" :options="[
+                        <vSelect v-model="form.tipo_de_mantenimiento" :options="[
                                               {value: 'Preventivo',label:'Preventivo'},
                                               {value: 'Correctivo',label:'Correctivo'},
                                               {value: 'Nueva Instalacion',label:'Nueva Instalación'}, ]"
-                                  label="label"></v-select>
+                                 label="label"></vSelect>
                     </div>
                 </div>
 
@@ -347,17 +348,20 @@ const formattedPrice = computed({
 
                 </div>
                 <div class=" my-8 flex justify-end">
-                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}</SecondaryButton>
+                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{
+                            lang().button.close
+                        }}
+                    </SecondaryButton>
                     <PrimaryButton v-if="!cotizaciona.factura" class="ml-3"
                                    :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                                    @click="update">
                         {{ form.processing ? lang().button.save + '...' : lang().button.save }}
                     </PrimaryButton>
-<!--                    <PrimaryButton v-if="!cotizaciona.centro_costo_id" class="ml-3" :class="{ 'opacity-25': form.processing }"-->
-<!--                                   :disabled="form.processing"-->
-<!--                                   @click="update2">-->
-<!--                        Generar Centro de costo-->
-<!--                    </PrimaryButton>-->
+                    <!--                    <PrimaryButton v-if="!cotizaciona.centro_costo_id" class="ml-3" :class="{ 'opacity-25': form.processing }"-->
+                    <!--                                   :disabled="form.processing"-->
+                    <!--                                   @click="update2">-->
+                    <!--                        Generar Centro de costo-->
+                    <!--                    </PrimaryButton>-->
                 </div>
             </form>
         </Modal>

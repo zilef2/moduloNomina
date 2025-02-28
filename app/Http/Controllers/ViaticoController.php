@@ -98,6 +98,7 @@ class ViaticoController extends Controller {
         return [$Empleados, $centroSelect];
     }
 
+    //todo: tosync
     public function PerPageAndPaginate($request, $cotizacions) {
         $perPage = $request->has('perPage') ? $request->perPage : 10;
         $page = request('page', 1); // Current page number

@@ -18,6 +18,8 @@ import {formatPesosCol} from '@/global.ts';
 
 import InfoButton from '@/Components/InfoButton.vue';
 
+
+
 const {_, debounce, pickBy} = pkg
 const props = defineProps({
     title: String,
@@ -28,6 +30,7 @@ const props = defineProps({
     perPage: Number,
     nombresTabla: Array,
     listaSupervisores: Object,
+    losSelect: Array,
 })
 
 const data = reactive({
@@ -97,7 +100,9 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                     <Edit :show="data.editOpen" @close="data.editOpen=false"
                           :listaSupervisores="props.listaSupervisores"
                           :CentroCosto="data.generico"
+                          :losSelect="props.losSelect"
                           :title="props.title"/>
+                    
                     <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :CentroCosto="data.generico"
                             :title="props.title"/>
                 </div>
@@ -169,9 +174,11 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                             </td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ parseInt(index, 10) + 1 }}</td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.nombre) }}</td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ formatPesosCol(clasegenerica.mano_obra_estimada) }}</td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.zona) }}</td>
-                           
+                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                {{ formatPesosCol(clasegenerica.mano_obra_estimada) }}
+                            </td>
+                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.zouna) }}</td>
+
                             <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                 <p v-for="(superv, inde) in clasegenerica.supervi.split(',')" :key="inde">
                                     <span v-if="superv.trim()">{{ inde + 1 + ') ' + superv }}</span>
@@ -187,9 +194,9 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                             </td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.descripcion) }}</td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.clasificacion) }}</td>
-                             <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                {{ (clasegenerica.cuantoshijos) }}
-                            </td>
+                            <!--                             <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">-->
+                            <!--                                {{ (clasegenerica.cuantoshijos) }}-->
+                            <!--                            </td>-->
                         </tr>
                         </tbody>
                     </table>

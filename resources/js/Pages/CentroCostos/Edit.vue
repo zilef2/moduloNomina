@@ -6,22 +6,24 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import DatetimeInput from '@/Components/DatetimeInput.vue';
-
-import { useForm } from '@inertiajs/vue3';
+import {useForm} from '@inertiajs/vue3';
 import {watchEffect, reactive, ref, watch} from 'vue';
 import Checkbox from '@/Components/Checkbox.vue';
+import vSelect from "vue-select";
+import "vue-select/dist/vue-select.css";
+
 
 const props = defineProps({
     show: Boolean,
     title: String,
     CentroCosto: Object,
     listaSupervisores: Object,
-    // listaSuSeleccionado: Object,
+    losSelect: Array,
 })
 
 const data = reactive({
     multipleSelect: false,
-    SelecSupervisores:[]
+    SelecSupervisores: []
 
 })
 
@@ -35,6 +37,7 @@ const form = useForm({
     selectedUsers: [],
     listaSupervisores: [],
     ValidoParaFacturar: true,
+    zona:null,
 });
 
 function findIndexById(id) {
@@ -49,16 +52,16 @@ function findIndexById(id) {
 const buscarCheckboxes = () => {
     data.SelecSupervisores = props.listaSupervisores?.map(gen => ({label: gen.name, value: gen.id}))
     let indexTrue
-    if( props.CentroCosto?.cuantoshijos){
-        if(data.SelecSupervisores){
+    if (props.CentroCosto?.cuantoshijos) {
+        if (data.SelecSupervisores) {
             console.log("=>(todos", (props.CentroCosto.todos));
             // if (Array.isArray(props.CentroCosto.todos)) {
-                data.SelecSupervisores.forEach(idsupervisor => {
-                    console.log("=>(Edit.vue:58) idsupervisor", idsupervisor);
-                    indexTrue = findIndexById(idsupervisor.value)
-                    console.log("=>(Edit.vue:59) indexTrue", indexTrue);
-                    if(indexTrue) form.selectedUsers[indexTrue] = true
-                });
+            data.SelecSupervisores.forEach(idsupervisor => {
+                console.log("=>(Edit.vue:58) idsupervisor", idsupervisor);
+                indexTrue = findIndexById(idsupervisor.value)
+                console.log("=>(Edit.vue:59) indexTrue", indexTrue);
+                if (indexTrue) form.selectedUsers[indexTrue] = true
+            });
             // }else{
             //    indexTrue = data.SelecSupervisores.findIndex((supervisor) =>{
             //         return props.CentroCosto.todos["1"] == supervisor.value
@@ -76,28 +79,29 @@ watchEffect(() => {
         form.descripcion = props.CentroCosto?.descripcion
         form.clasificacion = props.CentroCosto?.clasificacion
         form.activo = props.CentroCosto?.activo
-        form.activo = ref( !!props.CentroCosto?.activo);
+        form.activo = ref(!!props.CentroCosto?.activo);
         form.ValidoParaFacturar = props.CentroCosto?.ValidoParaFacturar
-        form.ValidoParaFacturar = ref( !!props.CentroCosto?.ValidoParaFacturar);
+        form.ValidoParaFacturar = ref(!!props.CentroCosto?.ValidoParaFacturar);
     }
 })
 
 
 watch(() => props.show, (newv, oldv) => {
-    if(newv && !oldv){
+    if (newv && !oldv) {
         form.selectedUsers = data.SelecSupervisores.map(() => false);
-        setTimeout(() => buscarCheckboxes(),30)
+        setTimeout(() => buscarCheckboxes(), 30)
 
     }
 }, {deep: true})
 
 
-function isChecked(userId,index) {
-    if(form.selectedUsers && form.selectedUsers.length){
+function isChecked(userId, index) {
+    if (form.selectedUsers && form.selectedUsers.length) {
 
         return form.selectedUsers.includes(index);
     }
 }
+
 const update = () => {
     form.listaSupervisores = props.listaSupervisores
     form.put(route('CentroCostos.update', props.CentroCosto?.id), {
@@ -122,24 +126,25 @@ const update = () => {
                 </h2>
                 <div class="my-6 grid grid-cols-2 gap-6">
                     <div>
-                        <InputLabel ref="nombre" for="nombre" :value="lang().label.name" />
+                        <InputLabel ref="nombre" for="nombre" :value="lang().label.name"/>
                         <TextInput id="nombre" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.nombre"
-                            :placeholder="lang().placeholder.nombre" :error="form.errors.nombre" />
+                                   :placeholder="lang().placeholder.nombre" :error="form.errors.nombre"/>
+                    </div>
+                    <div class="rounded-xl">
+                        <label name="zona">
+                            {{ lang().label.zona }}
+                        </label>
+                        <vSelect v-model="form.zona" :options="losSelect['zona']" label="label"></vSelect>
                     </div>
                     <div>
-                        <InputLabel ref="zona" for="zona" :value="lang().label.zona" />
-                        <TextInput id="zona" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.zona"
-                            :placeholder="lang().placeholder.zona" :error="form.errors.zona" />
-                    </div>
-                    <div>
-                        <InputLabel ref="descripcion" for="descripcion" :value="lang().label.descripcion" />
+                        <InputLabel ref="descripcion" for="descripcion" :value="lang().label.descripcion"/>
                         <TextInput id="descripcion" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.descripcion"
-                            :placeholder="lang().placeholder.descripcion" :error="form.errors.descripcion" />
+                                   :placeholder="lang().placeholder.descripcion" :error="form.errors.descripcion"/>
                     </div>
                     <div>
-                        <InputLabel ref="clasificacion" for="clasificacion" :value="lang().label.clasificacion" />
+                        <InputLabel ref="clasificacion" for="clasificacion" :value="lang().label.clasificacion"/>
                         <TextInput id="clasificacion" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.clasificacion"
-                            :placeholder="lang().placeholder.clasificacion" :error="form.errors.clasificacion" />
+                                   :placeholder="lang().placeholder.clasificacion" :error="form.errors.clasificacion"/>
                     </div>
                     <div class="col-span-2 w-full">
                         <InputLabel for="users" :value="lang().label.supervisores"/>
@@ -159,29 +164,31 @@ const update = () => {
                     </div>
 
 
+                    <div class="inline-flex col-span-1 mt-6">
+                        <input
+                            @click="toggleCheckbox"
+                            v-model="form.activo"
+                            type="checkbox" id="activo" class="bg-gray-50 dark:bg-gray-600 mt-1 w-7 h-7 p-2 my-auto rounded-xl"
+                        />
+                        <InputLabel ref="activo" for="activo" :value="lang().label.activo" class="mx-3 my-auto"/>
+                    </div>
+                    <div class="inline-flex col-span-1 mt-6">
+                        <input
+                            @click="toggleCheckbox"
+                            v-model="form.ValidoParaFacturar"
+                            type="checkbox" id="ValidoParaFacturar" class="bg-gray-50 dark:bg-gray-600 mt-1 w-7 h-7 p-2 my-auto rounded-xl"
+                        />
+                        <InputLabel ref="ValidoParaFacturar" for="ValidoParaFacturar" :value="lang().label.ValidoParaFacturar" class="mx-3 my-auto"/>
+                    </div>
 
-                    <div class="inline-flex col-span-1 mt-6">
-                        <input
-                           @click="toggleCheckbox"
-                           v-model="form.activo"
-                           type="checkbox" id="activo" class="bg-gray-50 dark:bg-gray-600 mt-1 w-7 h-7 p-2 my-auto rounded-xl"
-                        />
-                        <InputLabel ref="activo" for="activo"  :value="lang().label.activo" class="mx-3 my-auto"/>
-                    </div>
-                    <div class="inline-flex col-span-1 mt-6">
-                        <input
-                           @click="toggleCheckbox"
-                           v-model="form.ValidoParaFacturar"
-                           type="checkbox" id="ValidoParaFacturar" class="bg-gray-50 dark:bg-gray-600 mt-1 w-7 h-7 p-2 my-auto rounded-xl"
-                        />
-                        <InputLabel ref="ValidoParaFacturar" for="ValidoParaFacturar"  :value="lang().label.ValidoParaFacturar" class="mx-3 my-auto"/>
-                    </div>
+                    
+
                 </div>
                 <div class="flex justify-end">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
                     </SecondaryButton>
                     <PrimaryButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
-                        @click="update">
+                                   @click="update">
                         {{ form.processing ? lang().button.save + '...' : lang().button.save }}
                     </PrimaryButton>
                 </div>

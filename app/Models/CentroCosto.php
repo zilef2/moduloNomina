@@ -46,6 +46,8 @@ use Illuminate\Support\Facades\DB;
 class CentroCosto extends Model {
     use HasFactory;
 
+    protected Collection $supervisCache; // Propiedad para almacenar el valor calculado
+
     protected $fillable = [
         'nombre',
         'mano_obra_estimada',
@@ -55,25 +57,21 @@ class CentroCosto extends Model {
         'ValidoParaFacturar',
         'zona_id',
     ];
-    protected $appends = ['zouna'];
-
-
-    public function reportes(): HasMany {
-        return $this->hasMany(Reporte::class);
-    }
-
-    public function users(): BelongsToMany {
-        return $this->BelongstoMany(User::class, 'centro_user');
-    }
-    public function zona(): BelongsTo {
-        return $this->BelongsTo(zona::class);
-    }
     
-    public function getZounaAttribute(): string {
-        return $this->zona ? $this->zona->nombre : '';
+    protected $appends = [
+        'zouna',
+        'supervi',
+    ];
+
+    public function getSupervisAttribute() {
+        if ($this->superviCache === null) { // Solo calcula si no está en caché
+            $this->superviCache = User::UsersWithRol('supervisor')->get();
+        }
+        return $this->superviCache;
     }
 
-    public function ArrayListaSupervisores($supervisores): array {
+    public function ArrayListaSupervisores(): array {
+        $supervisores = $this->supervisCache ?? $this->getSupervisAttribute();
         $centroid = (int)$this->id;
         return $supervisores->map(function (User $user) use ($centroid) {
             if ($user->TieneEsteCentro($centroid)) {
@@ -83,6 +81,26 @@ class CentroCosto extends Model {
         })->filter()->toArray();
     }
 
+    public function reportes(): HasMany {
+        return $this->hasMany(Reporte::class);
+    }
+
+    public function users(): BelongsToMany {
+        return $this->BelongstoMany(User::class, 'centro_user');
+    }
+
+    public function zona(): BelongsTo {
+        return $this->BelongsTo(zona::class);
+    }
+
+    public function getZounaAttribute(): string {
+        return $this->zona ? $this->zona->nombre : 'Sin zona';
+    }
+
+    public function getSuperviAttribute($supervisores): string {
+        $ArrayListaSupervi = $this->ArrayListaSupervisores($supervisores);
+        return implode(',', $ArrayListaSupervi);
+    }
 
     /**
      * @param Collection<int, User> $PosiblesSupervisores
