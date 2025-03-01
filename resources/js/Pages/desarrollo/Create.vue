@@ -10,6 +10,7 @@ import {onMounted, reactive, watchEffect} from 'vue';
 import '@vuepic/vue-datepicker/dist/main.css'
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
+import {Date_to_html} from '@/global.ts';
 
 // --------------------------- ** -------------------------
 
@@ -18,7 +19,7 @@ const props = defineProps({
     title: String,
     roles: Object,
     titulos: Object, //parametros de la clase principal
-    losSelect: Object,
+    losSelect:Object,
     numberPermissions: Number,
 })
 const emit = defineEmits(["close"]);
@@ -30,43 +31,45 @@ const data = reactive({
 })
 
 //very usefull
-let justNames = props.titulos.map(names => {
-    if (names['order'] !== 'noquiero'
-        // &&
-        // names['order'] !== 'noquiero1'
-    )
+let justNames = props.titulos.map(names =>{
+    if(names['order'] !== 'fecha_cotizacion' 
+        && names['order'] !== 'fecha_cotizacion_aceptada'
+        && names['order'] !== 'estado'
+        )
         return names['order']
 })
-
 const form = useForm({
     ...Object.fromEntries(justNames.map(field => [field, ''])),
+    valor:0,
 });
 onMounted(() => {
-    if (props.numberPermissions > 9) {
+    if(props.numberPermissions > 9){
 
         const valueRAn = Math.floor(Math.random() * (9) + 1)
-        form.nombre = 'nombre genenerico ' + (valueRAn);
-        form.codigo = (valueRAn);
+        form.nombre = 'Cotización nueva funcion ';
         // form.hora_inicial = '0'+valueRAn+':00'//temp
-        // form.fecha = '2023-06-01'
+        let hoy = new Date()
+        form.fecha_reunion = Date_to_html(hoy)
+        form.valor = valueRAn * 100000
 
     }
 });
 
-const printForm = [];
-props.titulos.forEach(names => {
-    if (names['order'] !== 'noquiero'
-        // && names['order'] !== 'noquiero1'
-    )
-        printForm.push({
-            idd: names['order'], label: names['label'], type: names['type']
-        })
+const printForm =[];
+props.titulos.forEach(names =>{
+ if(names['order'] !== 'fecha_cotizacion'
+     && names['order'] !== 'fecha_cotizacion_aceptada'
+     && names['order'] !== 'estado'
+ )   
+    printForm.push ({
+        idd: names['order'], label: names['label'], type: names['type']
+    })
 });
 
-function ValidarVacios() {
+function ValidarVacios(){
     let result = true
     printForm.forEach(element => {
-        if (!form[element.idd]) {
+        if(!form[element.idd]){
             console.log("=>(Create.vue:70) falta esto papa element.idd", element.idd);
             result = false
             return result
@@ -76,9 +79,9 @@ function ValidarVacios() {
 }
 
 const create = () => {
-    if (ValidarVacios()) {
+    if(ValidarVacios()){
         // console.log("🧈 debu pieza_id:", form.pieza_id);
-        form.post(route('zona.store'), {
+        form.post(route('desarrollo.store'), {
             preserveScroll: true,
             onSuccess: () => {
                 emit("close")
@@ -87,7 +90,7 @@ const create = () => {
             onError: () => null,
             onFinish: () => null,
         })
-    } else {
+    }else{
         console.log('Hay campos vacios')
     }
 }
@@ -99,8 +102,16 @@ watchEffect(() => {
 })
 
 
-//very usefull
-const sexos = [{label: 'Masculino', value: 0}, {label: 'Femenino', value: 1}];
+// const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }];
+
+const estados = [
+        'Cotizando',
+        'Desarrollando',
+        'Esperando pago parcial',
+        'Pagada totalmente',
+        'Vencida',
+        'Finalizada'
+    ];
 </script>
 
 <template>
@@ -125,30 +136,36 @@ const sexos = [{label: 'Masculino', value: 0}, {label: 'Femenino', value: 1}];
 
                         <!-- tiempo -->
                         <div v-else-if="atributosform.type === 'time'" id="SelectVue">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
                             <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                       v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                       :error="form.errors[atributosform.idd]" step="3600"/>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
+                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
+                                :error="form.errors[atributosform.idd]" step="3600" />
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
 
 
                         <!-- normal -->
                         <div v-else class="">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
                             <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                       v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                       :error="form.errors[atributosform.idd]"/>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
+                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
+                                :error="form.errors[atributosform.idd]" />
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
                     </div>
-                    
+                    <div class="">
+                        <InputLabel for="valor" :value="lang().label.valor"/>
+                        <TextInput id="atributosform.idd" type="number" class="mt-1 block w-full"
+                                   v-model="form.valor" required placeholder="valor de la cotizacion"
+                                   :error="form.errors.valor"/>
+                        <InputError class="mt-2" :message="form.errors.valor"/>
+                    </div>
                 </div>
                 <div class=" my-8 flex justify-end">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
                     </SecondaryButton>
                     <PrimaryButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
-                                   @click="create">
+                        @click="create">
                         {{ lang().button.add }} {{ form.processing ? '...' : '' }}
                     </PrimaryButton>
                 </div>

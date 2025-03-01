@@ -19,13 +19,13 @@ return new class extends Migration
             $table->biginteger('valor_consig');
             $table->date('fecha_consig');
 
-            $table->unsignedBigInteger('user_id')->default(1);
+            $table->unsignedBigInteger('user_id')->default(1);//todo:no que le pasa
             $table->foreign('user_id')
                 ->references('id')
                 ->on('users')
                 ->onDelete('cascade'); //cascade, set null, restrict, no action 
 
-            $table->unsignedBigInteger('viatico_id')->default(1);
+            $table->unsignedBigInteger('viatico_id')->default(1);//todo:no que le pasa
             $table->foreign('viatico_id')
                 ->references('id')
                 ->on('viaticos')

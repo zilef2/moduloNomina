@@ -106,6 +106,10 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::get('/resetPassword/{id}', [UserController::class, 'resetPassword'])->name('resetPassword');
 	Route::resource("/material", \App\Http\Controllers\MaterialController::class);
 	Route::resource("/zona", \App\Http\Controllers\ZonaController::class);
+	Route::resource("/desarrollo", \App\Http\Controllers\DesarrolloController::class);
+	Route::resource("/pagodesarrollo", \App\Http\Controllers\PagodesarrolloController::class);
+    
+    Route::put('/updatePago/{id}', [\App\Http\Controllers\DesarrolloController::class, 'updatePago'])->name('updatePago');
 	//aquipues
 }); //fin verified
 

@@ -31,6 +31,9 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request)
     {
         return array_merge(parent::share($request), [
+            'env' => [
+                'environment' => env('APP_ENV'), 
+            ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
@@ -49,6 +52,7 @@ class HandleInertiaRequests extends Middleware
                     ['label' => '25', 'value' => 25],
                     ['label' => '50', 'value' => 50],
                     ['label' => '100', 'value' => 100],
+                    ['label' => '1000', 'value' => 1000],
                 ],
             ],
             'locale' => function () {

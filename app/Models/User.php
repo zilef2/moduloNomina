@@ -143,10 +143,13 @@ class User extends Authenticatable {
         return $result;
     }
 
-    public function NotMyCentros(): array {
+    public function NotMyCentros(int $numberPermissions): array {
+        if($numberPermissions > 9){
+            return [];
+        }
         $misCentrosIDs = $this->centros->pluck('id')->toArray();
 
-        return CentroCosto::whereNotIn('id', $misCentrosIDs)->get()->toArray();
+        return CentroCosto::whereNotIn('id', $misCentrosIDs)->pluck('id')->toArray();
     }
 
     public function ArraycentroName($numeroDeCentros = 0): array|string {

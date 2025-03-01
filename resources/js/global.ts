@@ -160,8 +160,11 @@ export function Date_to_html(date: Date): String {
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
+    let day2: string = day < 10 ? '0' + day : day + '';
 
-    return `${day}-${month}-${year}`;
+    let month2: string = month < 10 ? '0' + month : month + '';
+
+    return `${year}-${month2}-${day2}`;
 }
 
 export function Now_Date_to_html(): String {

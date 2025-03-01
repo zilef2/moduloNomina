@@ -26,7 +26,7 @@ class ViaticoController extends Controller {
     public string $FromController = 'viatico';
 
 
-    //<editor-fold desc="Construc | mapea | filtro and dependencia">
+    //<editor-fold desc="Construc | filtro and dependencia">
     public function __construct() {
 //        $this->middleware('permission:create viatico', ['only' => ['create', 'store']]);
 //        $this->middleware('permission:read viatico', ['only' => ['index', 'show']]);
@@ -37,7 +37,6 @@ class ViaticoController extends Controller {
 
     public function index(Request $request): Response {
         $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' viaticos '));
-//        $viaticos = $this->Mapear($this->Filtros($request));
         $viaticos = $this->Filtros($request)->get();
         $losSelect = $this->Dependencias();
 

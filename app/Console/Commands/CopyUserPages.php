@@ -25,18 +25,17 @@ class CopyUserPages extends Command {
     protected int $contadorMetodos;
 
     
+    //notacion de notas:
+     // //todo:
+     // nexttochange:
+     // todo: sync: añadir a los demas repos
      protected function generateAttributes(): array {
-        //notacion de notas:
-         // //todo:
-         // nexttochange:
-         // //todo: sync:
-         // todo: torescue: añadir a los demas repos
         // text // number // dinero // date // datetime // foreign
-        //TODO: hacer otro array para las clavesForaneas 
-
-        return [//ready to material
-            'nombre' => 'string',
-            'codigo' => 'string',
+        return [
+            'valor' => 'integer',
+            'fecha' => 'date',
+            'cuota' => 'integer',
+            'final' => 'integer',
         ];
 
         /*
@@ -46,6 +45,11 @@ class CopyUserPages extends Command {
 //            'descripcion' => 'text',
 //            'precio' => 'decimal',
         */
+    }
+    protected function generateForeign(): array {
+        return [
+//            'viatico_id' => 'viatico_id',
+        ];
     }
     
     public function handle(): int {
@@ -336,11 +340,7 @@ class CopyUserPages extends Command {
 
     }
 
-    protected function generateForeign(): array {
-        return [
-//            'viatico_id' => 'viatico_id',
-        ];
-    }
+    
 
     private function DoSideBar($resource): int {
         $directory = 'resources/js/Components/SideBarMenu.vue';

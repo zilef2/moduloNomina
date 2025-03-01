@@ -21,7 +21,10 @@ class WriteFillable extends Command
         $directory = 'app/Models';
         $files = glob($directory . '/*.php');
 
-        $fillable = "\n    protected \$fillable = [\n        'id',\n    ];\n";
+        $fillable = "\n    protected \$fillable = [\n        'id',\n    ];\n"
+//            . "protected \$appends = [\n'valorino'\n]"
+        ;
+        
         $contarEscritos = 0;
         $contarNoEscritos = 0;
         foreach ($files as $file) {

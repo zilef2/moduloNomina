@@ -183,9 +183,10 @@ const formattedPrice = computed({
                     <!--                        ></vSelect>-->
                     <!--                    </div>-->
 
-                    <div class="rounded-xl"><label name="estado_cliente">
-                        {{ lang().label.estado_cliente }}
-                    </label>
+                    <div class="rounded-xl">
+                        <label name="estado_cliente">
+                            {{ lang().label.estado_cliente }}
+                        </label>
                         <vSelect v-model="form.estado_cliente" :options="[
                                               {value:'Por aprobar',label:'Por aprobar'},
                                               {value:'Aprobado',label:'Aprobado'},

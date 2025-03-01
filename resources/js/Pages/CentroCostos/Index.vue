@@ -38,6 +38,7 @@ const data = reactive({
         search: props.filters?.search, //por nombre o descrip
         searchSCC: props.filters?.searchSCC, //por supervisor
         searchh2: props.filters?.searchh2, //ver todos (solo super)
+        searchh3: props.filters?.searchh3, //zona
         field: props.filters?.field,
         order: props.filters?.order,
         perPage: props.perPage,
@@ -84,7 +85,7 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                         value="false"
                         v-model="data.params.searchh2"
                     />
-                    Ver mas de 80
+                    Ver mas de 50
                 </label>
             </div>
         </h2>
@@ -119,7 +120,7 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                     <div class="flex gap-2">
                         <TextInput v-model="data.params.search" type="text" class="block w-1/2 rounded-lg"
                                    :placeholder="lang().placeholder.searchCC"/>
-                        <TextInput v-model="data.params.search2" type="text" class="block w-1/2 rounded-lg"
+                        <TextInput v-model="data.params.search3" type="text" class="block w-1/2 rounded-lg"
                                    placeholder="Zona"/>
                         <TextInput v-model="data.params.searchSCC" type="text" class="block w-1/2 rounded-lg"
                                    :placeholder="lang().placeholder.searchSupervisorCC"/>

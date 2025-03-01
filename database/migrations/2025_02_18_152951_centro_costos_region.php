@@ -19,8 +19,7 @@ return new class extends Migration
             $table->foreign('zona_id')
                 ->references('id')
                 ->on('zonas')
-                ->onDelete('cascade'); //cascade, set null, restrict, no action 
-            
+                ->onDelete('set null'); //cascade, set null, restrict, no action 
         });
         Schema::table('cotizacions', function (Blueprint $table) {
             $table->string('estado_cliente')->nullable();

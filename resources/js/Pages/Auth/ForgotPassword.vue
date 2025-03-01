@@ -47,7 +47,8 @@ const submit = () => {
             </div>
 
             <div class="flex items-center justify-end mt-4">
-                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                <PrimaryButton 
+                    :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                     {{ form.processing ? lang().button.forgot_password + '...' : lang().button.forgot_password }}
                 </PrimaryButton>
             </div>

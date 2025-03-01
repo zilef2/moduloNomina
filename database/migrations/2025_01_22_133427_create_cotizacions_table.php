@@ -18,7 +18,7 @@ return new class extends Migration
                 ->references('id')
                 ->on('centro_costos')
                 ->onDelete('cascade'); //cascade, set null, restrict, no action
-            $table->unsignedBigInteger('user_id')->default(1);
+            $table->unsignedBigInteger('user_id')->default(1); //todo:no que le pasa
             $table->foreign('user_id')
                 ->references('id')
                 ->on('users')

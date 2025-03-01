@@ -19,6 +19,8 @@ const toggleContent4 = () => data.showContent4 = !data.showContent4
 const ButtonsConfig = [ //SAME AS WEB.PHP
     'Parametros',
     'ubicacion',
+	  'desarrollo',
+    'pagodesarrollo',
 ];
 const ButtonsAdministrativo = [ //SAME AS WEB.PHP
     'user',

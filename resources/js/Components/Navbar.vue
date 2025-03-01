@@ -7,6 +7,7 @@ import { Bars3CenterLeftIcon, CheckBadgeIcon, ChevronDownIcon, UserIcon } from "
 import SwitchDarkModeNavbar from '@/Components/SwitchDarkModeNavbar.vue'
 import SwitchLangNavbar from '@/Components/SwitchLangNavbar.vue'
 import { ref } from 'vue'
+import { usePage } from '@inertiajs/vue3';
 
 const emit = defineEmits(["open"])
 
@@ -24,6 +25,12 @@ const justcc = async () => {
     window.open('/justcc', '_blank')
 }
 
+const page = usePage();
+let colorBar = page.props.env.environment === 'production'
+let colorDelBar = ''
+if(!colorBar){
+    colorDelBar = 'bg-blue-200'
+}
 </script>
 
 <template>
@@ -43,17 +50,21 @@ const justcc = async () => {
                     <!-- Logo -->
                     <div class="flex">
                         <Link :href="route('dashboard')" class="flex items-center space-x-2">
-                        <ApplicationLogo class="hidden md:block h-5 w-auto fill-current" />
-                        <p>{{ $page.props.app.name }}</p>
+                            <ApplicationLogo class="hidden md:block h-5 w-auto fill-current" />
+                            <p v-if="colorBar">{{ $page.props.app.name }}</p>
+                            <p v-else>
+                                PRUEBAS
+                            </p>
                         </Link>
                     </div>
                 </div>
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2" :class="colorDelBar">
                     <!-- <SwitchLangNavbar /> -->
                     <SwitchDarkModeNavbar />
 
                     <!-- <DropdownLink v-if="can(['isAdmin'])" class="text-gray-500 dark:text-white" @click="downloadExcel"> {{ lang().label.downloadUsers }} </DropdownLink> -->
                      <DropdownLink v-if="can(['isAdmin', 'isadministrativo', 'issupervisor'])" class="text-gray-500 dark:text-white" @click="justcc"> Centros de Costos </DropdownLink>
+                    <p v-if="can(['isAdmin'])">{{ $page.props.env.environment }}</p>
                     <div class="">
                         <!-- Settings Dropdown -->
                         <div class="relative">

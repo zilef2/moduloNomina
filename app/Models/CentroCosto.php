@@ -57,7 +57,7 @@ class CentroCosto extends Model {
         'ValidoParaFacturar',
         'zona_id',
     ];
-    
+
     protected $appends = [
         'zouna',
         'supervi',
@@ -70,23 +70,19 @@ class CentroCosto extends Model {
         return $this->superviCache;
     }
 
-    public function ArrayListaSupervisores(): array {
-        $supervisores = $this->supervisCache ?? $this->getSupervisAttribute();
-        $centroid = (int)$this->id;
-        return $supervisores->map(function (User $user) use ($centroid) {
-            if ($user->TieneEsteCentro($centroid)) {
-                return $user->name;
-            }
-            return null;
-        })->filter()->toArray();
-    }
+//    public function ArrayListaSupervisores(): array {
+//        $supervisores = $this->supervisCache ?? $this->getSupervisAttribute();
+//        $centroid = (int)$this->id;
+//        return $supervisores->map(function (User $user) use ($centroid) {
+//            if ($user->TieneEsteCentro($centroid)) {
+//                return $user->name;
+//            }
+//            return null;
+//        })->filter()->toArray();
+//    }
 
     public function reportes(): HasMany {
         return $this->hasMany(Reporte::class);
-    }
-
-    public function users(): BelongsToMany {
-        return $this->BelongstoMany(User::class, 'centro_user');
     }
 
     public function zona(): BelongsTo {
@@ -100,6 +96,17 @@ class CentroCosto extends Model {
     public function getSuperviAttribute($supervisores): string {
         $ArrayListaSupervi = $this->ArrayListaSupervisores($supervisores);
         return implode(',', $ArrayListaSupervi);
+    }
+
+    public function ArrayListaSupervisores(): array {
+        return $this->users()
+            ->whereHas('roles', fn($q) => $q->where('name', 'supervisor')) // Filtra solo supervisores
+            ->pluck('name')
+            ->toArray();
+    }
+
+    public function users(): BelongsToMany {
+        return $this->BelongstoMany(User::class, 'centro_user');
     }
 
     /**
