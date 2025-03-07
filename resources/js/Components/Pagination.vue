@@ -23,12 +23,12 @@ const data = reactive({
         soloQuincena: props.filters?.soloQuincena,
         FiltroUser: props.filters?.FiltroUser,
         FiltroQuincenita: props.filters?.FiltroQuincenita,
-        searchh1: props.filters?.searchh1,
-        searchh2: props.filters?.searchh2,
-        searchh3: props.filters?.searchh3,
-        searchh4: props.filters?.searchh4,
-        searchh5: props.filters?.searchh5,
-        searchh6: props.filters?.searchh6,
+        search1: props.filters?.search1,
+        search2: props.filters?.search2,
+        search3: props.filters?.search3,
+        search4: props.filters?.search4,
+        search5: props.filters?.search5,
+        search6: props.filters?.search6,
 
     },
 })
@@ -53,12 +53,12 @@ watchEffect(() => {
     data.params.soloQuincena = props.filters?.soloQuincena
     data.params.FiltroUser = props.filters?.FiltroUser
     data.params.FiltroQuincenita = props.filters?.FiltroQuincenita
-    data.params.searchh1 = props.filters?.searchh1
-    data.params.searchh2 = props.filters?.searchh2
-    data.params.searchh3 = props.filters?.searchh3 //searchNeativos
-    data.params.searchh4 = props.filters?.searchh4
-    data.params.searchh5 = props.filters?.searchh5
-    data.params.searchh6 = props.filters?.searchh6
+    data.params.search1 = props.filters?.search1
+    data.params.search2 = props.filters?.search2
+    data.params.search3 = props.filters?.search3 //searchNeativos
+    data.params.search4 = props.filters?.search4
+    data.params.search5 = props.filters?.search5
+    data.params.search6 = props.filters?.search6
 })
 </script>
 <template>

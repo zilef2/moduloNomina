@@ -96,16 +96,16 @@ const data = reactive({
     params: {
         searchQuincena: props.filters?.searchQuincena,
         searchIncongruencias: props.filters?.searchIncongruencias,
-        searchHorasD: props.filters?.searchHorasD,
+        searchorasD: props.filters?.searchorasD,
         soloValidos: props.filters?.soloValidos,
         soloValidos2: props.filters?.soloValidos2,
         soloQuincena: props.filters?.soloQuincena,
         FiltroUser: props.filters?.FiltroUser,
         FiltroQuincenita: props.filters?.FiltroQuincenita,
-        searchh1: props.filters?.searchh1,
-        searchh2: props.filters?.searchh2,
-        searchh3: props.filters?.searchh3, //nose
-        searchh4: props.filters?.searchh4, //año
+        search1: props.filters?.search1,
+        search2: props.filters?.search2,
+        search3: props.filters?.search3, //nose
+        search4: props.filters?.search4, //año
         HorasNoDiurnas: props.filters?.HorasNoDiurnas,
 
         search: props.filters?.search,
@@ -157,7 +157,7 @@ onMounted(() => {
 
         const hoy = new Date();
         data.params.search = mesesOnmounted[hoy.getMonth()];
-        data.params.searchh4 = hoy.getFullYear()
+        data.params.search4 = hoy.getFullYear()
     }
 })
 
@@ -247,7 +247,7 @@ const handleCheckboxChange = (values) => {
     data.params.soloQuincena = values[1]
     data.params.searchIncongruencias = values[2]
     data.params.searchSiigo = values[3]
-    data.params.searchh3 = values[4]
+    data.params.search3 = values[4]
     data.params.soloValidos2 = values[5]
 };
 
@@ -330,18 +330,18 @@ const handleCheckboxChange = (values) => {
                 <div class="flex justify-between p-2">
                     <div class="hidden sm:flex lg:hidden xl:flex space-x-2 gap-1">
                         <!-- ELFILTRO = horas diurnas-->
-                        <TextInput v-model="data.params.searchHorasD" v-show="props.numberPermissions > 9"
+                        <TextInput v-model="data.params.searchorasD" v-show="props.numberPermissions > 9"
                                    type="number" min="0" class="block w-2/3 md:w-full rounded-lg"
-                                   :placeholder="lang().placeholder.searchHorasD"/>
+                                   :placeholder="lang().placeholder.searchorasD"/>
                         <TextInput v-model="data.params.HorasNoDiurnas" v-show="props.numberPermissions > 9"
                                    type="number" min="0" class="block w-2/3 md:w-full rounded-lg"
                                    placeholder="No diurnas"/>
                         
                         <!-- ELFILTRO = numero del mes-->
-                        <TextInput v-model="data.params.searchh1" v-show="props.numberPermissions > 9"
+                        <TextInput v-model="data.params.search1" v-show="props.numberPermissions > 9"
                                    type="number" min="0" max="31" class="hidden xl:block w-full rounded-lg"
                                    placeholder="dia ini"/>
-                        <TextInput v-model="data.params.searchh2" v-show="props.numberPermissions > 9"
+                        <TextInput v-model="data.params.search2" v-show="props.numberPermissions > 9"
                                    type="number" min="0" max="31" class="hidden xl:block w-full rounded-lg"
                                    placeholder="dia fin"/>
                         <TextInput v-model="data.params.search" v-show="props.numberPermissions > 1"
@@ -569,7 +569,7 @@ const handleCheckboxChange = (values) => {
                     </tbody>
                 </table>
             </div>
-            <TextInput v-model="data.params.searchh4"
+            <TextInput v-model="data.params.search4"
                        type="number" min="2019" max="2099" class="hidden sm:block w-22 rounded-lg"
                        placeholder="año"/>
             <div class="flex justify-betwween items-center p-2 border-t border-gray-200 dark:border-gray-700">

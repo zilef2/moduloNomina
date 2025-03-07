@@ -58,11 +58,11 @@ class CentroCostosController extends Controller {
             'perPage' => (int)$perPage,
             'breadcrumbs' => [['label' => __('app.label.CentroCostos'), 'href' => route('CentroCostos.index')]],
             'title' => __('app.label.CentroCostos'),
-            'filters' => $request->all(['search', 'field', 'order', 'searchh2', 'searchSCC']),
+            'filters' => $request->all(['search', 'field', 'order', 'search2', 'searchSCC']),
             'nombresTabla' => $this->getNombresTabla(),
             'listaSupervisores' => $listaSupervisores,
             'numberPermissions' => $numberPermissions,
-            'losSelect' => $helperSelect->DependenciasCentro('a zona'),
+            'losSelect' => $helperSelect->DependenciasCentro('zona'),
 
         ]);
     }
@@ -94,8 +94,8 @@ class CentroCostosController extends Controller {
         if (
             $request->search //nombre o descrip
             || $searchSCC //nombre supervisor
-            || $request->searchh2  //ver_todos
-            || $request->searchh3  //zona
+            || $request->search2  //ver_todos
+            || $request->search3  //zona
         ) {
 
             $busqueda = true;
@@ -104,31 +104,27 @@ class CentroCostosController extends Controller {
                 $this->actualizarcache();
             }
             $centroCostos->orderBy('created_at', 'DESC');
-        }
-        else {
+        } else {
             Cache::forget('centro_costos_busqueda'); // Olvide que hay una búsqueda activa
 
             if ($request->has(['field', 'order'])) {
                 $this->limitadorCentrosParaVer = 500;
-                
+
                 if ($request->field === 'zouna') {
                     $centroCostos = $centroCostos
                         ->leftJoin('zonas', 'centro_costos.zona_id', '=', 'zonas.id')
                         ->orderByRaw('CASE WHEN zonas.nombre IS NULL THEN 1 ELSE 0 END, zonas.nombre ' . $request->order)
                         ->select('centro_costos.*');
-                }
-                else {
+                } else {
                     if ($request->field === 'nombre') {
-                        $centroCostos = $centroCostos->orderByRaw('CAST(nombre AS UNSIGNED) '.$request->order);
-                    }
-                    else {
+                        $centroCostos = $centroCostos->orderByRaw('CAST(nombre AS UNSIGNED) ' . $request->order);
+                    } else {
                         $centroCostos->orderBy($request->field, $request->order);
                     }
                 }
                 $this->actualizarcache();
-                
-            }
-            else {
+
+            } else {
                 $centroCostos->orderBy('activo', 'DESC')
                     ->orderBy('mano_obra_estimada', 'DESC');
             }
@@ -138,7 +134,7 @@ class CentroCostosController extends Controller {
         $supervisores = User::UsersWithRol('supervisor')->get();
         $NotMyCentros = $AUuser->NotMyCentros($numberPermissions);
         $centroCostos = $centroCostos->WhereNotIn('id', $NotMyCentros);
-        if ($request->has(['searchSCC']) || $request->has(['searchh2']) || $request->has(['search'])) {
+        if ($request->has(['searchSCC']) || $request->has(['search2']) || $request->has(['search'])) {
             $this->actualizarcache();
         }
 
@@ -146,17 +142,17 @@ class CentroCostosController extends Controller {
             $centroCostos = $this->getFilter($searchSCC, $request, $centroCostos);
         }
 //        dd($centroCostos->get());
-        $centroCostos = Cache::remember('centro_costos', $this->segundosActuSupervisores,
-            function () use ($centroCostos) {
-
-                Log::info('Cache miss: recalculating centro_costos');
-                return $centroCostos->limit($this->limitadorCentrosParaVer)->get()
-                    ->map(callback: function (CentroCosto $centroCosto) {
-                        
-                    $centroCosto->supervi = implode(',', $centroCosto->ArrayListaSupervisores());
-                    return $centroCosto;
-                })->filter();
-            });
+//        $centroCostos = Cache::remember('centro_costos', $this->segundosActuSupervisores,
+//            function () use ($centroCostos) {
+//
+//                Log::info('Cache miss: recalculating centro_costos');
+//                return $centroCostos->limit($this->limitadorCentrosParaVer)->get()
+//                    ->map(callback: function (CentroCosto $centroCosto) {
+//                        
+//                    $centroCosto->supervi = implode(',', $centroCosto->ArrayListaSupervisores());
+//                    return $centroCosto;
+//                })->filter();
+//            });
 
         return $centroCostos;
     }
@@ -202,39 +198,37 @@ class CentroCostosController extends Controller {
         if ($request->search)
             $centroCostos = $centroCostos->Where('nombre', 'like', '%' . $request->search . '%');
 
-        if ($request->searchh3)
-            $centroCostos = $centroCostos->whereHas('zona', function ($query) use ($request) {
-                $query->where('nombre', 'like', '%' . $request->searchh3 . '%');
-            });
+        if ($request->search3 && $request->search3['value'])
+            $centroCostos = $centroCostos->where('zona_id',$request->search3['value']);
 
         return $centroCostos;
     }
 
-    public
-    function PerPageAndPaginate($request, $modelo, $perPage): LengthAwarePaginator {
-        $page = request('page', 1); // Current page number
-        return new LengthAwarePaginator(
-            $modelo->forPage($page, $perPage),
-            $modelo->count(),
-            $perPage,
-            $page,
-            ['path' => request()->url()]
-        );
+//    public function PerPageAndPaginate($request, $modelo, $perPage): LengthAwarePaginator {
+//        $page = request('page', 1); // Current page number
+//        return new LengthAwarePaginator(
+//            $modelo->forPage($page, $perPage),
+//            $modelo->count(),
+//            $perPage,
+//            $page,
+//            ['path' => request()->url()]
+//        );
+//    }
+    public function PerPageAndPaginate($request, $modelo, $perPage): LengthAwarePaginator {
+        return $modelo->paginate($perPage);
     }
 
     /**
      * @return array
      */
-    public
-    function getNombresTabla(): array {
+    public function getNombresTabla(): array {
         $permissions = Auth()->user()->roles->pluck('name')[0];
         if ($permissions === 'empleado') { //admin | administrativo
             $nombresTabla = [//[0]: como se ven //[1] como es la BD
                 ['#', 'nombre'],
                 [null, 'nombre'],
             ];
-        }
-        else {
+        } else {
             $nombresTabla = [//[0]: como se ven //[1] como es la BD
                 ['Acciones', '#', 'nombre', 'Mano obra estimada', 'zona', 'Supervisores', 'activo', 'Facturar', 'descripcion', 'clasificacion', '# usuarios'],
                 [null, null, 'nombre', 'mano_obra_estimada', 'zouna', null, 'activo', 'ValidoParaFacturar', 'descripcion', 'clasificacion', null],
@@ -243,12 +237,10 @@ class CentroCostosController extends Controller {
         return $nombresTabla;
     }
 
-    public
-    function create() {
+    public function create() {
     }
 
-    public
-    function store(CentroCostoRequest $request) {
+    public function store(CentroCostoRequest $request) {
         $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
         DB::beginTransaction();
         try {
@@ -296,8 +288,7 @@ class CentroCostosController extends Controller {
 
         if ($numberPermissions === 1) { //1 : empleado | 2 : administrativo | 3 :supervisor
 
-        }
-        else { // not empleado
+        } else { // not empleado
             $titulo = MyhelpQuincena::CalcularTituloQuincena($permissions);
             $Reportes->orderBy('fecha_ini');
             $perPage = 100;
@@ -367,8 +358,7 @@ class CentroCostosController extends Controller {
                 DB::commit();
 
                 return back()->with('success', __('app.label.deleted_successfully', ['name' => $centroCostos->nombre]));
-            }
-            else {
+            } else {
                 return back()->with('error', 'No tiene permisos para borrar un centro de costos');
             }
         } catch (\Throwable $th) {
@@ -390,15 +380,14 @@ class CentroCostosController extends Controller {
                 foreach ($centroCostos as $index => $centroCosto) {
 
                     $centroCosto->update([
-                        'mano_obra_estimada' => 0
-                    ]);
+                                             'mano_obra_estimada' => 0
+                                         ]);
                 }
 
                 DB::commit();
                 $contar = $centroCostos->count();
                 echo "modificamos $contar centros";
-            }
-            else {
+            } else {
                 echo "modificamos nada";
             }
         } catch (\Throwable $th) {
@@ -412,13 +401,13 @@ class CentroCostosController extends Controller {
     public
     function update(Request $request, $id) {
         $validatedData = $request->validate([
-            'nombre' => [
-                'required',
-                Rule::unique('centro_costos', 'nombre')->ignore((int)$id),
-            ],
-        ], [
-            'nombre.unique' => 'El nombre ya está en uso.',
-        ]);
+                                                'nombre' => [
+                                                    'required',
+                                                    Rule::unique('centro_costos', 'nombre')->ignore((int)$id),
+                                                ],
+                                            ], [
+                                                'nombre.unique' => 'El nombre ya está en uso.',
+                                            ]);
         DB::beginTransaction();
         MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' | centro de Costos | '));
 

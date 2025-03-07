@@ -94,7 +94,12 @@ class ViaticoController extends Controller {
         $centroSelect = CentroCosto::all('id', 'nombre as name')->toArray();
         array_unshift($Empleados, ["name" => "Seleccione una persona", 'id' => 0]);
         array_unshift($centroSelect, ["name" => "Seleccione un centro de costo", 'id' => 0]);
-        return [$Empleados, $centroSelect];
+        
+        
+        $zonas = \App\Models\zona::all('id', 'nombre as name')->toArray();
+        array_unshift($zonas, ["name" => "Seleccione una zona", 'id' => 0]);
+        
+        return [$Empleados, $centroSelect,$zonas];
     }
 
     //todo: tosync

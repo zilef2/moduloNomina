@@ -20,11 +20,13 @@ class ReportesController extends Controller {
     //<editor-fold desc="Select y filtros">
     public function losSelect(&$valoresSelectConsulta, &$showUsers, &$valoresSelect, &$userFiltro, $numberPermissions) {
         $elUser = Myhelp::AuthU();
-        $valoresSelectConsulta = CentroCosto::Where('activo', 1)->orderBy('nombre')->get();
+        $valoresSelectConsulta = CentroCosto::Where('activo', 1)
+            ->Where('created_at', '>=', Carbon::now()->addMonths(-5)->toDateString())
+            ->orderBy('nombre')->get();
         $userFiltro[0] = ['label' => 'Sin empleado', 'value' => 0];
         foreach ($valoresSelectConsulta as $value) {
             $valoresSelect[] = [
-                'label' => $value->nombre, //centro de costos
+                'label' => $value->nombre . ' - '.$value->zouna, //centro de costos
                 'value' => (int)($value->id),
             ];
             $showSelect[(int)($value->id)] = $value->nombre;
@@ -58,13 +60,13 @@ class ReportesController extends Controller {
 
     public function Filtros(&$request, &$Reportes) {
         $esteAnio = Carbon::now()->format('Y');
-        if ($request->has('search') || $request->has('searchDDay') || $request->has('searchHorasD') || $request->has('searchIncongruencias') ||
+        if ($request->has('search') || $request->has('searchDDay') || $request->has('searchorasD') || $request->has('searchIncongruencias') ||
             $request->has('searchQuincena') || $request->has(['FiltroUser']) || $request->has(['FiltroQuincenita']) ||
             $request->has('searchSiigo') || $request->has('soloValidos') || $request->has('soloQuincena')) {
         }
 
-        if ($request->has('searchh4')) { //el anio
-            $Reportes->WhereYear('fecha_ini', $request->searchh4);
+        if ($request->has('search4')) { //el anio
+            $Reportes->WhereYear('fecha_ini', $request->search4);
         } else {
             $Reportes->WhereYear('fecha_ini', $esteAnio);
         }
@@ -85,8 +87,8 @@ class ReportesController extends Controller {
         if ($request->has('searchDDay')) {
             $Reportes->whereDay('fecha_ini', $request->searchDDay);
         }
-        if ($request->has('searchHorasD')) {
-            $Reportes->where('diurnas', $request->searchHorasD);
+        if ($request->has('searchorasD')) {
+            $Reportes->where('diurnas', $request->searchorasD);
         }
         if ($request->has('HorasNoDiurnas')) {
             $Reportes->where('diurnas', '!=', $request->HorasNoDiurnas);
@@ -114,12 +116,12 @@ class ReportesController extends Controller {
             }
         }
         if (
-            $request->has(['searchh1']) &&
-            $request->has(['searchh2'])
-            && $request->searchh1 != 0
+            $request->has(['search1']) &&
+            $request->has(['search2'])
+            && $request->search1 != 0
         ) {
-            $h1 = $request->searchh1;
-            $h2 = $request->searchh2;
+            $h1 = $request->search1;
+            $h2 = $request->search2;
             $Reportes->whereDay('fecha_ini', '>=', $h1);
             $Reportes->whereDay('fecha_fin', '<=', $h2);
         }
@@ -135,7 +137,7 @@ class ReportesController extends Controller {
                     ->orWhere('dominical_extra_nocturno', '<>', 0);
             });
         }
-        if ($request->has('searchh3')) {
+        if ($request->has('search3')) {
             $campos = ['horas_trabajadas', 'almuerzo', 'diurnas', 'nocturnas', 'extra_diurnas', 'extra_nocturnas', 'dominical_diurno', 'dominical_nocturno', 'dominical_extra_diurno', 'dominical_extra_nocturno'];
 
             $Reportes->Where(function ($query) use ($campos) {
@@ -356,9 +358,9 @@ class ReportesController extends Controller {
             'filters' => $request->all([
                 'search', 'field', 'order',
                 'soloValidos', 'FiltroUser', 'searchDDay',
-                'searchHorasD', 'soloQuincena', 'searchIncongruencias',
+                'searchorasD', 'soloQuincena', 'searchIncongruencias',
                 'searchQuincena', 'FiltroQuincenita',
-                'searchh1', 'searchh1', 'HorasNoDiurnas',
+                'search1', 'search1', 'HorasNoDiurnas',
             ]),
             'perPage' => (int)$perPage,
             'fromController' => $Reportes->paginate($perPage),

@@ -44,6 +44,7 @@ use Illuminate\Support\Facades\DB;
  * @method static selectRaw(string $string)
  */
 class CentroCosto extends Model {
+    
     use HasFactory;
 
     protected Collection $supervisCache; // Propiedad para almacenar el valor calculado
@@ -63,11 +64,13 @@ class CentroCosto extends Model {
         'supervi',
     ];
 
-    public function getSupervisAttribute() {
+    public function getSuperviAttribute() : string{
         if ($this->superviCache === null) { // Solo calcula si no está en caché
-            $this->superviCache = User::UsersWithRol('supervisor')->get();
+//            $this->superviCache = User::UsersWithRol('supervisor')->get();
+            $this->superviCache = implode(',', $this->ArrayListaSupervisores());
+            
         }
-        return $this->superviCache;
+        return $this->superviCache ?? '';
     }
 
 //    public function ArrayListaSupervisores(): array {
@@ -93,10 +96,10 @@ class CentroCosto extends Model {
         return $this->zona ? $this->zona->nombre : 'Sin zona';
     }
 
-    public function getSuperviAttribute($supervisores): string {
-        $ArrayListaSupervi = $this->ArrayListaSupervisores($supervisores);
-        return implode(',', $ArrayListaSupervi);
-    }
+//    public function getSuperviAttribute($supervisores): string {
+//        $ArrayListaSupervi = $this->ArrayListaSupervisores($supervisores);
+//        return implode(',', $ArrayListaSupervi);
+//    }
 
     public function ArrayListaSupervisores(): array {
         return $this->users()

@@ -18,6 +18,7 @@ import {formatPesosCol} from '@/global.ts';
 
 import InfoButton from '@/Components/InfoButton.vue';
 
+import vSelect from "vue-select";import "vue-select/dist/vue-select.css";
 
 
 const {_, debounce, pickBy} = pkg
@@ -37,8 +38,8 @@ const data = reactive({
     params: {
         search: props.filters?.search, //por nombre o descrip
         searchSCC: props.filters?.searchSCC, //por supervisor
-        searchh2: props.filters?.searchh2, //ver todos (solo super)
-        searchh3: props.filters?.searchh3, //zona
+        search2: props.filters?.search2, //ver todos (solo super)
+        search3: props.filters?.search3, //zona
         field: props.filters?.field,
         order: props.filters?.order,
         perPage: props.perPage,
@@ -78,12 +79,12 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
         <h2 class="text-lg mb-1">Esta vista se recarga cada 5 minutos</h2>
         <h2 class="mb-1">Mano de obra estimada de este mes. Se tiene en cuenta el salario de la persona.
             <div v-if="can(['isSuper'])" class="mt-1 block w-full">
-                <label :for="'searchh2'">
+                <label :for="'search2'">
                     <input
                         type="checkbox"
-                        :id="'searchh2'"
+                        :id="'search2'"
                         value="false"
-                        v-model="data.params.searchh2"
+                        v-model="data.params.search2"
                     />
                     Ver mas de 50
                 </label>
@@ -120,9 +121,10 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                     <div class="flex gap-2">
                         <TextInput v-model="data.params.search" type="text" class="block w-1/2 rounded-lg"
                                    :placeholder="lang().placeholder.searchCC"/>
-                        <TextInput v-model="data.params.search3" type="text" class="block w-1/2 rounded-lg"
-                                   placeholder="Zona"/>
-                        <TextInput v-model="data.params.searchSCC" type="text" class="block w-1/2 rounded-lg"
+<!--                        <TextInput v-model="data.params.search3" type="text" class="block w-1/2 rounded-lg"-->
+<!--                                   placeholder="Zona"/>-->
+                        <v-select v-model="data.params.search3" :options="props.losSelect['zona']" label="label"
+                        class="w-full" ></v-select>                        <TextInput v-model="data.params.searchSCC" type="text" class="block w-1/2 rounded-lg"
                                    :placeholder="lang().placeholder.searchSupervisorCC"/>
                     </div>
                 </div>

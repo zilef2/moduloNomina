@@ -6,18 +6,18 @@ use App\Models\zona;
 
 class HelperControllerSelect extends Controller {
     
-    public function DependenciasCentro($selecioneUno): array {
-        $dependexsSelect = zona::all(['id as value', 'nombre'])->map(function ($item) {
+    public function DependenciasCentro($selecioneUno, $elNombre = 'nombre'): array {
+        $dependexsSelect = zona::all(['id as value', $elNombre])->map(function ($item) {
                 return [
                     'value' => $item->value,
                     'label' => ($item->nombre ?? '')
                 ];
             })->toArray();
 
-        array_unshift($dependexsSelect, ["label" => "Seleccione un$selecioneUno", 'value' => 0]);
+        array_unshift($dependexsSelect, ["label" => "Seleccione $selecioneUno", 'value' => 0]);
         
         return [
-            'zona' => $dependexsSelect,
+            $selecioneUno => $dependexsSelect,
         ];
     }
 }

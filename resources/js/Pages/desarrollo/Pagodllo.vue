@@ -8,7 +8,9 @@ import TextInput from '@/Components/TextInput.vue';
 import {useForm} from '@inertiajs/vue3';
 import {onMounted, reactive, watchEffect} from 'vue';
 import "vue-select/dist/vue-select.css";
-import vSelect from "vue-select";import "vue-select/dist/vue-select.css";
+import vSelect from "vue-select";
+import "vue-select/dist/vue-select.css";
+
 
 
 const props = defineProps({
@@ -17,61 +19,30 @@ const props = defineProps({
     desarrolloa: Object,
     titulos: Object, //parametros de la clase principal
     losSelect: Object,
-
 })
 
 const emit = defineEmits(["close"]);
 const data = reactive({
+    numCoutasaNow: 0,
 })
 
-//very usefull
-let justNames = props.titulos.map(names =>{
-    if(names['order'] !== 'estado' 
-        // && names['order'] !== 'noquiero1'
-        )
-        return names['order']
-})
 const form = useForm({
-    valor:'',
-    fecha:'',
-    cuota:'',
+    valor: '',
+    fecha: '',
 });
 onMounted(() => {
-    if (props.numberPermissions > 9) {
-        const valueRAn = Math.floor(Math.random() * 9 + 1)
-        form.nombre = 'admin orden trabajo ' + (valueRAn);
-        // form.hora_inicial = '0'+valueRAn+':00'//temp
-        // form.fecha = '2023-06-01'
-    }
-    // data.printForm.length -= 1 //dependex
-});
-const printForm =[];
-
-props.titulos.forEach(names =>{
- if(names['order'] !== 'estado'
-     // && names['order'] !== 'noquiero1'
- )   
-    printForm.push ({
-        idd: names['order'], label: names['label'], type: names['type']
-    })
+    if (props.numberPermissions > 9) {}
 });
 
 watchEffect(() => {
     if (props.show) {
-        // data.justNames.forEach(element => {
-        //     form[element] =  props.desarrolloa[element]
-        // });
         form.errors = {}
-        props.titulos.forEach(names => {
-            form[names['order']] = props.desarrolloa[names['order']]
-        });
-
-        // form.codigo = props.desarrolloa?.codigo
+        data.numCoutasaNow = props.desarrolloa?.Numcuotas + 1
     }
 })
 
 const update = () => {
-    form.put(route('desarrollo.update', props.desarrolloa?.id), {
+    form.put(route('updatePago', props.desarrolloa?.id), {
         preserveScroll: true,
         onSuccess: () => {
             emit("close")
@@ -81,7 +52,6 @@ const update = () => {
         onFinish: () => null,
     })
 }
-// const sexos = [ { label: 'Masculino', value: 'Masculino' }, { label: 'Femenino', value: 'Femenino' } ];
 
 </script>
 
@@ -92,53 +62,26 @@ const update = () => {
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     {{ lang().label.edit }} {{ props.title }}
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-
-                    <!--                    <div id="SelectVue" class="">-->
-                    <!--                        <label name="labelSelectVue2"> Centro de costo </label>-->
-                    <!--                        <v-select :options="props.losSelect[0]"-->
-                    <!--                                  v-model="form.centro_costo_id"-->
-                    <!--                                  label="name"-->
-                    <!--                        ></v-select>-->
-                    <!--                    </div>-->
-
-
-                    <div v-for="(atributosform, indice) in printForm" :key="indice">
-                        <div v-if="atributosform.type === 'foreign'" id="SelectVue" class="">
-                            <label name="labelSelectVue"> {{ atributosform.label }} </label>
-                            <v-select :options="props.losSelect"
-                                      v-model="form[atributosform.idd]"
-                                      :reduce="element => element.value" label="label"
-                            ></v-select>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
-                        </div>
-
-                        <div v-else-if="atributosform.type === 'time'" id="SelectVue">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
-                            <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                       v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                       :error="form.errors[atributosform.idd]" step="3600"/>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
-                        </div>
-                        <div v-else-if="atributosform.type === 'date'" class="">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
-                            <TextInput 
-                                :disabled="props.desarrolloa[atributosform.idd]"
-                                :class="{ 'opacity-75 bg-gray-500': props.desarrolloa[atributosform.idd] }"
-                                :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                       v-model="form[atributosform.idd]" :placeholder="atributosform.label"
-                                       :error="form.errors[atributosform.idd]"
-                            />
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
-                        </div>
-                        <div v-else class="">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
-                            <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                       v-model="form[atributosform.idd]" :placeholder="atributosform.label"
-                                       :error="form.errors[atributosform.idd]"/>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <div class="">
+                        <InputLabel for="valor" :value="lang().label.valor"/>
+                        <TextInput id="valor" type="number" class="mt-1 block w-full"
+                                   v-model="form.valor" placeholder="valor"
+                                   :error="form.errors.valor"/>
+                        <InputError class="mt-2" :message="form.errors.valor"/> 
+                    </div>
+                    <div class="">
+                        <InputLabel for="fecha" :value="lang().label.fecha"/>
+                        <TextInput id="fecha" type="date" class="mt-1 block w-full"
+                                   v-model="form.fecha" placeholder="fecha"
+                                   :error="form.errors.fecha"/>
+                        <InputError class="mt-2" :message="form.errors.fecha"/> 
+                    </div>
+                    <div class="">
+                        <InputLabel for="cuota" :value="lang().label.cuota"/>
+                        <TextInput id="cuota" type="number" class="mt-1 block w-full bg-gray-400"
+                                   v-model="data.numCoutasaNow" disabled
+                        />
                     </div>
                     <div class="rounded-xl">
                         <label name="estado">
@@ -149,14 +92,11 @@ const update = () => {
                                               {value:'Desarrollando',label:'Desarrollando'},
                                               {value:'Esperando pago parcial',label:'Esperando pago parcial'},
                                               {value:'Pagada totalmente',label:'Pagada totalmente'},
-                                              {value:'Vencida',label:'Vencida'},
                                               {value:'Finalizada',label:'Finalizada'},
                                           ]"
                                  label="label"
                         ></vSelect>
                     </div>
-                    
-                    
 
 
                 </div>

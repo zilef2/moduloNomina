@@ -13,17 +13,17 @@ class CargosModelos {
         $crudCompleto = array_merge(['delete'], $crudSemiCompleto);
         //otros cargos NO_ADMIN
         $nombresDeCargos = [
-            'Rector',//1
-            'ViceRector', //2
-            'Lider', //3
-            'Vinculado', //4
-            'Contratista', //5
+//            'Rector',//1
+//            'ViceRector', //2
+//            'Lider', //3
+//            'Vinculado', //4
+//            'Contratista', //5
         ];//heyRemember: userseeder, RoleSeeder
         $isSome = [];
         foreach ($nombresDeCargos as $key => $value) {
             $isSome[] = 'is' . $value;
         }
-        $elcore = 'llaves';
+        $elcore = 'llaves'; //todo: esto no es asi
         $Models = [
             'role',
             'permission',

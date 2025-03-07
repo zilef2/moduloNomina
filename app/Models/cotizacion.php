@@ -10,8 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class cotizacion extends Model
-{
+class cotizacion extends Model {
     use HasFactory;
 
     protected $fillable = [
@@ -21,7 +20,7 @@ class cotizacion extends Model
         'aprobado_cot',
         'fecha_aprobacion_cot',
         'centro_costo_id',
-        
+
         'estado_cliente',
         'estado',
         'factura',
@@ -46,16 +45,36 @@ class cotizacion extends Model
         'orden_de_compra',
         'hes',
         'observaciones',
+        'zona_id',
     ];
     //19feb2025
     /*
      * estos cambios implican una lista de clientes y TIPO DE MANTENIMIENTO 
 
      */
+    protected $appends = [
+        'zouna',
+        'Prealiza',
+//        'Psolicita',
+    ];
 
-    public function centro(): BelongsTo
-    {
+    public function centro(): BelongsTo {
         return $this->belongsTo(CentroCosto::class, 'centro_costo_id');
     }
 
+    public function zona(): BelongsTo {
+        return $this->belongsTo(zona::class, 'zona_id');
+    }
+
+
+    public function getZounaAttribute(): string {return $this->zona ? $this->zona->nombre : '';}
+    
+    public function getPrealizaAttribute(): string {
+        $user = $this->belongsTo(User::class, 'persona_que_realiza_la_pe')->first();
+        return $user ? $user->name : '';
+    }
+//    public function getPsolicitaAttribute(): string {
+//        $user = $this->belongsTo(User::class, 'persona_que_solicita_la_propuesta_economica')->first();
+//        return $user ? $user->name : '';
+//    }
 }

@@ -109,7 +109,6 @@ const estados = [
         'Desarrollando',
         'Esperando pago parcial',
         'Pagada totalmente',
-        'Vencida',
         'Finalizada'
     ];
 </script>
@@ -153,13 +152,13 @@ const estados = [
                             <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
                     </div>
-                    <div class="">
-                        <InputLabel for="valor" :value="lang().label.valor"/>
-                        <TextInput id="atributosform.idd" type="number" class="mt-1 block w-full"
-                                   v-model="form.valor" required placeholder="valor de la cotizacion"
-                                   :error="form.errors.valor"/>
-                        <InputError class="mt-2" :message="form.errors.valor"/>
-                    </div>
+<!--                    <div class="">-->
+<!--                        <InputLabel for="valor" :value="lang().label.valor"/>-->
+<!--                        <TextInput id="atributosform.idd" type="number" class="mt-1 block w-full"-->
+<!--                                   v-model="form.valor" required placeholder="valor de la cotizacion"-->
+<!--                                   :error="form.errors.valor"/>-->
+<!--                        <InputError class="mt-2" :message="form.errors.valor"/>-->
+<!--                    </div>-->
                 </div>
                 <div class=" my-8 flex justify-end">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}

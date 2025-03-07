@@ -6,6 +6,7 @@ use App\helpers\Myhelp;
 use App\helpers\MyModels;
 use App\Models\CentroCosto;
 use App\Models\cotizacion;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -61,10 +62,11 @@ class CotizacionController extends Controller {
                 ;
             });
         }
-        if ($request->has('search2')) {
-            $cotizacions = $cotizacions->where(function ($query) use ($request) {
-                $query->where('descripcion_cot', 'LIKE', "%" . $request->search2 . "%");
-            });
+        if ($request->has('search2') && $request->search2['value']) {
+            $cotizacions = $cotizacions->where('zona_id',(int)$request->search2['value']);
+//            $cotizacions = $cotizacions->where(function ($query) use ($request) {
+//                $query->where('descripcion_cot', 'LIKE', "%" . $request->search2 . "%");
+//            });
         }
         if ($request->has('search3')) {
             $cotizacions = $cotizacions->where(function ($query) use ($request) {
@@ -94,13 +96,11 @@ class CotizacionController extends Controller {
                     ->join('centros_costos', 'cotizacions.centro_costo_id', '=', 'centros_costos.id')
                     ->orderBy('centros_costos.nombre', $request->order)
                     ->select('cotizacions.*');
-            }
-            else {
+            } else {
 
                 $cotizacions = $cotizacions->orderBy($request->field, $request->order);
             }
-        }
-        else {
+        } else {
             $cotizacions = $cotizacions->orderBy('updated_at', 'DESC');
         }
     }
@@ -115,22 +115,6 @@ class CotizacionController extends Controller {
         return $cotizacions;
     }
 
-    public function Dependencias2025(): array { //todo: torescue:
-        $dependexsSelect = CentroCosto::all(['id as value', 'nombre', 'descripcion'])
-            ->map(function ($item) {
-                $descrip = $item->descripcion == '' ? ' - No descripción ' : ' - ' . mb_substr($item->descripcion, 0, 17);
-                return [
-                    'value' => $item->value,
-                    'label' => ($item->nombre ?? '') . $descrip
-                ];
-            })->toArray();
-
-        array_unshift($dependexsSelect, ["label" => "Seleccione un centro de costo", 'value' => 0]);
-        return [
-            'centros' => $dependexsSelect,
-        ];
-    }
-
     public function PerPageAndPaginate($request, $modelo): LengthAwarePaginator {
         $perPage = $request->has('perPage') ? $request->perPage : 10;
         $page = request('page', 1); // Current page number
@@ -141,6 +125,34 @@ class CotizacionController extends Controller {
             $page,
             ['path' => request()->url()]
         );
+    }
+
+    public function Dependencias2025(): array { //todo: torescue:
+        $listausers = User::select(['id as value', 'name as label'])
+            ->whereHas('roles', function ($q) {
+                $q->whereIn('name', ['empleado', 'administrativo', 'supervisor', 'admin']);
+            })->get();
+
+        $dependexsSelect = CentroCosto::all(['id as value', 'nombre', 'descripcion'])
+            ->map(function ($item) {
+                $descrip = $item->descripcion == '' ? ' - No descripción ' : ' - ' . mb_substr($item->descripcion, 0, 17);
+                return [
+                    'value' => $item->value,
+                    'label' => ($item->nombre ?? '') . $descrip
+                ];
+            })->toArray();
+
+
+        $zonas = \App\Models\zona::all('id as value', 'nombre as label')->toArray();
+        array_unshift($zonas, ["label" => "Seleccione una zona", 'value' => 0]);
+
+
+        array_unshift($dependexsSelect, ["label" => "Seleccione un centro de costo", 'value' => 0]);
+        return [
+            'centros' => $dependexsSelect,
+            'zonas' => $zonas,
+            'listausers' => $listausers,
+        ];
     }
 
     //</editor-fold>
@@ -156,12 +168,14 @@ class CotizacionController extends Controller {
         $request->merge(['user_id' => Myhelp::AuthUid()]);
         $request->merge(['precio_cot' => str_replace(".", "", $request->precio_cot)]);
         $this->SonSelect($request, [
-            'centro_costo_id',
             'estado_cliente',
             'estado',
             'mes_pedido',
             'tipo',
             'tipo_de_mantenimiento',
+            'zona_id',
+            'persona_que_realiza_la_pe',
+//            'persona_que_solicita_la_propuesta_economica',
         ]);
         $cotizacion = cotizacion::create($request->all());
         Cache::forget('centro_costos'); // Borra la caché normal para búsquedas nuevas
@@ -174,7 +188,7 @@ class CotizacionController extends Controller {
     //! STORE - UPDATE - DELETE
     //! STORE functions
 
-    private function SonSelect(Request $request, array $selectinput) {
+    private function SonSelect(Request &$request, array $selectinput) {
         foreach ($selectinput as $index => $item) {
             $valor = $request->{$item}['value'] ?? null;
             $request->merge([$item => $valor]);
@@ -195,15 +209,19 @@ class CotizacionController extends Controller {
     public function update2(Request $request, $id) {
         Myhelp::EscribirEnLog($this, ' Begin update2:cotizacions');
         DB::beginTransaction();
+        $this->SonSelect($request, [
+            'zona',
+        ]);
         $cotizacion = cotizacion::findOrFail($id);
         $centro = centrocosto::create([
-            'nombre' => $cotizacion->numero_cot,
-            'mano_obra_estimada' => 0,
-            'activo' => 1,
-            'descripcion' => $cotizacion->descripcion_cot,
-            'clasificacion' => '',
-            'ValidoParaFacturar' => 1,
-        ]);
+                                          'nombre' => $cotizacion->numero_cot,
+                                          'mano_obra_estimada' => 0,
+                                          'activo' => 1,
+                                          'descripcion' => $cotizacion->descripcion_cot,
+                                          'clasificacion' => '',
+                                          'ValidoParaFacturar' => 1,
+                                          'zona_id' => $cotizacion->zona_id,
+                                      ]);
         $request->merge(['centro_costo_id' => $centro->id]);
         $request->merge(['fecha_aprobacion_cot' => Carbon::now()]);
         $cotizacion->update($request->all());
@@ -228,6 +246,7 @@ class CotizacionController extends Controller {
             'mes_pedido',
             'tipo',
             'tipo_de_mantenimiento',
+            'zona_id',
         ]);
         $cotizacion->update($request->all());
 
@@ -243,9 +262,9 @@ class CotizacionController extends Controller {
         $centro = centrocosto::findOrFail($cotizacion->centro_costo_id);
         $centro->update(['activo' => 0]);
         $cotizacion->update([
-            'factura' => $request->factura,
-            'fecha_factura' => $request->fecha_factura,
-        ]);
+                                'factura' => $request->factura,
+                                'fecha_factura' => $request->fecha_factura,
+                            ]);
 
         DB::commit();
         Myhelp::EscribirEnLog($this, 'UPDATE:EXITOSO', 'cotizacion id:' . $cotizacion->id . ' | centro id: ' . $centro->id, false);

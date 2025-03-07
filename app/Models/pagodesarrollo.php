@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 {
     use HasFactory;
     
+    protected $appends = ['Numcuotas'];
     
     protected $fillable = [
         'valor',
@@ -23,8 +24,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     public function desarrollo(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
         return $this->belongsTo(desarrollo::class);
     }
+
+        public function numcoutas() {
+            
+    }
     
-    
-    
+    public function getNumcuotasAttribute(): int {
+        return pagodesarrollo::Where('desarrollo_id',$this->desarrollo_id)->count();
+    }
 
 }

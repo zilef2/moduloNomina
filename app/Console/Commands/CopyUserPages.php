@@ -28,7 +28,10 @@ class CopyUserPages extends Command {
     //notacion de notas:
      // //todo:
      // nexttochange:
+    //very usefull
      // todo: sync: añadir a los demas repos
+    
+    
      protected function generateAttributes(): array {
         // text // number // dinero // date // datetime // foreign
         return [

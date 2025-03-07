@@ -148,7 +148,6 @@ const update = () => {
                                               {value:'Desarrollando',label:'Desarrollando'},
                                               {value:'Esperando pago parcial',label:'Esperando pago parcial'},
                                               {value:'Pagada totalmente',label:'Pagada totalmente'},
-                                              {value:'Vencida',label:'Vencida'},
                                               {value:'Finalizada',label:'Finalizada'},
                                           ]"
                                  label="label"

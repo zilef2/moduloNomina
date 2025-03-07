@@ -23,7 +23,6 @@ class DesarrolloController extends Controller {
         'Desarrollando',
         'Esperando pago parcial',
         'Pagada totalmente',
-        'Vencida',
         'Finalizada'
     ];
 
@@ -148,32 +147,35 @@ class DesarrolloController extends Controller {
         $permissions = Myhelp::EscribirEnLog($this, ' Begin UPDATE:desarrollos');
         DB::beginTransaction();
         $desarrollo = desarrollo::findOrFail($id);
-        if (gettype($request->estado) !== 'string' && $request->estado['value'])
-            $request->merge(['estado' => $request->estado['value']]);
+        if ($request->estado && gettype($request->estado) !== 'string' && $request->estado['value'])
+            $desarrollo->update(['estado' => $request->estado['value']]);
 
-        $desarrollo->update($request->all());
-
-        DB::commit();
-        Myhelp::EscribirEnLog($this, 'UPDATE:desarrollos EXITOSO', 'desarrollo id:' . $desarrollo->id . ' | ' . $desarrollo->nombre, false);
-        return back()->with('success', __('app.label.updated_successfully2', ['nombre' => $desarrollo->nombre]));
-    }
-
-
-    //paso 2
-    public function update(Request $request, $id): RedirectResponse {
-        $permissions = Myhelp::EscribirEnLog($this, ' Begin UPDATE:desarrollos');
-        DB::beginTransaction();
-        $desarrollo = desarrollo::findOrFail($id);
+        $numCuotas = pagodesarrollo::Where('desarrollo_id',$desarrollo->id)->count();
 
         pagodesarrollo::create(
             [
                 'valor' => $request->valor,
                 'fecha' => $request->fecha,
-                'cuota' => $request->cuota,
+                'cuota' => $numCuotas + 1,
                 'final' => 0,
                 'desarrollo_id' => $desarrollo->id,
             ]
         );
+        DB::commit();
+        Myhelp::EscribirEnLog($this, 'UPDATE2:desarrollos EXITOSO', 'desarrollo id:' . $desarrollo->id . ' | ' . $desarrollo->nombre, false);
+        return back()->with('success', __('app.label.updated_successfully2', ['nombre' => $desarrollo->nombre]));
+    }
+
+
+    //paso 2
+
+    public function update(Request $request, $id): RedirectResponse {
+        $permissions = Myhelp::EscribirEnLog($this, ' Begin UPDATE:desarrollos');
+        DB::beginTransaction();
+        $desarrollo = desarrollo::findOrFail($id);
+        if ($request->estado && gettype($request->estado) !== 'string' && $request->estado['value'])
+            $request->merge(['estado' => $request->estado['value']]);
+        $desarrollo->update($request->all());
 
         DB::commit();
         Myhelp::EscribirEnLog($this, 'UPDATE:desarrollos EXITOSO', 'desarrollo id:' . $desarrollo->id . ' | ' . $desarrollo->nombre, false);

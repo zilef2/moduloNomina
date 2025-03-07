@@ -16,6 +16,7 @@ import {ChevronUpDownIcon, PencilIcon, TrashIcon} from '@heroicons/vue/24/solid'
 import Create from '@/Pages/desarrollo/Create.vue';
 import Edit from '@/Pages/desarrollo/Edit.vue';
 import Delete from '@/Pages/desarrollo/Delete.vue';
+import Pagodllo from '@/Pages/desarrollo/Pagodllo.vue';
 
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
@@ -106,9 +107,14 @@ const estados = [
         'Desarrollando',
         'Esperando pago parcial',
         'Pagada totalmente',
-        'Vencida',
         'Finalizada'
     ];
+
+function obtenerIndice(estado) {
+    const index = estados.indexOf(estado);
+    return index !== -1 ? index + 1 : -1; // Retorna -1 si no se encuentra
+}
+
 </script>
 
 <template>
@@ -121,9 +127,9 @@ const estados = [
                 <div class="rounded-lg my-2 overflow-hidden w-fit">
 <!--                    create desarrollo-->
                     <PrimaryButton class="rounded-none" @click="data.createOpen = true" v-if="can(['isAdmin'])">
-                        {{ lang().button.new }}
+                        {{ lang().button.new }} requisito
                     </PrimaryButton>
-                    <p class="text-lg">
+                    <p class="text-lg my-2">
                         Cada cotizacion pasa por los siguientes pasos: {{ estados.join(', ') }}
                     </p>
 
@@ -136,7 +142,9 @@ const estados = [
                           :desarrolloa="data.desarrolloo" :title="props.title" :losSelect=props.losSelect />
                     <Pagodllo v-if="can(['isSuper'])" :titulos="titulos"
                           :numberPermissions="props.numberPermissions" :show="data.edit2Open" @close="data.edit2Open = false"
-                          :desarrolloa="data.desarrolloo" :title="props.title" :losSelect=props.losSelect />
+                          :desarrolloa="data.desarrolloo" :title="props.title" 
+                          :losSelect=props.losSelect 
+                    />
 
                     <Delete v-if="can(['isAdmin'])" :numberPermissions="props.numberPermissions"
                             :show="data.deleteOpen" @close="data.deleteOpen = false" :desarrolloa="data.desarrolloo"
@@ -165,9 +173,9 @@ const estados = [
                                     <span class="font-semibold title-font text-gray-700">{{ claseFromController.nombre }}</span>
                                     <span class="mt-1 text-gray-500 text-sm">Reunión: {{claseFromController.fecha_reunion}}</span>
                                 </div>
-                                <div class="md:flex-grow">
+                                <div class="w-1/2">
                                     <h2 class="text-2xl font-medium text-gray-900 title-font mb-2">
-                                        Estado <b>{{ claseFromController.estado }}</b>
+                                        <b>Etapa {{obtenerIndice(claseFromController.estado)}}: {{ claseFromController.estado }}</b>
                                     </h2>
                                     <p class="leading-relaxed">{{claseFromController.descripcion}}</p>
                                     <a class="text-indigo-500 inline-flex items-center mt-4"
@@ -180,10 +188,11 @@ const estados = [
                                     </a>
                                 </div>
                                 <div class="md:flex-grow">
-                                    <h2 class="text-2xl font-medium text-gray-900 title-font mb-2">Valor inicial</h2>
+                                    <p class="leading-relaxed">Valor inicial: {{formatPesosCol(claseFromController.valor_inicial)}}</p>
                                     <p class="leading-relaxed">{{formatPesosCol(claseFromController.valor_inicial)}}</p>
                                     <p class="leading-relaxed">Primer pago acordado: <b>{{ formatPesosCol(claseFromController.valor_parcial1) }}</b></p>
                                     <p class="leading-relaxed"> Pagos: {{claseFromController.valorino}}</p>
+                                    <p class="leading-relaxed"> Total: {{claseFromController.totalpagado}}</p>
                                     <p v-if="claseFromController.fecha_cotizacion_aceptada" class="text-indigo-500 inline-flex items-center mt-4">
                                         Cotizacion aceptada el: {{claseFromController.fecha_cotizacion_aceptada}}
                                     </p>

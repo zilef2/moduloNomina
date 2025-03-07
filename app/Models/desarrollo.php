@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class desarrollo extends Model {
     use HasFactory;
 
-    protected $appends = ['valorino'];
+    protected $appends = ['valorino','Numcuotas','totalpagado'];
 
     protected $fillable = [
         'nombre',
@@ -38,6 +38,13 @@ class desarrollo extends Model {
         }
 
         return implode(',' , $this->pagos->flatMap(fn($pago) => [$pago->valor])->toArray());
+    }
+    
+    public function getNumcuotasAttribute(): int {
+        return pagodesarrollo::Where('desarrollo_id',$this->id)->count();
+    }
+    public function getTotalpagadoAttribute(): int {
+        return pagodesarrollo::Where('desarrollo_id',$this->id)->sum('valor');
     }
 
 }

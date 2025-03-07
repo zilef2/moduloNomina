@@ -21,7 +21,8 @@ import Generarcc from '@/Pages/cotizacion/Generarcc.vue';
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
 import {Now_Date_to_html, formatDate2, formatDateTime, number_format} from '@/global.ts';
-
+import vSelect from "vue-select";
+import "vue-select/dist/vue-select.css";
 
 
 const {_, debounce, pickBy} = pkg
@@ -48,6 +49,7 @@ const data = reactive({
         search2: props.filters.search2, //zona
         search3: props.filters.search3,
         search4: props.filters.search4,
+        // search5: props.filters.search5, //zonaid
         field: props.filters.field,
         order: props.filters.order,
         perPage: props.perPage,
@@ -102,6 +104,7 @@ let titulos = [
     // { order: 'codigo', label: 'codigo', type: 'text' },
     {order: 'numero_cot', label: 'numero_cot', type: 'text'},
     {order: 'centro_costo_id', label: 'centro_costo', type: 'id', nameid: 'nombre'},
+    {order: 'zouna', label: 'zona', type: 'text'},
     {order: 'estado_cliente', label: 'estado_cliente', type: 'text'},
     {order: 'estado', label: 'estado', type: 'text'},
     {order: 'factura', label: 'factura', type: 'text'},
@@ -120,16 +123,12 @@ let titulos = [
     {order: 'admi', label: 'admi', type: 'porcentaje'},
     {order: 'impr', label: 'impr', type: 'porcentaje'},
     {order: 'util', label: 'util', type: 'porcentaje'},
-    {order: 'subtotal', label: 'subtotal', type: 'number'},
-    {order: 'iva', label: 'iva', type: 'number'},
-    {order: 'total', label: 'total', type: 'number'},
-    {order: 'persona_que_realiza_la_pe', label: 'persona_que_realiza_la_pe', type: 'text'},
+    {order: 'subtotal', label: 'subtotal', type: 'dinero'},
+    {order: 'iva', label: 'iva', type: 'dinero'},
+    {order: 'total', label: 'total', type: 'dinero'},
+    {order: 'Prealiza', label: 'persona_que_realiza_la_pe', type: 'text'},
     {order: 'cliente', label: 'cliente', type: 'text'},
-    {
-        order: 'persona_que_solicita_la_propuesta_economica',
-        label: 'persona_que_solicita_la_propuesta_economica',
-        type: 'text'
-    },
+    {order: 'persona_que_solicita_la_propuesta_economica', label: 'persona_que_solicita_la_propuesta_economica', type: 'text'},
     {order: 'orden_de_compra', label: 'orden_de_compra', type: 'text'},
     {order: 'hes', label: 'hes', type: 'text'},
     {order: 'observaciones', label: 'observaciones', type: 'text'},
@@ -137,10 +136,11 @@ let titulos = [
 
 
 const ocultar11 = () => {
-    if (data.ocultar1) {
+    if (data.ocultar1) { //aqui se ocultan varias columnas como por_a
         titulos = [
             {order: 'numero_cot', label: 'numero_cot', type: 'text'},
             {order: 'centro_costo_id', label: 'centro_costo', type: 'id', nameid: 'nombre'},
+            {order: 'zouna', label: 'zona', type: 'text'},
             {order: 'estado_cliente', label: 'estado_cliente', type: 'text'},
             {order: 'estado', label: 'estado', type: 'text'},
             {order: 'factura', label: 'factura', type: 'text'},
@@ -151,21 +151,16 @@ const ocultar11 = () => {
             {order: 'lugar', label: 'lugar', type: 'text'},
             {order: 'descripcion_cot', label: 'descripcion_cot', type: 'text'},
             {order: 'tipo', label: 'tipo', type: 'text'},
-            {order: 'tipo_de_mantenimiento', label: 'tipo_de_mantenimiento', type: 'text'},
             {order: 'precio_cot', label: 'precio_cot', type: 'number'},
             {order: 'admi', label: 'admi', type: 'number'},
             {order: 'impr', label: 'impr', type: 'number'},
             {order: 'util', label: 'util', type: 'number'},
-            {order: 'subtotal', label: 'subtotal', type: 'number'},
-            {order: 'iva', label: 'iva', type: 'number'},
-            {order: 'total', label: 'total', type: 'number'},
-            {order: 'persona_que_realiza_la_pe', label: 'persona_que_realiza_la_pe', type: 'text'},
+            {order: 'subtotal', label: 'subtotal', type: 'dinero'},
+            {order: 'iva', label: 'iva', type: 'dinero'},
+            {order: 'total', label: 'total', type: 'dinero'},
+            {order: 'Prealiza', label: 'Prealiza', type: 'text'},
             {order: 'cliente', label: 'cliente', type: 'text'},
-            {
-                order: 'persona_que_solicita_la_propuesta_economica',
-                label: 'persona_que_solicita_la_propuesta_economica',
-                type: 'text'
-            },
+            {order: 'persona_que_solicita_la_propuesta_economica', label: 'persona_que_solicita_la_propuesta_economica', type: 'text'},
             {order: 'orden_de_compra', label: 'orden_de_compra', type: 'text'},
             {order: 'hes', label: 'hes', type: 'text'},
             {order: 'observaciones', label: 'observaciones', type: 'text'},
@@ -174,6 +169,7 @@ const ocultar11 = () => {
         titulos = [
             {order: 'numero_cot', label: 'numero_cot', type: 'text'},
             {order: 'centro_costo_id', label: 'centro_costo', type: 'id', nameid: 'nombre'},
+            {order: 'zouna', label: 'zona', type: 'text'},
             {order: 'estado_cliente', label: 'estado_cliente', type: 'text'},
             {order: 'estado', label: 'estado', type: 'text'},
             {order: 'factura', label: 'factura', type: 'text'},
@@ -192,16 +188,12 @@ const ocultar11 = () => {
             {order: 'admi', label: 'admi', type: 'number'},
             {order: 'impr', label: 'impr', type: 'number'},
             {order: 'util', label: 'util', type: 'number'},
-            {order: 'subtotal', label: 'subtotal', type: 'number'},
-            {order: 'iva', label: 'iva', type: 'number'},
-            {order: 'total', label: 'total', type: 'number'},
-            {order: 'persona_que_realiza_la_pe', label: 'persona_que_realiza_la_pe', type: 'text'},
+            {order: 'subtotal', label: 'subtotal', type: 'dinero'},
+            {order: 'iva', label: 'iva', type: 'dinero'},
+            {order: 'total', label: 'total', type: 'dinero'},
+            {order: 'Prealiza', label: 'Prealiza', type: 'text'},
             {order: 'cliente', label: 'cliente', type: 'text'},
-            {
-                order: 'persona_que_solicita_la_propuesta_economica',
-                label: 'persona_que_solicita_la_propuesta_economica',
-                type: 'text'
-            },
+            {order: 'persona_que_solicita_la_propuesta_economica', label: 'persona_que_solicita_la_propuesta_economica', type: 'text'},
             {order: 'orden_de_compra', label: 'orden_de_compra', type: 'text'},
             {order: 'hes', label: 'hes', type: 'text'},
             {order: 'observaciones', label: 'observaciones', type: 'text'},
@@ -236,12 +228,12 @@ watch(() => data.ocultar1, (newX) => {
                             :cotizacionInicial2=props.cotizacionInicial2
                     />
 
-                    <Edit v-if="can(['update cotizacion'])" :titulos="titulos"
-                          :numberPermissions="props.numberPermissions" :show="data.editOpen"
-                          @close="data.editOpen = false"
-                          :cotizaciona="data.cotizaciono" :title="props.title"
-                          :losSelect=props.losSelect
-                    />
+<!--                    <Edit v-if="can(['update cotizacion'])" :titulos="titulos"-->
+<!--                          :numberPermissions="props.numberPermissions" :show="data.editOpen"-->
+<!--                          @close="data.editOpen = false"-->
+<!--                          :cotizaciona="data.cotizaciono" :title="props.title"-->
+<!--                          :losSelect=props.losSelect-->
+<!--                    />-->
                     <Facturar v-if="can(['update3 cotizacion'])"
                               :numberPermissions="props.numberPermissions" :show="data.edit3Open"
                               @close="data.edit3Open = false"
@@ -275,13 +267,16 @@ watch(() => data.ocultar1, (newX) => {
                         <p class="text-sm -mx-1 px-4">Solo Números</p>
                         <checkbox v-if="props.numberPermissions > 1" v-model="data.params.search4"
                                   class="p-2 mx-12 my-3"/>
+                        <label name="centro_costo_id" class="text-sm mx-2 px-4 mt-2">{{ lang().label.zona }}</label>
+                        <v-select v-model="data.params.search2" :options="props.losSelect['zonas']" label="label"
+                        class="w-full" ></v-select>
 <!--                        <p class="text-sm -mx-1 px-4">Ocultar porcentajes</p>-->
-<!--                        <checkbox v-if="props.numberPermissions > 1" v-model="data.ocultar1"-->
+<!--                        <checkbox v-if="props.numberPermissions > 9" v-model="data.ocultar1"-->
 <!--                                  class="p-2 mx-12 my-3"/>-->
                         <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"
                                    class="block w-full lg:w-5/6 rounded-xl" placeholder="Número"/>
-                        <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search2" type="text"
-                                   class="block w-full lg:w-5/6 rounded-xl mx-2" placeholder="Descripción"/>
+<!--                        <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search2" type="text"-->
+<!--                                   class="block w-full lg:w-5/6 rounded-xl mx-2" placeholder="Descripción"/>-->
                         <p class="text-sm mx-8 px-4">
                             Fecha Aprobación
                         </p>
@@ -326,7 +321,6 @@ watch(() => data.ocultar1, (newX) => {
                         <tbody>
                         <tr v-for="(claseFromController, indexu) in props.fromController.data" :key="indexu"
                             class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
-
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
                                 <input
                                     class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary dark:text-primary shadow-sm focus:ring-primary/80 dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-primary dark:checked:border-primary"
@@ -336,11 +330,11 @@ watch(() => data.ocultar1, (newX) => {
                             <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 w-12 px-2 sm:py-3">
                                 <div class="flex justify-center items-center">
                                     <div class="rounded-md overflow-hidden">
-                                        <InfoButton v-show="can(['update cotizacion']) && !claseFromController.factura" type="button"
-                                                    @click="(data.editOpen = true), (data.cotizaciono = claseFromController)"
-                                                    class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
-                                            <PencilIcon class="w-4 h-4"/>
-                                        </InfoButton>
+<!--                                        <InfoButton v-show="can(['update cotizacion']) && !claseFromController.factura" type="button"-->
+<!--                                                    @click="(data.editOpen = true), (data.cotizaciono = claseFromController)"-->
+<!--                                                    class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">-->
+<!--                                            <PencilIcon class="w-4 h-4"/>-->
+<!--                                        </InfoButton>-->
                                         <DangerButton v-show="can(['update2 cotizacion']) && !claseFromController.centro_costo_id" type="button"
                                                       @click="(data.generarOpen = true), (data.cotizaciono = claseFromController)"
                                                       class="px-2 py-1.5 rounded-none"
@@ -369,8 +363,12 @@ watch(() => data.ocultar1, (newX) => {
                                 <span v-if="titulo['type'] === 'string'" class="whitespace-nowrap"> {{
                                         claseFromController[titulo['order']]
                                     }} </span>
-                                <span v-if="titulo['type'] === 'number'" class="whitespace-nowrap"> {{ number_format(claseFromController[titulo['order']], 0, false) }} </span>
-                                <span v-if="titulo['type'] === 'porcentaje'" class="whitespace-nowrap"> {{ number_format(claseFromController[titulo['order']], 2, false) }} %</span>
+                                <span v-if="titulo['type'] === 'number'" class="whitespace-nowrap"> {{
+                                        number_format(claseFromController[titulo['order']], 0, false)
+                                    }} </span>
+                                <span v-if="titulo['type'] === 'porcentaje'" class="whitespace-nowrap"> {{
+                                        number_format(claseFromController[titulo['order']], 2, false)
+                                    }} %</span>
                                 <span v-if="titulo['type'] === 'dinero'" class="whitespace-nowrap"> {{
                                         number_format(claseFromController[titulo['order']], 0, true)
                                     }} </span>
