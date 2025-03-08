@@ -18,8 +18,9 @@ use Inertia\Inertia;
 
 class ReportesController extends Controller {
     //<editor-fold desc="Select y filtros">
-    public function losSelect(&$valoresSelectConsulta, &$showUsers, &$valoresSelect, &$userFiltro, $numberPermissions) {
+    public function losSelect(&$valoresSelectConsulta, &$showUsers, &$valoresSelect, &$userFiltro, $numberPermissions): array {
         $elUser = Myhelp::AuthU();
+        $showSelect = [];
         $valoresSelectConsulta = CentroCosto::Where('activo', 1)
             ->Where('created_at', '>=', Carbon::now()->addMonths(-5)->toDateString())
             ->orderBy('nombre')->get();
@@ -58,12 +59,8 @@ class ReportesController extends Controller {
         return $showSelect;
     }
 
-    public function Filtros(&$request, &$Reportes) {
+    public function Filtros(&$request, &$Reportes): void {
         $esteAnio = Carbon::now()->format('Y');
-        if ($request->has('search') || $request->has('searchDDay') || $request->has('searchorasD') || $request->has('searchIncongruencias') ||
-            $request->has('searchQuincena') || $request->has(['FiltroUser']) || $request->has(['FiltroQuincenita']) ||
-            $request->has('searchSiigo') || $request->has('soloValidos') || $request->has('soloQuincena')) {
-        }
 
         if ($request->has('search4')) { //el anio
             $Reportes->WhereYear('fecha_ini', $request->search4);
@@ -71,7 +68,6 @@ class ReportesController extends Controller {
             $Reportes->WhereYear('fecha_ini', $esteAnio);
         }
         if ($request->has('search')) { //el mes
-//            dd($request->search);
             $months = [
                 '', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
@@ -105,7 +101,6 @@ class ReportesController extends Controller {
             $Reportes->Where('user_id', $request->FiltroUser);
         }
         if ($request->has(['FiltroQuincenita']) && $request->FiltroQuincenita != 0) {
-            //$request->search
             $hoyNow = Carbon::now();
             $elquince = clone $hoyNow;
             $elquince = $elquince->startOfMonth()->addDays(14);
