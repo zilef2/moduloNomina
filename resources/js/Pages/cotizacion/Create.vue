@@ -140,7 +140,7 @@ onMounted(() => {
   let fecha1 = new Date()
   let aniofecha1 = fecha1.getFullYear()
   form.numero_cot = ('PE ' + aniofecha1 + '-' + props.consecutivoCotizacion);
-  if (props.numberPermissions > 19) {
+  if (props.numberPermissions > 9) {
     const valueRAn = Math.floor(Math.random() * (90) + 1)
     let StringRAn = "ejem " + (valueRAn * Math.floor(Math.random() * (20) + 1))
     form.descripcion_cot = "ejemplo" + (valueRAn);
@@ -163,7 +163,7 @@ onMounted(() => {
     form.orden_de_compra = (valueRAn) * 1020;
     form.hes = (valueRAn) * 1021;
     form.observaciones = StringRAn + ' observaciones';
-    form.zona_id = {"value": 6, "label": "hola"}
+    // form.zona_id = {"value": 6, "label": "hola"}
     form.tipo = {"value": "Servicio", "label": "Servicio"}
 
     // form.hora_inicial = '0'+valueRAn+':00'//temp
@@ -380,7 +380,7 @@ const formattedSubtotal = computed({
             {{ lang().label.estado }}
           </label>
             <v-select v-model="form.estado" :options="data.listas.estado"
-                      label="label"
+                      label="label" class="mt-2"
             ></v-select>
           </div>
 
@@ -393,7 +393,7 @@ const formattedSubtotal = computed({
           </div>
           <div class="rounded-xl">
             <label name="mes_pedido">{{ lang().label.mes_pedido }}</label>
-            <v-select v-model="form.mes_pedido" :options="data.listas.mes_pedido" label="label"></v-select>
+            <v-select v-model="form.mes_pedido" :options="data.listas.mes_pedido" label="label" class="mt-2"></v-select>
           </div>
 
           <div class="rounded-xl"><label name="lugar"> {{ lang().label.lugar }} </label>
@@ -404,7 +404,7 @@ const formattedSubtotal = computed({
           <div class="rounded-xl">
             <label name="centro_costo_id">{{ lang().label.zona }}</label>
             <v-select v-model="form.zona_id" :options="props.losSelect['zonas']"
-                      label="label"
+                      label="label" class="mt-2"
             ></v-select>
           </div>
 
@@ -418,7 +418,7 @@ const formattedSubtotal = computed({
             {{ lang().label.tipo }}
           </label>
             <v-select v-model="form.tipo" :options="data.listas.tipo"
-                      label="label"
+                      label="label" class="mt-2"
             ></v-select>
           </div>
           <div v-if="form.tipo.value ==='Mantenimiento' " class="rounded-xl"><label
@@ -426,7 +426,7 @@ const formattedSubtotal = computed({
             {{ lang().label.tipo_de_mantenimiento }}
           </label>
             <v-select v-model="form.tipo_de_mantenimiento" :options="data.listas.tipo_de_mantenimiento"
-                      label="label">
+                      label="label" class="mt-2">
             </v-select>
           </div>
         </div>
@@ -525,7 +525,7 @@ const formattedSubtotal = computed({
             <label name="persona_que_realiza_la_pe">
               {{ lang().label.persona_que_realiza_la_pe }} </label>
             <v-select v-model="form.persona_que_realiza_la_pe" :options="props.losSelect['listausers']"
-                      label="label"></v-select>
+                      label="label" class="mt-2"></v-select>
           </div>
 
           <div class="rounded-xl"><label name="cliente"> {{ lang().label.cliente }} </label>

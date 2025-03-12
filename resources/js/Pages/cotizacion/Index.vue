@@ -16,6 +16,7 @@ import Create from '@/Pages/cotizacion/Create.vue';
 import Edit from '@/Pages/cotizacion/Edit.vue';
 import Facturar from '@/Pages/cotizacion/Facturar.vue';
 import Delete from '@/Pages/cotizacion/Delete.vue';
+import DeleteBulk from '@/Pages/cotizacion/DeleteBulk.vue';
 import Generarcc from '@/Pages/cotizacion/Generarcc.vue';
 
 import Checkbox from '@/Components/Checkbox.vue';
@@ -64,7 +65,7 @@ const data = reactive({
     generarOpen: false,
     edit3Open: false,
     deleteOpen: false,
-    // deleteBulkOpen: false,
+    deleteBulkOpen: false,
     dataSet: usePage().props.app.perpage,
 })
 
@@ -123,9 +124,9 @@ let titulos = [
     {order: 'por_a', label: 'por_a', type: 'porcentaje'},
     {order: 'por_i', label: 'por_i', type: 'porcentaje'},
     {order: 'por_u', label: 'por_u', type: 'porcentaje'},
-    {order: 'admi', label: 'admi', type: 'porcentaje'},
-    {order: 'impr', label: 'impr', type: 'porcentaje'},
-    {order: 'util', label: 'util', type: 'porcentaje'},
+    {order: 'admi', label: 'admi', type: 'dinero'},
+    {order: 'impr', label: 'impr', type: 'dinero'},
+    {order: 'util', label: 'util', type: 'dinero'},
     {order: 'subtotal', label: 'subtotal', type: 'dinero'},
     {order: 'iva', label: 'iva', type: 'dinero'},
     {order: 'total', label: 'total', type: 'dinero'},
@@ -269,6 +270,9 @@ watch(() => data.ocultar1, (newX) => {
                             :show="data.deleteOpen" @close="data.deleteOpen = false" :cotizaciona="data.cotizaciono"
                             :title="props.title"
                     />
+                  <DeleteBulk :show="data.deleteBulkOpen"
+                                @close="data.deleteBulkOpen = false, data.multipleSelect = false, data.selectedId = []"
+                                :selectedId="data.selectedId" :title="props.title"/>
 
                 </div>
             </div>
@@ -276,11 +280,11 @@ watch(() => data.ocultar1, (newX) => {
                 <div class="flex justify-between p-2">
                     <div class="flex space-x-2">
                         <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet"/>
-                        <!-- <DangerButton @click="data.deleteBulkOpen = true"
-                            v-show="data.selectedId.length != 0 && can(['delete cotizacion'])" class="px-3 py-1.5"
+                        <DangerButton @click="data.deleteBulkOpen = true"
+                            v-show="data.selectedId.length !== 0 && can(['delete cotizacion'])" class="px-3 py-1.5"
                             v-tooltip="lang().tooltip.delete_selected">
                             <TrashIcon class="w-5 h-5" />
-                        </DangerButton> -->
+                        </DangerButton>
                     </div>
                     <div class="flex space-x-2">
                         <p class="text-sm -mx-1 px-4">Solo Números</p>

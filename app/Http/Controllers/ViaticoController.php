@@ -37,7 +37,12 @@ class ViaticoController extends Controller {
 
     public function index(Request $request): Response {
         $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' viaticos '));
-        $viaticos = $this->Filtros($request)->get();
+        $viaticos = $this->Filtros($request);
+        if($numberPermissions === 9)
+            $viaticos = $this->FiltrosCarlos($request,$viaticos);
+//        else $viaticos = $this->FiltrosAdministrativos($request,$viaticos);
+        
+        $viaticos = $viaticos->get();
         $losSelect = $this->Dependencias();
 
         $perPage = $request->has('perPage') ? $request->perPage : 10;
@@ -56,8 +61,17 @@ class ViaticoController extends Controller {
         ]);
     }
 
-    //todo: sync: this should be in all my repos
+    public function FiltrosCarlos($request,$viaticos): Builder {
+        if(!$request->has('search3'))
+            $viaticos = $viaticos->WhereNot('saldo', 0);
+        return $viaticos;
+    }
+//    public function FiltrosAdministrativos($request,$viaticos): Builder {
+//        
+//        return $viaticos->doesntHave('consignacion');
+//    }
 
+    //todo: sync: this should be in all my repos
     public function Filtros($request): Builder {
         $viaticos = Viatico::query();
         if ($request->has('search')) {

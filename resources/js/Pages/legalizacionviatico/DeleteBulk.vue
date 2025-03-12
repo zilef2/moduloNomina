@@ -18,7 +18,7 @@ const form = useForm({
 })
 
 const destory = () => {
-    form.post(route('cotizacion.destroy-bulk'), {
+    form.post(route('user.destroy-bulk'), {
         preserveScroll: true,
         onSuccess: () => {
             emit("close")
@@ -45,7 +45,7 @@ watchEffect(() => {
                     {{ lang().label.delete }} {{ props.title }}
                 </h2>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    {{ lang().label.delete_confirm }} {{ props.selectedId?.length }} {{ props.title }}es?
+                    {{ lang().label.delete_confirm }} {{ props.selectedId?.length }} {{ props.title }}?
                 </p>
                 <div class="mt-6 flex justify-end">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}

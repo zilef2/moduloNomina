@@ -170,30 +170,31 @@ class CotizacionController extends Controller {
 //        }
         $retornarError = false;
 
-        $ValidarSiEsAiu = $this->validarEsNormal($request);
-        if ($ValidarSiEsAiu) {
+        $ValidarSiEsNormal = $this->validarEsNormal($request);
+
+        if ($ValidarSiEsNormal) {
+        $request->merge(['precio_cot' => 0]);
+        
+        $request->merge(['admi' => 0]);
+        $request->merge(['por_a' => 0]);
+        
+        $request->merge(['por_i' => 0]);
+        $request->merge(['impr' => 0]);
+        
+        $request->merge(['por_u' => 0]);
+        $request->merge(['util' => 0]);
+            
+        } else if ($ValidarSiEsNormal === 0) {
             if ($request->util == 0)
                 $retornarError = true;
-
-        } else if ($ValidarSiEsAiu === 0) {
-            //validar que el iva es del subtotal
-            $request->precio_cot = 0;
-            $request->por_a = 0;
-            $request->admi = 0;
-            $request->por_i = 0;
-            $request->impr = 0;
-            $request->por_u = 0;
-            $request->util = 0;
         } else {
             $retornarError = true;
         }
-        
+
         if ($retornarError) return back()->with('error', 'Error general en la cotización');
 
         $request->merge(['aprobado_cot' => false]);
         $request->merge(['user_id' => Myhelp::AuthUid()]);
-        $request->merge(['precio_cot' => str_replace(".", "", $request->precio_cot)]);
-
         $this->SonSelect($request, [
             'estado_cliente',
             'estado',
@@ -204,7 +205,7 @@ class CotizacionController extends Controller {
             'persona_que_realiza_la_pe',
 //            'persona_que_solicita_la_propuesta_economica',
         ]);
-        
+
         $cotizacion = cotizacion::create($request->all());
         Cache::forget('centro_costos'); // Borra la caché normal para búsquedas nuevas
 
@@ -218,11 +219,15 @@ class CotizacionController extends Controller {
 
     function validarEsNormal($request): int {
         // Condición 1: Verificar si alguno de los campos es nulo
-        $camposNulos = is_null($request->precio_cot) || is_null($request->por_a) || is_null($request->por_i) || is_null($request->por_u);
+        $camposNulos = is_null($request->precio_cot)
+            || is_null($request->por_a)
+            || is_null($request->por_i)
+            || is_null($request->por_u);
+
 
         // Condición 2: Verificar la relación entre subtotal e IVA
         $relacionCalculada = $request->iva / $request->subtotal;
-        $tolerancia = 0.001; 
+        $tolerancia = 0.001;
         $relacionIva = abs($relacionCalculada - 0.19) < $tolerancia;
 
         // Verificar si ambas condiciones son iguales
@@ -349,7 +354,7 @@ class CotizacionController extends Controller {
     public function destroyBulk(Request $request) {
         $cotizacion = cotizacion::whereIn('id', $request->id);
         $cotizacion->delete();
-        return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
+        return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.cotizacion')]));
     }
 
 }

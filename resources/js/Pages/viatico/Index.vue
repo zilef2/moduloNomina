@@ -43,6 +43,7 @@ const data = reactive({
     params: {
         search: props.filters.search,
         search2: props.filters.search2,
+        search3: props.filters.search3, //mostrar todo para el admin
         field: props.filters.field,
         order: props.filters.order,
         perPage: props.perPage,
@@ -150,7 +151,7 @@ const titulos = [
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="grid grid-cols-5 justify-between p-2">
+                <div class="grid grid-cols-3 justify-between p-2">
                     <div class="flex gap-2 ">
                         <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet" />
                         <!-- <DangerButton @click="data.deleteBulkOpen = true"
@@ -159,13 +160,16 @@ const titulos = [
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton> -->
                     </div>
-                    <div class="col-span-2"></div>
+                    <div class="col-span-1"></div>
                     <div class="inline-flex ">
                         
                     <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"
                                class="block w-4/6 md:w-3/6 lg:w-full mx-1 rounded-lg" placeholder="Descripción" />
                     <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search2" type="text"
                                class="block w-4/6 md:w-3/6 lg:w-full mx-1 rounded-lg" placeholder="Persona" />
+                      <p class="text-sm -mx-1 px-4">Mostrar todos</p>
+                        <checkbox v-if="props.numberPermissions > 8" v-model="data.params.search3"
+                                  class="p-2 mx-12 my-3"/>
                     </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
@@ -213,7 +217,7 @@ const titulos = [
                                                     class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.aprobar">
                                             <CheckCircleIcon class="w-4 h-4" />
                                         </InfoButton>
-                                        <InfoButton v-show="can(['isadministrativo'])" type="button" :thecolor="'gray'"
+                                        <InfoButton v-show="can(['isadministrativo']) && claseFromController.consignaciona.length" type="button" :thecolor="'gray'"
                                                     @click="(data.LegalizarOpen = true), (data.viaticoo = claseFromController)"
                                                     class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.legalizar">
                                             <ShieldExclamationIcon class="w-4 h-4" />
@@ -257,6 +261,8 @@ const titulos = [
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['centrou'] }}</td>
                             
                         </tr>
+                        
+                        
                         <tr class="border-t border-gray-600">
                             <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
                             <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>

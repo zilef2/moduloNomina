@@ -35,7 +35,7 @@ class CopyUserPages extends Command {
      protected function generateAttributes(): array {
         // text // number // dinero // date // datetime // foreign
         return [
-            'valor' => 'integer',
+            'valor_legalizacion' => 'integer',
             'fecha' => 'date',
             'cuota' => 'integer',
             'final' => 'integer',
