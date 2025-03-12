@@ -706,7 +706,7 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                     </SecondaryButton>
                     <PrimaryButton v-if="correccionUsuario" class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                         @click="update">
-                        {{ form.processing ? '...' : lang().button.corect }}
+                        {{ form.processing ? '...' : lang().button.correct }}
                     </PrimaryButton>
                     <PrimaryButton v-else class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                         @click="update">

@@ -36,9 +36,11 @@ class cotizacion extends Model {
         'admi',
         'impr',
         'util',
+        
         'subtotal',
         'iva',
         'total',
+        
         'persona_que_realiza_la_pe',
         'cliente',
         'persona_que_solicita_la_propuesta_economica',

@@ -30,12 +30,16 @@ const update2 = () => {
 
 <template>
     <section class="space-y-6">
-        <Modal :show="props.show" @close="emit('close')" :maxWidth="'lg'">
+        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl2'">
             <form class="p-6" @submit.prevent="destory">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    Generar centro de costo llamado <b>{{ props.cotizaciona?.numero }}</b> 
+                <h2 class="text-xl font-medium text-gray-900 dark:text-gray-100">
+                    Generar centro de costo <b>{{ props.cotizaciona?.numero_cot }}</b> 
                 </h2>
-                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Recuerde vincular los supervisores</p>
+                <p class="mt-1 text-lg text-gray-600 dark:text-gray-400">Por favor, vincular los supervisores</p>
+                <p class="mt-1 text-lg text-gray-600 dark:text-gray-400">¡Importante!</p>
+                <p class="mt-1 text-lg text-gray-600 dark:text-gray-400">
+                  No podrá cambiar, el número de la cotización si realiza esta accion. 
+                </p>
                 <div class="mt-6 flex justify-end">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}</SecondaryButton>
                     <DangerButton v-if="!cotizaciona.centro_costo_id" class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"

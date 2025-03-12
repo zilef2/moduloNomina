@@ -113,7 +113,7 @@ watchEffect(() => {
                     </SecondaryButton>
                     <PrimaryButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                         @click="update">
-                        {{ form.processing ? '...' : lang().button.corect }}
+                        {{ form.processing ? '...' : lang().button.correct }}
                     </PrimaryButton>
                 </div>
             </form>

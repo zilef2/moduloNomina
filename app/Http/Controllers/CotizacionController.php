@@ -63,7 +63,7 @@ class CotizacionController extends Controller {
             });
         }
         if ($request->has('search2') && $request->search2['value']) {
-            $cotizacions = $cotizacions->where('zona_id',(int)$request->search2['value']);
+            $cotizacions = $cotizacions->where('zona_id', (int)$request->search2['value']);
 //            $cotizacions = $cotizacions->where(function ($query) use ($request) {
 //                $query->where('descripcion_cot', 'LIKE', "%" . $request->search2 . "%");
 //            });
@@ -164,9 +164,36 @@ class CotizacionController extends Controller {
     public function store(Request $request): RedirectResponse {
         $permissions = Myhelp::EscribirEnLog($this, ' Begin STORE:cotizacions');
         DB::beginTransaction();
+
+//        if ($request->modoaiu && (!$request->precio_cot || !$request->por_u)) {
+//            return back()->with('error', 'Faltan datos en la cotización');
+//        }
+        $retornarError = false;
+
+        $ValidarSiEsAiu = $this->validarEsNormal($request);
+        if ($ValidarSiEsAiu) {
+            if ($request->util == 0)
+                $retornarError = true;
+
+        } else if ($ValidarSiEsAiu === 0) {
+            //validar que el iva es del subtotal
+            $request->precio_cot = 0;
+            $request->por_a = 0;
+            $request->admi = 0;
+            $request->por_i = 0;
+            $request->impr = 0;
+            $request->por_u = 0;
+            $request->util = 0;
+        } else {
+            $retornarError = true;
+        }
+        
+        if ($retornarError) return back()->with('error', 'Error general en la cotización');
+
         $request->merge(['aprobado_cot' => false]);
         $request->merge(['user_id' => Myhelp::AuthUid()]);
         $request->merge(['precio_cot' => str_replace(".", "", $request->precio_cot)]);
+
         $this->SonSelect($request, [
             'estado_cliente',
             'estado',
@@ -177,12 +204,35 @@ class CotizacionController extends Controller {
             'persona_que_realiza_la_pe',
 //            'persona_que_solicita_la_propuesta_economica',
         ]);
+        
         $cotizacion = cotizacion::create($request->all());
         Cache::forget('centro_costos'); // Borra la caché normal para búsquedas nuevas
 
         DB::commit();
-        Myhelp::EscribirEnLog($this, 'STORE:cotizacions EXITOSO', 'permissions = ' . $permissions . ' | cotizacion id:' . $cotizacion->id . ' | ' . $cotizacion->numero_cot, false);
+        $authuser = Myhelp::AuthU();
+        Myhelp::EscribirEnLog($this, 'STORE:cotizacions EXITOSO', 'cotizacion id:' . $cotizacion->id
+                                   . ' | numero_cot = ' . $cotizacion->numero_cot
+                                   . ' | fue modificada por  = ' . $authuser->id . ' |nombre del user =  ' . $authuser->name, false);
         return back()->with('success', __('app.label.created_successfully', ['name' => $cotizacion->numero_cot]));
+    }
+
+    function validarEsNormal($request): int {
+        // Condición 1: Verificar si alguno de los campos es nulo
+        $camposNulos = is_null($request->precio_cot) || is_null($request->por_a) || is_null($request->por_i) || is_null($request->por_u);
+
+        // Condición 2: Verificar la relación entre subtotal e IVA
+        $relacionCalculada = $request->iva / $request->subtotal;
+        $tolerancia = 0.001; 
+        $relacionIva = abs($relacionCalculada - 0.19) < $tolerancia;
+
+        // Verificar si ambas condiciones son iguales
+        if ($camposNulos == $relacionIva) {
+            // Ambas condiciones son iguales (ambas verdaderas o ambas falsas)
+            return $camposNulos ? 1 : 0; // 1 si ambas son verdaderas, 0 si ambas son falsas
+        } else {
+            // Las condiciones son diferentes
+            return -1;
+        }
     }
 
     //! STORE - UPDATE - DELETE
@@ -197,14 +247,11 @@ class CotizacionController extends Controller {
 
     //fin store functions
 
-    public function create() {
-    }
+    public function create() {}
 
-    public function show($id) {
-    }
+    public function show($id) {}
 
-    public function edit($id) {
-    }
+    public function edit($id) {}
 
     public function update2(Request $request, $id) {
         Myhelp::EscribirEnLog($this, ' Begin update2:cotizacions');
@@ -240,18 +287,27 @@ class CotizacionController extends Controller {
 
         $request->merge(['precio_cot' => str_replace(".", "", $request->precio_cot)]);
         $this->SonSelect($request, [
-            'centro_costo_id',
             'estado_cliente',
             'estado',
             'mes_pedido',
             'tipo',
             'tipo_de_mantenimiento',
             'zona_id',
+            'persona_que_realiza_la_pe',
         ]);
-        $cotizacion->update($request->all());
+        $aprobadou = $request->estado_cliente;
+        if ($aprobadou === 'Aprobado') {
+            $request->merge(['aprobado_cot' => true]);
+
+        }
+        $cotizacion->update(array_filter($request->all(), fn($value) => !is_null($value)));
 
         DB::commit();
-        Myhelp::EscribirEnLog($this, 'UPDATE:cotizacions EXITOSO', 'cotizacion id:' . $cotizacion->id . ' | ' . $cotizacion->numero_cot, false);
+        $authuser = Myhelp::AuthU();
+        Myhelp::EscribirEnLog($this, 'UPDATE:cotizacions EXITOSO', 'cotizacion id:' . $cotizacion->id
+                                   . ' | numero_cot = ' . $cotizacion->numero_cot
+                                   . ' | fue modificada por  = ' . $authuser->id . ' |nombre del user =  ' . $authuser->name, false);
+
         return back()->with('success', __('app.label.updated_successfully2', ['numero_cot' => $cotizacion->numero_cot]));
     }
 

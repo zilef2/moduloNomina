@@ -74,7 +74,7 @@ return [
         'descripcion_cot' => 'Descripción',
         'precio_cot' => 'Antes del iva',
         'aprobado_cot' => 'Aprobado',
-        'fecha_aprobacion_cot' => 'Fecha solicitud',
+        'fecha_aprobacion_cot' => 'Fecha aprobación',
 
 
         //parametros
@@ -270,7 +270,7 @@ return [
     'button' => [
         'Recontratar' => 'Recontratar',
         //edit reportes
-        'corect' => 'corregir',
+        'correct' => 'corregir',
 
         //subirusuarios
         'subir' => 'Subir',

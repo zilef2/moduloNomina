@@ -25,6 +25,7 @@ import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 
 
+
 const {_, debounce, pickBy} = pkg
 const props = defineProps({
     fromController: Object,
@@ -102,6 +103,7 @@ const select = () => data.multipleSelect = props.fromController?.data.length ===
 // text // number - porcentaje - dinero // date // datetime // foreign //list?
 let titulos = [
     // { order: 'codigo', label: 'codigo', type: 'text' },
+    
     {order: 'numero_cot', label: 'numero_cot', type: 'text'},
     {order: 'centro_costo_id', label: 'centro_costo', type: 'id', nameid: 'nombre'},
     {order: 'zouna', label: 'zona', type: 'text'},
@@ -116,6 +118,7 @@ let titulos = [
     {order: 'descripcion_cot', label: 'descripcion_cot', type: 'text'},
     {order: 'tipo', label: 'tipo', type: 'text'},
     {order: 'tipo_de_mantenimiento', label: 'tipo_de_mantenimiento', type: 'text'},
+    
     {order: 'precio_cot', label: 'precio_cot', type: 'number'},
     {order: 'por_a', label: 'por_a', type: 'porcentaje'},
     {order: 'por_i', label: 'por_i', type: 'porcentaje'},
@@ -128,7 +131,11 @@ let titulos = [
     {order: 'total', label: 'total', type: 'dinero'},
     {order: 'Prealiza', label: 'persona_que_realiza_la_pe', type: 'text'},
     {order: 'cliente', label: 'cliente', type: 'text'},
-    {order: 'persona_que_solicita_la_propuesta_economica', label: 'persona_que_solicita_la_propuesta_economica', type: 'text'},
+    {
+        order: 'persona_que_solicita_la_propuesta_economica',
+        label: 'persona_que_solicita_la_propuesta_economica',
+        type: 'text'
+    },
     {order: 'orden_de_compra', label: 'orden_de_compra', type: 'text'},
     {order: 'hes', label: 'hes', type: 'text'},
     {order: 'observaciones', label: 'observaciones', type: 'text'},
@@ -160,7 +167,11 @@ const ocultar11 = () => {
             {order: 'total', label: 'total', type: 'dinero'},
             {order: 'Prealiza', label: 'Prealiza', type: 'text'},
             {order: 'cliente', label: 'cliente', type: 'text'},
-            {order: 'persona_que_solicita_la_propuesta_economica', label: 'persona_que_solicita_la_propuesta_economica', type: 'text'},
+            {
+                order: 'persona_que_solicita_la_propuesta_economica',
+                label: 'persona_que_solicita_la_propuesta_economica',
+                type: 'text'
+            },
             {order: 'orden_de_compra', label: 'orden_de_compra', type: 'text'},
             {order: 'hes', label: 'hes', type: 'text'},
             {order: 'observaciones', label: 'observaciones', type: 'text'},
@@ -193,7 +204,11 @@ const ocultar11 = () => {
             {order: 'total', label: 'total', type: 'dinero'},
             {order: 'Prealiza', label: 'Prealiza', type: 'text'},
             {order: 'cliente', label: 'cliente', type: 'text'},
-            {order: 'persona_que_solicita_la_propuesta_economica', label: 'persona_que_solicita_la_propuesta_economica', type: 'text'},
+            {
+                order: 'persona_que_solicita_la_propuesta_economica',
+                label: 'persona_que_solicita_la_propuesta_economica',
+                type: 'text'
+            },
             {order: 'orden_de_compra', label: 'orden_de_compra', type: 'text'},
             {order: 'hes', label: 'hes', type: 'text'},
             {order: 'observaciones', label: 'observaciones', type: 'text'},
@@ -228,12 +243,16 @@ watch(() => data.ocultar1, (newX) => {
                             :cotizacionInicial2=props.cotizacionInicial2
                     />
 
-<!--                    <Edit v-if="can(['update cotizacion'])" :titulos="titulos"-->
-<!--                          :numberPermissions="props.numberPermissions" :show="data.editOpen"-->
-<!--                          @close="data.editOpen = false"-->
-<!--                          :cotizaciona="data.cotizaciono" :title="props.title"-->
-<!--                          :losSelect=props.losSelect-->
-<!--                    />-->
+                    <Edit v-if="can(['update cotizacion'])" :titulos="titulos"
+                          :numberPermissions="props.numberPermissions" :show="data.editOpen"
+                          @close="data.editOpen = false"
+                          :cotizaciona="data.cotizaciono"
+                          :title="props.title"
+                          :losSelect=props.losSelect
+                          :CentrosRepetidos=props.CentrosRepetidos
+                          :consecutivoCotizacion=props.consecutivoCotizacion
+                          :cotizacionInicial2=props.cotizacionInicial2
+                    />
                     <Facturar v-if="can(['update3 cotizacion'])"
                               :numberPermissions="props.numberPermissions" :show="data.edit3Open"
                               @close="data.edit3Open = false"
@@ -269,14 +288,15 @@ watch(() => data.ocultar1, (newX) => {
                                   class="p-2 mx-12 my-3"/>
                         <label name="centro_costo_id" class="text-sm mx-2 px-4 mt-2">{{ lang().label.zona }}</label>
                         <v-select v-model="data.params.search2" :options="props.losSelect['zonas']" label="label"
-                        class="w-full" ></v-select>
-<!--                        <p class="text-sm -mx-1 px-4">Ocultar porcentajes</p>-->
-<!--                        <checkbox v-if="props.numberPermissions > 9" v-model="data.ocultar1"-->
-<!--                                  class="p-2 mx-12 my-3"/>-->
+                                  class="w-full">
+                        </v-select>
+                        <!--                        <p class="text-sm -mx-1 px-4">Ocultar porcentajes</p>-->
+                        <!--                        <checkbox v-if="props.numberPermissions > 9" v-model="data.ocultar1"-->
+                        <!--                                  class="p-2 mx-12 my-3"/>-->
                         <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"
                                    class="block w-full lg:w-5/6 rounded-xl" placeholder="Número"/>
-<!--                        <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search2" type="text"-->
-<!--                                   class="block w-full lg:w-5/6 rounded-xl mx-2" placeholder="Descripción"/>-->
+                        <!--                        <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search2" type="text"-->
+                        <!--                                   class="block w-full lg:w-5/6 rounded-xl mx-2" placeholder="Descripción"/>-->
                         <p class="text-sm mx-8 px-4">
                             Fecha Aprobación
                         </p>
@@ -330,11 +350,11 @@ watch(() => data.ocultar1, (newX) => {
                             <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 w-12 px-2 sm:py-3">
                                 <div class="flex justify-center items-center">
                                     <div class="rounded-md overflow-hidden">
-<!--                                        <InfoButton v-show="can(['update cotizacion']) && !claseFromController.factura" type="button"-->
-<!--                                                    @click="(data.editOpen = true), (data.cotizaciono = claseFromController)"-->
-<!--                                                    class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">-->
-<!--                                            <PencilIcon class="w-4 h-4"/>-->
-<!--                                        </InfoButton>-->
+                                        <InfoButton v-show="can(['update cotizacion']) && !claseFromController.factura" type="button"
+                                                    @click="(data.editOpen = true), (data.cotizaciono = claseFromController)"
+                                                    class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
+                                            <PencilIcon class="w-4 h-4"/>
+                                        </InfoButton>
                                         <DangerButton v-show="can(['update2 cotizacion']) && !claseFromController.centro_costo_id" type="button"
                                                       @click="(data.generarOpen = true), (data.cotizaciono = claseFromController)"
                                                       class="px-2 py-1.5 rounded-none"
