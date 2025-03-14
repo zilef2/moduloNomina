@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
     class legalizacionviatico extends Model
 {
-    use HasFactory;
+    use HasFactory;//this file, is about to be deleted
     protected $fillable = ['valor_legalizacion', 'fecha', 'cuota', 'final'];
     
     public function viatico(): \Illuminate\Database\Eloquent\Relations\BelongsTo

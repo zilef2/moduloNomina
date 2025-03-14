@@ -37,7 +37,7 @@ return [
 		'consignarViatico' => 'Consignar al Viático',
 		'cc' => 'Centro de costo',
 		'gasto' => 'Solicitado',
-		'consignaciona' => 'Consignaciones',
+		'Consignaciona' => 'Consignaciones',
         
 		'fecha_legalizacion' => 'Fecha legalización',
 		'consignarviatico' => 'Consignar',
@@ -61,12 +61,7 @@ return [
 		'fecha' => 'Fecha',
 		'cuota' => 'Cuota',
 		'final' => 'Final',
-		'legalizacionviatico' => 'Legalizacionviatico',
-		'legalizacionviatico' => 'legalizacionviatico',
-		'valor_legalizacion' => 'valor_legalizacion',
-		'fecha' => 'fecha',
-		'cuota' => 'cuota',
-		'final' => 'final',
+		'legalizacionviatico' => 'Legalizacion',
 		//aquipues
         
         'viatico' => 'viático',
@@ -338,6 +333,8 @@ return [
     'tooltip' => [
         'update2_cotizacion' => 'Facturar',
         'aprobar' => 'aprobar',
+        'consignar' => 'Consignar',
+        'legalizar' => 'Legalizar',
         'saldo' => 'saldo',
         'Reporte' => 'Reporte',
         'see' => 'Ver',

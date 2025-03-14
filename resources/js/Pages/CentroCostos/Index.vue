@@ -180,7 +180,7 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3">
                                 {{ formatPesosCol(clasegenerica.mano_obra_estimada) }}
                             </td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.zouna) }}</td>
+                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.Zouna) }}</td>
 
                             <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                 <p v-for="(superv, inde) in clasegenerica.supervi.split(',')" :key="inde">

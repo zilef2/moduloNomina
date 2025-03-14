@@ -55,7 +55,7 @@ class cotizacion extends Model {
 
      */
     protected $appends = [
-        'zouna',
+        'Zouna',
         'Prealiza',
 //        'Psolicita',
     ];

@@ -12,7 +12,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class viatico extends Model {
     use HasFactory, SoftDeletes;
 
-    protected $appends = ['userino', 'centrou', 'consignaciona', 'fechaconsig'];
+    protected $appends = [
+        'userino',
+        'centrou',
+        'Consignaciona',
+    ];
+
     protected $fillable = [
         'gasto',
         'saldo',
@@ -49,22 +54,23 @@ class viatico extends Model {
     }//tiene que existir la funcion centro
 
     public function getConsignacionaAttribute(): array {
-        $arrayConsignaciones = $this->consignacion->pluck('valor_consig')->toarray();
-        if (gettype($arrayConsignaciones) == 'array') {
-            return $this->consignacion ? $arrayConsignaciones : ['0'];
-        }
-        else {
-            return ['0'];
-        }
+        return $this->consignacion()->get()->map(function ($item) {
+            return [
+                'consignacion_id' => $item->id,
+                'valor' => $item->valor_consig,
+                'fecha' => $item->created_at
+            ];
+        })->toArray();
+
     }
 
-    public function getFechaconsigAttribute(): array {
-        $arrayConsignaciones = $this->consignacion->pluck('created_at')->toarray();
-        if (gettype($arrayConsignaciones) == 'array') {
-            return $this->consignacion ? $arrayConsignaciones : ['-'];
-        }
-        else {
-            return ['-'];
-        }
-    }
+//    public function getFechaconsigAttribute(): array {
+//        $arrayConsignaciones = $this->consignacion->pluck('created_at')->toarray();
+//        if (gettype($arrayConsignaciones) == 'array') {
+//            return $this->consignacion ? $arrayConsignaciones : ['-'];
+//        }
+//        else {
+//            return ['-'];
+//        }
+//    }
 }

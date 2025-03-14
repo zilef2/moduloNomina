@@ -38,10 +38,10 @@ class ViaticoController extends Controller {
     public function index(Request $request): Response {
         $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' viaticos '));
         $viaticos = $this->Filtros($request);
-        if($numberPermissions === 9)
-            $viaticos = $this->FiltrosCarlos($request,$viaticos);
+        if ($numberPermissions === 9)
+            $viaticos = $this->FiltrosCarlos($request, $viaticos);
 //        else $viaticos = $this->FiltrosAdministrativos($request,$viaticos);
-        
+
         $viaticos = $viaticos->get();
         $losSelect = $this->Dependencias();
 
@@ -56,22 +56,12 @@ class ViaticoController extends Controller {
             'perPage' => (int)$perPage,
             'numberPermissions' => $numberPermissions,
             'losSelect' => $losSelect ?? [],
+//            'legalizaciones' => $this->getlegalizaciones(),
             'totalsaldo' => $this->totalsaldo() ?? 0,
             'totallegalizado' => $this->totallegalizado() ?? 0,
         ]);
     }
 
-    public function FiltrosCarlos($request,$viaticos): Builder {
-        if(!$request->has('search3'))
-            $viaticos = $viaticos->WhereNot('saldo', 0);
-        return $viaticos;
-    }
-//    public function FiltrosAdministrativos($request,$viaticos): Builder {
-//        
-//        return $viaticos->doesntHave('consignacion');
-//    }
-
-    //todo: sync: this should be in all my repos
     public function Filtros($request): Builder {
         $viaticos = Viatico::query();
         if ($request->has('search')) {
@@ -90,11 +80,22 @@ class ViaticoController extends Controller {
 
         if ($request->has(['field', 'order'])) {
             $viaticos = $viaticos->orderBy($request->field, $request->order);
-        }
-        else
+        } else
             $viaticos = $viaticos->orderBy('updated_at', 'DESC');
 
 
+        return $viaticos;
+    }
+//    public function FiltrosAdministrativos($request,$viaticos): Builder {
+//        
+//        return $viaticos->doesntHave('consignacion');
+//    }
+
+    //todo: sync: this should be in all my repos
+
+    public function FiltrosCarlos($request, $viaticos): Builder {
+        if (!$request->has('search3'))
+            $viaticos = $viaticos->WhereNot('saldo', 0);
         return $viaticos;
     }
 
@@ -108,12 +109,12 @@ class ViaticoController extends Controller {
         $centroSelect = CentroCosto::all('id', 'nombre as name')->toArray();
         array_unshift($Empleados, ["name" => "Seleccione una persona", 'id' => 0]);
         array_unshift($centroSelect, ["name" => "Seleccione un centro de costo", 'id' => 0]);
-        
-        
+
+
         $zonas = \App\Models\zona::all('id', 'nombre as name')->toArray();
         array_unshift($zonas, ["name" => "Seleccione una zona", 'id' => 0]);
-        
-        return [$Empleados, $centroSelect,$zonas];
+
+        return [$Empleados, $centroSelect, $zonas];
     }
 
     //todo: tosync
@@ -144,6 +145,7 @@ class ViaticoController extends Controller {
     //fin store functions
 
     public function store(Request $request): RedirectResponse {
+
         $permissions = Myhelp::EscribirEnLog($this, ' Begin STORE:viaticos');
         DB::beginTransaction();
 //        $no_nada = $request->no_nada['id'];
@@ -154,10 +156,30 @@ class ViaticoController extends Controller {
 //        $request->merge(['fecha_legalizacion' => Carbon::now()]);
         $viatico = viatico::create($request->all());
 
+        $mensaje = $this->EnviaralJefe($request, $myuser);
+
+        if ($mensaje === '-') {
+            return back()->with('error', 'El mensaje no fue enviado');
+        } else {
+
+            Myhelp::EscribirEnLog($this, 'STORE:viaticos EXITOSO', 'viatico id:' . $viatico->id . ' | ' . $viatico->nombre, false);
+            DB::commit();
+            return back()->with('success', $mensaje . __('app.label.created_successfully', ['name' => $viatico->nombre]));
+        }
+
+    }
+
+    public function create() {}
+
+    /**
+     * @param Request $request
+     * @param User|null $myuser
+     * @return string
+     */
+    public function EnviaralJefe(Request $request, ?User $myuser): string {
         $jefe = User::Where('name', 'Carlos Daniel Anaya Barrios')->first();
         if ($jefe) {
-            $detalle = [
-                'mensaje' => "Se ha generado un nuevo viático por un valor de $request->gasto. 
+            $detalle = ['mensaje' => "Se ha generado un nuevo viático por un valor de $request->gasto. 
                               El solicitante es $myuser->name y el motivo del viaje es $request->descripcion"
             ];
             if (\Illuminate\Support\Facades\App::environment('production')) {
@@ -166,45 +188,34 @@ class ViaticoController extends Controller {
             EnviarViaticoJob::dispatch('ajelof2@gmail.com', $detalle)->delay(now()->addSeconds(5));
 
             $mensaje = "Correo enviado y Viatico ";
-        }
-        else {
-            $mensaje = "El Correo no pudo ser enviado, Viatico ";
+        } else {
+            $mensaje = "-";
             Myhelp::EscribirEnLog($this, ' ERROR: no se encontro al jefe');
         }
+        return $mensaje;
+    }//fin store
 
-        Myhelp::EscribirEnLog($this, 'STORE:viaticos EXITOSO', 'viatico id:' . $viatico->id . ' | ' . $viatico->nombre, false);
-        DB::commit();
-        return back()->with('success', $mensaje . __('app.label.created_successfully', ['name' => $viatico->nombre]));
 
-    }
-
-    public function create() {
-    }
-
-    public function show($id) {
-    }
-
-    public function edit($id) {
-    }
+    public function show($id) {}
 
     //paso2 cuando el admin APRUEBA
 
+    public function edit($id) {}
+
     public function viaticoupdate2(Request $request, $id): RedirectResponse {
-        $permissions = Myhelp::EscribirEnLog($this, ' Begin CONSIGNACION viaticoupdate2:viaticos');
+        Myhelp::EscribirEnLog($this, ' Begin CONSIGNACION viaticoupdate2:viaticos');
         DB::beginTransaction();
         $viatico = viatico::findOrFail($id);
 
         $now = Carbon::now();
         consignarViatico::create([
-            'viatico_id' => $viatico->id,
-            'valor_consig' => $request->valor_consig,
-            'fecha_consig' => $now,
-            'user_id' => Myhelp::AuthUid(),
-        ]);
+                                     'valor_consig' => $request->valor_consig,
+                                     'fecha_consig' => $now,
+                                     'viatico_id' => $viatico->id,
+                                     'user_id' => Myhelp::AuthUid(),
+                                 ]);
 
-        $viatico->update([
-            'saldo' => $this->getSaldo($viatico),
-        ]);
+        $viatico->update(['saldo' => $this->getSaldo($viatico),]);
 
         DB::commit();
         Myhelp::EscribirEnLog($this, 'UPDATE:viaticos EXITOSO', 'viatico id:' . $viatico->id . ' | ' . $viatico->nombre, false);
@@ -242,6 +253,8 @@ class ViaticoController extends Controller {
         return back()->with('success', __('app.label.updated_successfully2', ['nombre' => $viatico->nombre]));
     }
 
+    //FIN : STORE - UPDATE - DELETE
+
     public function getSaldo($viatico): int {
         $Int_viaticoSuma = (int)consignarViatico::Where('viatico_id', $viatico->id)->sum('valor_consig');
         $saldo = (int)$viatico->gasto - $Int_viaticoSuma;
@@ -249,19 +262,33 @@ class ViaticoController extends Controller {
 
     }
 
-    //FIN : STORE - UPDATE - DELETE
-
     public function legalizarviatico(Request $request, $id): RedirectResponse {
         $permissions = Myhelp::EscribirEnLog($this, ' Begin legalizarviatico:viaticos');
         DB::beginTransaction();
         $viatico = viatico::findOrFail($id);
         $now = Carbon::now();
-        $viatico->update([
-            'legalizacion' => 1,
-            'fecha_legalizacion' => $now,
-            'valor_legalizacion' => $request->valor_legalizacion,
-            'descripcion_legalizacion' => $request->descripcion_legalizacion,
-        ]);
+//        $viatico->update([
+//                             'legalizacion' => 1,
+//                             'fecha_legalizacion' => $now,
+//                             'valor_legalizacion' => $request->valor_legalizacion,
+//                             'descripcion_legalizacion' => $request->descripcion_legalizacion,
+//                         ]);
+
+        $now = Carbon::now();
+
+        foreach ($request->valor_legalizacion as $index => $item) {
+            dd(
+                $item,
+                $request->descripcion_legalizacion[$index]
+            );
+            $item::update([
+                              'valor_legalizado' => $item,
+                              'fecha_legalizado' => $now,
+                              'descripcion_legalizacion' => $request->descripcion_legalizacion[$index],
+                          ]);
+        }
+
+        $viatico->update(['saldo' => $this->getSaldo($viatico),]);
 
         DB::commit();
         Myhelp::EscribirEnLog($this, 'UPDATE:viaticos EXITOSO', 'viatico id:' . $viatico->id . ' | ' . $viatico->nombre, false);

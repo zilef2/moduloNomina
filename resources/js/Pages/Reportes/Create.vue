@@ -11,6 +11,8 @@ import {onMounted, reactive, ref, watch, watchEffect} from 'vue';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 import "vue-select/dist/vue-select.css";
+import vSelect from "vue-select";
+
 import FestivosColombia from 'festivos-colombia';
 import {TransformTdate, weekNumber} from "@/global";
 import {calcularHoras} from "@/CreateReporte/HelpingCreate";
@@ -103,9 +105,13 @@ onMounted(() => {
         console.log("=>(Create.vue:86) data.TrabajadasSemana", data.TrabajadasSemana);
     }
 
+    //todo: tosync all repositories
     //explaining: recuperamos el centro de costo que habiamos selecciopnado previamente
     if (localStorage.getItem('centroCostoId')) {
-        form.centro_costo_id = localStorage.getItem('centroCostoId')
+        form.centro_costo_id = props.valoresSelect.find((ele) => {
+            return ele.value === localStorage.getItem('centroCostoId')
+        })
+        // form.centro_costo_id = localStorage.getItem('centroCostoId')
     }
 });
 
@@ -115,7 +121,7 @@ const form = useForm({
     // fecha_ini: '2023-04-0'+diaoDominicla+'T'+horas[0]+':00', fecha_fin: '2023-04-0'+(diaoDominicla)+'T'+horas[1]+':00', //temp
     // fecha_ini: '2023-06-01T23:00', fecha_fin: '2023-06-01T23:59', //temp
 
-    centro_costo_id: props.IntegerDefectoSelect,
+    centro_costo_id: {'value': 0, 'label': 'Seleccione un centro'},
     observaciones: '',
     horas_trabajadas: '',
     almuerzo: '0',
@@ -178,6 +184,16 @@ const Reporte11_59 = () => {
 
 watchEffect(() => {
     if (props.show) {
+        if (form.centro_costo_id == null
+            || (typeof form.centro_costo_id.value === "undefined")
+            || form.centro_costo_id.value === 0) {
+
+            form.centro_costo_id = props.valoresSelect.find((ele) => {
+                return ele.value == props.IntegerDefectoSelect
+            })
+        }
+
+
         // explaining: El dia anterior trabajo? 
         if (data.diaSelected) {
             data.HorasDelDiaAnterior59 = props.ArrayOrdinarias[data.diaSelected];
@@ -205,7 +221,6 @@ watchEffect(() => {
             // 38 => 46 - 8
             data.TrabajadasSemana = props.HorasDeCadaSemana[WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
                 props.HorasDeCadaSemana[WeekN] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
-            console.log("=>(Create.vue:194) WeekN", WeekN);
 
             data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
 
@@ -258,7 +273,7 @@ watchEffect(() => {
                         */
 
 
-                        let ccid = parseInt(form.centro_costo_id)
+                        let ccid = parseInt(form.centro_costo_id.value)
                         if (props.ArrayCentrosNoFactura.includes(ccid)) {
                             let dirunasYnocturnas = calcularSinExtras(ini, fin)
                             form.diurnas = dirunasYnocturnas[0];
@@ -318,9 +333,12 @@ let calcularSinExtras = (Inicio, Fin) => {
 // <!--<editor-fold desc="Watchers">-->
 
 watch(() => form.centro_costo_id, (newX) => {
-    localStorage.setItem('centroCostoId', newX)
-    data.BoolCentrosNoFactura = (props.ArrayCentrosNoFactura.includes(parseInt(newX)))
-    analisarSiFactura()
+    if (newX && newX.value) {
+
+        localStorage.setItem('centroCostoId', newX.value)
+        data.BoolCentrosNoFactura = (props.ArrayCentrosNoFactura.includes(parseInt(newX.value)))
+        analisarSiFactura()
+    }
 })
 
 watch(() => form.diurnas, (newX) => {
@@ -332,7 +350,6 @@ watch(() => form.nocturnas, (newX) => {
 
 watch(() => form.horas_trabajadas, (newX) => {
     // const hoy = new Date();
-    console.clear()
     analisarSiFactura()
 })
 
@@ -470,7 +487,7 @@ const formatfin = (date) => {
 <template>
     <section class="space-y-6">
         <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl4'">
-            <form @submit.prevent="create" class="p-6 mb-12">
+            <form @submit.prevent="create" class="p-6 xs:mb-24 lg:mb-64">
                 <div class="flex space-x-4">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                         <b>
@@ -608,22 +625,12 @@ const formatfin = (date) => {
                         </span>
                         <InputLabel v-else for="centro_costo_id" :value="lang().label.centro_costo_id"/>
 
-                        <SelectInput v-model="form.centro_costo_id" :dataSet="props.valoresSelect"
-                                     class="mt-1 block w-full"/>
+                        <!--                        <SelectInput v-model="form.centro_costo_id" :dataSet="props.valoresSelect"-->
+                        <!--                                     class="mt-1 block w-full"/>-->
+                        <vSelect v-model="form.centro_costo_id" :options="props.valoresSelect"
+                                 label="label" class="mt-2"></vSelect>
                         <InputError class="mt-2" :message="form.errors.centro_costo_id"/>
                     </div>
-
-                    <!--                    new select-->
-                    <!--                    <div class="xl:col-span-2 col-span-1">-->
-                    <!--                        <InputLabel for="centro_costo_id" :value="lang().label.centro_costo_id" />-->
-                    <!--                        <v-select-->
-                    <!--                            :options="props.valoresSelect"-->
-                    <!--                            label="label" required-->
-                    <!--                            v-model="form['centro_costo_id']"-->
-                    <!--                            class="dark:bg-gray-400"-->
-                    <!--                        ></v-select>-->
-                    <!--                        <InputError class="mt-2" :message="form.errors['centro_costo_id']" />-->
-                    <!--                    </div>-->
 
                     <div v-if="form.dominicales === 'si'" class="mt-4">
                         <label class="dark:text-white">Horario</label>

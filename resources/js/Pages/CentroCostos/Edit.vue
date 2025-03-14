@@ -37,7 +37,7 @@ const form = useForm({
     selectedUsers: [],
     listaSupervisores: [],
     ValidoParaFacturar: true,
-    zona:null,
+    zona_id: null,
 });
 
 function findIndexById(id) {
@@ -54,12 +54,9 @@ const buscarCheckboxes = () => {
     let indexTrue
     if (props.CentroCosto?.cuantoshijos) {
         if (data.SelecSupervisores) {
-            console.log("=>(todos", (props.CentroCosto.todos));
             // if (Array.isArray(props.CentroCosto.todos)) {
             data.SelecSupervisores.forEach(idsupervisor => {
-                console.log("=>(Edit.vue:58) idsupervisor", idsupervisor);
                 indexTrue = findIndexById(idsupervisor.value)
-                console.log("=>(Edit.vue:59) indexTrue", indexTrue);
                 if (indexTrue) form.selectedUsers[indexTrue] = true
             });
             // }else{
@@ -82,6 +79,16 @@ watchEffect(() => {
         form.activo = ref(!!props.CentroCosto?.activo);
         form.ValidoParaFacturar = props.CentroCosto?.ValidoParaFacturar
         form.ValidoParaFacturar = ref(!!props.CentroCosto?.ValidoParaFacturar);
+        // form.selectedUsers =
+        data.SelecSupervisores.forEach((ElementoLista,index) => {
+            props.CentroCosto.ListaSupervisores.forEach((Supervisor) => {
+                if (ElementoLista.value == Supervisor['id'])
+                    form.selectedUsers[index] = true;
+            })
+        })
+        if(props.CentroCosto.zona_id){
+            form.zona_id = { "value": props.CentroCosto.zona_id, "label": props.CentroCosto.Zouna }
+        }
     }
 })
 
@@ -127,25 +134,29 @@ const update = () => {
                 <div class="my-6 grid grid-cols-2 gap-6">
                     <div>
                         <InputLabel ref="nombre" for="nombre" :value="lang().label.name"/>
-                        <TextInput id="nombre" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.nombre"
+                        <TextInput id="nombre" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
+                                   v-model="form.nombre"
                                    :placeholder="lang().placeholder.nombre" :error="form.errors.nombre"/>
                     </div>
                     <div class="rounded-xl">
                         <label name="zona">
                             {{ lang().label.zona }}
                         </label>
-                        <vSelect v-model="form.zona" :options="losSelect['zona']" label="label"></vSelect>
+                        <vSelect v-model="form.zona_id" :options="losSelect['zona']" label="label"></vSelect>
                     </div>
                     <div>
                         <InputLabel ref="descripcion" for="descripcion" :value="lang().label.descripcion"/>
-                        <TextInput id="descripcion" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.descripcion"
+                        <TextInput id="descripcion" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
+                                   v-model="form.descripcion"
                                    :placeholder="lang().placeholder.descripcion" :error="form.errors.descripcion"/>
                     </div>
                     <div>
                         <InputLabel ref="clasificacion" for="clasificacion" :value="lang().label.clasificacion"/>
-                        <TextInput id="clasificacion" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.clasificacion"
+                        <TextInput id="clasificacion" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
+                                   v-model="form.clasificacion"
                                    :placeholder="lang().placeholder.clasificacion" :error="form.errors.clasificacion"/>
                     </div>
+
                     <div class="col-span-2 w-full">
                         <InputLabel for="users" :value="lang().label.supervisores"/>
                         <div v-for="(user, index) in data.SelecSupervisores" :key="index" class="mt-1 block w-full">
@@ -168,7 +179,8 @@ const update = () => {
                         <input
                             @click="toggleCheckbox"
                             v-model="form.activo"
-                            type="checkbox" id="activo" class="bg-gray-50 dark:bg-gray-600 mt-1 w-7 h-7 p-2 my-auto rounded-xl"
+                            type="checkbox" id="activo"
+                            class="bg-gray-50 dark:bg-gray-600 mt-1 w-7 h-7 p-2 my-auto rounded-xl"
                         />
                         <InputLabel ref="activo" for="activo" :value="lang().label.activo" class="mx-3 my-auto"/>
                     </div>
@@ -176,12 +188,13 @@ const update = () => {
                         <input
                             @click="toggleCheckbox"
                             v-model="form.ValidoParaFacturar"
-                            type="checkbox" id="ValidoParaFacturar" class="bg-gray-50 dark:bg-gray-600 mt-1 w-7 h-7 p-2 my-auto rounded-xl"
+                            type="checkbox" id="ValidoParaFacturar"
+                            class="bg-gray-50 dark:bg-gray-600 mt-1 w-7 h-7 p-2 my-auto rounded-xl"
                         />
-                        <InputLabel ref="ValidoParaFacturar" for="ValidoParaFacturar" :value="lang().label.ValidoParaFacturar" class="mx-3 my-auto"/>
+                        <InputLabel ref="ValidoParaFacturar" for="ValidoParaFacturar"
+                                    :value="lang().label.ValidoParaFacturar" class="mx-3 my-auto"/>
                     </div>
 
-                    
 
                 </div>
                 <div class="flex justify-end">

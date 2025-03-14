@@ -110,7 +110,7 @@ class CentroCostosController extends Controller {
             if ($request->has(['field', 'order'])) {
                 $this->limitadorCentrosParaVer = 500;
 
-                if ($request->field === 'zouna') {
+                if ($request->field === 'Zouna') {
                     $centroCostos = $centroCostos
                         ->leftJoin('zonas', 'centro_costos.zona_id', '=', 'zonas.id')
                         ->orderByRaw('CASE WHEN zonas.nombre IS NULL THEN 1 ELSE 0 END, zonas.nombre ' . $request->order)
@@ -199,7 +199,7 @@ class CentroCostosController extends Controller {
             $centroCostos = $centroCostos->Where('nombre', 'like', '%' . $request->search . '%');
 
         if ($request->search3 && $request->search3['value'])
-            $centroCostos = $centroCostos->where('zona_id',$request->search3['value']);
+            $centroCostos = $centroCostos->where('zona_id', $request->search3['value']);
 
         return $centroCostos;
     }
@@ -231,14 +231,13 @@ class CentroCostosController extends Controller {
         } else {
             $nombresTabla = [//[0]: como se ven //[1] como es la BD
                 ['Acciones', '#', 'nombre', 'Mano obra estimada', 'zona', 'Supervisores', 'activo', 'Facturar', 'descripcion', 'clasificacion', '# usuarios'],
-                [null, null, 'nombre', 'mano_obra_estimada', 'zouna', null, 'activo', 'ValidoParaFacturar', 'descripcion', 'clasificacion', null],
+                [null, null, 'nombre', 'mano_obra_estimada', 'Zouna', null, 'activo', 'ValidoParaFacturar', 'descripcion', 'clasificacion', null],
             ];
         }
         return $nombresTabla;
     }
 
-    public function create() {
-    }
+    public function create() {}
 
     public function store(CentroCostoRequest $request) {
         $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |centro de Costos| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
@@ -401,13 +400,14 @@ class CentroCostosController extends Controller {
     public
     function update(Request $request, $id) {
         $validatedData = $request->validate([
-                                                'nombre' => [
-                                                    'required',
-                                                    Rule::unique('centro_costos', 'nombre')->ignore((int)$id),
-                                                ],
-                                            ], [
-                                                'nombre.unique' => 'El nombre ya está en uso.',
-                                            ]);
+            'nombre' => [
+                'required',
+                Rule::unique('centro_costos', 'nombre')->ignore((int)$id),
+            ],
+        ], [
+            'nombre.unique' => 'El nombre ya está en uso.',
+        ]);
+        
         DB::beginTransaction();
         MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' | centro de Costos | '));
 
@@ -419,14 +419,13 @@ class CentroCostosController extends Controller {
 //                return back()->with('error', 'Este centro de costos esta bloqueado');
 //            }
 
-            $this->SonSelect($request, ['zona']);
-
+            $this->SonSelect($request, ['zona_id']);
             $centroCosto->nombre = $request->nombre;
             $centroCosto->activo = $request->activo;
             $centroCosto->descripcion = $request->descripcion;
             $centroCosto->clasificacion = $request->clasificacion;
             $centroCosto->ValidoParaFacturar = $request->ValidoParaFacturar;
-            $centroCosto->zona_id = $request->zona;
+            $centroCosto->zona_id = $request->zona_id;
             $centroCosto->save();
 
             $IDsSeleccionados = [];

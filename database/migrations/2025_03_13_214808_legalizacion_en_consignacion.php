@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('legalizacionviaticos', function (Blueprint $table) {
-            $table->integer('valor_legalizado');
-            $table->date('fecha');
-            $table->integer('cuota');
-            $table->integer('final');
-            $table->id();
-            $table->timestamps();
+        Schema::table('consignar_viaticos', function (Blueprint $table) {
+            $table->bigInteger('valor_legalizado')->nullable();
+            $table->dateTime('valor_legalizado')->nullable();
+            $table->string('descripcion_legalizacion',512)->nullable();
         });
+
     }
 
     /**
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('legalizacionviaticos');
+        //
     }
 };

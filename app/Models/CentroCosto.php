@@ -60,8 +60,9 @@ class CentroCosto extends Model {
     ];
 
     protected $appends = [
-        'zouna',
+        'Zouna',
         'supervi',
+        'ListaSupervisores',
     ];
 
     public function getSuperviAttribute() : string{
@@ -71,6 +72,11 @@ class CentroCosto extends Model {
             
         }
         return $this->superviCache ?? '';
+    }
+    public function getListaSupervisoresAttribute() : array{
+        $supervisoresAsociados = $this->users()->select(['users.id', 'name'])->get()->toArray();
+
+        return $supervisoresAsociados ?? [];
     }
 
 //    public function ArrayListaSupervisores(): array {

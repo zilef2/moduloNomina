@@ -81,14 +81,14 @@ let CamposExcluidos = [ //excluidos del form
   'fecha_aprobacion_cot',
   'factura',
   'fecha_factura',
-  'zouna',
+  'Zouna',
   'Prealiza',
   // 'Psolicita',
 ]
 let noValidar = [
   'tipo_de_mantenimiento',
   'centro_costo_id',
-  'zouna',
+  'Zouna',
   'Prealiza',
   'Psolicita',
   'subtotal',

@@ -107,7 +107,7 @@ let titulos = [
     
     {order: 'numero_cot', label: 'numero_cot', type: 'text'},
     {order: 'centro_costo_id', label: 'centro_costo', type: 'id', nameid: 'nombre'},
-    {order: 'zouna', label: 'zona', type: 'text'},
+    {order: 'Zouna', label: 'zona', type: 'text'},
     {order: 'estado_cliente', label: 'estado_cliente', type: 'text'},
     {order: 'estado', label: 'estado', type: 'text'},
     {order: 'factura', label: 'factura', type: 'text'},
@@ -148,7 +148,7 @@ const ocultar11 = () => {
         titulos = [
             {order: 'numero_cot', label: 'numero_cot', type: 'text'},
             {order: 'centro_costo_id', label: 'centro_costo', type: 'id', nameid: 'nombre'},
-            {order: 'zouna', label: 'zona', type: 'text'},
+            {order: 'Zouna', label: 'zona', type: 'text'},
             {order: 'estado_cliente', label: 'estado_cliente', type: 'text'},
             {order: 'estado', label: 'estado', type: 'text'},
             {order: 'factura', label: 'factura', type: 'text'},
@@ -181,7 +181,7 @@ const ocultar11 = () => {
         titulos = [
             {order: 'numero_cot', label: 'numero_cot', type: 'text'},
             {order: 'centro_costo_id', label: 'centro_costo', type: 'id', nameid: 'nombre'},
-            {order: 'zouna', label: 'zona', type: 'text'},
+            {order: 'Zouna', label: 'zona', type: 'text'},
             {order: 'estado_cliente', label: 'estado_cliente', type: 'text'},
             {order: 'estado', label: 'estado', type: 'text'},
             {order: 'factura', label: 'factura', type: 'text'},

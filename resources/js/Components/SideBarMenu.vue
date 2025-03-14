@@ -30,7 +30,7 @@ const ButtonsAdministrativo = [ //SAME AS WEB.PHP
 	// 'consignarViatico',
 	'material',
 	'zona',
-	'legalizacionviatico',
+	// 'legalizacionviatico',
 	//aquipuesSide
 ];
 const ButtonsInformes = [ //SAME AS WEB.PHP

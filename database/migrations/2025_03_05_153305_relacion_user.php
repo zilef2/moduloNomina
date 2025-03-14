@@ -10,10 +10,11 @@ return new class extends Migration {
      */
     public function up(): void {
         Schema::table('cotizacions', function (Blueprint $table) {
-//            $table->unsignedBigInteger('persona_que_realiza_la_pe')->nullable();
+            $table->unsignedBigInteger('persona_que_realiza_la_pe')->nullable();
             $table->foreign('persona_que_realiza_la_pe')
                 ->references('id')
                 ->on('users')
+                ->onUpdate('cascade') 
                 ->onDelete('cascade'); //cascade, set null, restrict, no action 
 //            $table->unsignedBigInteger('persona_que_solicita_la_propuesta_economica')->nullable();
 //            $table->foreign('persona_que_solicita_la_propuesta_economica')

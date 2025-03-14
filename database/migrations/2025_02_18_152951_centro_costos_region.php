@@ -14,13 +14,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('centro_costos', function (Blueprint $table) {
-            $table->unsignedBigInteger('zona_id')->nullable();
-            $table->foreign('zona_id')
-                ->references('id')
-                ->on('zonas')
-                ->onDelete('set null'); //cascade, set null, restrict, no action 
-        });
         Schema::table('cotizacions', function (Blueprint $table) {
             $table->string('estado_cliente')->nullable();
             $table->string('estado')->nullable();

@@ -27,6 +27,15 @@ return new class extends Migration
             $table->timestamps();
         });
         
+        
+        Schema::table('centro_costos', function (Blueprint $table) {
+            $table->unsignedBigInteger('zona_id')->nullable();
+            $table->foreign('zona_id')
+                ->references('id')
+                ->on('zonas')
+                ->onUpdate('cascade') //cascade, set null, restrict, no action 
+                ->onDelete('set null'); //cascade, set null, restrict, no action 
+        });
        
     }
 

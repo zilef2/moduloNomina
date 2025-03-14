@@ -27,7 +27,7 @@ const emit = defineEmits(["close"]);
 let justNames = props.titulos.map((names) => {
     if (names['order'] !== 'legalizacion'
         && names['order'] !== 'saldo'
-        && names['order'] !== 'consignaciona'
+        && names['order'] !== 'Consignaciona'
         && names['order'] !== 'user_id'
         && names['order'] !== 'fecha_legalizacion'
         && names['order'] !== 'valor_legalizacion'
@@ -40,7 +40,7 @@ const printForm = [];
 props.titulos.forEach((names) => {
     if (names['order'] !== 'descripcion'
         && names['order'] !== 'legalizacion'
-        && names['order'] !== 'consignaciona'
+        && names['order'] !== 'Consignaciona'
         && names['order'] !== 'saldo'
         && names['order'] !== 'user_id'
         && names['order'] !== 'fecha_legalizacion'

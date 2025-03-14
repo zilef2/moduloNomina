@@ -5,6 +5,7 @@ use App\Http\Controllers\CentroTableController;
 use App\Http\Controllers\ConsignarViaticoController;
 use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\DeudaSingularController;
+use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\ParametrosController;
 use App\Http\Controllers\PermissionController;
@@ -37,6 +38,7 @@ Route::get('/', function () {
     return redirect('/login');
 });
 
+Route::get('/CentroObsoleto', [EstadisticasController::class, 'CentroObsoleto'])->name('CentroObsoleto');
 Route::get('/dashboard', [UserController::class, 'Dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/setLang/{locale}', function ($locale) {

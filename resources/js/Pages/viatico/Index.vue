@@ -11,7 +11,7 @@ import DangerButton from '@/Components/DangerButton.vue';
 import pkg from 'lodash';
 
 import Pagination from '@/Components/Pagination.vue';
-import {ChevronUpDownIcon, PencilIcon, TrashIcon, CheckCircleIcon, ShieldExclamationIcon} from '@heroicons/vue/24/solid';
+import {ChevronUpDownIcon, PencilIcon, TrashIcon, CurrencyDollarIcon, ShieldExclamationIcon} from '@heroicons/vue/24/solid';
 import Create from '@/Pages/viatico/Create.vue';
 import Edit from '@/Pages/viatico/Edit.vue';
 import Delete from '@/Pages/viatico/Delete.vue';
@@ -102,10 +102,10 @@ const titulos = [
     {order: 'user_id', label: 'user_id', type: 'foreign', nameid: 'userino'},
     {order: 'descripcion', label: 'descripcion', type: 'text2'},
     {order: 'gasto', label: 'gasto', type: 'number'},
-    {order: 'consignaciona', label: 'consignaciona', type: 'number'},
+    {order: 'Consignaciona', label: 'Consignaciona', type: 'number'},
     {order: 'fechaconsig', label: 'fechaconsig', type: 'date'},
     {order: 'saldo', label: 'saldo', type: 'number'},
-    {order: 'legalizacion', label: 'legalizacion', type: 'text'},
+    // {order: 'legalizacion', label: 'legalizacion', type: 'text'},
     {order: 'valor_legalizacion', label: 'valor_legalizacion', type: 'dinero'},
     {order: 'descripcion_legalizacion', label: 'descripcion_legalizacion', type: 'text'},
     {order: 'fecha_legalizacion', label: 'fecha_legalizacion', type: 'datetime'},
@@ -113,6 +113,7 @@ const titulos = [
     // { order: 'inventario', label: 'inventario', type: 'foreign',nameid:'nombre'},
 ];
 
+let classbotones = "w-6 h-6"
 </script>
 
 <template>
@@ -210,23 +211,23 @@ const titulos = [
                                         <InfoButton v-show="can(['update viatico'])" type="button"
                                                     @click="(data.editOpen = true), (data.viaticoo = claseFromController)"
                                                     class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
-                                            <PencilIcon class="w-4 h-4" />
+                                            <PencilIcon :class="classbotones" />
                                         </InfoButton>
                                         <InfoButton v-show="can(['isAdmin'])" type="button" :thecolor="'green'"
                                                     @click="(data.AprobarOpen = true), (data.viaticoo = claseFromController)"
-                                                    class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.aprobar">
-                                            <CheckCircleIcon class="w-4 h-4" />
+                                                    class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.consignar">
+                                            <CurrencyDollarIcon :class="classbotones" />
                                         </InfoButton>
-                                        <InfoButton v-show="can(['isadministrativo']) && claseFromController.consignaciona.length" type="button" :thecolor="'gray'"
+                                        <InfoButton v-show="can(['isadministrativo']) && claseFromController.Consignaciona.length !== 0" type="button" :thecolor="'gray'"
                                                     @click="(data.LegalizarOpen = true), (data.viaticoo = claseFromController)"
                                                     class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.legalizar">
-                                            <ShieldExclamationIcon class="w-4 h-4" />
+                                            <ShieldExclamationIcon :class="classbotones" />
                                         </InfoButton>
                                         <DangerButton v-show="can(['isSuper'])" type="button"
                                                       @click="(data.deleteOpen = true), (data.viaticoo = claseFromController)"
                                                       class="px-2 py-1.5 rounded-none"
                                                       v-tooltip="lang().tooltip.delete">
-                                            <TrashIcon class="w-4 h-4" />
+                                            <TrashIcon :class="classbotones" />
                                         </DangerButton>
                                     </div>
                                 </div>
@@ -240,22 +241,21 @@ const titulos = [
                                 {{ formatPesosCol(claseFromController['gasto']) }}
                             </td>
                             <td class="whitespace-nowrap py-2 px-2">
-                                <p v-for="item in claseFromController['consignaciona']" :key="item.id" 
+                                <p v-for="item in claseFromController['Consignaciona']" :key="item.id" 
                                    class="whitespace-nowrap py-2 px-2">
-                                    {{ formatPesosCol(item) }}
+                                    {{ formatPesosCol(item['valor']) }}
                                 </p>
                             </td>
                             <td class="whitespace-nowrap py-2 px-2">
-                                <p v-for="item in claseFromController['fechaconsig']" :key="item.id" 
+                                <p v-for="item in claseFromController['Consignaciona']" :key="item.id" 
                                    class="whitespace-nowrap py-2 px-2">
-                                    {{ formatDate(item) }}
+                                    {{ formatDate(item['fecha']) }}
                                 </p>
                             </td>
                             <td class="whitespace-nowrap py-2 px-8">
                                 {{ formatPesosCol(claseFromController['saldo']) }}
                             </td>
-                            <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['legalizacion'] ? '✅': '❌'}}</td>
-                            <td class="whitespace-nowrap py-2 px-2"> {{ formatPesosCol(claseFromController['valor_legalizacion'])}}</td>
+                            <td class="whitespace-nowrap py-2 px-2"> {{ formatPesosCol(claseFromController['valor_legalizacion'])}} {{ claseFromController['legalizacion'] ? '✅': '❌'}}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['descripcion_legalizacion']}}</td>
                             <td class="whitespace-nowrap py-2 px-2">{{ formatDate(claseFromController['fecha_legalizacion']) }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['centrou'] }}</td>

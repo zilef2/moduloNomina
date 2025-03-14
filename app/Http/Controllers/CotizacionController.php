@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\helpers\Myhelp;
 use App\helpers\MyModels;
+use App\Http\Requests\CotizacionesStoreRequest;
 use App\Models\CentroCosto;
 use App\Models\cotizacion;
 use App\Models\User;
@@ -161,40 +162,42 @@ class CotizacionController extends Controller {
         return CentroCosto::pluck('nombre')->toArray();
     }
 
-    public function store(Request $request): RedirectResponse {
+    public function store(CotizacionesStoreRequest $request): RedirectResponse {
         $permissions = Myhelp::EscribirEnLog($this, ' Begin STORE:cotizacions');
+        $data = $request->validated();
+
         DB::beginTransaction();
 
 //        if ($request->modoaiu && (!$request->precio_cot || !$request->por_u)) {
 //            return back()->with('error', 'Faltan datos en la cotización');
 //        }
-        $retornarError = false;
-
-        $ValidarSiEsNormal = $this->validarEsNormal($request);
-
-        if ($ValidarSiEsNormal) {
-        $request->merge(['precio_cot' => 0]);
-        
-        $request->merge(['admi' => 0]);
-        $request->merge(['por_a' => 0]);
-        
-        $request->merge(['por_i' => 0]);
-        $request->merge(['impr' => 0]);
-        
-        $request->merge(['por_u' => 0]);
-        $request->merge(['util' => 0]);
-            
-        } else if ($ValidarSiEsNormal === 0) {
-            if ($request->util == 0)
-                $retornarError = true;
-        } else {
-            $retornarError = true;
-        }
-
-        if ($retornarError) return back()->with('error', 'Error general en la cotización');
+//        $retornarError = false;
+//        $ValidarSiEsNormal = $this->validarEsNormal($request);
+//        if ($ValidarSiEsNormal) {
+//            $request->merge(['precio_cot' => 0]);
+//        
+//            $request->merge(['admi' => 0]);
+//            $request->merge(['por_a' => 0]);
+//
+//            $request->merge(['por_i' => 0]);
+//            $request->merge(['impr' => 0]);
+//
+//            $request->merge(['por_u' => 0]);
+//            $request->merge(['util' => 0]);
+//
+//        } else if ($ValidarSiEsNormal === 0) {
+//            if ($request->util == 0)
+//                $retornarError = true;
+//        } else {
+//            $retornarError = true;
+//        }
+//        if ($retornarError) return back()->with('error', 'Error general en la cotización');
 
         $request->merge(['aprobado_cot' => false]);
         $request->merge(['user_id' => Myhelp::AuthUid()]);
+        if(!$request->precio_cot)
+            $request->merge(['precio_cot' => 0]);
+        
         $this->SonSelect($request, [
             'estado_cliente',
             'estado',
@@ -227,7 +230,7 @@ class CotizacionController extends Controller {
 
         // Condición 2: Verificar la relación entre subtotal e IVA
         $relacionCalculada = $request->iva / $request->subtotal;
-        $tolerancia = 0.001;
+        $tolerancia = 0.01;
         $relacionIva = abs($relacionCalculada - 0.19) < $tolerancia;
 
         // Verificar si ambas condiciones son iguales

@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::table('viaticos', function (Blueprint $table) {
             
-            $table->biginteger('valor_legalizacion')->nullable();
+            $table->biginteger('valor_legalizado')->nullable();
             $table->string('descripcion_legalizacion',512)->nullable();
         });
     }
