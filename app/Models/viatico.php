@@ -23,9 +23,9 @@ class viatico extends Model {
         'saldo',
         'descripcion',
         'legalizacion',
-        'fecha_legalizacion',
-        'valor_legalizacion',
-        'descripcion_legalizacion',
+//        'fecha_legalizacion',
+//        'valor_legalizacion',
+//        'descripcion_legalizacion',
 
         'user_id',
         'centro_costo_id',
@@ -56,9 +56,13 @@ class viatico extends Model {
     public function getConsignacionaAttribute(): array {
         return $this->consignacion()->get()->map(function ($item) {
             return [
+                'viatic_id' => $this->id,
                 'consignacion_id' => $item->id,
                 'valor' => $item->valor_consig,
-                'fecha' => $item->created_at
+                'fecha' => $item->created_at,
+                'fecha_legalizacion' => $item->fecha_legalizacion ?? '',
+                'valor_legalizacion' => $item->valor_legalizacion ?? '',
+                'descripcion_legalizacion' => $item->descripcion_legalizacion ?? '',
             ];
         })->toArray();
 

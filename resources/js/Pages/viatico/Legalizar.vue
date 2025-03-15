@@ -32,9 +32,13 @@ const data = reactive({
 const form = useForm({
     valor_legalizacion: [''],
     descripcion_legalizacion: [''],
+    fecha_legalizacion: [''],
+    consignacion_id: [0],
 });
 
+
 onMounted(() => {
+
     if (props.numberPermissions > 9) {
         form.valor_legalizacion = Math.floor(Math.random() * 9 + 10000)
         // form.nombre = 'admin orden trabajo ' + (valueRAn);
@@ -51,12 +55,39 @@ const validarValor = () => {
     else data.mensajeError_saldo = ''
     return estamal
 }
+
 watch(() => form.valor_legalizacion, (newVal) => {
     // validarValor()
 });
 
+
+const ensureArraySize = () => {
+    if (!Array.isArray(form.descripcion_legalizacion)) {
+        form.descripcion_legalizacion = [];
+    }
+
+    const cantidadCotizaciones = props.viaticoa?.Consignaciona?.length || 10;
+
+    // Crear un nuevo array del tamaño correcto
+    form.descripcion_legalizacion = Array(cantidadCotizaciones)
+        .fill('')
+        .map((val, i) => form.descripcion_legalizacion[i] || '');
+    
+    form.consignacion_id.map((val, i) => {
+            form.consignacion_id[i] = props.viaticoa.Consignaciona[i].consignacion_id
+    });
+        console.log("=>(Legalizar.vue:77) form.consignacion_id", form.consignacion_id);
+};
+watch(() => [props.show, props.viaticoa?.Consignaciona], () => {
+        if (props.show) {
+            ensureArraySize();
+        }
+    },
+    {immediate: true, deep: true}
+);
 watchEffect(() => {
     if (props.show) {
+
         data.valorConsig = formatPesosCol(form.valor_legalizacion)
         form.errors = {}
 
@@ -68,7 +99,7 @@ watchEffect(() => {
             data.valorConsig = formatPesosCol(form.valor_legalizacion)
 
             data.AutoActualizarse = false
-            data.consignaciones = Object.entries(props.viaticoa?.Consignaciona);
+            data.consignaciones = Object.entries(props.viaticoa?.Consignaciona); //transforma en array
 
         }
     } else {
@@ -102,13 +133,69 @@ const formattedValor = {
         form.valor_legalizacion[index] = value.replace(/\D/g, "");
     }
 };
+const valorArray = (valor) => {
+    if (valor && valor[1]) {
+
+        return '( ' + formatPesosCol(valor[1]['valor']) + ' )'
+    }
+    return ''
+}
+const getDescripcion = (index) => {
+    if (!Array.isArray(form.descripcion_legalizacion)) {
+        form.descripcion_legalizacion = [];
+    }
+
+    // Asegúrate de que el array tenga suficientes elementos
+    while (form.descripcion_legalizacion.length <= index) {
+        form.descripcion_legalizacion.push('');
+    }
+
+    return form.descripcion_legalizacion[index];
+};
+const setDescripcion = (index, value) => {
+    if (!Array.isArray(form.descripcion_legalizacion)) {
+        form.descripcion_legalizacion = [];
+    }
+
+    // Asegúrate de que el array tenga suficientes elementos
+    while (form.descripcion_legalizacion.length <= index) {
+        form.descripcion_legalizacion.push('');
+    }
+
+    form.descripcion_legalizacion[index] = value;
+};
+
+const getFecha = (index) => {
+    if (!Array.isArray(form.fecha_legalizacion)) {
+        form.fecha_legalizacion = [];
+    }
+
+    // Asegúrate de que el array tenga suficientes elementos
+    while (form.fecha_legalizacion.length <= index) {
+        form.fecha_legalizacion.push('');
+    }
+
+    return form.fecha_legalizacion[index];
+};
+const setFecha = (index, value) => {
+    if (!Array.isArray(form.fecha_legalizacion)) {
+        form.fecha_legalizacion = [];
+    }
+
+    // Asegúrate de que el array tenga suficientes elementos
+    while (form.fecha_legalizacion.length <= index) {
+        form.fecha_legalizacion.push('');
+    }
+
+    form.fecha_legalizacion[index] = value;
+};
 
 const update = () => {
     form.put(route('legalizarviatico', props.viaticoa?.id), {
         preserveScroll: true,
         onSuccess: () => {
             emit("close")
-            form.reset()
+            // form.reset() //todo: justtesting
         },
         onError: () => {
             alert('Hay campos incompletos o erroneos')
@@ -124,62 +211,74 @@ const update = () => {
 
 <template>
     <section class="space-y-6">
-        <Modal :maxWidth="'xl4'" :show="props.show" @close="emit('close')">
+        <Modal :maxWidth="'xl5'" :show="props.show" @close="emit('close')">
             <form class="p-6" @submit.prevent="create">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    Legalizar {{ props.title }}
-                </h2>
-                <p class="texto-legal">
-                    Por favor, digite el valor que se ha legalizado con documentos u otras pruebas
-                </p>
+                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Legalizar {{ props.title }}</h2>
+                <p class="texto-legal">Por favor, digite el valor que se ha legalizado con documentos u otras
+                    pruebas</p>
                 <div v-for="(valor, index) in data.consignaciones" :key="index"
-
-                     class="grid xs:grid-cols-1 md:grid-cols-2 xs:gap-2 md:gap-8 2xl:gap-12 my-6">
+                     class="grid xs:grid-cols-1 md:grid-cols-3 xs:gap-2 md:gap-8 2xl:gap-12 my-6">
                     <div class="">
-                        <InputLabel for="valor_legalizacionid" 
-                                    :value="lang().label['valor_legalizacion'] + '( ' + formatPesosCol(valor[1]) + ' )'"
+<!--                        {{ valor }}-->
+                        <InputLabel for="valor_legalizacionid"
+                                    :value="lang().label['valor_legalizacion'] + valorArray(valor)"
                         />
-                        <!--                        <TextInput id="valor_legalizacionid" v-model="formattedValor"-->
-                        <!--                                   :error="form.errors.valor_legalizacion"-->
-                        <!--                                   placeholder="valor legalizacion" type="text"-->
-                        <!--                                   class="my-2 block w-full"-->
-                        <!--                                   required-->
-                        <!--                        />-->
 
+                        <TextInput v-if="valor.valor_legalizacion"
+                                   :id="`valor_legalizacion_${index}`"
+                                   :modelValue="formattedValor.get(index)"
+                                   @update:modelValue="(value) => formattedValor.set(index, value)"
+                                   :error="form.errors[`valor_legalizacion.${index}`]"
+                                   placeholder="Valor legalización" type="text" required
+                                   class="my-2 block w-full bg-gray-300" disabled
+                        />
+                        <TextInput v-else
+                                   :id="`valor_legalizacion_${index}`"
+                                   :modelValue="formattedValor.get(index)"
+                                   @update:modelValue="(value) => formattedValor.set(index, value)"
+                                   :error="form.errors[`valor_legalizacion.${index}`]"
+                                   placeholder="Valor legalización" type="text" required
+                                   class="my-2 block w-full"
+                        />
 
-                        <!--                            :error="form.errors[`valor_legalizacion.${index}`]"-->
-                            <TextInput
-                                :id="`valor_legalizacion_${index}`"
-                                :modelValue="formattedValor.get(index)"
-                                @update:modelValue="(value) => formattedValor.set(index, value)"
-                                :error="form.errors[`valor_legalizacion.${index}`]"
-                                placeholder="Valor legalización"
-                                type="text"
-                                class="my-2 block w-full"
-                                required
-                            />
-
-
-                        <!--                                   ref="valorConsigInput"-->
                         <InputError :message="form.errors.valor_legalizacion" class="mt-2"/>
-                        <!--                        <label class="my-2 py-4 text-black dark:text-white text-lg"> {{ data.valorConsig }} Pesos-->
-                        <!--                            colombianos</label>-->
                     </div>
-                    <div class="">
+                    <div class="mt-2">
                         <InputLabel for="descripcion_legalizacionid"
                                     :value="lang().label['descripcion_legalizacion'] + ' (opcional)'"/>
-                        <TextInput id="descripcion_legalizacionid" v-model="form.descripcion_legalizacion[index]"
-                                   :error="form.errors.descripcion_legalizacion"
-                                   placeholder="descripcion_legalizacion" type="text"
-                                   class="my-2 block w-full"
-                                   required
+                        <!--                        <TextInput -->
+                        <!--                                :id="`descripcion_legalizacionid_${index}`"-->
+                        <!--                            v-model="form.descripcion_legalizacion['index']"-->
+                        <!--                                   placeholder="descripcion_legalizacion" type="text" required-->
+                        <!--                                   class="my-2 block w-full"-->
+
+                        <input
+                            type="text"
+                            :id="`descripcion_legalizacionid_${index}`"
+                            :value="getDescripcion(index)"
+                            @input="(event) => setDescripcion(index, event.target.value)"
+                            class="w-full rounded-md shadow-sm placeholder:text-gray-400 placeholder:dark:text-gray-400/50 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary dark:focus:border-primary focus:ring-primary dark:focus:ring-primary"
                         />
-<!--                        <InputError :message="form.errors.descripcion_legalizacion" class="mt-2"/>-->
+                    </div>
+                    <div class="mt-2">
+                        <InputLabel for="fecha_legalizacion"
+                                    :value="lang().label['fecha_legalizacion']"/>
+
+                        <input
+                            type="date"
+                            :id="`fecha_legalizacionid_${index}`"
+                            :value="getFecha(index)"
+                            @input="(event) => setFecha(index, event.target.value)"
+                            class="w-full rounded-md shadow-sm placeholder:text-gray-400 placeholder:dark:text-gray-400/50 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary dark:focus:border-primary focus:ring-primary dark:focus:ring-primary"
+                        />
                     </div>
 
                 </div>
                 <div class=" my-8 flex justify-end">
-                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}</SecondaryButton>
+                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{
+                            lang().button.close
+                        }}
+                    </SecondaryButton>
                     <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="ml-3"
                                    @click="update">
                         {{ form.processing ? lang().button.save + '...' : lang().button.save }}

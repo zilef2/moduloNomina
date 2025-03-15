@@ -277,18 +277,17 @@ class ViaticoController extends Controller {
         $now = Carbon::now();
 
         foreach ($request->valor_legalizacion as $index => $item) {
-            dd(
-                $item,
-                $request->descripcion_legalizacion[$index]
-            );
-            $item::update([
-                              'valor_legalizado' => $item,
-                              'fecha_legalizado' => $now,
-                              'descripcion_legalizacion' => $request->descripcion_legalizacion[$index],
-                          ]);
+            $consingacion = consignarViatico::find($request->consignacion_id[$index]);
+            $consingacion->update([
+                  'valor_legalizado' => $item,
+                  'fecha_legalizado' => $request->fecha_legalizacion[$index],
+                  'descripcion_legalizacion' => $request->descripcion_legalizacion[$index],
+            ]);
+        }
+        if (!empty($request->valor_legalizacion[0])) {
+            $viatico->update(['saldo' => $this->getSaldo($viatico)]);
         }
 
-        $viatico->update(['saldo' => $this->getSaldo($viatico),]);
 
         DB::commit();
         Myhelp::EscribirEnLog($this, 'UPDATE:viaticos EXITOSO', 'viatico id:' . $viatico->id . ' | ' . $viatico->nombre, false);

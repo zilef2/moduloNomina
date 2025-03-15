@@ -121,7 +121,7 @@ public function index(Request $request) {
         $elUser = Myhelp::AuthU();
         $showSelect = [];
 
-        $DateEstandar = Carbon::now()->subYear(-2);
+        $DateEstandar = Carbon::now()->subYears(2);
 
         $valoresSelectConsulta = CentroCosto::Where('activo', 1)
             ->WhereHas('reportes', function ($query) use ($DateEstandar) {

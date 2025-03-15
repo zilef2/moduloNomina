@@ -131,9 +131,9 @@ class CentroCostosController extends Controller {
         }
 
 
-        $supervisores = User::UsersWithRol('supervisor')->get();
-        $NotMyCentros = $AUuser->NotMyCentros($numberPermissions);
-        $centroCostos = $centroCostos->WhereNotIn('id', $NotMyCentros);
+//        $supervisores = User::UsersWithRol('supervisor')->get();
+//        $NotMyCentros = $AUuser->NotMyCentros($numberPermissions);
+//        $centroCostos = $centroCostos->WhereNotIn('id', $NotMyCentros);
         if ($request->has(['searchSCC']) || $request->has(['search2']) || $request->has(['search'])) {
             $this->actualizarcache();
         }
