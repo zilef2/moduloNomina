@@ -16,6 +16,7 @@ class viatico extends Model {
         'userino',
         'centrou',
         'Consignaciona',
+        'Totallegalizadou',
     ];
 
     protected $fillable = [
@@ -60,12 +61,20 @@ class viatico extends Model {
                 'consignacion_id' => $item->id,
                 'valor' => $item->valor_consig,
                 'fecha' => $item->created_at,
-                'fecha_legalizacion' => $item->fecha_legalizacion ?? '',
-                'valor_legalizacion' => $item->valor_legalizacion ?? '',
+                'fecha_legalizacion' => $item->fecha_legalizado ?? '',
+                'valor_legalizacion' => $item->valor_legalizado ?? '',
                 'descripcion_legalizacion' => $item->descripcion_legalizacion ?? '',
             ];
         })->toArray();
 
+    }
+    public function getTotallegalizadouAttribute(): int {
+//        dd(
+//          $this->consignacion()->get(),  
+//          $this->consignacion()->get()[0]->getattributes(),  
+//          $this->consignacion()->get()->sum('valor_legalizado'),  
+//        );
+        return $this->consignacion()->get()->sum('valor_legalizado');
     }
 
 //    public function getFechaconsigAttribute(): array {

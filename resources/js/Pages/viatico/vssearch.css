@@ -1,20 +1,23 @@
->>> {
-    --vs-controls-color: #7398e7;
-    --vs-border-color: #1f0383;
-    --vs-border-width: 4px;
+:deep(.v-select) {
+    --vs-controls-color: #ffffff; /* Blanco */
+    --vs-border-color: #dde1ee; /* Azul oscuro */
+    --vs-border-width: 1px;
 
-    --vs-dropdown-bg: #848688;
-    --vs-dropdown-color: #062eda;
-    --vs-dropdown-option-color: #210000;
+    --vs-dropdown-bg: #b4bfe5; /* Azul intenso */
+    --vs-dropdown-color: #000000; /* Texto blanco */
+    --vs-dropdown-option-color: #000000; /* Texto blanco en opciones */
 
-    --vs-selected-bg: #0d5402;
-    --vs-selected-color: #81818f;
+    --vs-selected-bg: #98999b; /* Azul más claro */
+    --vs-selected-color: #656464; 
 
-    --vs-search-input-color: #eeeeee;
+    --vs-search-input-color: #1c1b1b;
 
-    --vs-dropdown-option--active-bg: #664cc3;
-    --vs-dropdown-option--active-color: #eeeeee;
+    --vs-dropdown-option--active-bg: #3b82f6;
+    --vs-dropdown-option--active-color: #ffffff;
 }
+
+
+
 textarea {
     @apply px-3 py-2 border border-gray-300 rounded-md;
 }

@@ -32,7 +32,7 @@ class HandleInertiaRequests extends Middleware
     {
         return array_merge(parent::share($request), [
             'env' => [
-                'environment' => env('APP_ENV'), 
+                'environment' => config('app.env'), 
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),

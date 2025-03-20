@@ -31,6 +31,7 @@ class CopyUserPages extends Command {
     //very usefull
      // todo: sync: añadir a los demas repos
      // justtesting: cuando hay que qutiar cosas que solo deberian aparecer en la version de pruebas
+    //thisisnew!!!
     
     
      protected function generateAttributes(): array {

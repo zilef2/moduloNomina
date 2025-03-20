@@ -21,7 +21,7 @@ import Generarcc from '@/Pages/cotizacion/Generarcc.vue';
 
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
-import {Now_Date_to_html, formatDate2, formatDateTime, number_format} from '@/global.ts';
+import {Now_Date_to_html, formatDateToHuman, formatDateTimeToHuman, number_format} from '@/global.ts';
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 
@@ -397,10 +397,10 @@ watch(() => data.ocultar1, (newX) => {
                                         number_format(claseFromController[titulo['order']], 0, true)
                                     }} </span>
                                 <span v-if="titulo['type'] === 'date'" class="whitespace-nowrap"> {{
-                                        formatDate2(claseFromController[titulo['order']], false)
+                                        formatDateToHuman(claseFromController[titulo['order']], false)
                                     }} </span>
                                 <span v-if="titulo['type'] === 'datetime'" class="whitespace-nowrap"> {{
-                                        formatDateTime(claseFromController[titulo['order']], true)
+                                        formatDateTimeToHuman(claseFromController[titulo['order']], true)
                                     }} </span>
                                 <span v-if="titulo['type'] === 'id'">
                                     {{ claseFromController[titulo['order'] + '2'] }}

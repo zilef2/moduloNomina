@@ -43,7 +43,29 @@ class Myhelp
     }
 
     //************************logs************************\\
+    
+    
 
+    public static function zilefLog($escribirenlog = true){
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+        $permissions = self::AuthU()->roles->pluck('name')[0];
+        $ElMensaje = 'U:' . self::AuthU()->name; 
+        
+        foreach ($trace[0] as $index => $trac) {
+            $ElMensaje .= " $index = $trac";
+        }
+        
+        if($escribirenlog){
+            Log::channel(MyModels::getPermissiToLog($permissions))->info($ElMensaje);
+            return MyModels::getPermissionToNumber($permissions);
+        }else{
+            return [$ElMensaje,$permissions];
+        }
+        
+    }
+    
+    
+    
     public static function EscribirEnLog($thiis, $clase = '', $mensaje = '', $returnPermission = true, $critico = false)
     {
         $permissions = $returnPermission ? self::AuthU()->roles->pluck('name')[0] : null;

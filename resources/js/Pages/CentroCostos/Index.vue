@@ -177,10 +177,8 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                             </td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ parseInt(index, 10) + 1 }}</td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.nombre) }}</td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                {{ formatPesosCol(clasegenerica.mano_obra_estimada) }}
-                            </td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.Zouna) }}</td>
+                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ formatPesosCol(clasegenerica.mano_obra_estimada) }}</td>
+                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.Zouna) }}</td>
 
                             <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                 <p v-for="(superv, inde) in clasegenerica.supervi.split(',')" :key="inde">
@@ -188,15 +186,15 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                                     <span v-else class="border-b-blue-300 border-2">Sin supervisor</span>
                                 </p>
                             </td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{
+                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{
                                     (clasegenerica.activo ? '✅' : '❌')
                                 }}
                             </td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                 {{ (clasegenerica.ValidoParaFacturar ? '✅' : '❌') }}
                             </td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.descripcion) }}</td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.clasificacion) }}</td>
+                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.descripcion) }}</td>
+                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.clasificacion) }}</td>
                             <!--                             <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">-->
                             <!--                                {{ (clasegenerica.cuantoshijos) }}-->
                             <!--                            </td>-->

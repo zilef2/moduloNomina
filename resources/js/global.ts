@@ -166,6 +166,26 @@ export function Date_to_html(date: Date): String {
 
     return `${year}-${month2}-${day2}`;
 }
+export function DateTime_to_html(StringDate): string {
+    if (!StringDate) {
+        return '';
+    }
+    let date = new Date(StringDate)
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    
+    // Formatear con ceros a la izquierda cuando sea necesario
+    const day2 = day < 10 ? '0' + day : day.toString();
+    const month2 = month < 10 ? '0' + month : month.toString();
+    const hours2 = hours < 10 ? '0' + hours : hours.toString();
+    const minutes2 = minutes < 10 ? '0' + minutes : minutes.toString();
+    
+    // Formato YYYY-MM-DDThh:mm para input datetime-local
+    return `${year}-${month2}-${day2}T${hours2}:${minutes2}`;
+}
 
 export function Now_Date_to_html(): String {
     let hoy = new Date();
@@ -179,7 +199,7 @@ export function Now_Date_to_html(): String {
 }
 
 export function formatDate(date, isDateTime: string): string { //todo: no aceptara mas datetime
-    if (isNullOrUndef(date)) return '';
+    if (isNullOrUndef(date) || date == '') return '';
     let validDate = new Date(date)
 
     // validDate = new Date(validDate.getTime() + (5 * 60 * 60 * 1000)) //correccion con GTM -5
@@ -223,7 +243,7 @@ export function formatDate(date, isDateTime: string): string { //todo: no acepta
     }
 }
 
-export function formatDate2(date:string): string { //todo: no aceptara mas datetime
+export function formatDateToHuman(date:string): string { //todo: no aceptara mas datetime
     if (isNullOrUndef(date)) return '';
     // let validDate = new Date(date)
     const parts = date.split("-");
@@ -260,7 +280,7 @@ export function formatDate2(date:string): string { //todo: no aceptara mas datet
     }
 }
 
-export function formatDateTime(datetime): string {
+export function formatDateTimeToHuman(datetime): string {
     if (isNullOrUndef(datetime)) return '';
     let validDate = new Date(datetime)
     // validDate = new Date(validDate.getTime() + (5 * 60 * 60 * 1000)) //correccion con GTM -5

@@ -105,6 +105,7 @@ Route::middleware('auth', 'verified')->group(function () {
 	Route::resource("/viatico", ViaticoController::class);
 	Route::resource("/consignarViatico", ConsignarViaticoController::class);
     Route::put('/viaticoupdate2/{id}', [ViaticoController::class, 'viaticoupdate2'])->name('viaticoupdate2');
+    Route::get('/viatico2', [ViaticoController::class, 'viatico2'])->name('viatico2');
     Route::put('/legalizarviatico/{id}', [ViaticoController::class, 'legalizarviatico'])->name('legalizarviatico');
     Route::get('/resetPassword/{id}', [UserController::class, 'resetPassword'])->name('resetPassword');
 	Route::resource("/material", \App\Http\Controllers\MaterialController::class);

@@ -42,6 +42,8 @@ class DesarrolloController extends Controller {
 //        $losSelect = $this->Dependencias();
 
 
+	    $todoslosdllos = desarrollo::all();
+	    $saldodllo = $todoslosdllos->sum('valor_inicial') - ($todoslosdllos->sum('totalpagado'));
         $perPage = $request->has('perPage') ? $request->perPage : 100;
         return Inertia::render($this->FromController . '/Index', [
             'fromController' => $this->PerPageAndPaginate($request, $desarrollos),
@@ -62,6 +64,7 @@ class DesarrolloController extends Controller {
             'perPage' => (int)$perPage,
             'numberPermissions' => $numberPermissions,
             'losSelect' => $losSelect ?? [],
+            'saldodllo' => $saldodllo ?? 0,
         ]);
     }
 

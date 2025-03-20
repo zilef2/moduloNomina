@@ -14,6 +14,7 @@ import {formatPesosCol} from '@/global.ts';
 const props = defineProps({
     show: Boolean,
     title: String,
+    route: String,
     viaticoa: Object,
     titulos: Object, //parametros de la clase principal
     losSelect: Object,
@@ -35,7 +36,9 @@ const justNames = [
     'valor_consig'
 ]
 
-const form = useForm({...Object.fromEntries(justNames.map(field => [field, '']))});
+const form = useForm({...Object.fromEntries(justNames.map(field => [field, ''])),
+    routeadmin:''
+});
 onMounted(() => {
     if (props.numberPermissions > 9) {
         form.valor_consig = Math.floor(Math.random() * 9 + 1000000)
@@ -88,25 +91,6 @@ watch(() => props.show, (newVal) => {
         }
     }
 );
-
-
-const update = () => {
-    form.put(route('viaticoupdate2', props.viaticoa?.id), {
-        preserveScroll: true,
-        onSuccess: () => {
-            emit("close")
-            form.reset()
-        },
-        onError: () => {
-            alert('Hay campos incompletos o erroneos')
-        },
-        onFinish: () => {
-            data.AutoActualizarse = true
-        },
-    })
-}
-
-
 // <!--<editor-fold desc="selected items">-->
 const selectedUser = computed({
     get: () => props.losSelect[0].find(user => user.id === form.user_id) || null,
@@ -121,6 +105,27 @@ const selectedcc = computed({
     }
 });
 // <!--</editor-fold>-->
+
+
+const update = () => {
+    if(props.route) form.routeadmin = 'index2'
+    console.log("=>(Aprobar.vue:112) props.route", props.route);
+    console.log("=>(Aprobar.vue:112) form.routeadmin", form.routeadmin);
+
+    form.put(route('viaticoupdate2', props.viaticoa?.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            emit("close")
+            form.reset()
+        },
+        onError: () => {
+            alert('Hay campos incompletos o erroneos')
+        },
+        onFinish: () => {
+            data.AutoActualizarse = true
+        },
+    })
+}
 
 const valorConsigInput = ref(null);
 </script>

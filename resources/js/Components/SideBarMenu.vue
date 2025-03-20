@@ -20,7 +20,7 @@ const ButtonsConfig = [ //SAME AS WEB.PHP
     'Parametros',
     'ubicacion',
 	  'desarrollo',
-    'pagodesarrollo',
+    // 'pagodesarrollo',
 ];
 const ButtonsAdministrativo = [ //SAME AS WEB.PHP
     'user',
@@ -148,6 +148,21 @@ const ButtonsInformes = [ //SAME AS WEB.PHP
                         <Link :href="route(value+'.index')" class="flex items-center py-2 px-4">
                             <PresentationChartLineIcon class="w-6 h-5"/>
                             <span class="ml-3">{{ lang().label[value] }}</span>
+                        </Link>
+                    </li>
+                </div>
+            </ul>
+        </div>
+        
+        <div class="mt-1">
+            <ul v-if="can(['isAdmin'])" class="space-y-2 my-1">
+                <div class="" 
+                >
+                    <li class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
+                        :class="{ 'bg-red-900 dark:bg-red-900': route().current('viatico2') }">
+                        <Link :href="route('viatico2')" class="flex items-center py-2 px-4">
+                            <PresentationChartLineIcon class="w-6 h-5"/>
+                            <span class="ml-3"> Pendientes </span>
                         </Link>
                     </li>
                 </div>

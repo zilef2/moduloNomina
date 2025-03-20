@@ -21,7 +21,7 @@ import Pagodllo from '@/Pages/desarrollo/Pagodllo.vue';
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
 
-import {formatDate, number_format,formatPesosCol} from '@/global.ts';
+import {formatDate,formatPesosCol} from '@/global.ts';
 
 
 
@@ -32,6 +32,7 @@ const props = defineProps({
     filters: Object,
     breadcrumbs: Object,
     perPage: Number,
+    saldodllo: Number,
 
     title: String,
 
@@ -132,6 +133,9 @@ function obtenerIndice(estado) {
                     <p class="text-lg my-2">
                         Cada cotizacion pasa por los siguientes pasos: {{ estados.join(', ') }}
                     </p>
+                    <p class="text-lg my-2">
+                        Pendiente: {{formatPesosCol(props.saldodllo)}}
+                    </p>
 
                     <Create v-if="can(['isSuper'])" :numberPermissions="props.numberPermissions"
                             :titulos="titulos" :show="data.createOpen" @close="data.createOpen = false" :title="props.title"
@@ -192,7 +196,7 @@ function obtenerIndice(estado) {
                                     <p class="leading-relaxed">{{formatPesosCol(claseFromController.valor_inicial)}}</p>
                                     <p class="leading-relaxed">Primer pago acordado: <b>{{ formatPesosCol(claseFromController.valor_parcial1) }}</b></p>
                                     <p class="leading-relaxed"> Pagos: {{claseFromController.valorino}}</p>
-                                    <p class="leading-relaxed"> Total: {{claseFromController.totalpagado}}</p>
+                                    <p class="leading-relaxed"> Total: {{formatPesosCol(claseFromController.totalpagado)}}</p>
                                     <p v-if="claseFromController.fecha_cotizacion_aceptada" class="text-indigo-500 inline-flex items-center mt-4">
                                         Cotizacion aceptada el: {{claseFromController.fecha_cotizacion_aceptada}}
                                     </p>
