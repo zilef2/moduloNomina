@@ -11,8 +11,15 @@ use Throwable;
 class zzloggingcrud {
 	
 	
-	public static function zilefLogUpdate($tthis, $theModel = null, $original = null, $nombreUotro = 'nombre',Throwable $th = 
-	null) {
+	public static function zilefLogBulk($nameofModel, $numdestruidos, Throwable $th = null) {
+		$permissions = self::AuthU()->roles->pluck('name')[0];
+		$ElMensaje = self::AuthU()->name . " se han borrado $numdestruidos $nameofModel";
+		Log::channel(MyModels::getPermissiToLog($permissions))->info($ElMensaje);
+		
+	}
+	
+	public static function zilefLogUpdate(
+		$tthis, $theModel = null, $original = null, $nombreUotro = 'nombre',Throwable $th = null) {
 		[$ElMensaje, $permissions] = self::zilefLogTrace(false);
 		
 		if ($theModel) {
@@ -41,24 +48,42 @@ class zzloggingcrud {
 	}
 	
 	public static function zilefLogTrace($escribirenlog = true) {
-		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
 		$permissions = self::AuthU()->roles->pluck('name')[0];
 		$ElMensaje = 'U:' . self::AuthU()->name;
 		
-		foreach ($trace[0] as $index => $trac) {
+		foreach ($trace[1] as $index => $trac) {
 			$ElMensaje .= " $index = $trac";
 		}
 		
 		if ($escribirenlog) {
 			Log::channel(MyModels::getPermissiToLog($permissions))->info($ElMensaje);
-			
-			
 			return MyModels::getPermissionToNumber($permissions);
 		}
 		else {
 			return [$ElMensaje, $permissions];
 		}
+	}
+	public static function zilefSaveArrayLogTrace($paraellog,$escribirenlog = true) {
+		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
+		$permissions = self::AuthU()->roles->pluck('name')[0];
+		$ElMensaje = self::AuthU()->name;
 		
+		foreach ($paraellog as $index => $atributes) {
+			$ElMensaje .= " $index = $atributes";
+		}
+		
+		foreach ($trace[1] as $index => $trac) {
+			$ElMensaje .= " $index = $trac";
+		}
+		
+		if ($escribirenlog) {
+			Log::channel(MyModels::getPermissiToLog($permissions))->info($ElMensaje);
+			return MyModels::getPermissionToNumber($permissions);
+		}
+		else {
+			return [$ElMensaje, $permissions];
+		}
 	}
 	
 	public static function AuthU(): ?User {

@@ -17,6 +17,7 @@ import Edit from '@/Pages/viatico/Edit.vue';
 import Delete from '@/Pages/viatico/Delete.vue';
 import Aprobar from '@/Pages/viatico/Aprobar.vue';
 import Legalizar from '@/Pages/viatico/Legalizar.vue';
+import DeleteBulk from '@/Pages/viatico/DeleteBulk.vue';
 
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
@@ -43,7 +44,7 @@ const data = reactive({
     params: {
         search: props.filters.search,
         search2: props.filters.search2,
-        search3: props.filters.search3, //mostrar todo para el admin
+        // search3: props.filters.search3, //mostrar todo para el admin
         field: props.filters.field,
         order: props.filters.order,
         perPage: props.perPage,
@@ -56,7 +57,7 @@ const data = reactive({
     AprobarOpen: false,
     LegalizarOpen: false,
     deleteOpen: false,
-    // deleteBulkOpen: false,
+    deleteBulkOpen: false,
     dataSet: usePage().props.app.perpage,
 })
 
@@ -99,12 +100,15 @@ const totalSaldo = computed(() => {
 // text // number // dinero // date // datetime // foreign
 const titulos = [
     // { order: 'codigo', label: 'codigo', type: 'text' },
+    {order: 'gasto', label: 'gasto', type: 'number'},
     {order: 'user_id', label: 'user_id', type: 'foreign', nameid: 'userino'},
     {order: 'descripcion', label: 'descripcion', type: 'text2'},
-    {order: 'gasto', label: 'gasto', type: 'number'},
     {order: 'Consignaciona', label: 'Consignaciona', type: 'number'},
     {order: 'fechaconsig', label: 'fechaconsig', type: 'date'},
     {order: 'saldo', label: 'saldo', type: 'number'},
+    {order: 'fecha_inicial', label: 'fecha_inicial', type: 'date'},
+    {order: 'fecha_final', label: 'fecha_final', type: 'date'},
+    {order: 'numerodias', label: 'numerodias', type: 'number'},
     // {order: 'legalizacion', label: 'legalizacion', type: 'text'},
     {order: 'valor_legalizacion', label: 'valor_legalizacion', type: 'dinero'},
     {order: 'descripcion_legalizacion', label: 'descripcion_legalizacion', type: 'text'},
@@ -120,32 +124,19 @@ let classbotones = "w-6 h-6"
     <Head :title="props.title" />
     <AuthenticatedLayout>
 <!--        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" class="capitalize text-xl font-bold" />-->
+        <p class="my-6 text-lg">Se muestran los resultados cuyo saldo es mayor a cero (pendientes).</p>
         <div class="space-y-4">
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">
-<!--                    <PrimaryButton class="rounded-none" @click="data.createOpen = true"-->
-<!--                                   v-if="can(['create viatico'])">-->
-<!--                        {{ lang().button.new }}-->
-<!--                    </PrimaryButton>-->
-
-                    <Create v-if="can(['create viatico'])" :numberPermissions="props.numberPermissions"
-                            :titulos="titulos" :show="data.createOpen" @close="data.createOpen = false"
-                            :title="props.title"
-                            :losSelect=props.losSelect
-                    />
 
                     <Edit v-if="can(['update viatico'])" :titulos="titulos"
                           :numberPermissions="props.numberPermissions" :show="data.editOpen"
                           @close="data.editOpen = false"
                           :viaticoa="data.viaticoo" :title="props.title" :losSelect=props.losSelect />
-                    
-<!--                    consignar-->
                     <Aprobar v-if="can(['isAdmin'])" :titulos="titulos"
                              :numberPermissions="props.numberPermissions" :show="data.AprobarOpen"
                              @close="data.AprobarOpen = false"
-                            :route="'index2'"
                              :viaticoa="data.viaticoo" :title="props.title" :losSelect=props.losSelect />
-                    
                     <Legalizar v-if="can(['isadministrativo'])" :titulos="titulos"
                              :numberPermissions="props.numberPermissions" :show="data.LegalizarOpen"
                              @close="data.LegalizarOpen = false"
@@ -154,16 +145,23 @@ let classbotones = "w-6 h-6"
                     <Delete v-if="can(['delete viatico'])" :numberPermissions="props.numberPermissions"
                             :show="data.deleteOpen" @close="data.deleteOpen = false" :viaticoa="data.viaticoo"
                             :title="props.title" />
+                      <DeleteBulk v-if="can(['isSuper'])" :show="data.deleteBulkOpen"
+                        @close="data.deleteBulkOpen = false, data.multipleSelect = false, data.selectedId = []"
+                        :selectedId="data.selectedId" :title="props.title" />
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-<!--                <div class="grid grid-cols-3 justify-between p-2">-->
+                <div class="grid grid-cols-3 justify-between p-2">
 <!--                    <div class="flex gap-2 ">-->
 <!--                        <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet" />-->
+<!--                        <DangerButton  v-if="can(['isSuper'])" @click="data.deleteBulkOpen = true"-->
+<!--                            v-show="data.selectedId.length != 0 && can(['delete viatico'])" class="px-3 py-1.5"-->
+<!--                            v-tooltip="lang().tooltip.delete_selected">-->
+<!--                            <TrashIcon class="w-5 h-5" />-->
+<!--                        </DangerButton>-->
 <!--                    </div>-->
-<!--                    <div class="col-span-1"></div>-->
-<!--                    <div class="inline-flex ">-->
-<!--                        -->
+                    <div class="col-span-1"></div>
+                    <div class="inline-flex">
 <!--                    <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"-->
 <!--                               class="block w-4/6 md:w-3/6 lg:w-full mx-1 rounded-lg" placeholder="Descripción" />-->
 <!--                    <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search2" type="text"-->
@@ -171,8 +169,8 @@ let classbotones = "w-6 h-6"
 <!--                      <p class="text-sm -mx-1 px-4">Mostrar todos</p>-->
 <!--                        <checkbox v-if="props.numberPermissions > 8" v-model="data.params.search3"-->
 <!--                                  class="p-2 mx-12 my-3"/>-->
-<!--                    </div>-->
-<!--                </div>-->
+                    </div>
+                </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table v-if="props.total > 0" class="w-full">
                         <thead class="uppercase text-sm border-t border-gray-200 dark:border-gray-700">
@@ -235,11 +233,9 @@ let classbotones = "w-6 h-6"
 
 <!--{{claseFromController}}-->
 <!--                            <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++indexu }}</td>-->
+                            <td class="whitespace-nowrap py-2 px-2">{{ formatPesosCol(claseFromController['gasto']) }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['userino'] }}</td>
                             <td class="min-w-[440px] py-2 px-2"> {{ claseFromController['descripcion'] }}</td>
-                            <td class="whitespace-nowrap py-2 px-2">
-                                {{ formatPesosCol(claseFromController['gasto']) }}
-                            </td>
                             <td class="whitespace-nowrap py-2 px-2">
                                 <p v-for="item in claseFromController['Consignaciona']" :key="item.id" 
                                    class="whitespace-nowrap py-2 px-2">
@@ -252,9 +248,10 @@ let classbotones = "w-6 h-6"
                                     {{ formatDate(item['fecha']) }}
                                 </p>
                             </td>
-                            <td class="whitespace-nowrap py-2 px-8">
-                                {{ formatPesosCol(claseFromController['saldo']) }}
-                            </td>
+                            <td class="whitespace-nowrap py-2 px-8">{{ formatPesosCol(claseFromController['saldo']) }}</td>
+                            <td class="whitespace-nowrap py-2 px-8">{{ formatDate(claseFromController['fecha_inicial']) }}</td>
+                            <td class="whitespace-nowrap py-2 px-8">{{ formatDate(claseFromController['fecha_final']) }}</td>
+                            <td class="whitespace-nowrap py-2 px-8">{{ (claseFromController['numerodias']) }}</td>
                             
                              <td class="whitespace-nowrap py-2 px-2">
                                 <p v-for="item in claseFromController['Consignaciona']" :key="item.id" 
@@ -294,15 +291,16 @@ let classbotones = "w-6 h-6"
                             <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
                             <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
                             <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
+                            <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> <strong class="text-sm">Total saldo:</strong>  </td>
+                            <td>{{ formatPesosCol(props.totalsaldo) }}</td>
                             <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
                             <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
-                            <td><strong>Total legalizado: <br></strong> {{ formatPesosCol(totallegalizado) }}</td>
-                            <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
-                            <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
+                            <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> <strong class="text-sm">Total legalizado: </strong> </td>
+                            <td> {{ formatPesosCol(totallegalizado) }}</td>
                         </tr>
                         </tbody>
                     </table>
-                    <h2 v-else class="text-center text-2xl my-8">Todos los viáticos han sido procesados 👌</h2>
+                    <h2 v-else class="text-center text-xl my-8">Sin Registros</h2>
                 </div>
                 <div v-if="props.total > 0"
                      class="flex justify-between items-center p-2 border-t border-gray-200 dark:border-gray-700">

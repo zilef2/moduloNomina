@@ -399,8 +399,7 @@ class UserController extends Controller {
 			return back()->with('success', __('app.label.updated_successfully', ['name' => $user->name]));
 		} catch (\Throwable $th) {
 			DB::rollback();
-			zzloggingcrud::zilefLogUpdate($this,null,null, 'name');
-			Myhelp::EscribirEnLog($this, 'users','fallo la actulizacion de user');
+			zzloggingcrud::zilefLogUpdate($this,null,null, 'name',$th);
 			
 			
 			return back()->with('error', __('app.label.updated_error', ['name' => $user->name]) . $th->getMessage());

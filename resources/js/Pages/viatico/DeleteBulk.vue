@@ -18,7 +18,7 @@ const form = useForm({
 })
 
 const destory = () => {
-    form.post(route('user.destroy-bulk'), {
+    form.post(route('viatico.destroy-bulk'), {
         preserveScroll: true,
         onSuccess: () => {
             emit("close")

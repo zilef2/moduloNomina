@@ -72,8 +72,7 @@ class Myhelp
         $ListaControladoresYnombreClase = (explode('\\', get_class($thiis)));
         $nombreC = end($ListaControladoresYnombreClase);
         if (!$critico) {
-            $ElMensaje = $mensaje != '' ? ' Mensaje: ' . $mensaje : ' Sin mensaje ';
-            $ElMensaje = 'Vista: ' . $nombreC . 'U:' . self::AuthU()->name . ' | clase: ' . $clase . '|| ' . ' Mensaje: ' . $ElMensaje;
+            $ElMensaje = $nombreC . ' ::' . self::AuthU()->name . ' | clase: ' . $clase;
             if ($permissions == 'admin' || $permissions == 'superadmin') {
                 Log::channel('soloadmin')->info($ElMensaje);
             } else {

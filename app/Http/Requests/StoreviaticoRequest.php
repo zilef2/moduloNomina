@@ -11,7 +11,7 @@ class StoreviaticoRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,13 @@ class StoreviaticoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+			'centro_costo_id' => 'required',
+			'user_id' => 'required',
+			'descripcion' => 'required',
+			'gasto' => 'required',
+			'fecha_inicial' => 'required',
+			'fecha_final' => 'required',
+			'numerodias' => 'required',
         ];
     }
 }

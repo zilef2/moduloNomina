@@ -5,6 +5,10 @@ return [
 		'zona' => 'Zona',
         
         //cotizacion
+        'fecha_inicial' => 'Fecha inicial',
+        'fecha_final' => 'Fecha final',
+        'numerodias' => 'Numero de días',
+		
         'fecha_solicitud' => 'Fecha solicitud',
         'estado_cliente' => 'Estado cliente',
         'estado' => 'Estado',

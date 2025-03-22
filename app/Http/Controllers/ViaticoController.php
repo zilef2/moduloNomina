@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\helpers\zzloggingcrud;
+use App\Http\Requests\StoreviaticoRequest;
 use App\Jobs\EnviarViaticoJob;
 use App\Mail\MailViaticoGenerado;
 use App\Models\CentroCosto;
@@ -12,6 +13,7 @@ use App\Models\viatico;
 use App\helpers\Myhelp;
 use App\helpers\MyModels;
 use Carbon\Carbon;
+use DateTime;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,7 +43,7 @@ class ViaticoController extends Controller {
 		
 		$viaticos = $this->Filtros($request);
 		if ($numberPermissions === 9) {
-			$viaticos = $this->FiltrosCarlos($request, $viaticos);
+			$viaticos = $this->FiltrosCarlos($request);
 		}
 		//        else $viaticos = $this->FiltrosAdministrativos($request,$viaticos);
 		
@@ -168,7 +170,7 @@ class ViaticoController extends Controller {
 	//todo: tosync
 	
 	private function totalsaldo(): int {
-		return (int)viatico::all()->sum('valor_consig');
+		return (int)viatico::all()->sum('saldo');
 	}
 	
 	private function totallegalizado(): int {
@@ -214,40 +216,45 @@ class ViaticoController extends Controller {
 	
 	//fin store functions
 	
-	public function store(Request $request): RedirectResponse {
-		
-		$permissions = Myhelp::EscribirEnLog($this, ' Begin STORE:viaticos');
+	public function store(StoreviaticoRequest $request): RedirectResponse {
+		Myhelp::EscribirEnLog($this, ' Begin STORE:viaticos');
 		DB::beginTransaction();
-		//        $no_nada = $request->no_nada['id'];
 		$myuser = Myhelp::AuthU();
 		$cuantosViaticos = count($request->centro_costo_id);
 		$total = 0;
-		
+		$paraellog = [];
 		foreach ($request->centro_costo_id as $index => $centro) {
-			$viatico = viatico::create([
-				                           'centro_costo_id' => $centro['id'],
-				                           'user_id'         => $request->user_id[$index]['id'],
-				                           'descripcion'     => $request->descripcion[$index],
-				                           'gasto'           => $request->gasto[$index],
-			                           ]);
+			
+			$date = new DateTime($request->fecha_inicial[$index][0]);
+			$ini = $date->format('Y-m-d');
+			$date = new DateTime($request->fecha_inicial[$index][1]);
+			$fini = $date->format('Y-m-d');
+			
+			$thearray = [
+				'centro_costo_id' => $centro['id'],
+				'user_id'         => $request->user_id[$index]['id'],
+				'descripcion'     => $request->descripcion[$index],
+				'gasto'           => $request->gasto[$index],
+				'fecha_inicial'   => $ini,
+				'fecha_final'     => $fini,
+				'numerodias'      => $request->numerodias[$index],
+				'saldo'      => $request->gasto[$index],
+			];
+			$paraellog[] = implode(",", $thearray);
+			$viatico = viatico::create($thearray);
+			
 			$total += $request->gasto[$index];
 			
 		}
-//		$request->merge(['user_id' => $myuser->id]);
-//		$request->merge(['centro_costo_id' => $request->centro_costo_id['id']]);
-//		$request->merge(['saldo' => $request->gasto]);
-		//        $request->merge(['fecha_legalizacion' => Carbon::now()]);
-//		$viatico = viatico::create($request->all());
 		
-		$mensaje = $this->EnviaralJefe($request, $myuser,$cuantosViaticos,$total);
+		$mensaje = $this->EnviaralJefe($request, $myuser, $cuantosViaticos, $total);
 		
 		if ($mensaje === '-') {
 			return back()->with('error', 'El mensaje no fue enviado');
 		}
 		else {
-			
-			Myhelp::EscribirEnLog($this, 'STORE:viaticos EXITOSO', 'viatico id:' . $viatico->id . ' | ' . $viatico->nombre, false);
 			DB::commit();
+			zzloggingcrud::zilefSaveArrayLogTrace($paraellog);
 			
 			
 			return back()->with('success', $mensaje . __('app.label.created_successfully', ['name' => $viatico->nombre]));
@@ -262,7 +269,7 @@ class ViaticoController extends Controller {
 	 * @param User|null $myuser
 	 * @return string
 	 */
-	public function EnviaralJefe(Request $request, ?User $myuser,$cuantosViaticos,$total): string {
+	public function EnviaralJefe(Request $request, ?User $myuser, $cuantosViaticos, $total): string {
 		$jefe = User::Where('name', 'Carlos Daniel Anaya Barrios')->first();
 		if ($jefe) {
 			$detalle = [
@@ -274,7 +281,8 @@ class ViaticoController extends Controller {
 				EnviarViaticoJob::dispatch($jefe->email, $detalle)->delay(now()->addSeconds(5));
 				EnviarViaticoJob::dispatch('ajelof2@gmail.com', $detalle)->delay(now()->addSeconds(5));
 				$mensaje = "Correo enviado y Viatico ";
-			}else{
+			}
+			else {
 				EnviarViaticoJob::dispatch('alejofg2@gmail.com', $detalle)->delay(now()->addSeconds(5));
 				$mensaje = "Correo enviado solo a alejo ";
 				
@@ -363,8 +371,8 @@ class ViaticoController extends Controller {
 	//FIN : STORE - UPDATE - DELETE
 	
 	public function getSaldo($viatico): int {
-		$Int_viaticoSuma = (int)consignarViatico::Where('viatico_id', $viatico->id)->sum('valor_consig');
-		$saldo = (int)$viatico->gasto - $Int_viaticoSuma;
+		$Int_consignaciones = (int)consignarViatico::Where('viatico_id', $viatico->id)->sum('valor_consig');
+		$saldo = (int)$viatico->gasto - $Int_consignaciones;
 		
 		
 		return $saldo;
@@ -418,12 +426,23 @@ class ViaticoController extends Controller {
 	
 	public function destroyBulk(Request $request) {
 		zzloggingcrud::zilefLogTrace();
+		$permissions = Myhelp::AuthU()->roles->pluck('name')[0];
+		$numberpermission = MyModels::getPermissionToNumber($permissions);
+		if ($numberpermission > 9) {
+			
+			$numdestruidos = count($request->id);
+			$viatico = viatico::whereIn('id', $request->id);
+			$viatico->delete();
+			
+			zzloggingcrud::zilefLogBulk('viaticos', $numdestruidos);
+			
+			
+			return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
+		}
 		
-		$viatico = viatico::whereIn('id', $request->id);
-		$viatico->delete();
 		
+		return back()->with('error', 'Acción desautorizada');
 		
-		return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
 	}
 	
 }

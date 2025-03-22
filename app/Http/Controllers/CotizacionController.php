@@ -294,7 +294,7 @@ class CotizacionController extends Controller {
 	public function edit($id) {}
 	
 	public function update2(Request $request, $id) {
-		$numberPermissions = zzloggingcrud::zilefLogTrace();
+		zzloggingcrud::zilefLogTrace();
 		DB::beginTransaction();
 		try {
 			$this->SonSelect($request, [
@@ -311,6 +311,8 @@ class CotizacionController extends Controller {
 				                              'ValidoParaFacturar' => 1,
 				                              'zona_id'            => $cotizacion->zona_id,
 			                              ]);
+			\Illuminate\Support\Facades\Log::info('Creando centrocosto para cotización ID: ' . $id);
+
 			$request->merge(['centro_costo_id' => $centro->id]);
 			$request->merge(['fecha_aprobacion_cot' => Carbon::now()]);
 			$cotizacion->update($request->all());
@@ -319,11 +321,11 @@ class CotizacionController extends Controller {
 			zzloggingcrud::zilefLogUpdate($this, $cotizacion, $original, 'numero_cot');
 			
 			
-			//        Myhelp::EscribirEnLog($this, 'UPDATE:cotizacions EXITOSO', 'cotizacion id:' . $cotizacion->id . ' | ' . $cotizacion->numero_cot, false);
 			return back()->with('success', __('app.label.updated_successfully', ['name' => $cotizacion->numero_cot]));
 		} catch (\Throwable $th) {
 			DB::rollback();
-			zzloggingcrud::zilefLogUpdate($this, null, null, 'numero_cot');
+			zzloggingcrud::zilefLogUpdate($this, null, null, 'numero_cot', $th);
+			
 			
 			return back()->with('error', __('app.label.created_error', ['name' => __('app.label.project')]) . $th->getMessage());
 		}

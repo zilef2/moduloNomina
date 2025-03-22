@@ -106,6 +106,9 @@ class CopyUserPages extends Command {
         Artisan::call('lang:u ' . $modelName);
 
 
+        $EsValidoSeguir = $this->ValidatePages($plantillaActual, $modelName);
+
+
         $RealizoVueConExito = $this->MakeVuePages($plantillaActual, $modelName);
         $mensaje = $RealizoVueConExito ? self::getMessage('generando') . ' Vuejs' . self::MSJ_EXITO
             : self::getMessage('generando') . ' Vuejs' . self::getMessage('fallo');
@@ -132,6 +135,11 @@ class CopyUserPages extends Command {
         $sourcePath = base_path('resources/js/Pages/' . $plantillaActual);
         $destinationPath = base_path("resources/js/Pages/$modelName");
 
+        // Add this validation
+        if (!File::exists($sourcePath)) {
+            $this->error("La carpeta de origen '$plantillaActual' no existe.");
+            return false;
+        }
         if (File::exists($destinationPath)) {
             $this->warn("La carpeta de destino '$modelName' ya existe.");
             return false;
@@ -143,6 +151,11 @@ class CopyUserPages extends Command {
     private function MakeControllerPages($plantillaActual, $modelName): bool {
         $folderMayus = ucfirst($modelName);
         $sourcePath = base_path('app/Http/Controllers/' . $plantillaActual . 'Controller.php');
+        if (!File::exists($sourcePath)) {
+            $this->error("El controlador de origen '$sourcePath' no existe.");
+            return false;
+        }
+
         $destinationPath = base_path("app/Http/Controllers/" . $folderMayus . "sController.php");
 
         if (File::exists($destinationPath)) {
@@ -152,6 +165,34 @@ class CopyUserPages extends Command {
         File::copyDirectory($sourcePath, $destinationPath);
         $this->info("- " . $sourcePath);
         $this->info("- " . $destinationPath);
+
+        return true;
+    }
+    private function ExisteOno($primeraParte, $plantillaActual, $ObjetoEnMira): bool {
+        $sourcePath = base_path($primeraParte . $plantillaActual . $ObjetoEnMira);
+
+        if (!File::exists($sourcePath)) {
+            $this->error("El $ObjetoEnMira de origen '$sourcePath' no existe.");
+            return false;
+        }
+        return true;
+    }
+    private function ValidatePages($plantillaActual, $modelName): bool {
+        $folderMayus = ucfirst($modelName);
+
+        //validaciones del controlador
+        $ObjetoEnMira = 'Controller.php';
+        $RutaDelArchivo = 'app/Http/Controllers/';
+        $controllerExiste = $this->ExisteOno($RutaDelArchivo,$plantillaActual,$ObjetoEnMira);
+        if(!$controllerExiste) return false;
+
+        //vue 
+        $ObjetoEnMira = '';
+        $RutaDelArchivo = 'resources/js/Pages/';
+        $vueExiste = $this->ExisteOno($RutaDelArchivo,$plantillaActual,$ObjetoEnMira);
+        if(!$vueExiste) return false;
+
+        //todo: falta los app.es y demas
 
         return true;
     }

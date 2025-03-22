@@ -99,6 +99,7 @@ Route::middleware('auth', 'verified')->group(function () {
 
     Route::resource("/cotizacion", CotizacionController::class);
     Route::post('/cotizacion/destroy-bulk', [CotizacionController::class, 'destroyBulk'])->name('cotizacion.destroy-bulk');
+    Route::post('/viatico/destroy-bulk', [ViaticoController::class, 'destroyBulk'])->name('viatico.destroy-bulk');
     Route::put('/cotiza/{id}', [CotizacionController::class, 'update2'])->name('cotizacion.update2');
     Route::put('/cotiza3/{id}', [CotizacionController::class, 'update3'])->name('cotizacion.update3');
     Route::get('/deuda', [DeudaSingularController::class, 'index'])->name('deuda.index');
@@ -115,6 +116,7 @@ Route::middleware('auth', 'verified')->group(function () {
     
     Route::put('/updatePago/{id}', [\App\Http\Controllers\DesarrolloController::class, 'updatePago'])->name('updatePago');
 	Route::resource("/legalizacionviatico", \App\Http\Controllers\LegalizacionviaticoController::class);
+    Route::get('/obtenerCentroCostosUltimaQuincena', [ReportesController::class, 'obtenerCentroCostosUltimaQuincena'])->name('obtenerCentroCostosUltimaQuincena');
 	//aquipues
 }); //fin verified
 

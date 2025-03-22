@@ -572,7 +572,7 @@ class CentroCostosController extends Controller {
 			zzloggingcrud::zilefLogUpdate($this, null, null, 'nombre', $th);
 			
 			
-			return back()->with('error', __('app.label.created_error', ['name' => __('app.label.centroCostos')]) . $mensajeErrorTH);
+			return back()->with('error', __('app.label.created_error', ['name' => __('app.label.centroCostos')]));
 		}
 	}
 	

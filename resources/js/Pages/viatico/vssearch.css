@@ -1,9 +1,9 @@
 :deep(.v-select) {
-    --vs-controls-color: #ffffff; /* Blanco */
+    --vs-controls-color: #0f24ab; /* Blanco */
     --vs-border-color: #dde1ee; /* Azul oscuro */
     --vs-border-width: 1px;
 
-    --vs-dropdown-bg: #b4bfe5; /* Azul intenso */
+    --vs-dropdown-bg: #aeaeaf; /* Azul intenso */
     --vs-dropdown-color: #000000; /* Texto blanco */
     --vs-dropdown-option-color: #000000; /* Texto blanco en opciones */
 
