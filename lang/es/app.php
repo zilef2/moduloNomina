@@ -3,6 +3,8 @@
 return [
     'label' => [
 		'zona' => 'Zona',
+		'Totalsolicitado' => 'Solicitado',
+		'saldo_sol' => 'Saldo',
         
         //cotizacion
         'fecha_inicial' => 'Fecha inicial',
@@ -66,6 +68,11 @@ return [
 		'cuota' => 'Cuota',
 		'final' => 'Final',
 		'legalizacionviatico' => 'Legalizacion',
+		'solicitud_viatico' => 'Solicitud viático',
+		'Solicitante' => 'Solicitante',
+		'Fechasol' => 'Fecha solicitud',
+		'Ciudad' => 'Ciudad',
+		'ObraServicio' => 'Obra o Servicio',
 		//aquipues
         
         'viatico' => 'viático',
@@ -267,15 +274,16 @@ return [
 		'estado' => 'estado',
 		'pagodesarrollo' => 'Pagodesarrollo',
 		'valor' => 'valor',
-		'fecha' => 'fecha',
-		'cuota' => 'cuota',
-		'final' => 'final',
-		'legalizacionviatico' => 'Legalizacionviatico',
-		'legalizacionviatico' => 'legalizacionviatico',
+		'legalizacionviatico' => 'Legalizacion viático',
 		'valor_legalizacion' => 'valor_legalizacion',
 		'fecha' => 'fecha',
 		'cuota' => 'cuota',
 		'final' => 'final',
+		'solicitud_viatico' => 'Solicitud viatico',
+		'Solicitante' => 'Solicitante',
+		'Fechasol' => 'Fechasol',
+		'Ciudad' => 'Ciudad',
+		'ObraServicio' => 'Obra o Servicio',
 		//aquipues
     ],
     'button' => [
@@ -423,8 +431,8 @@ return [
 
         'delete viatico' => 'Borrar viáticos',
         'update viatico' => 'Actualizar viáticos',
-        'update2 viatico' => 'Actualizar 2 viáticos',
-        'update3 viatico' => 'Actualizar 3 viáticos',
+        'update2 viatico' => 'Consignar viáticos',
+        'update3 viatico' => 'Legalizar viáticos',
         'read viatico' => 'Leer viáticos',
         'create viatico' => 'Crear viáticos',
 

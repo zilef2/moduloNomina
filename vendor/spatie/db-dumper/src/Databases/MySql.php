@@ -3,6 +3,7 @@
 namespace Spatie\DbDumper\Databases;
 
 use Spatie\DbDumper\DbDumper;
+use Spatie\DbDumper\Exceptions\CannotSetParameter;
 use Spatie\DbDumper\Exceptions\CannotStartDump;
 use Symfony\Component\Process\Process;
 
@@ -199,6 +200,17 @@ class MySql extends DbDumper
         return $this;
     }
 
+    public function useAppendMode(): self
+    {
+        if ($this->compressor) {
+            throw CannotSetParameter::conflictingParameters('append mode', 'compress');
+        }
+
+        $this->appendMode = true;
+
+        return $this;
+    }
+
     public function getDumpCommand(string $dumpFile, string $temporaryCredentialsFile): string
     {
         $quote = $this->determineQuote();
@@ -207,7 +219,13 @@ class MySql extends DbDumper
             "{$quote}{$this->dumpBinaryPath}mysqldump{$quote}",
             "--defaults-extra-file=\"{$temporaryCredentialsFile}\"",
         ];
+        $finalDumpCommand = $this->getCommonDumpCommand($command);
 
+        return $this->echoToFile($finalDumpCommand, $dumpFile);
+    }
+
+    public function getCommonDumpCommand(array $command): string
+    {
         if (! $this->createTables) {
             $command[] = '--no-create-info';
         }
@@ -278,7 +296,7 @@ class MySql extends DbDumper
             $finalDumpCommand .= " | {$sedCommand}";
         }
 
-        return $this->echoToFile($finalDumpCommand, $dumpFile);
+        return $finalDumpCommand;
     }
 
     public function getContentsOfCredentialsFile(): string

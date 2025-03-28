@@ -10,14 +10,13 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class LogFolder
 {
     public string $identifier;
-
     protected mixed $files;
 
     public function __construct(
         public string $path,
         mixed $files,
     ) {
-        $this->identifier = Utils::shortMd5($path);
+        $this->identifier = Utils::shortMd5(Utils::getLocalIP().':'.$path);
         $this->files = new LogFileCollection($files);
     }
 
@@ -114,7 +113,7 @@ class LogFolder
         // just in case we have created it before.
         @unlink($zipPath);
 
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
 
         if ($zip->open($zipPath, \ZipArchive::CREATE) !== true) {
             throw new \Exception('Could not open '.$zipPath.' for writing.');

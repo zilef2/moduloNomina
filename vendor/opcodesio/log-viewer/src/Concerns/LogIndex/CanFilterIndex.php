@@ -3,21 +3,17 @@
 namespace Opcodes\LogViewer\Concerns\LogIndex;
 
 use Carbon\CarbonInterface;
-use Opcodes\LogViewer\Level;
 
 trait CanFilterIndex
 {
     protected ?int $filterFrom = null;
-
     protected ?int $filterTo = null;
-
-    protected ?array $filterLevels = null;
-
+    protected ?array $includeLevels = null;
+    protected ?array $excludeLevels = null;
     protected ?int $limit = null;
-
     protected ?int $skip = null;
 
-    public function setQuery(string $query = null): self
+    public function setQuery(?string $query = null): self
     {
         if ($this->query !== $query) {
             $this->query = $query;
@@ -33,7 +29,7 @@ trait CanFilterIndex
         return $this->query;
     }
 
-    public function forDateRange(int|CarbonInterface $from = null, int|CarbonInterface $to = null): self
+    public function forDateRange(int|CarbonInterface|null $from = null, int|CarbonInterface|null $to = null): self
     {
         if ($from instanceof CarbonInterface) {
             $from = $from->timestamp;
@@ -49,32 +45,46 @@ trait CanFilterIndex
         return $this;
     }
 
-    public function forLevels(string|array $levels = null): self
+    public function forLevels(string|array|null $levels = null): self
     {
         if (is_string($levels)) {
             $levels = [$levels];
         }
 
         if (is_array($levels)) {
-            $this->filterLevels = array_map('strtolower', array_filter($levels));
+            $this->includeLevels = array_filter($levels);
         } else {
-            $this->filterLevels = null;
+            $this->includeLevels = null;
         }
 
         return $this;
     }
 
-    public function forLevel(string $level = null): self
+    public function exceptLevels(string|array|null $levels = null): self
+    {
+        if (is_null($levels)) {
+            $this->excludeLevels = null;
+        } elseif (is_array($levels)) {
+            $this->excludeLevels = $levels;
+        } else {
+            $this->excludeLevels = [$levels];
+        }
+
+        return $this;
+    }
+
+    public function forLevel(?string $level = null): self
     {
         return $this->forLevels($level);
     }
 
-    public function getSelectedLevels(): ?array
+    public function isLevelSelected(string $level): bool
     {
-        return $this->filterLevels ?? Level::caseValues();
+        return (is_null($this->includeLevels) || in_array($level, $this->includeLevels))
+            && (is_null($this->excludeLevels) || ! in_array($level, $this->excludeLevels));
     }
 
-    public function skip(int $skip = null): self
+    public function skip(?int $skip = null): self
     {
         $this->skip = $skip;
 
@@ -86,7 +96,7 @@ trait CanFilterIndex
         return $this->skip;
     }
 
-    public function limit(int $limit = null): self
+    public function limit(?int $limit = null): self
     {
         $this->limit = $limit;
 
@@ -107,6 +117,7 @@ trait CanFilterIndex
     protected function hasFilters(): bool
     {
         return $this->hasDateFilters()
-            || isset($this->filterLevels);
+            || isset($this->includeLevels)
+            || isset($this->excludeLevels);
     }
 }

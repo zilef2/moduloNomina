@@ -44,7 +44,8 @@ const destory = () => {
                 <div class="mt-6 flex justify-end">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
                     </SecondaryButton>
-                    <DangerButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
+                    <DangerButton class="ml-3" 
+                                  :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                         @click="destory">
                         {{ form.processing ? lang().button.delete + '...' : lang().button.delete }}
                     </DangerButton>

@@ -15,8 +15,7 @@ class LocationFake
     public function __construct(
         protected LocationManager $manager,
         protected array $requests = [],
-    ) {
-    }
+    ) {}
 
     /**
      * Forward missing method calls to the location manager.
@@ -29,7 +28,7 @@ class LocationFake
     /**
      * Get a fake location instance.
      */
-    public function get(string $ip = null): Position|bool
+    public function get(?string $ip = null): Position|bool
     {
         $ip ??= '127.0.0.1';
 

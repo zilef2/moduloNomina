@@ -5,17 +5,14 @@ namespace Opcodes\LogViewer;
 class LogIndexChunk
 {
     protected int $earliestTimestamp;
-
     protected int $latestTimestamp;
-
     protected array $levelCounts = [];
 
     public function __construct(
         public array $data,
         public int $index,
         public int $size,
-    ) {
-    }
+    ) {}
 
     public static function fromDefinitionArray(array $definition): LogIndexChunk
     {

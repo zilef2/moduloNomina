@@ -3,8 +3,8 @@
 namespace Opcodes\LogViewer\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use Opcodes\LogViewer\Facades\LogViewer;
 use Opcodes\LogViewer\Http\Resources\LogFileResource;
 
@@ -12,8 +12,6 @@ class FilesController
 {
     public function index(Request $request)
     {
-        JsonResource::withoutWrapping();
-
         $files = LogViewer::getFiles();
 
         if ($request->query('direction', 'desc') === 'asc') {
@@ -25,13 +23,26 @@ class FilesController
         return LogFileResource::collection($files);
     }
 
-    public function download(string $fileIdentifier)
+    public function requestDownload(Request $request, string $fileIdentifier)
     {
         $file = LogViewer::getFile($fileIdentifier);
 
         abort_if(is_null($file), 404);
 
         Gate::authorize('downloadLogFile', $file);
+
+        return response()->json([
+            'url' => URL::temporarySignedRoute(
+                'log-viewer.files.download',
+                now()->addMinute(),
+                ['fileIdentifier' => $fileIdentifier]
+            ),
+        ]);
+    }
+
+    public function download(string $fileIdentifier)
+    {
+        $file = LogViewer::getFile($fileIdentifier);
 
         return $file->download();
     }

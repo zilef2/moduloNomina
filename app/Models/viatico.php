@@ -15,8 +15,6 @@ class viatico extends Model {
     protected $appends = [
         'userino',
         'centrou',
-        'Consignaciona',
-        'Totallegalizadou',
     ];
 
     protected $fillable = [
@@ -33,6 +31,7 @@ class viatico extends Model {
 
         'user_id',
         'centro_costo_id',
+        'solicitud_viatico_id',
     ];
 
 
@@ -57,28 +56,20 @@ class viatico extends Model {
         return $this->centro ? $this->centro->nombre : '';
     }//tiene que existir la funcion centro
 
-    public function getConsignacionaAttribute(): array {
-        return $this->consignacion()->get()->map(function ($item) {
-            return [
-                'viatic_id' => $this->id,
-                'consignacion_id' => $item->id,
-                'valor' => $item->valor_consig,
-                'fecha' => $item->created_at,
-                'fecha_legalizacion' => $item->fecha_legalizado ?? '',
-                'valor_legalizacion' => $item->valor_legalizado ?? '',
-                'descripcion_legalizacion' => $item->descripcion_legalizacion ?? '',
-            ];
-        })->toArray();
-
-    }
-    public function getTotallegalizadouAttribute(): int {
-//        dd(
-//          $this->consignacion()->get(),  
-//          $this->consignacion()->get()[0]->getattributes(),  
-//          $this->consignacion()->get()->sum('valor_legalizado'),  
-//        );
-        return $this->consignacion()->get()->sum('valor_legalizado');
-    }
+//    public function getConsignacionaAttribute(): array {
+//        return $this->consignacion()->get()->map(function ($item) {
+//            return [
+//                'viatic_id' => $this->id,
+//                'consignacion_id' => $item->id,
+//                'valor' => $item->valor_consig,
+//                'fecha' => $item->created_at,
+//                'fecha_legalizacion' => $item->fecha_legalizado ?? '',
+//                'valor_legalizacion' => $item->valor_legalizado ?? '',
+//                'descripcion_legalizacion' => $item->descripcion_legalizacion ?? '',
+//            ];
+//        })->toArray();
+//    }
+    
 
 //    public function getFechaconsigAttribute(): array {
 //        $arrayConsignaciones = $this->consignacion->pluck('created_at')->toarray();

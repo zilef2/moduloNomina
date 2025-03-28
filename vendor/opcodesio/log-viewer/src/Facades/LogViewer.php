@@ -9,11 +9,13 @@ use Opcodes\LogViewer\LogFile;
 use Opcodes\LogViewer\LogFileCollection;
 use Opcodes\LogViewer\LogFolder;
 use Opcodes\LogViewer\LogFolderCollection;
+use Opcodes\LogViewer\Readers\LogReaderInterface;
 
 /**
  * @see \Opcodes\LogViewer\LogViewerService
  *
  * @method static string version()
+ * @method static string timezone()
  * @method static bool assetsAreCurrent()
  * @method static bool supportsHostsFeature()
  * @method static void resolveHostsUsing(callable $callback)
@@ -31,9 +33,12 @@ use Opcodes\LogViewer\LogFolderCollection;
  * @method static void setMaxLogSize(int $bytes)
  * @method static int maxLogSize()
  * @method static int lazyScanChunkSize()
- * @method static string laravelRegexPattern()
- * @method static string logMatchPattern()
+ * @method static float lazyScanTimeout()
  * @method static string basePathForLogs()
+ * @method static void extend(string $type, string $class)
+ * @method static void useLogFileClass(string $class)
+ * @method static void useLogReaderClass(string $class)
+ * @method static string|LogReaderInterface logReaderClass()
  */
 class LogViewer extends Facade
 {

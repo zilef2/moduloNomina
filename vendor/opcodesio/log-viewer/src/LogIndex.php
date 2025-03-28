@@ -8,21 +8,18 @@ use Opcodes\LogViewer\Utils\Utils;
 
 class LogIndex
 {
-    use Concerns\LogIndex\HasMetadata;
     use Concerns\LogIndex\CanCacheIndex;
     use Concerns\LogIndex\CanFilterIndex;
     use Concerns\LogIndex\CanIterateIndex;
     use Concerns\LogIndex\CanSplitIndexIntoChunks;
+    use Concerns\LogIndex\HasMetadata;
     use Concerns\LogIndex\PreservesIndexingProgress;
 
-    const DEFAULT_CHUNK_SIZE = 20_000;
+    const DEFAULT_CHUNK_SIZE = 50_000;
 
     public string $identifier;
-
     protected int $nextLogIndexToCreate;
-
     protected int $lastScannedFilePosition;
-
     protected int $lastScannedIndex;
 
     public function __construct(
@@ -33,7 +30,7 @@ class LogIndex
         $this->loadMetadata();
     }
 
-    public function addToIndex(int $filePosition, int|CarbonInterface $timestamp, string $severity, int $index = null): int
+    public function addToIndex(int $filePosition, int|CarbonInterface $timestamp, string $severity, ?int $index = null): int
     {
         $logIndex = $index ?? $this->nextLogIndexToCreate ?? 0;
 
@@ -78,7 +75,7 @@ class LogIndex
         return null;
     }
 
-    public function get(int $limit = null): array
+    public function get(?int $limit = null): array
     {
         $results = [];
         $itemsAdded = 0;
@@ -121,7 +118,7 @@ class LogIndex
                 }
 
                 foreach ($tsIndex as $level => $levelIndex) {
-                    if (isset($this->filterLevels) && ! in_array($level, $this->filterLevels)) {
+                    if (! $this->isLevelSelected($level)) {
                         continue;
                     }
 
@@ -160,7 +157,7 @@ class LogIndex
         return $results;
     }
 
-    public function getFlatIndex(int $limit = null): array
+    public function getFlatIndex(?int $limit = null): array
     {
         $results = [];
         $itemsAdded = 0;
@@ -200,7 +197,7 @@ class LogIndex
                 $itemsWithinThisTimestamp = [];
 
                 foreach ($tsIndex as $level => $levelIndex) {
-                    if (isset($this->filterLevels) && ! in_array($level, $this->filterLevels)) {
+                    if (! $this->isLevelSelected($level)) {
                         continue;
                     }
 
@@ -241,18 +238,26 @@ class LogIndex
 
     public function getLevelCounts(): Collection
     {
-        $counts = collect(Level::caseValues())->mapWithKeys(fn ($case) => [$case => 0]);
+        $counts = collect([]);
 
         if (! $this->hasDateFilters()) {
             // without date filters, we can use a faster approach
             foreach ($this->getChunkDefinitions() as $chunkDefinition) {
                 foreach ($chunkDefinition['level_counts'] as $severity => $count) {
+                    if (! $counts->has($severity)) {
+                        $counts[$severity] = 0;
+                    }
+
                     $counts[$severity] += $count;
                 }
             }
         } else {
             foreach ($this->get() as $timestamp => $tsIndex) {
                 foreach ($tsIndex as $severity => $logIndex) {
+                    if (! $counts->has($severity)) {
+                        $counts[$severity] = 0;
+                    }
+
                     $counts[$severity] += count($logIndex);
                 }
             }
@@ -261,19 +266,11 @@ class LogIndex
         return $counts;
     }
 
-    /**
-     * @deprecated Will be removed in v2.0. Please use LogIndex::count()
-     */
-    public function total(): int
-    {
-        return $this->count();
-    }
-
     public function count(): int
     {
         return array_reduce($this->getChunkDefinitions(), function ($sum, $chunkDefinition) {
             foreach ($chunkDefinition['level_counts'] as $level => $count) {
-                if (! isset($this->filterLevels) || in_array($level, $this->filterLevels)) {
+                if ($this->isLevelSelected($level)) {
                     $sum += $count;
                 }
             }

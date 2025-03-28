@@ -37,10 +37,15 @@ class CopyUserPages extends Command {
      protected function generateAttributes(): array {
         // text // number // dinero // date // datetime // foreign
         return [
-            'valor_legalizacion' => 'integer',
-            'fecha' => 'date',
-            'cuota' => 'integer',
-            'final' => 'integer',
+            'Solicitante' => 'text',
+            'Fechasol' => 'date',
+            'Ciudad' => 'text',
+            'ObraServicio' => 'text',
+//            'Transporte' => 'text',
+//            'Alimentacion' => 'text',
+//            'Hidratacion' => 'text',
+//            'Estadia' => 'text',
+//            'Cajamenor' => 'text',
         ];
 
         /*
@@ -53,7 +58,7 @@ class CopyUserPages extends Command {
     }
     protected function generateForeign(): array {
         return [
-//            'viatico_id' => 'viatico_id',
+            'user_id' => 'user_id',
         ];
     }
     

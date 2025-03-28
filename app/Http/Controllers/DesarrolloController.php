@@ -85,7 +85,7 @@ class DesarrolloController extends Controller {
                               'order'
                           ])) {
             $desarrollos = $desarrollos->orderBy($request->field, $request->order);
-        } else $desarrollos = $desarrollos->orderBy('updated_at', 'DESC');
+        } else $desarrollos = $desarrollos->orderBy('created_at', 'DESC');
 
         $desarrollos = $this->Mapear($desarrollos);
 

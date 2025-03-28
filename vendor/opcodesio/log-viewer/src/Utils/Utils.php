@@ -6,6 +6,8 @@ use Opcodes\LogViewer\Exceptions\InvalidRegularExpression;
 
 class Utils
 {
+    private static string $_cachedLocalIP;
+
     /**
      * Get a human-friendly readable string of the number of bytes provided.
      */
@@ -74,14 +76,48 @@ class Utils
         return substr(md5($content), -$length, $length);
     }
 
-    public static function glob_recursive($pattern, $flags = 0): bool|array
+    public static function glob_recursive($pattern, $flags = 0): array
     {
-        $files = glob($pattern, $flags);
+        $files = glob($pattern, $flags) ?: [];
+        $folders = glob(dirname($pattern).'/*', GLOB_ONLYDIR | GLOB_NOSORT) ?: [];
 
-        foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
+        foreach ($folders as $dir) {
             $files = array_merge($files, static::glob_recursive($dir.'/'.basename($pattern), $flags));
         }
 
         return $files;
+    }
+
+    public static function getLocalIP(bool $cached = true): string
+    {
+        if (isset(self::$_cachedLocalIP) && $cached) {
+            return self::$_cachedLocalIP;
+        }
+
+        if (isset($_SERVER['SERVER_ADDR'])) {
+            self::$_cachedLocalIP = $_SERVER['SERVER_ADDR'];
+        } else {
+            $os = php_uname('s');
+
+            if (stripos($os, 'Linux') !== false) {
+                $localIP = shell_exec("hostname -I | awk '{print $1}'"); // Linux systems
+            } elseif (stripos($os, 'Darwin') !== false) {
+                $localIP = shell_exec("ifconfig | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}' | head -n 1"); // macOS
+            } else {
+                $localIP = gethostbyname(gethostname()); // Fallback method
+            }
+
+            self::$_cachedLocalIP = trim($localIP ?? '');
+        }
+
+        return self::$_cachedLocalIP;
+    }
+
+    /**
+     * Used for testing only. Do not use in your code.
+     */
+    public static function setCachedLocalIP(string $ip): void
+    {
+        self::$_cachedLocalIP = $ip;
     }
 }

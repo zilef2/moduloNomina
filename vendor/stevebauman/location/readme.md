@@ -10,6 +10,8 @@ Retrieve a visitor's location from their IP address using various services (onli
 <a href="https://packagist.org/packages/stevebauman/location"><img src="https://img.shields.io/packagist/l/stevebauman/location.svg?style=flat-square"></a>
 </p>
 
+## Index
+
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -115,6 +117,23 @@ Location::fake([
         // ...
     ]),
     '192.168.1.1' => Position::make([
+        'countryName' => 'Canada',
+        'countryCode' => 'CA',
+        // ...
+    ]),
+]);
+```
+
+You may also use an asterisk to fake several IP patterns:
+
+```php
+Location::fake([
+    '192.123.*.*' => Position::make([
+        'countryName' => 'United States',
+        'countryCode' => 'US',
+        // ...
+    ]),
+    '192.456.*.*' => Position::make([
         'countryName' => 'Canada',
         'countryCode' => 'CA',
         // ...

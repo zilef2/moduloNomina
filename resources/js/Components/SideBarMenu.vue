@@ -26,11 +26,12 @@ const ButtonsAdministrativo = [ //SAME AS WEB.PHP
     'user',
     'role',
     'cotizacion',
-    'viatico',
+    // 'viatico',
 	// 'consignarViatico',
 	'material',
 	'zona',
 	// 'legalizacionviatico',
+	'solicitud_viatico',
 	//aquipuesSide
 ];
 const ButtonsInformes = [ //SAME AS WEB.PHP
@@ -137,36 +138,36 @@ const ButtonsInformes = [ //SAME AS WEB.PHP
                 </li>
             </div>
         </ul>
-        <div class="mt-1">
-            <button @click="toggleContent4" v-show="can(['isAdmin'])" class=" text-blue-400">
-                {{ (data.showContent4 ? '' : 'Ver ') + 'Informes' }}
-            </button>
-            <ul v-if="data.showContent4" v-show="can((['isAdmin']))" class="space-y-2 my-1">
-                <div class="" v-for="value in ButtonsInformes">
-                    <li class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
-                        :class="{ 'bg-red-900 dark:bg-red-900': route().current(value+'.index') }">
-                        <Link :href="route(value+'.index')" class="flex items-center py-2 px-4">
-                            <PresentationChartLineIcon class="w-6 h-5"/>
-                            <span class="ml-3">{{ lang().label[value] }}</span>
-                        </Link>
-                    </li>
-                </div>
-            </ul>
-        </div>
+<!--        <div class="mt-1">-->
+<!--            <button @click="toggleContent4" v-show="can(['isAdmin'])" class=" text-blue-400">-->
+<!--                {{ (data.showContent4 ? '' : 'Ver ') + 'Informes' }}-->
+<!--            </button>-->
+<!--            <ul v-if="data.showContent4" v-show="can((['isAdmin']))" class="space-y-2 my-1">-->
+<!--                <div class="" v-for="value in ButtonsInformes">-->
+<!--                    <li class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"-->
+<!--                        :class="{ 'bg-red-900 dark:bg-red-900': route().current(value+'.index') }">-->
+<!--                        <Link :href="route(value+'.index')" class="flex items-center py-2 px-4">-->
+<!--                            <PresentationChartLineIcon class="w-6 h-5"/>-->
+<!--                            <span class="ml-3">{{ lang().label[value] }}</span>-->
+<!--                        </Link>-->
+<!--                    </li>-->
+<!--                </div>-->
+<!--            </ul>-->
+<!--        </div>-->
         
         <div class="mt-1">
-            <ul v-if="can(['isAdmin'])" class="space-y-2 my-1">
-                <div class="" 
-                >
-                    <li class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"
-                        :class="{ 'bg-red-900 dark:bg-red-900': route().current('viatico2') }">
-                        <Link :href="route('viatico2')" class="flex items-center py-2 px-4">
-                            <PresentationChartLineIcon class="w-6 h-5"/>
-                            <span class="ml-3"> Pendientes </span>
-                        </Link>
-                    </li>
-                </div>
-            </ul>
+<!--            <ul v-if="can(['isAdmin'])" class="space-y-2 my-1">-->
+<!--                <div class="" -->
+<!--                >-->
+<!--                    <li class="bg-gray-700/40 dark:bg-gray-800/40 text-white rounded-lg hover:bg-primary dark:hover:bg-primary"-->
+<!--                        :class="{ 'bg-red-900 dark:bg-red-900': route().current('viatico2') }">-->
+<!--                        <Link :href="route('viatico2')" class="flex items-center py-2 px-4">-->
+<!--                            <PresentationChartLineIcon class="w-6 h-5"/>-->
+<!--                            <span class="ml-3"> Pendientes </span>-->
+<!--                        </Link>-->
+<!--                    </li>-->
+<!--                </div>-->
+<!--            </ul>-->
         </div>
     </div>
 </template>

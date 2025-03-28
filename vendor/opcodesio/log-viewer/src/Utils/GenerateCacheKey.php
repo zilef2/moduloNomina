@@ -8,7 +8,7 @@ use Opcodes\LogViewer\LogIndex;
 
 class GenerateCacheKey
 {
-    public static function for(mixed $object, string $namespace = null): string
+    public static function for(mixed $object, ?string $namespace = null): string
     {
         $key = '';
 
@@ -33,6 +33,6 @@ class GenerateCacheKey
 
     protected static function baseKey(): string
     {
-        return 'lv:'.LogViewer::version();
+        return config('log-viewer.cache_key_prefix', 'lv').':'.LogViewer::version();
     }
 }

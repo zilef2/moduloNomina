@@ -59,6 +59,8 @@ const data = reactive({
     deleteOpen: false,
     deleteBulkOpen: false,
     dataSet: usePage().props.app.perpage,
+    DetalleOpen: false,
+    
 })
 
 // <!--<editor-fold desc="order, watchclone, select">-->
@@ -156,6 +158,11 @@ let classbotones = "w-6 h-6"
                       <DeleteBulk v-if="can(['isSuper'])" :show="data.deleteBulkOpen"
                         @close="data.deleteBulkOpen = false, data.multipleSelect = false, data.selectedId = []"
                         :selectedId="data.selectedId" :title="props.title" />
+                    
+                    <Detalle :show="data.DetalleOpen" :viaticoa="data.viaticoo" 
+                             @close="data.DetalleOpen = false" :generi="data.generi"
+                            :title="props.title" maintitle="'Viaticos'"
+                    />
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">

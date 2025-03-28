@@ -14,6 +14,7 @@ use App\Http\Controllers\QRController;
 use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ServiciosController;
+use App\Http\Controllers\SolicitudViaticoController;
 use App\Http\Controllers\UbicacionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ViaticoController;
@@ -104,10 +105,14 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::put('/cotiza3/{id}', [CotizacionController::class, 'update3'])->name('cotizacion.update3');
     Route::get('/deuda', [DeudaSingularController::class, 'index'])->name('deuda.index');
 	Route::resource("/viatico", ViaticoController::class);
+	
+	
 	Route::resource("/consignarViatico", ConsignarViaticoController::class);
-    Route::put('/viaticoupdate2/{id}', [ViaticoController::class, 'viaticoupdate2'])->name('viaticoupdate2');
+	
+	
+    Route::put('/viaticoupdate2/{id}', [SolicitudViaticoController::class, 'viaticoupdate2'])->name('viaticoupdate2');
     Route::get('/viatico2', [ViaticoController::class, 'viatico2'])->name('viatico2');
-    Route::put('/legalizarviatico/{id}', [ViaticoController::class, 'legalizarviatico'])->name('legalizarviatico');
+    Route::put('/legalizarviatico/{id}', [SolicitudViaticoController::class, 'legalizarviatico'])->name('legalizarviatico');
     Route::get('/resetPassword/{id}', [UserController::class, 'resetPassword'])->name('resetPassword');
 	Route::resource("/material", \App\Http\Controllers\MaterialController::class);
 	Route::resource("/zona", \App\Http\Controllers\ZonaController::class);
@@ -117,6 +122,8 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::put('/updatePago/{id}', [\App\Http\Controllers\DesarrolloController::class, 'updatePago'])->name('updatePago');
 	Route::resource("/legalizacionviatico", \App\Http\Controllers\LegalizacionviaticoController::class);
     Route::get('/obtenerCentroCostosUltimaQuincena', [ReportesController::class, 'obtenerCentroCostosUltimaQuincena'])->name('obtenerCentroCostosUltimaQuincena');
+    Route::get('/FuncionPruebas', [ReportesController::class, 'FuncionPruebas'])->name('FuncionPruebas');
+	Route::resource("/solicitud_viatico", SolicitudViaticoController::class);
 	//aquipues
 }); //fin verified
 

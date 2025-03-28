@@ -393,13 +393,13 @@ class UserController extends Controller {
 			
 			DB::commit();
 			
-			zzloggingcrud::zilefLogUpdate($this,$user,$original, 'name');
+			zzloggingcrud::zilefLogUpdate($this, $user, $original, 'name');
 			
 			
 			return back()->with('success', __('app.label.updated_successfully', ['name' => $user->name]));
 		} catch (\Throwable $th) {
 			DB::rollback();
-			zzloggingcrud::zilefLogUpdate($this,null,null, 'name',$th);
+			zzloggingcrud::zilefLogUpdate($this, null, null, 'name', $th);
 			
 			
 			return back()->with('error', __('app.label.updated_error', ['name' => $user->name]) . $th->getMessage());
@@ -1014,5 +1014,27 @@ class UserController extends Controller {
 			return response()->json(['message' => 'Contraseña restablecida correctamente']);
 		}
 		
+	}
+	
+	public function AutorizadosParaGenerarViaticos(): array {
+		$arrayReturn = [
+			User::select('id', 'name')->Where('name', 'like', '%Michael Edison Cruz Herrera%')->first(),
+			User::select('id', 'name')->Where('name', 'like', '%Luis Javier Palacios Morales%')->first(),
+			User::select('id', 'name')->Where('name', 'like', '%Andrés Alejandro Velásquez Acosta%')->first(),
+			User::select('id', 'name')->Where('name', 'like', '%Santiago Sanchez Mesa%')->first(),
+			User::select('id', 'name')->Where('name', 'like', '%Vladimir Ruiz Morelos%')->first(),
+			User::select('id', 'name')->Where('name', 'like', '%Andrés Tomás Restrepo Garay%')->first(),
+			User::select('id', 'name')->Where('name', 'like', '%Juan Ignacio Duque Lopera%')->first(),
+			User::select('id', 'name')->Where('name', 'like', '%Romario Ahumada Tejera%')->first(),
+			User::select('id', 'name')->Where('name', 'like', '%Kevin Solano Ortiz%')->first(),
+		];
+		foreach ($arrayReturn as $index => $item) {
+			if($item){
+				
+				$filteredArray[] = $item;
+			}
+		}
+		
+		return $filteredArray;
 	}
 }

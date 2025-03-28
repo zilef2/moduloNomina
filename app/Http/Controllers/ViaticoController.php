@@ -8,6 +8,7 @@ use App\Jobs\EnviarViaticoJob;
 use App\Mail\MailViaticoGenerado;
 use App\Models\CentroCosto;
 use App\Models\consignarViatico;
+use App\Models\solicitud_viatico;
 use App\Models\User;
 use App\Models\viatico;
 use App\helpers\Myhelp;
@@ -48,7 +49,6 @@ class ViaticoController extends Controller {
 		//        else $viaticos = $this->FiltrosAdministrativos($request,$viaticos);
 		
 		$viaticos = $viaticos->get();
-		$losSelect = $this->Dependencias();
 		
 		$perPage = $request->has('perPage') ? $request->perPage : 10;
 		
@@ -71,8 +71,7 @@ class ViaticoController extends Controller {
 			                                     ]),
 			'perPage'           => (int)$perPage,
 			'numberPermissions' => $numberPermissions,
-			'losSelect'         => $losSelect ?? [],
-			//            'legalizaciones' => $this->getlegalizaciones(),
+			'losSelect'         => $this->Dependencias() ?? [],
 			'totalsaldo'        => $this->totalsaldo() ?? 0,
 			'totallegalizado'   => $this->totallegalizado() ?? 0,
 		]);
@@ -123,6 +122,17 @@ class ViaticoController extends Controller {
 		return $viaticos;
 	}
 	
+	public function PerPageAndPaginate($request, $cotizacions) {
+		$perPage = $request->has('perPage') ? $request->perPage : 10;
+		$page = request('page', 1); // Current page number
+		$paginated = new LengthAwarePaginator($cotizacions->forPage($page, $perPage), $cotizacions->count(), $perPage, $page, ['path' => request()->url()]);
+		
+		
+		return $paginated;
+	}
+	
+	//</editor-fold>
+	
 	public function Dependencias() {
 		$Empleados = User::select('id', 'name')->whereHas('roles', function ($query) {
 			return $query->WhereIn('name', [
@@ -154,17 +164,6 @@ class ViaticoController extends Controller {
 			$centroSelect,
 			$zonas
 		];
-	}
-	
-	//</editor-fold>
-	
-	public function PerPageAndPaginate($request, $cotizacions) {
-		$perPage = $request->has('perPage') ? $request->perPage : 10;
-		$page = request('page', 1); // Current page number
-		$paginated = new LengthAwarePaginator($cotizacions->forPage($page, $perPage), $cotizacions->count(), $perPage, $page, ['path' => request()->url()]);
-		
-		
-		return $paginated;
 	}
 	
 	//todo: tosync
@@ -223,6 +222,7 @@ class ViaticoController extends Controller {
 		$cuantosViaticos = count($request->centro_costo_id);
 		$total = 0;
 		$paraellog = [];
+		
 		foreach ($request->centro_costo_id as $index => $centro) {
 			
 			$date = new DateTime($request->fecha_inicial[$index][0]);
@@ -238,7 +238,7 @@ class ViaticoController extends Controller {
 				'fecha_inicial'   => $ini,
 				'fecha_final'     => $fini,
 				'numerodias'      => $request->numerodias[$index],
-				'saldo'      => $request->gasto[$index],
+				'saldo'           => $request->gasto[$index],
 			];
 			$paraellog[] = implode(",", $thearray);
 			$viatico = viatico::create($thearray);
@@ -275,7 +275,7 @@ class ViaticoController extends Controller {
 			$detalle = [
 				'mensaje' => "Se han generado $cuantosViaticos viáticos por un valor de $total. 
                               El solicitante es $myuser->name.
-                              Haga click aqui:   https://modnom.ecnomina.com/viatico2   si desea ver los pendientes."
+                              Haga click aqui:   https://modnom.ecnomina.com/solicitud_viatico   si desea ver los pendientes."
 			];
 			if (\Illuminate\Support\Facades\App::environment('production')) {
 				EnviarViaticoJob::dispatch($jefe->email, $detalle)->delay(now()->addSeconds(5));
@@ -308,21 +308,22 @@ class ViaticoController extends Controller {
 		
 		zzloggingcrud::zilefLogTrace();
 		DB::beginTransaction();
-		$viatico = viatico::findOrFail($id);
-		$original = $viatico->getOriginal(); // Valores antes de la actualización
+		$solicitud_viatico = solicitud_viatico::findOrFail($id);
+		$original = $solicitud_viatico->getOriginal(); // Valores antes de la actualización
 		
 		$now = Carbon::now();
-		$consignarViatico = consignarViatico::create([
-			                                             'valor_consig' => $request->valor_consig,
-			                                             'fecha_consig' => $now,
-			                                             'viatico_id'   => $viatico->id,
-			                                             'user_id'      => Myhelp::AuthUid(),
-		                                             ]);
+		$consignarViatico = consignarViatico::
+		create([
+			       'valor_consig' => $request->valor_consig,
+			       'fecha_consig' => $now,
+			       'solicitud_viatico_id'   => $solicitud_viatico->id,
+			       'user_id'      => Myhelp::AuthUid(),
+		       ]);
 		
-		$viatico->update(['saldo' => $this->getSaldo($viatico),]);
+		$solicitud_viatico->update(['saldo_sol' => $this->getSaldo($solicitud_viatico),]);
 		
 		DB::commit();
-		zzloggingcrud::zilefLogUpdate($this, $viatico, $original, 'saldo');
+		zzloggingcrud::zilefLogUpdate($this, $solicitud_viatico, $original, 'saldo_sol');
 		Myhelp::EscribirEnLog($this, 'ADEMAS, se genero un consignarViatico::' . implode(', ', $consignarViatico->getAttributes()));
 		
 		if ($request->routeadmin == 'index2') {
@@ -370,12 +371,12 @@ class ViaticoController extends Controller {
 	
 	//FIN : STORE - UPDATE - DELETE
 	
-	public function getSaldo($viatico): int {
-		$Int_consignaciones = (int)consignarViatico::Where('viatico_id', $viatico->id)->sum('valor_consig');
-		$saldo = (int)$viatico->gasto - $Int_consignaciones;
+	public function getSaldo($solicitud_viatico): int {
+		$Int_consignaciones = (int)consignarViatico::Where('solicitud_viatico_id', $solicitud_viatico->id)->sum('valor_consig');
+		$getTotalsolicitadoAttribute = (int)$solicitud_viatico->getTotalsolicitadoAttribute();
 		
 		
-		return $saldo;
+		return $getTotalsolicitadoAttribute - $Int_consignaciones;
 	}
 	
 	//update3

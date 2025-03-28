@@ -8,21 +8,35 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use Opcodes\LogViewer\Readers\IndexedLogReader;
+use Opcodes\LogViewer\Readers\LogReaderInterface;
 use Opcodes\LogViewer\Utils\Utils;
 
 class LogViewerService
 {
     const DEFAULT_MAX_LOG_SIZE_TO_DISPLAY = 131_072;    // 128 KB
 
+    public static string $logFileClass = LogFile::class;
+    public static string $logReaderClass = IndexedLogReader::class;
     protected ?Collection $_cachedFiles = null;
-
+    protected string $_cachedTimezone;
     protected mixed $authCallback;
-
     protected int $maxLogSizeToDisplay = self::DEFAULT_MAX_LOG_SIZE_TO_DISPLAY;
-
     protected mixed $hostsResolver;
+    protected string $layout = 'log-viewer::index';
 
-    protected function getFilePaths(): array
+    public function timezone(): string
+    {
+        if (! isset($this->_cachedTimezone)) {
+            $this->_cachedTimezone = config('log-viewer.timezone')
+                ?? config('app.timezone')
+                ?? 'UTC';
+        }
+
+        return $this->_cachedTimezone;
+    }
+
+    protected function getLaravelLogFilePaths(): array
     {
         // Because we'll use the base path as a parameter for `glob`, we should escape any
         // glob's special characters and treat those as actual characters of the path.
@@ -47,31 +61,63 @@ class LogViewerService
             );
         }
         $files = [];
+        $filePathsCollected = [];
 
-        foreach (config('log-viewer.include_files', []) as $pattern) {
+        foreach (config('log-viewer.include_files', []) as $pattern => $alias) {
+            if (is_numeric($pattern)) {
+                $pattern = $alias;
+                $alias = null;
+            }
+
             if (! str_starts_with($pattern, DIRECTORY_SEPARATOR)) {
                 $pattern = $baseDir.$pattern;
             }
 
-            $files = array_merge($files, $this->getFilePathsMatchingPattern($pattern));
+            $filesMatchingPattern = $this->getFilePathsMatchingPattern($pattern);
+            $filesMatchingPattern = array_map('realpath', $filesMatchingPattern);
+            $filesMatchingPattern = array_values(array_filter($filesMatchingPattern, 'is_file'));
+            $filesMatchingPattern = array_values(array_diff($filesMatchingPattern, $filePathsCollected));
+            $filePathsCollected = array_merge($filePathsCollected, $filesMatchingPattern);
+
+            // Let's prep aliases if they are provided.
+            if (! empty($alias)) {
+                $filesMatchingPattern = array_map(fn ($path) => [$path, $alias], $filesMatchingPattern);
+            }
+
+            $files = array_merge($files, $filesMatchingPattern);
         }
 
-        foreach (config('log-viewer.exclude_files', []) as $pattern) {
+        foreach (config('log-viewer.exclude_files', []) as $pattern => $alias) {
+            if (is_numeric($pattern)) {
+                $pattern = $alias;
+                $alias = null;
+            }
+
             if (! str_starts_with($pattern, DIRECTORY_SEPARATOR)) {
                 $pattern = $baseDir.$pattern;
             }
 
-            $files = array_diff($files, $this->getFilePathsMatchingPattern($pattern));
+            $filesMatchingPattern = $this->getFilePathsMatchingPattern($pattern);
+            $filesMatchingPattern = array_map('realpath', $filesMatchingPattern);
+            $filesMatchingPattern = array_values(array_filter($filesMatchingPattern, 'is_file'));
+
+            if (! empty($alias)) {
+                $filesMatchingPattern = array_map(fn ($path) => [$path, $alias], $filesMatchingPattern);
+            }
+
+            $files = array_filter($files, function (string|array $file) use ($filesMatchingPattern) {
+                if (is_array($file)) {
+                    return ! in_array($file[0], $filesMatchingPattern);
+                }
+
+                return ! in_array($file, $filesMatchingPattern);
+            });
         }
-
-        $files = array_map('realpath', $files);
-
-        $files = array_filter($files, 'is_file');
 
         return array_values(array_reverse($files));
     }
 
-    protected function getFilePathsMatchingPattern($pattern)
+    protected function getFilePathsMatchingPattern($pattern): array
     {
         // The GLOB_BRACE flag is not available on some non GNU systems, like Solaris or Alpine Linux.
 
@@ -79,7 +125,7 @@ class LogViewerService
             return Utils::glob_recursive($pattern);
         }
 
-        return glob($pattern);
+        return glob($pattern) ?: [];
     }
 
     public function basePathForLogs(): string
@@ -93,10 +139,24 @@ class LogViewerService
     public function getFiles(): LogFileCollection
     {
         if (! isset($this->_cachedFiles)) {
-            $this->_cachedFiles = (new LogFileCollection($this->getFilePaths()))
+            $fileClass = static::$logFileClass;
+
+            $this->_cachedFiles = (new LogFileCollection($this->getLaravelLogFilePaths()))
                 ->unique()
-                ->map(fn ($filePath) => new LogFile($filePath))
+                ->map(function ($filePath) use ($fileClass) {
+                    if (is_array($filePath)) {
+                        [$filePath, $alias] = $filePath;
+                    }
+
+                    return new $fileClass($filePath, null, $alias ?? null);
+                })
                 ->values();
+
+            if (config('log-viewer.hide_unknown_files', true)) {
+                $this->_cachedFiles = $this->_cachedFiles->filter(function (LogFile $file) {
+                    return ! $file->type()->isUnknown();
+                });
+            }
         }
 
         return $this->_cachedFiles;
@@ -209,9 +269,19 @@ class LogViewerService
         }
     }
 
+    public function hasAuthCallback(): bool
+    {
+        return isset($this->authCallback);
+    }
+
     public function lazyScanChunkSize(): int
     {
         return intval(config('log-viewer.lazy_scan_chunk_size_in_mb', 100)) * 1024 * 1024;
+    }
+
+    public function lazyScanTimeout(): float
+    {
+        return 5.0;    // 5 seconds
     }
 
     /**
@@ -227,14 +297,46 @@ class LogViewerService
         $this->maxLogSizeToDisplay = $bytes > 0 ? $bytes : self::DEFAULT_MAX_LOG_SIZE_TO_DISPLAY;
     }
 
-    public function laravelRegexPattern(): string
+    public function extend(string $type, string $class): void
     {
-        return config('log-viewer.patterns.laravel.log_parsing_regex');
+        app(LogTypeRegistrar::class)->register($type, $class);
     }
 
-    public function logMatchPattern(): string
+    public function useLogFileClass(string $class): void
     {
-        return config('log-viewer.patterns.laravel.log_matching_regex');
+        // figure out whether the class extends from the LogFile class
+        if (! is_subclass_of($class, LogFile::class)) {
+            throw new \InvalidArgumentException("The class {$class} must extend from the ".LogFile::class.' class.');
+        }
+
+        static::$logFileClass = $class;
+    }
+
+    public function useLogReaderClass(string $class): void
+    {
+        // figure out whether the class implements the LogReaderInterface
+        $reflection = new \ReflectionClass($class);
+
+        if (! $reflection->implementsInterface(LogReaderInterface::class)) {
+            throw new \InvalidArgumentException("The class {$class} must implement the LogReaderInterface.");
+        }
+
+        static::$logReaderClass = $class;
+    }
+
+    public function logReaderClass(): string
+    {
+        return static::$logReaderClass;
+    }
+
+    public function setViewLayout(string $layout): void
+    {
+        $this->layout = $layout;
+    }
+
+    public function getViewLayout(): string
+    {
+        return $this->layout;
     }
 
     /**

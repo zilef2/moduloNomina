@@ -193,10 +193,10 @@ function obtenerIndice(estado) {
                                 </div>
                                 <div class="md:flex-grow">
                                     <p class="leading-relaxed">Valor inicial: {{formatPesosCol(claseFromController.valor_inicial)}}</p>
-                                    <p class="leading-relaxed">{{formatPesosCol(claseFromController.valor_inicial)}}</p>
                                     <p class="leading-relaxed">Primer pago acordado: <b>{{ formatPesosCol(claseFromController.valor_parcial1) }}</b></p>
                                     <p class="leading-relaxed"> Pagos: {{claseFromController.valorino}}</p>
-                                    <p class="leading-relaxed"> Total: {{formatPesosCol(claseFromController.totalpagado)}}</p>
+                                    <p class="leading-relaxed"> Pagado: {{formatPesosCol(claseFromController.totalpagado)}}</p>
+                                    <p class="leading-relaxed"> Deuda: {{formatPesosCol(claseFromController.Deudau)}}</p>
                                     <p v-if="claseFromController.fecha_cotizacion_aceptada" class="text-indigo-500 inline-flex items-center mt-4">
                                         Cotizacion aceptada el: {{claseFromController.fecha_cotizacion_aceptada}}
                                     </p>

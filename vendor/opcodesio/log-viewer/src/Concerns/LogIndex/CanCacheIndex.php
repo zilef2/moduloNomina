@@ -11,13 +11,32 @@ trait CanCacheIndex
 {
     public function clearCache(): void
     {
-        $this->clearChunksFromCache();
-
-        Cache::forget($this->metaCacheKey());
-        Cache::forget($this->cacheKey());
+        foreach ($this->getAllCacheKeys() as $cacheKey) {
+            Cache::forget($cacheKey);
+        }
 
         // this will reset all properties to default, because it won't find any cached settings for this index
         $this->loadMetadata();
+    }
+
+    public function cacheSize(): int
+    {
+        return collect($this->getAllCacheKeys())
+            ->sum(fn ($cacheKey) => strlen(serialize(Cache::get($cacheKey))));
+    }
+
+    protected function getAllCacheKeys(): array
+    {
+        $keys = [];
+
+        foreach ($this->getChunkDefinitions() as $chunkDefinition) {
+            $keys[] = $this->chunkCacheKey($chunkDefinition['index']);
+        }
+
+        $keys[] = $this->metaCacheKey();
+        $keys[] = $this->cacheKey();
+
+        return $keys;
     }
 
     protected function saveMetadataToCache(): void
@@ -30,18 +49,40 @@ trait CanCacheIndex
         return Cache::get($this->metaCacheKey(), []);
     }
 
+    protected function canUseCompression(): bool
+    {
+        return extension_loaded('zlib')
+            && in_array(config('cache.default'), ['file', 'redis', 'array']);
+    }
+
     protected function saveChunkToCache(LogIndexChunk $chunk): void
     {
+        $data = $chunk->data;
+
+        if ($this->canUseCompression()) {
+            $data = gzcompress(serialize($data), 1);
+        }
+
         Cache::put(
             $this->chunkCacheKey($chunk->index),
-            $chunk->data,
+            $data,
             $this->cacheTtl()
         );
     }
 
     protected function getChunkDataFromCache(int $index, $default = null): ?array
     {
-        return Cache::get($this->chunkCacheKey($index), $default);
+        $data = Cache::get($this->chunkCacheKey($index), $default);
+
+        if (is_string($data) && $this->canUseCompression()) {
+            $data = unserialize(gzuncompress($data));
+        }
+
+        if ($data === false) {
+            throw new \Exception('Cannot retrieve the index chunk. Please clear the cache.');
+        }
+
+        return $data;
     }
 
     protected function clearChunksFromCache(): void

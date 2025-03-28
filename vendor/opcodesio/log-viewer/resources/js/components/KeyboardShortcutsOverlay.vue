@@ -16,12 +16,12 @@
               leave-to="translate-x-full"
             >
               <DialogPanel class="pointer-events-auto w-screen max-w-md">
-                <div class="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-xl">
+                <div class="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-xl dark:bg-gray-700">
                   <div class="px-4 sm:px-6">
                     <div class="flex items-start justify-between">
-                      <DialogTitle class="text-base font-semibold leading-6 text-gray-900">Keyboard Shortcuts</DialogTitle>
+                      <DialogTitle class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-100">Keyboard Shortcuts</DialogTitle>
                       <div class="ml-3 flex h-7 items-center">
-                        <button type="button" class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2" @click="logViewerStore.helpSlideOverOpen = false">
+                        <button type="button" class="rounded-md bg-white dark:bg-gray-700 text-gray-400 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-brand-300 focus:ring-offset-2" @click="logViewerStore.helpSlideOverOpen = false">
                           <span class="sr-only">Close panel</span>
                           <XMarkIcon class="h-6 w-6" aria-hidden="true" />
                         </button>
@@ -40,6 +40,22 @@
                     <div class="keyboard-shortcut">
                       <span class="shortcut">{{ KeyShortcuts.Logs }}</span>
                       <span class="description">Jump to logs</span>
+                    </div>
+                    <div class="keyboard-shortcut">
+                      <span class="shortcut">{{ KeyShortcuts.NextLog }}</span>
+                      <span class="description">Open next log</span>
+                    </div>
+                    <div class="keyboard-shortcut">
+                      <span class="shortcut">{{ KeyShortcuts.PreviousLog }}</span>
+                      <span class="description">Open previous log</span>
+                    </div>
+                    <div class="keyboard-shortcut">
+                      <span class="shortcut">{{ KeyShortcuts.Next }}</span>
+                      <span class="description">Next (file or log)</span>
+                    </div>
+                    <div class="keyboard-shortcut">
+                      <span class="shortcut">{{ KeyShortcuts.Previous }}</span>
+                      <span class="description">Previous (file or log)</span>
                     </div>
                     <div class="keyboard-shortcut">
                       <span class="shortcut">{{ KeyShortcuts.Severity }}</span>

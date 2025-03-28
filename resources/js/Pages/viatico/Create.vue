@@ -107,6 +107,7 @@ onMounted(() => {
         // form.fecha_legalizacion = "2023-01-01";
     }
 });
+
 watchEffect(() => {
     if (props.show) {
         form.errors = {};
@@ -127,7 +128,7 @@ watch(() => form.fecha_inicial, (new_fecha_inicial) => {
             const fechaFin = new Date(thedate[1]);
 
             // Restamos las fechas y convertimos a días
-            const diffDias = Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24));
+            const diffDias = Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
             form.numerodias[index] = diffDias;
 
             console.log("Fecha inicial:", fechaInicio);

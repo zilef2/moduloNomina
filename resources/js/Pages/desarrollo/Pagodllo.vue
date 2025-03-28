@@ -29,6 +29,7 @@ const data = reactive({
 const form = useForm({
     valor: '',
     fecha: '',
+    estado: '',
 });
 onMounted(() => {
     if (props.numberPermissions > 9) {}

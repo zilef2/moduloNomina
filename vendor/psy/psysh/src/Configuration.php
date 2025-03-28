@@ -633,8 +633,8 @@ class Configuration
     {
         $runtimeDir = $this->configPaths->runtimeDir();
 
-        if ($create && !\is_dir($runtimeDir)) {
-            if (!@\mkdir($runtimeDir, 0700, true)) {
+        if ($create) {
+            if (!@ConfigPaths::ensureDir($runtimeDir)) {
                 throw new RuntimeException(\sprintf('Unable to create PsySH runtime directory. Make sure PHP is able to write to %s in order to continue.', \dirname($runtimeDir)));
             }
         }
@@ -713,7 +713,7 @@ class Configuration
      */
     public function setEraseDuplicates(bool $value)
     {
-        $this->eraseDuplicates = (bool) $value;
+        $this->eraseDuplicates = $value;
     }
 
     /**
@@ -819,7 +819,7 @@ class Configuration
             $this->readline = new $className(
                 $this->getHistoryFile(),
                 $this->getHistorySize(),
-                $this->getEraseDuplicates()
+                $this->getEraseDuplicates() ?? false
             );
         }
 

@@ -913,7 +913,7 @@ class ReportesController extends Controller {
 		$now = Carbon::now();
 		[$fechaInicio, $fechaFin] = $this->inicioYfinQuicena($now);
 		$diasArestar = - 15;// establece si seran de 15 o 30 el paso del for
-		$ValorArregloParaAnio = ($diasArestar * -12 * 2) / 15;
+		$ValorArregloParaAnio = ($diasArestar * - 12 * 2) / 15;
 		//si son 15, mostrará
 		$nombreQuincena1 = $this->obtenerNombreQuincena($fechaInicio);
 		$newnowArrray[0] = Carbon::now();
@@ -930,8 +930,9 @@ class ReportesController extends Controller {
 			                     ->orderBy('conteo_reportes', 'DESC')->get()->toArray()
 			;
 			$centroCostos[$i] = [
-				'fechas'   => $fechaInicio->toDateString() . "--" . $fechaFin->toDateString(), // Formatea la fecha como string
-				'Reportes' => $resultados,
+				'fechas'          => $fechaInicio->toDateString() . "--" . $fechaFin->toDateString(),
+				// Formatea la fecha como string
+				'Reportes'        => $resultados,
 				'nombreQuincena1' => $nombreQuincena1,
 			];
 			
@@ -977,4 +978,19 @@ class ReportesController extends Controller {
 			return "Quincena 2 del mes $mes";
 		}
 	}
+	
+	function FuncionPruebas() {
+		dd(
+			
+		User::Where('name', 'like', '%Andrés Alejandro Velásquez Acosta%')->first(),
+		User::Where('name', 'like', '%Santiago Sanchez Mesa%')->first(),
+		User::Where('name', 'like', '%Vladimir Ruiz Morelos%')->first(),
+		User::Where('name', 'like', '%Andrés Tomás Restrepo Garay%')->first(),
+		User::Where('name', 'like', '%Juan Ignacio Duque Lopera%')->first(),
+		User::Where('name', 'like', '%Romario Ahumada Tejera%')->first(),
+		User::Where('name', 'like', '%Kevin Solano Ortiz%')->first(),
+	);
+		
+	}
+	
 }
