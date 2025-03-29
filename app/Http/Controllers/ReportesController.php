@@ -12,9 +12,12 @@ use App\Models\Reporte;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
+use Spatie\LaravelPdf\Facades\Pdf;
 
 class ReportesController extends Controller {
 	
@@ -980,17 +983,57 @@ class ReportesController extends Controller {
 	}
 	
 	function FuncionPruebas() {
-		dd(
-			
-		User::Where('name', 'like', '%Andrés Alejandro Velásquez Acosta%')->first(),
-		User::Where('name', 'like', '%Santiago Sanchez Mesa%')->first(),
-		User::Where('name', 'like', '%Vladimir Ruiz Morelos%')->first(),
-		User::Where('name', 'like', '%Andrés Tomás Restrepo Garay%')->first(),
-		User::Where('name', 'like', '%Juan Ignacio Duque Lopera%')->first(),
-		User::Where('name', 'like', '%Romario Ahumada Tejera%')->first(),
-		User::Where('name', 'like', '%Kevin Solano Ortiz%')->first(),
-	);
 		
+		$this->EnviaralJefeProbando(1, 2000);
+		//		>format('letter')
+		//Legal: ->format('legal')
+		//A3: ->format('a3')
+		//A5: ->format('a5')
+		//A6: ->format('a6')  ->landscape()
+		
+		dd(User::Where('name', 'like', '%Andrés Alejandro Velásquez Acosta%')->first(), User::Where('name', 'like', '%Santiago Sanchez Mesa%')->first(), User::Where('name', 'like', '%Vladimir Ruiz Morelos%')->first(), User::Where('name', 'like', '%Andrés Tomás Restrepo Garay%')->first(), User::Where('name', 'like', '%Juan Ignacio Duque Lopera%')->first(), User::Where('name', 'like', '%Romario Ahumada Tejera%')->first(), User::Where('name', 'like', '%Kevin Solano Ortiz%')->first());
+		
+	}
+	
+	public function EnviaralJefeProbando($cuantosViaticos, $total): string {
+		$jefe = User::where('name', 'LIKE', '%Carlos Daniel Anaya Barrios%')->first();
+		if ($jefe) {
+			$cotizacion = \App\Models\cotizacion::all()->first(); // Asegúrate de tener la lógica correcta para obtener la cotización
+			
+			$pdfPath = storage_path('app/public/cotizacion.pdf');
+			
+			// Generar y guardar el PDF
+			Pdf::view('pdf.cotizacion', ['cotizacion' => $cotizacion])->format('letter')->margins(20, 15, 10, 15)->save($pdfPath)
+			;
+			
+			// Leer el contenido del PDF para enviarlo en el correo
+			$pdfData = file_get_contents($pdfPath);
+			// Datos del correo
+			$data = [
+				'cuantosViaticos' => $cuantosViaticos,
+				'total'           => $total,
+				'solicitante'     => 'nombre de prueba1',
+			];
+			
+			// Enviar el correo con el archivo adjunto
+			
+			if (\Illuminate\Support\Facades\App::environment('production')) {
+				//				Mail::to($jefe->email)->send(new \App\Mail\NotificacionCotizacionConAdjunto($data, $pdfPath));
+				Mail::to('ajelof2@gmail.com')->send(new \App\Mail\NotificacionCotizacionConAdjunto($data, $pdfData));
+				$mensaje = "Correo enviado y Viatico ";
+			}
+			else {
+				Mail::to('ajelof2@gmail.com')->send(new \App\Mail\NotificacionCotizacionConAdjunto($data, $pdfData));
+				$mensaje = "Correo enviado solo a alejo ";
+			}
+		}
+		else {
+			$mensaje = "-";
+			Myhelp::EscribirEnLog($this, ' ERROR: no se encontro al jefe');
+		}
+		
+		
+		return $mensaje;
 	}
 	
 }

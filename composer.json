@@ -27,6 +27,7 @@
         "psr/http-message": "^2.0",
         "spatie/laravel-backup": "^8.2",
         "spatie/laravel-ignition": "*",
+        "spatie/laravel-pdf": "^1.5",
         "spatie/laravel-permission": "^5.9",
         "stevebauman/location": "^7.0",
         "symfony/console": "*",

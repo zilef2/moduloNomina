@@ -114,7 +114,7 @@ watchEffect(() => {
                             </div>
                             
                         </div>
-                        
+                        asd
                         
                         <img alt="ecommerce" class="xs:mx-1 lg:mx-24 2xl:mx-48 w-full lg:h-auto h-64 object-cover object-center rounded"
                              src="https://dummyimage.com/350x150/cccccc/000000&text=Comprobante">

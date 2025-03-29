@@ -39,6 +39,7 @@ class ComposerStaticInitd750df7314cfaedc6dd919c89622cb39
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
         '0c3c22e27afa83be19b4c938f4c6e9ea' => __DIR__ . '/..' . '/spatie/laravel-backup/src/Helpers/functions.php',
         '320163ac6b93aebe3dc25b60a0533d56' => __DIR__ . '/..' . '/spatie/laravel-ignition/src/helpers.php',
+        '5c6a9495e67e3398fc97ef867ed00846' => __DIR__ . '/..' . '/spatie/laravel-pdf/src/Support/functions.php',
         '377b22b161c09ed6e5152de788ca020a' => __DIR__ . '/..' . '/spatie/laravel-permission/src/helpers.php',
     );
 
@@ -96,12 +97,14 @@ class ComposerStaticInitd750df7314cfaedc6dd919c89622cb39
             'Spatie\\TemporaryDirectory\\' => 26,
             'Spatie\\SignalAwareCommand\\' => 26,
             'Spatie\\Permission\\' => 18,
+            'Spatie\\LaravelPdf\\' => 18,
             'Spatie\\LaravelPackageTools\\' => 27,
             'Spatie\\LaravelIgnition\\' => 23,
             'Spatie\\Ignition\\' => 16,
             'Spatie\\FlareClient\\' => 19,
             'Spatie\\ErrorSolutions\\' => 22,
             'Spatie\\DbDumper\\' => 16,
+            'Spatie\\Browsershot\\' => 19,
             'Spatie\\Backup\\' => 14,
             'Spatie\\Backtrace\\' => 17,
         ),
@@ -371,6 +374,10 @@ class ComposerStaticInitd750df7314cfaedc6dd919c89622cb39
         array (
             0 => __DIR__ . '/..' . '/spatie/laravel-permission/src',
         ),
+        'Spatie\\LaravelPdf\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/spatie/laravel-pdf/src',
+        ),
         'Spatie\\LaravelPackageTools\\' => 
         array (
             0 => __DIR__ . '/..' . '/spatie/laravel-package-tools/src',
@@ -396,6 +403,10 @@ class ComposerStaticInitd750df7314cfaedc6dd919c89622cb39
         'Spatie\\DbDumper\\' => 
         array (
             0 => __DIR__ . '/..' . '/spatie/db-dumper/src',
+        ),
+        'Spatie\\Browsershot\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/spatie/browsershot/src',
         ),
         'Spatie\\Backup\\' => 
         array (
@@ -730,6 +741,7 @@ class ComposerStaticInitd750df7314cfaedc6dd919c89622cb39
         'App\\Http\\Controllers\\RoleController' => __DIR__ . '/../..' . '/app/Http/Controllers/RoleController.php',
         'App\\Http\\Controllers\\ScriptController' => __DIR__ . '/../..' . '/app/Http/Controllers/ScriptController.php',
         'App\\Http\\Controllers\\ServiciosController' => __DIR__ . '/../..' . '/app/Http/Controllers/ServiciosController.php',
+        'App\\Http\\Controllers\\SolicitudViaticoController' => __DIR__ . '/../..' . '/app/Http/Controllers/SolicitudViaticoController.php',
         'App\\Http\\Controllers\\UbicacionController' => __DIR__ . '/../..' . '/app/Http/Controllers/UbicacionController.php',
         'App\\Http\\Controllers\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/UserController.php',
         'App\\Http\\Controllers\\ViaticoController' => __DIR__ . '/../..' . '/app/Http/Controllers/ViaticoController.php',
@@ -768,6 +780,7 @@ class ComposerStaticInitd750df7314cfaedc6dd919c89622cb39
         'App\\Http\\Requests\\StorelegalizacionviaticoRequest' => __DIR__ . '/../..' . '/app/Http/Requests/StorelegalizacionviaticoRequest.php',
         'App\\Http\\Requests\\StorematerialRequest' => __DIR__ . '/../..' . '/app/Http/Requests/StorematerialRequest.php',
         'App\\Http\\Requests\\StorepagodesarrolloRequest' => __DIR__ . '/../..' . '/app/Http/Requests/StorepagodesarrolloRequest.php',
+        'App\\Http\\Requests\\Storesolicitud_viaticoRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Storesolicitud_viaticoRequest.php',
         'App\\Http\\Requests\\StoreviaticoRequest' => __DIR__ . '/../..' . '/app/Http/Requests/StoreviaticoRequest.php',
         'App\\Http\\Requests\\StorezonaRequest' => __DIR__ . '/../..' . '/app/Http/Requests/StorezonaRequest.php',
         'App\\Http\\Requests\\UpdateCostoRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UpdateCostoRequest.php',
@@ -778,6 +791,7 @@ class ComposerStaticInitd750df7314cfaedc6dd919c89622cb39
         'App\\Http\\Requests\\UpdatelegalizacionviaticoRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UpdatelegalizacionviaticoRequest.php',
         'App\\Http\\Requests\\UpdatematerialRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UpdatematerialRequest.php',
         'App\\Http\\Requests\\UpdatepagodesarrolloRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UpdatepagodesarrolloRequest.php',
+        'App\\Http\\Requests\\Updatesolicitud_viaticoRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Updatesolicitud_viaticoRequest.php',
         'App\\Http\\Requests\\UpdateviaticoRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UpdateviaticoRequest.php',
         'App\\Http\\Requests\\UpdatezonaRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UpdatezonaRequest.php',
         'App\\Http\\Requests\\User\\UserIndexRequest' => __DIR__ . '/../..' . '/app/Http/Requests/User/UserIndexRequest.php',
@@ -801,6 +815,7 @@ class ComposerStaticInitd750df7314cfaedc6dd919c89622cb39
         'App\\Models\\legalizacionviatico' => __DIR__ . '/../..' . '/app/Models/legalizacionviatico.php',
         'App\\Models\\material' => __DIR__ . '/../..' . '/app/Models/material.php',
         'App\\Models\\pagodesarrollo' => __DIR__ . '/../..' . '/app/Models/pagodesarrollo.php',
+        'App\\Models\\solicitud_viatico' => __DIR__ . '/../..' . '/app/Models/solicitud_viatico.php',
         'App\\Models\\viatico' => __DIR__ . '/../..' . '/app/Models/viatico.php',
         'App\\Models\\zona' => __DIR__ . '/../..' . '/app/Models/zona.php',
         'App\\Policies\\ConsignarViaticoPolicy' => __DIR__ . '/../..' . '/app/Policies/ConsignarViaticoPolicy.php',
@@ -811,6 +826,7 @@ class ComposerStaticInitd750df7314cfaedc6dd919c89622cb39
         'App\\Policies\\PagodesarrolloPolicy' => __DIR__ . '/../..' . '/app/Policies/PagodesarrolloPolicy.php',
         'App\\Policies\\ReportePolicy' => __DIR__ . '/../..' . '/app/Policies/ReportePolicy.php',
         'App\\Policies\\ServiciosPolicy' => __DIR__ . '/../..' . '/app/Policies/ServiciosPolicy.php',
+        'App\\Policies\\SolicitudViaticoPolicy' => __DIR__ . '/../..' . '/app/Policies/SolicitudViaticoPolicy.php',
         'App\\Policies\\ViaticoPolicy' => __DIR__ . '/../..' . '/app/Policies/ViaticoPolicy.php',
         'App\\Policies\\ZonaPolicy' => __DIR__ . '/../..' . '/app/Policies/ZonaPolicy.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
@@ -980,6 +996,7 @@ class ComposerStaticInitd750df7314cfaedc6dd919c89622cb39
         'Database\\Factories\\PagodesarrolloFactory' => __DIR__ . '/../..' . '/database/factories/PagodesarrolloFactory.php',
         'Database\\Factories\\ReporteFactory' => __DIR__ . '/../..' . '/database/factories/ReporteFactory.php',
         'Database\\Factories\\ServiciosFactory' => __DIR__ . '/../..' . '/database/factories/ServiciosFactory.php',
+        'Database\\Factories\\SolicitudViaticoFactory' => __DIR__ . '/../..' . '/database/factories/SolicitudViaticoFactory.php',
         'Database\\Factories\\UserFactory' => __DIR__ . '/../..' . '/database/factories/UserFactory.php',
         'Database\\Factories\\ViaticoFactory' => __DIR__ . '/../..' . '/database/factories/ViaticoFactory.php',
         'Database\\Factories\\ZonaFactory' => __DIR__ . '/../..' . '/database/factories/ZonaFactory.php',
@@ -1000,6 +1017,7 @@ class ComposerStaticInitd750df7314cfaedc6dd919c89622cb39
         'Database\\Seeders\\RoleSeederIngeniero' => __DIR__ . '/../..' . '/database/seeders/RoleSeederIngeniero.php',
         'Database\\Seeders\\ServiciosSeeder' => __DIR__ . '/../..' . '/database/seeders/ServiciosSeeder.php',
         'Database\\Seeders\\SimlacroSeeder' => __DIR__ . '/../..' . '/database/seeders/SimlacroSeeder.php',
+        'Database\\Seeders\\SolicitudViaticoSeeder' => __DIR__ . '/../..' . '/database/seeders/SolicitudViaticoSeeder.php',
         'Database\\Seeders\\UserSeeder' => __DIR__ . '/../..' . '/database/seeders/UserSeeder.php',
         'Database\\Seeders\\ViaticoSeeder' => __DIR__ . '/../..' . '/database/seeders/ViaticoSeeder.php',
         'Database\\Seeders\\ZonaSeeder' => __DIR__ . '/../..' . '/database/seeders/ZonaSeeder.php',
@@ -6345,6 +6363,16 @@ class ComposerStaticInitd750df7314cfaedc6dd919c89622cb39
         'Spatie\\Backup\\Tasks\\Monitor\\HealthChecks\\MaximumAgeInDays' => __DIR__ . '/..' . '/spatie/laravel-backup/src/Tasks/Monitor/HealthChecks/MaximumAgeInDays.php',
         'Spatie\\Backup\\Tasks\\Monitor\\HealthChecks\\MaximumStorageInMegabytes' => __DIR__ . '/..' . '/spatie/laravel-backup/src/Tasks/Monitor/HealthChecks/MaximumStorageInMegabytes.php',
         'Spatie\\Backup\\Traits\\Retryable' => __DIR__ . '/..' . '/spatie/laravel-backup/src/Traits/Retryable.php',
+        'Spatie\\Browsershot\\Browsershot' => __DIR__ . '/..' . '/spatie/browsershot/src/Browsershot.php',
+        'Spatie\\Browsershot\\ChromiumResult' => __DIR__ . '/..' . '/spatie/browsershot/src/ChromiumResult.php',
+        'Spatie\\Browsershot\\Enums\\Polling' => __DIR__ . '/..' . '/spatie/browsershot/src/Enums/Polling.php',
+        'Spatie\\Browsershot\\Exceptions\\CouldNotTakeBrowsershot' => __DIR__ . '/..' . '/spatie/browsershot/src/Exceptions/CouldNotTakeBrowsershot.php',
+        'Spatie\\Browsershot\\Exceptions\\ElementNotFound' => __DIR__ . '/..' . '/spatie/browsershot/src/Exceptions/ElementNotFound.php',
+        'Spatie\\Browsershot\\Exceptions\\FileDoesNotExistException' => __DIR__ . '/..' . '/spatie/browsershot/src/Exceptions/FileDoesNotExistException.php',
+        'Spatie\\Browsershot\\Exceptions\\FileUrlNotAllowed' => __DIR__ . '/..' . '/spatie/browsershot/src/Exceptions/FileUrlNotAllowed.php',
+        'Spatie\\Browsershot\\Exceptions\\HtmlIsNotAllowedToContainFile' => __DIR__ . '/..' . '/spatie/browsershot/src/Exceptions/HtmlIsNotAllowedToContainFile.php',
+        'Spatie\\Browsershot\\Exceptions\\UnsuccessfulResponse' => __DIR__ . '/..' . '/spatie/browsershot/src/Exceptions/UnsuccessfulResponse.php',
+        'Spatie\\Browsershot\\ImageManipulations' => __DIR__ . '/..' . '/spatie/browsershot/src/ImageManipulations.php',
         'Spatie\\DbDumper\\Compressors\\Bzip2Compressor' => __DIR__ . '/..' . '/spatie/db-dumper/src/Compressors/Bzip2Compressor.php',
         'Spatie\\DbDumper\\Compressors\\Compressor' => __DIR__ . '/..' . '/spatie/db-dumper/src/Compressors/Compressor.php',
         'Spatie\\DbDumper\\Compressors\\GzipCompressor' => __DIR__ . '/..' . '/spatie/db-dumper/src/Compressors/GzipCompressor.php',
@@ -6592,6 +6620,14 @@ class ComposerStaticInitd750df7314cfaedc6dd919c89622cb39
         'Spatie\\LaravelPackageTools\\Exceptions\\InvalidPackage' => __DIR__ . '/..' . '/spatie/laravel-package-tools/src/Exceptions/InvalidPackage.php',
         'Spatie\\LaravelPackageTools\\Package' => __DIR__ . '/..' . '/spatie/laravel-package-tools/src/Package.php',
         'Spatie\\LaravelPackageTools\\PackageServiceProvider' => __DIR__ . '/..' . '/spatie/laravel-package-tools/src/PackageServiceProvider.php',
+        'Spatie\\LaravelPdf\\Enums\\Format' => __DIR__ . '/..' . '/spatie/laravel-pdf/src/Enums/Format.php',
+        'Spatie\\LaravelPdf\\Enums\\Orientation' => __DIR__ . '/..' . '/spatie/laravel-pdf/src/Enums/Orientation.php',
+        'Spatie\\LaravelPdf\\Enums\\Unit' => __DIR__ . '/..' . '/spatie/laravel-pdf/src/Enums/Unit.php',
+        'Spatie\\LaravelPdf\\Facades\\Pdf' => __DIR__ . '/..' . '/spatie/laravel-pdf/src/Facades/Pdf.php',
+        'Spatie\\LaravelPdf\\FakePdfBuilder' => __DIR__ . '/..' . '/spatie/laravel-pdf/src/FakePdfBuilder.php',
+        'Spatie\\LaravelPdf\\PdfBuilder' => __DIR__ . '/..' . '/spatie/laravel-pdf/src/PdfBuilder.php',
+        'Spatie\\LaravelPdf\\PdfFactory' => __DIR__ . '/..' . '/spatie/laravel-pdf/src/PdfFactory.php',
+        'Spatie\\LaravelPdf\\PdfServiceProvider' => __DIR__ . '/..' . '/spatie/laravel-pdf/src/PdfServiceProvider.php',
         'Spatie\\Permission\\Commands\\CacheReset' => __DIR__ . '/..' . '/spatie/laravel-permission/src/Commands/CacheReset.php',
         'Spatie\\Permission\\Commands\\CreatePermission' => __DIR__ . '/..' . '/spatie/laravel-permission/src/Commands/CreatePermission.php',
         'Spatie\\Permission\\Commands\\CreateRole' => __DIR__ . '/..' . '/spatie/laravel-permission/src/Commands/CreateRole.php',

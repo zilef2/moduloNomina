@@ -22,6 +22,7 @@
     "floating-vue": "^2.0.0-beta.20",
     "lucide-react": "^0.483.0",
     "motion": "^12.5.0",
+    "puppeteer": "^24.4.0",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
     "vue-chartjs": "^5.2.0",
