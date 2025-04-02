@@ -40,10 +40,11 @@ const form = useForm({
 // <!--<editor-fold desc="onmounted, watchers y mas">-->
 onMounted(() => {
 
-    if (props.numberPermissions > 9) {
-        // form.hora_inicial = '0'+valueRAn+':00'//temp
-        // form.fecha = '2023-06-01'
-    }
+    // setTimeout(() => {
+    //     if (props.numberPermissions > 9) {
+    //         setFecha(0, '2025-04-01T10:39')
+    //     }
+    // }, 1500)
 });
 
 //hijo de watch(() => form.valor_legalizacion
@@ -166,6 +167,7 @@ const setFecha = (index, value) => {
     }
 
     form.fecha_legalizacion[index] = value;
+    console.log("=>(Legalizar.vue:169) value", value);
 };
 // <!--</editor-fold>-->
 
@@ -199,11 +201,11 @@ const ensureArraySize = () => {
         if (val.valor_legalizacion) {
             console.log("=>(Legalizar.vue:192) form.valor_legalizacion", form.valor_legalizacion);
             form.valor_legalizacion[inde] = val.valor_legalizacion
-            setFecha(inde,DateTime_to_html(val.fecha_legalizacion))  
+            setFecha(inde, DateTime_to_html(val.fecha_legalizacion))
             // setFecha(inde,'2025-01-01T08:00')  
             // console.log("=>(Legalizar.vue:190) DateTime_to_html(val.fecha_legalizacion)",
             //     DateTime_to_html(val.fecha_legalizacion));
-            
+
             // form.fecha_legalizacion[inde] = '2025-02-08T07:00'
 
             form.descripcion_legalizacion[inde] = val.descripcion_legalizacion
@@ -218,21 +220,38 @@ const ensureArraySize = () => {
     });
 };
 
+const validarForm = () => {
+    let isRight = true
+    for (let consignacionesKey in data.consignaciones) {
+        if (form.valor_legalizacion[consignacionesKey]) {
+
+            isRight = parseInt(data.consignaciones[consignacionesKey].valor) >= parseInt(form.valor_legalizacion[consignacionesKey])
+            console.log("=>(Legalizar.vue:225) form.valor_legalizacion", form.valor_legalizacion[consignacionesKey]);
+            console.log((data.consignaciones[consignacionesKey].valor));
+            console.log("=>(Legalizar.vue:227) isRight", isRight);
+        } else {
+            continue
+        }
+        if (!isRight) return isRight
+    }
+    return isRight
+}
 
 const update = () => {
-    form.put(route('legalizarviatico', props.solicitud_viaticoa?.id), {
-        preserveScroll: true,
-        onSuccess: () => {
-            emit("close")
-            form.reset()
-        },
-        onError: () => {
-            alert('Hay campos incompletos o erroneos')
-        },
-        onFinish: () => {
-            data.AutoActualizarse = true //avisa que hay que se muestra otro viatico, por tanto, hay que actualizar el form
-        },
-    })
+    if (validarForm())
+        form.put(route('legalizarviatico', props.solicitud_viaticoa?.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                emit("close")
+                form.reset()
+            },
+            onError: () => {
+                alert('Hay campos incompletos o erroneos')
+            },
+            onFinish: () => {
+                data.AutoActualizarse = true //avisa que hay que se muestra otro viatico, por tanto, hay que actualizar el form
+            },
+        })
 }
 
 // const valorConsigInput = ref(null);
@@ -257,7 +276,7 @@ const update = () => {
                         <TextInput v-if="valor.valor_legalizacion"
                                    :id="`valor_legalizacion_${index}`"
                                    v-model="valor.valor_legalizacion"
-                                   placeholder="Valor legalización" type="text" required
+                                   placeholder="Valor legalización" type="text"
                                    class="my-2 block w-full bg-gray-300" disabled
                         />
                         <TextInput v-else
@@ -265,7 +284,7 @@ const update = () => {
                                    :modelValue="formattedValor.get(index)"
                                    @update:modelValue="(value) => formattedValor.set(index, value)"
                                    :error="form.errors[`valor_legalizacion.${index}`]"
-                                   placeholder="Valor legalización" type="text" required
+                                   placeholder="Valor legalización" type="text"
                                    class="my-2 block w-full"
                         />
 
@@ -280,24 +299,24 @@ const update = () => {
                         <!--                                   placeholder="descripcion_legalizacion" type="text" required-->
                         <!--                                   class="my-2 block w-full"-->
 
-                        <input
-                            type="text"
-                            :id="`descripcion_legalizacionid_${index}`"
-                            :value="getDescripcion(index)"
-                            @input="(event) => setDescripcion(index, event.target.value)"
-                            class="my-2 w-full rounded-md shadow-sm placeholder:text-gray-400 placeholder:dark:text-gray-400/50 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary dark:focus:border-primary focus:ring-primary dark:focus:ring-primary"
+                        <input :disabled="!!valor.valor_legalizacion"
+                               type="text"
+                               :id="`descripcion_legalizacionid_${index}`"
+                               :value="getDescripcion(index)"
+                               @input="(event) => setDescripcion(index, event.target.value)"
+                               class="my-2 w-full rounded-md shadow-sm placeholder:text-gray-400 placeholder:dark:text-gray-400/50 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary dark:focus:border-primary focus:ring-primary dark:focus:ring-primary"
                         />
                     </div>
                     <div class="lg:col-span-2 mt-2">
                         <InputLabel for="fecha_legalizacion"
                                     :value="lang().label['fecha_legalizacion']"/>
 
-                        <input
-                            type="datetime-local"
-                            :id="`fecha_legalizacionid_${index}`"
-                            :value="getFecha(index)"
-                            @input="(event) => setFecha(index, event.target.value)"
-                            class="my-2 w-full rounded-md shadow-sm placeholder:text-gray-400 placeholder:dark:text-gray-400/50 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary dark:focus:border-primary focus:ring-primary dark:focus:ring-primary"
+                        <input :disabled="!!valor.valor_legalizacion"
+                               type="datetime-local"
+                               :id="`fecha_legalizacionid_${index}`"
+                               :value="getFecha(index)"
+                               @input="(event) => setFecha(index, event.target.value)"
+                               class="my-2 w-full rounded-md shadow-sm placeholder:text-gray-400 placeholder:dark:text-gray-400/50 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary dark:focus:border-primary focus:ring-primary dark:focus:ring-primary"
                         />
                     </div>
 

@@ -49,8 +49,8 @@ onMounted(async () => {
 </script>
 <template>
     <footer
-        class="text-gray-500 dark:text-gray-300">
-        <div class="flex items-center justify-center sm:justify-end w-full py-4 px-6 sm:px-12">
+        class="text-gray-500 dark:text-gray-300 sticky top-full">
+        <div class="flex items-center justify-center sm:justify-end w-full xs:py-1 sm:py-4 lg:py-12 px-6 sm:px-12">
             <p class="text-center">
                 <a href=""
                    class="font-bold text-primary">

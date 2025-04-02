@@ -79,7 +79,7 @@ watchEffect(() => {
                         <div v-if="data.mostrarGeneral === 1" v-for="(consignacion, index) in props.viaticoa?.Consignaciona" :key="index"
                              class="lg:w-1/2 w-full lg:pr-10 lg:py-6 mb-6 lg:mb-0">
                             <h2 class="text-sm title-font text-gray-500 tracking-widest">
-                                Viático N°{{ index + 1 }}
+                                Consignación N°{{ index + 1 }}
                             </h2>
                             <h1 class="text-gray-900 text-2xl title-font font-medium mb-4">
                                 {{ consignacion.fecha_legalizacion ? formatDateTimeToHuman(consignacion.fecha_legalizacion) : 'No hay legalización' }}</h1>
@@ -114,7 +114,6 @@ watchEffect(() => {
                             </div>
                             
                         </div>
-                        asd
                         
                         <img alt="ecommerce" class="xs:mx-1 lg:mx-24 2xl:mx-48 w-full lg:h-auto h-64 object-cover object-center rounded"
                              src="https://dummyimage.com/350x150/cccccc/000000&text=Comprobante">

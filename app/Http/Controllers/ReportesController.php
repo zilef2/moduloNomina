@@ -994,6 +994,17 @@ class ReportesController extends Controller {
 		dd(User::Where('name', 'like', '%Andrés Alejandro Velásquez Acosta%')->first(), User::Where('name', 'like', '%Santiago Sanchez Mesa%')->first(), User::Where('name', 'like', '%Vladimir Ruiz Morelos%')->first(), User::Where('name', 'like', '%Andrés Tomás Restrepo Garay%')->first(), User::Where('name', 'like', '%Juan Ignacio Duque Lopera%')->first(), User::Where('name', 'like', '%Romario Ahumada Tejera%')->first(), User::Where('name', 'like', '%Kevin Solano Ortiz%')->first());
 		
 	}
+	function FuncionPruebas2() {
+		$primerdia = Carbon::now()->addMonths(-2)->startOfDay(); 
+		$diafin = Carbon::now()->endOfMonth();
+		$reportes = Reporte::whereBetween('fecha_ini', [$primerdia,$diafin])
+			->WhereHas('centro',function($query){
+				$query->WhereNull('zona_id');
+			})->get()->pluck('centro_costo_id')->toArray();
+		
+		$centrosSinZona = CentroCosto::whereIn('id',$reportes)->get()->pluck('nombre')->toArray();
+		dd($centrosSinZona);
+	}
 	
 	public function EnviaralJefeProbando($cuantosViaticos, $total): string {
 		$jefe = User::where('name', 'LIKE', '%Carlos Daniel Anaya Barrios%')->first();

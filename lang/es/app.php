@@ -2,6 +2,7 @@
 
 return [
     'label' => [
+		'centrou' => 'Centro de costo',
 		'zona' => 'Zona',
 		'Totalsolicitado' => 'Solicitado',
 		'saldo_sol' => 'Saldo',

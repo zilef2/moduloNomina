@@ -123,6 +123,7 @@ Route::middleware('auth', 'verified')->group(function () {
 	Route::resource("/legalizacionviatico", \App\Http\Controllers\LegalizacionviaticoController::class);
     Route::get('/obtenerCentroCostosUltimaQuincena', [ReportesController::class, 'obtenerCentroCostosUltimaQuincena'])->name('obtenerCentroCostosUltimaQuincena');
     Route::get('/FuncionPruebas', [ReportesController::class, 'FuncionPruebas'])->name('FuncionPruebas');
+    Route::get('/FuncionPruebas2', [ReportesController::class, 'FuncionPruebas2'])->name('FuncionPruebas2');
 	Route::resource("/solicitud_viatico", SolicitudViaticoController::class);
 	//aquipues
 }); //fin verified

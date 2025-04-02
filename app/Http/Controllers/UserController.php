@@ -34,30 +34,7 @@ use ZipStream\OperationMode;
 class UserController extends Controller {
 	
 	public function __construct() {
-		$this->middleware('permission:create user', [
-			'only' => [
-				'create',
-				'store'
-			]
-		]);
-		$this->middleware('permission:read user', [
-			'only' => [
-				'index',
-				'show'
-			]
-		]);
-		$this->middleware('permission:update user', [
-			'only' => [
-				'edit',
-				'update'
-			]
-		]);
-		$this->middleware('permission:delete user', [
-			'only' => [
-				'destroy',
-				'destroyBulk'
-			]
-		]);
+		$this->middleware('permission:create user', ['only' => ['create', 'store']]);$this->middleware('permission:read user', ['only' => ['index', 'show']]);$this->middleware('permission:update user', ['only' => ['edit', 'update']]);$this->middleware('permission:delete user', ['only' => ['destroy', 'destroyBulk']]);
 	}
 	
 	public function Dashboard() {
@@ -83,12 +60,17 @@ class UserController extends Controller {
 				$reportes = (int)Reporte::WhereIn('centro_costo_id', $centroMio)->count();
 				
 				$ultimos5dias = [
-					'Mes pasado' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->where('fecha_ini', '<', Carbon::today()->addMonth(- 1))->get()->count(),
+					'Mes pasado' => Reporte::WhereIn('centro_costo_id', $centroMio)
+				                       ->whereValido(1)
+                                       ->where('fecha_ini', '<', Carbon::today()->addMonth(-1)->endOfMonth())
+                                       ->where('fecha_ini', '>=', Carbon::today()->addMonth(- 1)->firstOfMonth())
+                                       ->get()->count(),
 					
-					'Semana pasada' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->whereBetween('fecha_ini', [
-						Carbon::now()->addDays(- 7)->startOfWeek(),
-						Carbon::now()->addDays(- 7)->endOfWeek()
-					])->get()->count(),
+					'Semana pasada' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)
+                                        ->whereBetween('fecha_ini', [
+											Carbon::now()->addDays(-7)->startOfWeek(),
+											Carbon::now()->addDays(-7)->endOfWeek()
+										])->get()->count(),
 					
 					'Semana actual' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->whereBetween('fecha_ini', [
 						Carbon::now()->startOfWeek(),

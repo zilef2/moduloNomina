@@ -31,17 +31,14 @@ class solicitud_viatico extends Model {
 		'saldo_sol',
 	];
 	
-	public function user(): BelongsTo {
-		return $this->belongsTo(User::class);
-	}
+	public function user(): BelongsTo {return $this->belongsTo(User::class); }
+	public function consignacion(): \Illuminate\Database\Eloquent\Relations\HasMany {return $this->hasMany(consignarViatico::class); }
+	public function viaticos(): \Illuminate\Database\Eloquent\Relations\HasMany {return $this->hasMany(viatico::class); }
 	
 	public function getTotallegalizadouAttribute(): int {
 		return $this->consignacion()->get()->sum('valor_legalizado');
 	}
 	
-	public function consignacion(): \Illuminate\Database\Eloquent\Relations\HasMany {
-		return $this->hasMany(consignarViatico::class);
-	}
 	
 	public function getLosviaticosAttribute(): array {
 		 $viaticos = $this->viaticos()->get()->toArray();
@@ -54,9 +51,6 @@ class solicitud_viatico extends Model {
 		return $this->user()->first()->name ?? 'No hay responsable';
 	}
 	
-	public function viaticos(): \Illuminate\Database\Eloquent\Relations\HasMany {
-		return $this->hasMany(viatico::class);
-	}
 	
 	public function getTotalsolicitadoAttribute(): int {
 		return $this->viaticos()->get()->sum('gasto');
@@ -67,7 +61,8 @@ class solicitud_viatico extends Model {
 	
 	public function getCentrouAttribute(): string //igual que el vector pero con mayus
 	{
-		return $this->centro ? $this->centro->nombre : '';
+		$viatico1 = $this->viaticos()->first();
+		return $viatico1->centro ? $viatico1->centro->nombre : '';
 	}//tiene que existir la funcion centro
 	
 	public function getConsignacionaAttribute(): array {

@@ -72,6 +72,10 @@ class Reporte extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function centro()
+    {
+        return $this->belongsTo(CentroCosto::class,'centro_costo_id');
+    }
 
     public function nameUser()
     {

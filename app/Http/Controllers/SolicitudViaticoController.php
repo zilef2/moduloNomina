@@ -43,7 +43,13 @@ class SolicitudViaticoController extends Controller {
 	public function index(Request $request) {
 		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' solicitud_viaticos '));
 		$solicitud_viaticos = $this->Filtros($request)->get();
-		//        $losSelect = $this->Dependencias();
+		
+		
+		if ($request->has('search3')) {
+			$solicitud_viaticos->filter(function ($item) {
+				return $item->centrou == 'valor';
+			});
+		}
 		
 		$perPage = $request->has('perPage') ? $request->perPage : 10;
 		
@@ -58,7 +64,7 @@ class SolicitudViaticoController extends Controller {
 				]
 			],
 			'title'             => __('app.label.' . $this->FromController),
-			'filters'           => $request->all(['search', 'field', 'order']),
+			'filters'           => $request->all(['search', 'field', 'order', 'search2', 'search3']),
 			'perPage'           => (int)$perPage,
 			'numberPermissions' => $numberPermissions,
 			'losSelect'         => $this->Dependencias() ?? [],
@@ -76,6 +82,18 @@ class SolicitudViaticoController extends Controller {
 					//                    ->orWhere('identificacion', 'LIKE', "%" . $request->search . "%")
 				;
 			});
+		}
+		if ($request->has('search2')) {
+			$solicitud_viaticos = $solicitud_viaticos->whereHas('user', function ($query) use ($request) {
+				$query
+					->where('name', 'LIKE', "%" . $request->search2 . "%")->orWhere('cedula', 'LIKE', "%" . $request->search2 . "%")
+				;
+			});
+		}
+		if ($request->has('search3')) {
+			$solicitud_viaticos = $solicitud_viaticos->whereHas('viaticos',function ($query) use ($request) {
+				$query->where('centro_costo_id', 'LIKE', "%" . $request->search3['id'] . "%");
+			}); 
 		}
 		
 		if ($request->has(['field', 'order'])) {
@@ -337,7 +355,7 @@ class SolicitudViaticoController extends Controller {
 	//FIN : STORE - UPDATE - DELETE
 	
 	//update2
-
+	
 	public function getSaldo($sol_viatico): int {
 		$Int_consignaciones = (int)consignarViatico::Where('solicitud_viatico_id', $sol_viatico->id)->sum('valor_consig');
 		$saldo = (int)$sol_viatico->Totalsolicitado - $Int_consignaciones;

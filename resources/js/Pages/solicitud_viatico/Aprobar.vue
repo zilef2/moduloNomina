@@ -96,28 +96,22 @@ const selectedcc = computed({
 });
 
 const consigEstaMal = (newVal) => {
-    let estamal = newVal > props.solicitud_viaticoa.saldo_sol
+    let estamal = (newVal > props.solicitud_viaticoa.saldo_sol) || (newVal < 0) 
 
-    if (estamal) data.mensajeError_saldo = 'Valor a consignar es superior al saldo'
+    if (estamal) data.mensajeError_saldo = 'Valor a consignar es superior al saldo o es negativo'
     else data.mensajeError_saldo = ''
     return estamal
 }
-watch(() => form.valor_consig, (newVal) => {
-    consigEstaMal(newVal)
-});
+
+watch(() => form.valor_consig, (newVal) => consigEstaMal(newVal));
 
 // <!--</editor-fold>-->
 const update = () => {
     if (props.route) form.routeadmin = 'index2'
 
-    let superaelsaldo = consigEstaMal(form.valor_consig)
-    console.log("=>(Aprobar.vue:120) superaelsaldo", superaelsaldo);
-    let respuestaSeguro = true
-    if (superaelsaldo) {
-        respuestaSeguro = confirm("El valor consignado supera lo solicitado ¿Continuar?");
-
-    }
-    if (respuestaSeguro)
+    if (consigEstaMal(form.valor_consig)) {
+        alert("El valor consignado supera lo solicitado o es negativo");
+    }else{
         form.put(route('viaticoupdate2', props.solicitud_viaticoa?.id), {
             preserveScroll: true,
             onSuccess: () => {
@@ -131,6 +125,7 @@ const update = () => {
                 data.AutoActualizarse = true
             },
         })
+    }
 }
 
 const valorConsigInput = ref(null);

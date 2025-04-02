@@ -19,6 +19,8 @@ import InfoButton from '@/Components/InfoButton.vue';
 import {reactive, watch, computed} from 'vue';
 import {ChevronUpDownIcon, PencilIcon, TrashIcon, CurrencyDollarIcon, ShieldExclamationIcon} from '@heroicons/vue/24/solid';
 import {formatDate, number_format, formatPesosCol} from '@/global.ts';
+import vSelect from "vue-select";
+import "vue-select/dist/vue-select.css";
 // import DeleteBulk from '@/Pages/viatico/DeleteBulk.vue';
 
 
@@ -41,7 +43,8 @@ const props = defineProps({
 const data = reactive({
     params: {
         search: props.filters.search,
-        search2: props.filters.search2,
+        search2: props.filters.search2, //persona
+        search3: props.filters.search3, //centro
         // search3: props.filters.search3, //mostrar todo para el admin
         field: props.filters.field,
         order: props.filters.order,
@@ -185,12 +188,14 @@ let classbotones = "w-6 h-6"
                             <TrashIcon class="w-5 h-5"/>
                         </DangerButton>
                     </div>
-                    <div class="col-span-1"></div>
-                    <div class="inline-flex">
+                    <div class="inline-flex col-span-2">
                         <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"
                                    class="block w-4/6 md:w-3/6 lg:w-full mx-1 rounded-lg" placeholder="Descripción"/>
                         <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search2" type="text"
                                    class="block w-4/6 md:w-3/6 lg:w-full mx-1 rounded-lg" placeholder="Persona"/>
+                        <vSelect v-if="props.numberPermissions > 1" v-model="data.params.search3" 
+                                  :options="props.losSelect[1]" label="name"
+                        class="block w-5/6 md:w-5/6 lg:w-full mx-1 mt-1 rounded-lg"></vSelect>
                         <!--                      <p class="text-sm -mx-1 px-4">Mostrar todos</p>-->
                         <!--                        <checkbox v-if="props.numberPermissions > 8" v-model="data.params.search3"-->
                         <!--                                  class="p-2 mx-12 my-3"/>-->
@@ -211,6 +216,13 @@ let classbotones = "w-6 h-6"
                                     v-on:click="order(titulo['order'])">
                                     <div class="flex justify-between items-center">
                                         <span>{{ lang().label[titulo['label']] }}</span>
+                                        <ChevronUpDownIcon class="w-4 h-4"/>
+                                    </div>
+                                </th>
+                                <th class="px-2 py-4 cursor-pointer"
+                                    v-on:click="order(titulo['centrou'])">
+                                    <div class="flex justify-between items-center">
+                                        <span>{{ lang().label.centrou }}</span>
                                         <ChevronUpDownIcon class="w-4 h-4"/>
                                     </div>
                                 </th>
@@ -291,6 +303,7 @@ let classbotones = "w-6 h-6"
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['Fechasol'] }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['Ciudad'] }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['ObraServicio'] }}</td>
+                            <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['centrou'] }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ formatPesosCol(claseFromController['Totalsolicitado']) }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ formatPesosCol(claseFromController['TotalConsignado']) }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ formatPesosCol(claseFromController['saldo_sol']) }}</td>

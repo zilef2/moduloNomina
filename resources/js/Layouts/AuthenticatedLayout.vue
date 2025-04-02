@@ -17,7 +17,7 @@ const emit = defineEmits(['close', 'open']);
             <Toast :flash="$page.props.flash" />
             <NavbarVue :open="sidebarOpened" @open="sidebarOpened = true" />
             <!-- Page Content -->
-            <main class="xl:max-w-full lg:max-w-7xl md:max-w-7xl mx-auto sm:px-6 lg:px-8 pb-10 text-gray-900 dark:text-gray-100 dark:bg-gray-900 text-md">
+            <main class="xl:max-w-full lg:max-w-7xl md:max-w-7xl mx-auto sm:px-6 lg:px-8 pb-6 text-gray-900 dark:text-gray-100 dark:bg-gray-900 text-md">
                 <slot />
             </main>
             
