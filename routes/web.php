@@ -96,7 +96,6 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::get('/CentroCostoTable/{id}', [CentroTableController::class, 'table'])->name('CentroCostos.table');
     Route::get('/AproxDestroy', [CentroCostosController::class, 'AproxDestroy'])->name('AproxDestroy');
     Route::get('/DescompresionDespliegue/{esAmbientePruebas}', [ZipController::class, 'DescompresionDespliegue']);
-    Route::get('/JustDeploy/{pruebas}', [\App\Http\Controllers\ScriptController::class, 'JustDeploy']);
 
     Route::resource("/cotizacion", CotizacionController::class);
     Route::post('/cotizacion/destroy-bulk', [CotizacionController::class, 'destroyBulk'])->name('cotizacion.destroy-bulk');

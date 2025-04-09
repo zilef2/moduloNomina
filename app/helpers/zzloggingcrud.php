@@ -64,6 +64,8 @@ class zzloggingcrud {
 			return [$ElMensaje, $permissions];
 		}
 	}
+	
+	// Funcion para guardar los atributos que cambiaron en un proceso de actualización
 	public static function zilefSaveArrayLogTrace($paraellog,$escribirenlog = true) {
 		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
 		$permissions = self::AuthU()->roles->pluck('name')[0];
@@ -78,6 +80,9 @@ class zzloggingcrud {
 		}
 		
 		if ($escribirenlog) {
+			dd(
+			    MyModels::getPermissiToLog($permissions)
+			);
 			Log::channel(MyModels::getPermissiToLog($permissions))->info($ElMensaje);
 			return MyModels::getPermissionToNumber($permissions);
 		}

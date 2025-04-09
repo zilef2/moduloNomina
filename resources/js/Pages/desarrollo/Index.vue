@@ -172,17 +172,18 @@ function obtenerIndice(estado) {
                     <div class="container px-5 py-24 mx-auto">
                         <div class="my-2 divide-y-2 divide-gray-100 rounded-2xl">
                             <div v-for="(claseFromController, indexu) in props.fromController.data" :key="indexu" 
-                                class="py-8 flex flex-wrap md:flex-nowrap hover:bg-blue-100">
-                                <div class="md:w-64 md:mb-0 mb-6 flex-shrink-0 flex flex-col">
+                                class="py-8 flex flex-wrap md:flex-nowrap ">
+                                <div class="md:w-64 md:mb-0 mb-6 flex-shrink-0 flex flex-col hover:bg-indigo-50 border-r-2 border-gray-200 mx-2">
                                     <span class="font-semibold title-font text-gray-700">{{ claseFromController.nombre }}</span>
                                     <span class="mt-1 text-gray-500 text-sm">Reunión: {{claseFromController.fecha_reunion}}</span>
+                                    <span class="mt-1 text-gray-500 text-sm">{{claseFromController.HaceCuanto}}</span>
                                 </div>
-                                <div class="w-1/2">
+                                <div class="w-1/2 hover:bg-indigo-50 border-r-2 border-gray-200 mx-2">
                                     <h2 class="text-2xl font-medium text-gray-900 title-font mb-2">
                                         <b>Etapa {{obtenerIndice(claseFromController.estado)}}: {{ claseFromController.estado }}</b>
                                     </h2>
                                     <p class="leading-relaxed">{{claseFromController.descripcion}}</p>
-                                    <a class="text-indigo-500 inline-flex items-center mt-4"
+                                    <a class="text-indigo-500 inline-flex items-center mt-4 cursor-pointer"
                                     @click="(data.editOpen = true), (data.desarrolloo = claseFromController)">
                                         Cotizacion enviada el: {{claseFromController.fecha_cotizacion}}
                                         <svg class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -191,7 +192,7 @@ function obtenerIndice(estado) {
                                         </svg>
                                     </a>
                                 </div>
-                                <div class="md:flex-grow">
+                                <div class="md:flex-grow hover:bg-indigo-50 border-r-2 border-gray-200 mx-2">
                                     <p class="leading-relaxed">Valor inicial: {{formatPesosCol(claseFromController.valor_inicial)}}</p>
                                     <p class="leading-relaxed">Primer pago acordado: <b>{{ formatPesosCol(claseFromController.valor_parcial1) }}</b></p>
                                     <p class="leading-relaxed"> Pagos: {{claseFromController.valorino}}</p>
@@ -200,7 +201,7 @@ function obtenerIndice(estado) {
                                     <p v-if="claseFromController.fecha_cotizacion_aceptada" class="text-indigo-500 inline-flex items-center mt-4">
                                         Cotizacion aceptada el: {{claseFromController.fecha_cotizacion_aceptada}}
                                     </p>
-                                    <a class="text-indigo-500 inline-flex items-center mt-4"
+                                    <a class="text-indigo-500 inline-flex items-center mt-4 cursor-pointer"
                                     @click="(data.edit2Open = true), (data.desarrolloo = claseFromController)">
                                         Ingreso un pago
                                         <svg class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">

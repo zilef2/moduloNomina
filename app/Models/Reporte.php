@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -63,22 +64,23 @@ class Reporte extends Model
 
         'centro_costo_id',
         'user_id',
+        
+		'name_aprobo',
+		'id_aprobo',
     ];
 
-    //	public function centrocostos() {
-    //		return $this->hasOne('App\Models\CentroCosto');
-    //	}
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-    public function centro()
-    {
-        return $this->belongsTo(CentroCosto::class,'centro_costo_id');
-    }
+    
+    public function user() { return $this->belongsTo(User::class); }
+    public function centro() { return $this->belongsTo(CentroCosto::class,'centro_costo_id'); }
 
-    public function nameUser()
-    {
+    public function nameUser() {
         return $this->user->name;
     }
+	
+	protected $appends = ['EsSabado'];
+	
+	public function getEsSabadoAttribute(): bool {
+		$fecha = Carbon::parse($this->fecha_ini);
+		return $fecha->isSaturday(); //Modelo::whereRaw("WEEKDAY(fecha) = 5")->get(); // 5 representa sábado
+	}
 }

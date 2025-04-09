@@ -702,16 +702,28 @@ class ReportesController extends Controller {
 	 *
 	 * @param ReportesRequest $request
 	 * @param int $id
-	 * @return \Illuminate\Http\Response
+	 * @return \Illuminate\Http\RedirectResponse
 	 */
 	public function update(Request $request, $id) {
-		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes update| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 		
+		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes update| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+		$theuserAprobo = Myhelp::AuthU();
 		DB::beginTransaction();
 		try {
 			$Reportes = Reporte::findOrFail($id);
+			if ($request->valido === true) {
+				$quehizo = ' aprobó.';
+			}
+			if ($request->valido === 2) {
+				$quehizo = ' rechazó.';
+			}
+			
+			$Reportes->name_aprobo = $theuserAprobo->name . $quehizo;
+			$Reportes->id_aprobo = $theuserAprobo->id;
+			
 			if ($request->valido === 1 || $request->valido === true) {
 				$Reportes->valido = $request->valido; //0 creado //1 aceptado //2 rechazado
+				
 			}
 			else {
 				$Reportes->fecha_ini = $this->updatingDate($request->fecha_ini);
@@ -984,7 +996,7 @@ class ReportesController extends Controller {
 	
 	function FuncionPruebas() {
 		
-		$this->EnviaralJefeProbando(1, 2000);
+		(new EnvioCorreos())->EnviaralGerenteProbando(1, 2000);
 		//		>format('letter')
 		//Legal: ->format('legal')
 		//A3: ->format('a3')
@@ -993,17 +1005,6 @@ class ReportesController extends Controller {
 		
 		dd(User::Where('name', 'like', '%Andrés Alejandro Velásquez Acosta%')->first(), User::Where('name', 'like', '%Santiago Sanchez Mesa%')->first(), User::Where('name', 'like', '%Vladimir Ruiz Morelos%')->first(), User::Where('name', 'like', '%Andrés Tomás Restrepo Garay%')->first(), User::Where('name', 'like', '%Juan Ignacio Duque Lopera%')->first(), User::Where('name', 'like', '%Romario Ahumada Tejera%')->first(), User::Where('name', 'like', '%Kevin Solano Ortiz%')->first());
 		
-	}
-	function FuncionPruebas2() {
-		$primerdia = Carbon::now()->addMonths(-2)->startOfDay(); 
-		$diafin = Carbon::now()->endOfMonth();
-		$reportes = Reporte::whereBetween('fecha_ini', [$primerdia,$diafin])
-			->WhereHas('centro',function($query){
-				$query->WhereNull('zona_id');
-			})->get()->pluck('centro_costo_id')->toArray();
-		
-		$centrosSinZona = CentroCosto::whereIn('id',$reportes)->get()->pluck('nombre')->toArray();
-		dd($centrosSinZona);
 	}
 	
 	public function EnviaralJefeProbando($cuantosViaticos, $total): string {
@@ -1014,8 +1015,7 @@ class ReportesController extends Controller {
 			$pdfPath = storage_path('app/public/cotizacion.pdf');
 			
 			// Generar y guardar el PDF
-			Pdf::view('pdf.cotizacion', ['cotizacion' => $cotizacion])->format('letter')->margins(20, 15, 10, 15)->save($pdfPath)
-			;
+			Pdf::view('pdf.cotizacion', ['cotizacion' => $cotizacion])->format('letter')->margins(20, 15, 10, 15)->save($pdfPath);
 			
 			// Leer el contenido del PDF para enviarlo en el correo
 			$pdfData = file_get_contents($pdfPath);
@@ -1045,6 +1045,17 @@ class ReportesController extends Controller {
 		
 		
 		return $mensaje;
+	}
+	
+	function FuncionPruebas2() {
+		$primerdia = Carbon::now()->addMonths(- 2)->startOfDay();
+		$diafin = Carbon::now()->endOfMonth();
+		$reportes = Reporte::whereBetween('fecha_ini', [$primerdia, $diafin])->WhereHas('centro', function ($query) {
+			$query->WhereNull('zona_id');
+		})->get()->pluck('centro_costo_id')->toArray();
+		
+		$centrosSinZona = CentroCosto::whereIn('id', $reportes)->get()->pluck('nombre')->toArray();
+		dd($centrosSinZona);
 	}
 	
 }

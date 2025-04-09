@@ -1017,6 +1017,6 @@ class UserController extends Controller {
 			}
 		}
 		
-		return $filteredArray;
+		return $filteredArray ?? [];
 	}
 }

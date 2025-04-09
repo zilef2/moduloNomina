@@ -43,6 +43,7 @@ class ParametrosSeeder extends Seeder
             'HORAS_ORDINARIAS' => 8,
             'HORAS_DEL_MES_30_DIAS' => 0,
             'MAXIMO_HORAS_SEMANALES' => 0,
+            'minimo_material' => 0,
         ]);
     }
 }

@@ -134,6 +134,7 @@ class RoleSeeder extends Seeder
             //  'read parametros',
         ]);
 
+        Role::create(['name' => 'ingeniero']);
 
 
 

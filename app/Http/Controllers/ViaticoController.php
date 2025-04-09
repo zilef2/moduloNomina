@@ -247,8 +247,8 @@ class ViaticoController extends Controller {
 			
 		}
 		
-		$mensaje = $this->EnviaralJefe($request, $myuser, $cuantosViaticos, $total);
 		
+		$mensaje = (new EnvioCorreos())->EnviaralGerente($request, $myuser, $cuantosViaticos, $total);
 		if ($mensaje === '-') {
 			return back()->with('error', 'El mensaje no fue enviado');
 		}

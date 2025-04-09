@@ -374,7 +374,7 @@ const handleCheckboxChange = (values) => {
             </div>
             <div class="flex justify-between p-4">
                 <div
-                    v-if="data.selectedId.length != 0 && can(['isingeniero','isadmin','isadministrativo','issupervisor'])"
+                    v-if="data.selectedId.length !== 0 && can(['isingeniero','isadmin','isadministrativo','issupervisor'])"
                     class="flex space-x-2">
                     <!--                        los empleados pueden borrar reportes, pero no actualizarlos (ni borrarlos en masa-->
                     <DangerButton @click="data.deleteBulkOpen = true"
@@ -472,10 +472,12 @@ const handleCheckboxChange = (values) => {
                             </div>
                         </td>
                         <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (index + 1) }}</td>
-                        <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ showSelect[clasegenerica.centro_costo_id] }}
-                        </td>
+                        <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ showSelect[clasegenerica.centro_costo_id] }}</td>
                         <td v-show="can(['updateCorregido reporte'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
-                            {{ showUsers[clasegenerica.user_id] }}
+                            {{ showUsers[clasegenerica.user_id] }} 
+                            <span v-show="clasegenerica.name_aprobo">
+                                - {{clasegenerica.name_aprobo}}
+                            </span>
                         </td>
 
                         <td v-for="(titulo_slug, indi) in nombresTabla[1]" :key="indi"

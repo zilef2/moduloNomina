@@ -18,7 +18,6 @@ class RoleSeederIngeniero extends Seeder
      */
     public function run()
     {
-        Permission::create(['name' => 'isIngeniero']);
 
         $superadmin = Role::Where('name','superadmin')->first();
         $superadmin->givePermissionTo([

@@ -218,7 +218,7 @@ class SolicitudViaticoController extends Controller {
 			
 		}
 		
-		$mensaje = $this->EnviaralJefe($request, $myuser, $cuantosViaticos, $total);
+		$mensaje = (new EnvioCorreos())->EnviaralGerente($request, $myuser, $cuantosViaticos, $total);
 		$solViatico->update(['saldo_sol' => $total]);
 		
 		if ($mensaje === '-') {

@@ -16,7 +16,7 @@ const emit = defineEmits(["open"])
 // }
 
 // let version = "24d2024_domingos"
-let version = "20feb_25_v1"
+let version = "6_ab25"
 const downloadExcel = async () => {
     window.open('/users/export', '_blank')
 }
@@ -27,16 +27,18 @@ const justcc = async () => {
 const page = usePage();
 let colorBar = page.props.env.environment === 'test'
 let colorDelBar = ''
+let colorDelNav = 'bg-gray-900 border-gray-700 text-gray-300 lg:bg-white dark:bg-gray-900 border-b lg:border-gray-100 dark:border-gray-800 lg:text-gray-500 dark:text-gray-300'
 if (colorBar) {
-    colorDelBar = 'bg-blue-200'
+    colorDelBar = 'bg-blue-900 text-white'
+    colorDelNav = 'bg-blue-900 border-blue-700 text-white lg:bg-blue-900 dark:bg-gray-900 border-b lg:border-gray-200 dark:border-gray-800 lg:text-blue-500 dark:text-gray-300'
 }
 </script>
 
 <template>
     <nav
-        class="bg-gray-900 border-gray-700 text-gray-300 lg:bg-white dark:bg-gray-900 border-b lg:border-gray-100 dark:border-gray-800 lg:text-gray-500 dark:text-gray-300">
+        :class="colorDelNav">
         <!-- Primary Navigation Menu -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" :class="colorDelBar">
             <div class="flex justify-between h-16">
                 <div class="flex">
                     <!-- Hamburger -->
@@ -64,7 +66,7 @@ if (colorBar) {
 
                     <!-- <DropdownLink v-if="can(['isAdmin'])" class="text-gray-500 dark:text-white" @click="downloadExcel"> {{ lang().label.downloadUsers }} </DropdownLink> -->
                     <DropdownLink v-if="can(['isAdmin', 'isadministrativo', 'issupervisor'])"
-                                  class="text-gray-500 dark:text-white" @click="justcc"> Centros de Costos
+                                  :class="colorDelNav" @click="justcc"> Centros de Costos
                     </DropdownLink>
                     <p v-if="can(['isAdmin'])">{{ $page.props.env.environment }}</p>
                     <div class="">

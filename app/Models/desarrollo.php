@@ -15,6 +15,7 @@ class desarrollo extends Model {
 	use HasFactory;
 	
 	protected $appends = [
+		'HaceCuanto',
 		'valorino',
 		'Numcuotas',
 		'totalpagado',
@@ -38,6 +39,10 @@ class desarrollo extends Model {
 		return $this->HasMany(pagodesarrollo::class);
 	}
 	
+	public function getHaceCuantoAttribute(): string {
+		
+		return \Carbon\Carbon::parse($this->fecha_cotizacion)->diffForHumans();
+	}
 	public function getValorinoAttribute(): string {
 		if (!$this->pagos || $this->pagos->isEmpty()) {
 			return '0';
