@@ -9,7 +9,14 @@ import DangerButton from '@/Components/DangerButton.vue';
 import pkg from 'lodash';
 
 import Pagination from '@/Components/Pagination.vue';
-import {CheckIcon, ChevronUpDownIcon, DocumentCheckIcon, PencilIcon, TrashIcon, XCircleIcon} from '@heroicons/vue/24/solid';
+import {
+    CheckIcon,
+    ChevronUpDownIcon,
+    DocumentCheckIcon,
+    PencilIcon,
+    TrashIcon,
+    XCircleIcon
+} from '@heroicons/vue/24/solid';
 
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
@@ -37,6 +44,7 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 const {_, debounce, pickBy} = pkg
 
+let NoliberarHastaPago = false
 const props = defineProps({
     title: String,
     filters: Object,
@@ -73,6 +81,7 @@ const props = defineProps({
     ArrayHorasSemanales: Array,  //parametros
     ArrayCentrosNoFactura: Array,  //centros que no facturan
 
+    losSelect: Object,
 })
 
 // <!--<editor-fold desc="Charts">-->
@@ -106,6 +115,7 @@ const data = reactive({
         search2: props.filters?.search2,
         search3: props.filters?.search3, //nose
         search4: props.filters?.search4, //año
+        search5: props.filters?.search5, //centro
         HorasNoDiurnas: props.filters?.HorasNoDiurnas,
 
         search: props.filters?.search,
@@ -336,7 +346,7 @@ const handleCheckboxChange = (values) => {
                         <TextInput v-model="data.params.HorasNoDiurnas" v-show="props.numberPermissions > 9"
                                    type="number" min="0" class="block w-2/3 md:w-full rounded-lg"
                                    placeholder="No diurnas"/>
-                        
+
                         <!-- ELFILTRO = numero del mes-->
                         <TextInput v-model="data.params.search1" v-show="props.numberPermissions > 9"
                                    type="number" min="0" max="31" class="hidden xl:block w-full rounded-lg"
@@ -354,17 +364,14 @@ const handleCheckboxChange = (values) => {
                         <TextInput v-model="data.params.searchDDay" v-show="props.numberPermissions > 1"
                                    type="number" min="0" max="31" class="hidden lg:block w-2/3 md:w-full rounded-lg"
                                    :placeholder="lang().placeholder.searchDDay"/>
-                        <!--                        <label for="soloval" class="hidden md:block mx-1 my-auto">Solo validos</label>-->
-                        <!--                        <label for="soloval" class="mx-1 md:hidden my-auto">Val</label>-->
-                        <!--                        <input v-model="data.params.soloValidos" id="soloval" type="checkbox"-->
-                        <!--                            class="bg-gray-100 h-6 w-6 mt-2 ml-3" />-->
-                        <!--                        <label for="soloval" class="hidden md:block mx-1 my-auto">Quincena actual</label>-->
-                        <!--                        <label for="soloval" class="mx-1 md:hidden my-auto">Q</label>-->
-                        <!--                        <input v-model="data.params.soloQuincena" id="soloval" type="checkbox"-->
-                        <!--                            class="bg-gray-100 h-6 w-6 mt-2 ml-3" />-->
-
                     </div>
-                    <div class="text-center">
+                    <div class="grid grid-cols-2 text-center gap-2">
+                        <div class="flex">
+                            <small v-if="!data.params.search5" class="my-1">Filtrar por Centro</small>
+                            <vSelect v-if="props.numberPermissions > 1" v-model="data.params.search5"
+                                     :options="props.losSelect['centros']" label="name"
+                                     class="block w-full mx-1 mt-1 rounded-lg"></vSelect>
+                        </div>
                         <FilterButtons @update:checked="handleCheckboxChange"
                                        :numberPermissions="props.numberPermissions"
                                        class="text-right"/>
@@ -404,8 +411,8 @@ const handleCheckboxChange = (values) => {
                 </div>
             </div>
 
-            
-<!--            empieza la tabla-->
+
+            <!--            empieza la tabla-->
             <div class="overflow-x-auto scrollbar-table">
                 <table class="w-full">
                     <thead class="uppercase sticky text-sm border-t border-gray-200 dark:border-gray-700">
@@ -472,11 +479,14 @@ const handleCheckboxChange = (values) => {
                             </div>
                         </td>
                         <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (index + 1) }}</td>
-                        <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ showSelect[clasegenerica.centro_costo_id] }}</td>
+                        <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{
+                                showSelect[clasegenerica.centro_costo_id]
+                            }}
+                        </td>
                         <td v-show="can(['updateCorregido reporte'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
-                            {{ showUsers[clasegenerica.user_id] }} 
+                            {{ showUsers[clasegenerica.user_id] }}
                             <span v-show="clasegenerica.name_aprobo">
-                                - {{clasegenerica.name_aprobo}}
+                                - {{ clasegenerica.name_aprobo }}
                             </span>
                         </td>
 
@@ -586,19 +596,19 @@ const handleCheckboxChange = (values) => {
                  class="text-gray-600 body-font overflow-hidden">
             <div class="container px-5 py-4 mx-auto">
                 <div class="flex flex-wrap m-2">
-<!--                    <div class="p-1 md:w-1/2 flex flex-col items-start">-->
-<!--                            <span-->
-<!--                                class="inline-block py-1 px-2 rounded bg-indigo-50 text-indigo-500 text-xs font-medium tracking-widest">-->
-<!--                                Este mes-->
-<!--                            </span>-->
-<!--                        <h2 v-if="props.nombrePersona"-->
-<!--                            class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">-->
-<!--                            Reportes de este mes: <b>{{ props.nombrePersona }}</b>-->
-<!--                        </h2>-->
-<!--                        <div class="m-1 p-1 w-full">-->
-<!--                            <Bar id="my-chart-id" :options="chartOptions" :data="chartData"/>-->
-<!--                        </div>-->
-<!--                    </div>-->
+                    <!--                    <div class="p-1 md:w-1/2 flex flex-col items-start">-->
+                    <!--                            <span-->
+                    <!--                                class="inline-block py-1 px-2 rounded bg-indigo-50 text-indigo-500 text-xs font-medium tracking-widest">-->
+                    <!--                                Este mes-->
+                    <!--                            </span>-->
+                    <!--                        <h2 v-if="props.nombrePersona"-->
+                    <!--                            class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">-->
+                    <!--                            Reportes de este mes: <b>{{ props.nombrePersona }}</b>-->
+                    <!--                        </h2>-->
+                    <!--                        <div class="m-1 p-1 w-full">-->
+                    <!--                            <Bar id="my-chart-id" :options="chartOptions" :data="chartData"/>-->
+                    <!--                        </div>-->
+                    <!--                    </div>-->
                     <!-- <div class="p-1 md:w-1/2 flex flex-col items-start">
                         <span class="inline-block py-1 px-2 rounded bg-indigo-50 text-indigo-500 text-xs font-medium tracking-widest">Segunda quincena</span>
                         <h2 class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">Numero de reportes</h2>
@@ -615,23 +625,3 @@ const handleCheckboxChange = (values) => {
 
     </AuthenticatedLayout>
 </template>
-
-<!--<style scoped>-->
-<!--&gt;>> {-->
-//--vs-controls-color: #664cc3;
-//--vs-border-color: #664cc3;
-//
-//--vs-dropdown-bg: #282c34;
-//--vs-dropdown-color: #cc99cd;
-//--vs-dropdown-option-color: #cc99cd;
-//
-//--vs-selected-bg: #664cc3;
-//--vs-selected-color: #eeeeee;
-//
-//--vs-search-input-color: #eeeeee;
-//
-//  --vs-dropdown-z-index: 1000;
-//--vs-dropdown-option--active-bg: #664cc3;
-//--vs-dropdown-option--active-color: #eeeeee;
-<!--}-->
-<!--</style>-->

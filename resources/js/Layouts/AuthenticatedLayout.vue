@@ -13,7 +13,7 @@ const emit = defineEmits(['close', 'open']);
 <template>
     <div class="flex w-full overflow-hidden">
         <SideBarVue :open="sidebarOpened" @close="sidebarOpened = false" />
-        <div class="pl-0 lg:pl-52 w-full min-h-screen block bg-gray-100 dark:bg-gray-900">
+        <div class="pl-0 lg:pl-52 w-full min-h-screen block bg-gray-200 dark:bg-gray-900">
             <Toast :flash="$page.props.flash" />
             <NavbarVue :open="sidebarOpened" @open="sidebarOpened = true" />
             <!-- Page Content -->

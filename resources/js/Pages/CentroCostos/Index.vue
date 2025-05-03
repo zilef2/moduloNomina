@@ -18,7 +18,8 @@ import {formatPesosCol} from '@/global.ts';
 
 import InfoButton from '@/Components/InfoButton.vue';
 
-import vSelect from "vue-select";import "vue-select/dist/vue-select.css";
+import vSelect from "vue-select";
+import "vue-select/dist/vue-select.css";
 
 
 const {_, debounce, pickBy} = pkg
@@ -104,7 +105,7 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                           :CentroCosto="data.generico"
                           :losSelect="props.losSelect"
                           :title="props.title"/>
-                    
+
                     <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :CentroCosto="data.generico"
                             :title="props.title"/>
                 </div>
@@ -113,7 +114,7 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                 <div class="flex justify-between p-2">
                     <div class="flex space-x-2">
                         <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet"/>
-                        <DangerButton @click="data.deleteBulkOpen = true" v-show="data.selectedId.length != 0"
+                        <DangerButton @click="data.deleteBulkOpen = true" v-show="data.selectedId.length !== 0"
                                       class="px-3 py-1.5" v-tooltip="lang().tooltip.delete_selected">
                             <TrashIcon class="w-5 h-5"/>
                         </DangerButton>
@@ -121,10 +122,11 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                     <div class="flex gap-2">
                         <TextInput v-model="data.params.search" type="text" class="block w-1/2 rounded-lg"
                                    :placeholder="lang().placeholder.searchCC"/>
-<!--                        <TextInput v-model="data.params.search3" type="text" class="block w-1/2 rounded-lg"-->
-<!--                                   placeholder="Zona"/>-->
+                        <!--                        <TextInput v-model="data.params.search3" type="text" class="block w-1/2 rounded-lg"-->
+                        <!--                                   placeholder="Zona"/>-->
                         <v-select v-model="data.params.search3" :options="props.losSelect['zona']" label="label"
-                        class="w-full" ></v-select>                        <TextInput v-model="data.params.searchSCC" type="text" class="block w-1/2 rounded-lg"
+                                  class="w-full"></v-select>
+                        <TextInput v-model="data.params.searchSCC" type="text" class="block w-1/2 rounded-lg"
                                    :placeholder="lang().placeholder.searchSupervisorCC"/>
                     </div>
                 </div>
@@ -177,8 +179,12 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                             </td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ parseInt(index, 10) + 1 }}</td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.nombre) }}</td>
-                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ formatPesosCol(clasegenerica.mano_obra_estimada) }}</td>
-                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.Zouna) }}</td>
+                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                {{ formatPesosCol(clasegenerica.mano_obra_estimada) }}
+                            </td>
+                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                {{ (clasegenerica.Zouna) }}
+                            </td>
 
                             <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                 <p v-for="(superv, inde) in clasegenerica.supervi.split(',')" :key="inde">
@@ -193,8 +199,12 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
                             <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                 {{ (clasegenerica.ValidoParaFacturar ? '✅' : '❌') }}
                             </td>
-                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.descripcion) }}</td>
-                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (clasegenerica.clasificacion) }}</td>
+                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                {{ (clasegenerica.descripcion) }}
+                            </td>
+                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                {{ (clasegenerica.clasificacion) }}
+                            </td>
                             <!--                             <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">-->
                             <!--                                {{ (clasegenerica.cuantoshijos) }}-->
                             <!--                            </td>-->

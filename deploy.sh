@@ -37,6 +37,7 @@ run_or_exit "/usr/bin/php artisan optimize"
 # Paso 4: Migraciones
 run_or_exit "/usr/bin/php artisan migrate --force"
 
+run_or_exit "cp /home/wwecno/pruebas/moduloNomina.zip /home/wwecno/repo/modnom2/"
 log "✅ Migración ejecutada correctamente"
 log "🎉 === DEPLOY FINALIZADO ==="
 } >> /home/wwecno/pruebas/deploy_log2.txt 2>&1

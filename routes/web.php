@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CentroCostosController;
 use App\Http\Controllers\CentroTableController;
 use App\Http\Controllers\ConsignarViaticoController;
@@ -121,9 +122,13 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::put('/updatePago/{id}', [\App\Http\Controllers\DesarrolloController::class, 'updatePago'])->name('updatePago');
 	Route::resource("/legalizacionviatico", \App\Http\Controllers\LegalizacionviaticoController::class);
     Route::get('/obtenerCentroCostosUltimaQuincena', [ReportesController::class, 'obtenerCentroCostosUltimaQuincena'])->name('obtenerCentroCostosUltimaQuincena');
-    Route::get('/FuncionPruebas', [ReportesController::class, 'FuncionPruebas'])->name('FuncionPruebas');
-    Route::get('/FuncionPruebas2', [ReportesController::class, 'FuncionPruebas2'])->name('FuncionPruebas2');
+    
 	Route::resource("/solicitud_viatico", SolicitudViaticoController::class);
+    Route::get('/actyindex', [ActivityLogController::class, 'index'])->name('actyindex');
+	
+	//para mi 
+	Route::get('/FuncionPruebas', [ReportesController::class, 'FuncionPruebas'])->name('FuncionPruebas');
+	Route::get('/FuncionPruebas2', [ReportesController::class, 'FuncionPruebas2'])->name('FuncionPruebas2');
 	//aquipues
 }); //fin verified
 
@@ -133,6 +138,7 @@ Route::middleware('auth', 'verified')->group(function () {
 
 
 // <editor-fold desc="Artisan">
+
 Route::get('/exception', function () {
     $ReportesDeHoy = \App\Models\Reporte::Where('fecha_ini', \Carbon\Carbon::today())->first();
     if ($ReportesDeHoy) {

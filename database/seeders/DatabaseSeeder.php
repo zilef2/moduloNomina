@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder {
 			            PermissionSeeder::class,
 			            RoleSeeder::class,
 			            UserSeeder::class,
+			            UserSeederReal::class,
 			            ReporteSeeder::class,
 			            ParametrosSeeder::class,
 			            RoleSeeder2025::class,

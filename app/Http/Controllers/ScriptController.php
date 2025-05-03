@@ -13,16 +13,14 @@ class ScriptController extends Controller {
 	
 	public function JustDeploy($pruebas = 0): int|string {
 		$request = request();
-//		$process = new Process(['whoami']);
-//		
 //		try {
+//		    $process = new Process(['whoami']);
 //			$process->run();
-//			
 //			if (!$process->isSuccessful()) {
 //				throw new ProcessFailedException($process);
 //			}
 //			$user = trim($process->getOutput());
-//			//			dd(function_exists('proc_open'), $user); // Debería mostrar true y el nombre de usuario (ej: 'www-data')
+//			//			dd(function_exists('proc_open'), $user);
 //			
 //		} catch (ProcessFailedException $exception) {
 //			echo $exception->getMessage();
@@ -45,9 +43,7 @@ class ScriptController extends Controller {
 		Log::info('Valor recibido en X-DEPLOY-KEY:', ['key' => request()->header('X-DEPLOY-KEY')]);
 		Log::info('Valor recibido en DEPLOY_KEY2:', ['key' => config('deploy.key')]);
 		
-		if ($request->header('X-DEPLOY-KEY') !== config('deploy.key')) {
-			abort(403, 'No autorizado');
-		}
+		if ($request->header('X-DEPLOY-KEY') !== config('deploy.key')) abort(403, 'No autorizado');
 		
 		$process = new Process(['bash', '/home/wwecno/pruebas/deploy.sh']);
 		$process->run();

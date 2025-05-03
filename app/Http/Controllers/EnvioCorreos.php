@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\helpers\Myhelp;
+use App\helpers\zzloggingcrud;
 use App\Jobs\EnviarViaticoJob;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -31,7 +32,8 @@ class EnvioCorreos extends Controller {
 		}
 		else {
 			$mensaje = "-";
-			Myhelp::EscribirEnLog($this, ' ERROR: no se encontro al jefe');
+			\App\Jobs\LogZilefMessage::dispatch(' ERROR: no se encontro al jefe');
+			
 		}
 		
 		

@@ -23,7 +23,7 @@ class UserSeeder extends Seeder {
 		
 		$superadmin = User::create(['name'              => 'Superadmin',
 		                            'email'             => 'superadminmodnom@superadmin.com',
-		                            'password'          => bcrypt($genPa . 'superadmin00.+-*' . $genPa), // 
+		                            'password'          => bcrypt($genPa . 'superadmin00.+-*' . $genPa),
 		                            'email_verified_at' => date('Y-m-d H:i'),
 		                            'cedula'            => '11232454',
 		                            'cargo_id'          => 2
@@ -49,7 +49,7 @@ class UserSeeder extends Seeder {
 				$anios = Carbon::now()->subYears($yearRandom)->format('Y-m-d H:i');
 				$unUsuario = User::create(['name'              => substr($key, $nombresRandom) . ' el ' . $rol,
 				                           'email'             => $key . '@' . $rol . $key . '.com',
-				                           'password'          => bcrypt($genPa . ' _ ' . $rol), //modnomqwe+-*
+				                           'password'          => bcrypt($genPa . ' _ ' . $rol), //1234_modnom _ Empleado
 				                           'email_verified_at' => date('Y-m-d H:i'),
 				                           'fecha_de_ingreso'  => $anios,
 				                           'cedula'            => $value,
@@ -63,19 +63,5 @@ class UserSeeder extends Seeder {
 			}
 		}
 		
-		//users real
-		$unUsuario = User::create(['name'              => 'Jessica Maria Perez Meza',
-		                           'email'             => 'perezmezajessica@gmail.com',
-		                           'password'          => bcrypt('1193231624+-'),
-		                           'email_verified_at' => date('Y-m-d H:i'),
-		                           'fecha_de_ingreso'  => date('Y-m-d', strtotime('01/08/2023')),
-		                           'cedula'            => '1193231624',
-		                           'sexo'              => 'femenino',
-		                           'celular'           => '3012124273',
-		                           'salario'           => 1600000,
-		                           'cargo_id'          => 14, //Coordinadora de gestion humana
-			                          // 'centro_costo_id' => 1,
-		                          ]);
-		$unUsuario->assignRole('Administrativo');
 	}
 }

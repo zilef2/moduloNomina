@@ -254,7 +254,7 @@ class ViaticoController extends Controller {
 		}
 		else {
 			DB::commit();
-			zzloggingcrud::zilefSaveArrayLogTrace($paraellog);
+			zzloggingcrud::zilefStoreArrayLogTrace($paraellog);
 			
 			
 			return back()->with('success', $mensaje . __('app.label.created_successfully', ['name' => $viatico->nombre]));

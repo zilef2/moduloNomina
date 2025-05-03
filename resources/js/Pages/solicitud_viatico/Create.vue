@@ -12,7 +12,7 @@ import "vue-select/dist/vue-select.css";
 import VueDatePicker from '@vuepic/vue-datepicker';
 import Thex from "@/Components/imfeng/thex.vue";
 import {formatPesosCol} from '@/global.ts';
-import {onMounted, reactive,watchEffect,watch} from "vue";
+import {onMounted, reactive, watchEffect, watch} from "vue";
 
 // --------------------------- ** -------------------------
 
@@ -82,15 +82,25 @@ onMounted(() => {
         form.codigo = (valueRAn);
         // form.hora_inicial = '0'+valueRAn+':00'//temp
         // form.fecha = '2023-06-01'
-        
+
         form.Fechasol = '2025-03-26';
         form.Ciudad = 'Medellin';
         form.ObraServicio = 'Una obra ejemplo';
-        
+
         form.descripcion[0] = valueRAn + ''
         form.gasto[0] = valueRAn
+        form.Solicitante = props.losSelect[3][0]
+
+        setTimeout(buscarSelects, 2000);
+
     }
 });
+
+function buscarSelects() {
+    form.user_id[0] = props.losSelect[0][1]
+    form.centro_costo_id[0] = props.losSelect[1][1]
+}
+
 
 watchEffect(() => {
     if (props.show) {
@@ -105,7 +115,7 @@ watch(() => form.numerodias, (new_numerodias, old_numerodias) => {
             form.fecha_inicial[index] = null;
         }
     });
-}, { deep: true });
+}, {deep: true});
 watch(() => form.fecha_inicial, (new_fecha_inicial) => {
     new_fecha_inicial.forEach((thedate, index) => {
         if (thedate && thedate[0] && thedate[1]) {
@@ -121,7 +131,7 @@ watch(() => form.fecha_inicial, (new_fecha_inicial) => {
             console.log("Diferencia en días:", diffDias);
         }
     });
-}, { deep: true });
+}, {deep: true});
 
 
 const formattedValor = {
@@ -144,10 +154,6 @@ const formattedValor = {
 const daynames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
 
 
-
-
-
-
 const ValidarForm = [];
 props.titulos.forEach(names => {
     if (names['order'] !== 'noquiero'
@@ -159,7 +165,7 @@ props.titulos.forEach(names => {
 
     ValidarForm.push({idd: 'user_id', label: 'user_id', type: 'foreign'})
     ValidarForm.push({idd: 'centro_costo_id', label: 'centro_costo_id', type: 'foreign'})
-    
+
     ValidarForm.push({idd: 'descripcion', label: 'descripcion', type: 'text'})
     ValidarForm.push({idd: 'gasto', label: 'gasto', type: 'text'})
     ValidarForm.push({idd: 'numerodias', label: 'numerodias', type: 'text'})
@@ -201,16 +207,16 @@ const create = () => {
 <template>
     <section class="space-y-6">
         <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl4'">
-            <form class="p-6 mb-36" @submit.prevent="create" >
+            <form class="p-6 mb-36" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     {{ lang().label.add }} {{ props.title }}
                 </h2>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div class="w-full">
                         <label class="dark:text-gray-50">Quién realiza la solicitud</label>
-<!--                        SolicitudViaticoController/ Dependencias-->
-                        <vSelect v-model="form.Solicitante" :options="props.losSelect[3]" 
+                        <!--                        SolicitudViaticoController/ Dependencias-->
+                        <vSelect v-model="form.Solicitante" :options="props.losSelect[3]"
                                  label="name"></vSelect>
                     </div>
 

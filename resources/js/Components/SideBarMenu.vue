@@ -86,7 +86,7 @@ const ButtonsInformes = [ //SAME AS WEB.PHP
                 :class="{ 'bg-sky-600 dark:bg-sky-600': route().current('permission.index') }">
                 <Link :href="route('permission.index')" class="flex items-center py-2 px-4">
                     <ShieldCheckIcon class="w-6 h-5"/>
-                    <span class="ml-3">{{ lang().label.permission }}</span>
+                    <span class="ml-3">{{ lang().label.permission }} <br>solo super</span>
                 </Link>
             </li>
             <li v-show="can(['read centroCostos'])"

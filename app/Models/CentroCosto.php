@@ -44,138 +44,136 @@ use Illuminate\Support\Facades\DB;
  * @method static selectRaw(string $string)
  */
 class CentroCosto extends Model {
-    
-    use HasFactory;
-
-    protected Collection $supervisCache; // Propiedad para almacenar el valor calculado
-
-    protected $fillable = [
-        'nombre',
-        'mano_obra_estimada',
-        'activo', //finish_at 27mayo2024
-        'descripcion',
-        'clasificacion',
-        'ValidoParaFacturar',
-        'zona_id',
-    ];
-
-    protected $appends = [
-        'Zouna',
-        'supervi',
-        'ListaSupervisores',
-    ];
-
-    public function getSuperviAttribute() : string{
-        if ($this->superviCache === null) { // Solo calcula si no está en caché
-//            $this->superviCache = User::UsersWithRol('supervisor')->get();
-            $this->superviCache = implode(',', $this->ArrayListaSupervisores());
-            
-        }
-        return $this->superviCache ?? '';
-    }
-    public function getListaSupervisoresAttribute() : array{
-        $supervisoresAsociados = $this->users()->select(['users.id', 'name'])->get()->toArray();
-
-        return $supervisoresAsociados ?? [];
-    }
-
-//    public function ArrayListaSupervisores(): array {
-//        $supervisores = $this->supervisCache ?? $this->getSupervisAttribute();
-//        $centroid = (int)$this->id;
-//        return $supervisores->map(function (User $user) use ($centroid) {
-//            if ($user->TieneEsteCentro($centroid)) {
-//                return $user->name;
-//            }
-//            return null;
-//        })->filter()->toArray();
-//    }
-
-    public function reportes(): HasMany {
-        return $this->hasMany(Reporte::class);
-    }
-
-    public function zona(): BelongsTo {
-        return $this->BelongsTo(zona::class);
-    }
-
-    public function getZounaAttribute(): string {
-        return $this->zona ? $this->zona->nombre : 'Sin zona';
-    }
-
-//    public function getSuperviAttribute($supervisores): string {
-//        $ArrayListaSupervi = $this->ArrayListaSupervisores($supervisores);
-//        return implode(',', $ArrayListaSupervi);
-//    }
-
-    public function ArrayListaSupervisores(): array {
-        return $this->users()
-            ->whereHas('roles', fn($q) => $q->where('name', 'supervisor')) // Filtra solo supervisores
-            ->pluck('name')
-            ->toArray();
-    }
-
-    public function users(): BelongsToMany {
-        return $this->BelongstoMany(User::class, 'centro_user');
-    }
-
-    /**
-     * @param Collection<int, User> $PosiblesSupervisores
-     */
-    public function ArraySupervisores($centroid, Collection $PosiblesSupervisores): array {
-        $result = [];
-        if ($PosiblesSupervisores->count()) {
-            foreach ($PosiblesSupervisores as $supervisor) {
-                $result[] = $supervisor->ArrayCentrosID();
-            }
-        }
-
-        return array_unique($result);
-    }
-
-    public function ArraySupervIDs(): array {
-        $centroid = $this->id;
-        $supervisores = User::UsersWithRol('supervisor')->get();
-        $result = $supervisores->map(function ($user) use ($centroid) {
-            if ($user->TieneEsteCentro($centroid)) {
-                return $user->id;
-            }
-
-            return null;
-        })->filter()->toArray();
-
-        return $result;
-    }
-
-    //deep2 |
-    public function actualizarEstimado($anio, $mes, $parametros): void {
-        $elSelect = [
-            'user_id',
-            DB::raw('COUNT(*) as total'),
-            DB::raw('SUM(horas_trabajadas) as horas_trabajadas'),
-            DB::raw('SUM(almuerzo) as almuerzo'),
-            DB::raw('SUM(diurnas) as diurnas'),
-            DB::raw('SUM(nocturnas) as nocturnas'),
-            DB::raw('SUM(extra_diurnas) as extra_diurnas'),
-            DB::raw('SUM(extra_nocturnas) as extra_nocturnas'),
-            DB::raw('SUM(dominical_diurno) as dominical_diurno'),
-            DB::raw('SUM(dominical_nocturno) as dominical_nocturno'),
-            DB::raw('SUM(dominical_extra_diurno) as dominical_extra_diurno'),
-            DB::raw('SUM(dominical_extra_nocturno) as dominical_extra_nocturno'),
-        ];
-
-        $Reportes = Reporte::Select($elSelect)
-            ->Where('centro_costo_id', $this->id)
-            ->WhereYear('fecha_ini', $anio)
-            ->WhereMonth('fecha_ini', $mes)
-            ->Where('valido', 1)
-            ->groupBy('user_id')
-            ->get();
-
-        $CTC = new CentroTableController();
-        [$Reportes, $mano_obra_estimada] = $CTC->MultiplicarPorSalario($Reportes, $this->id);
-
-        $this->update([
-            'mano_obra_estimada' => $mano_obra_estimada,
-        ]);
-    }
+	
+	use HasFactory;
+	
+	protected Collection $supervisCache; // Propiedad para almacenar el valor calculado
+	
+	protected $fillable = ['nombre',
+		'mano_obra_estimada',
+		'activo', //finish_at 27mayo2024
+		'descripcion',
+		'clasificacion',
+		'ValidoParaFacturar',
+		'zona_id',
+	];
+	
+	protected $appends = ['Zouna',
+		'supervi',
+		'ListaSupervisores',
+	];
+	
+	public function getSuperviAttribute(): string {
+		if ($this->superviCache === null) { // Solo calcula si no está en caché
+			//            $this->superviCache = User::UsersWithRol('supervisor')->get();
+			$this->superviCache = implode(',', $this->ArrayListaSupervisores());
+			
+		}
+		
+		
+		return $this->superviCache ?? '';
+	}
+	
+	public function ArrayListaSupervisores(): array {
+		return $this
+			->users()->whereHas('roles', fn($q) => $q->where('name', 'supervisor')) // Filtra solo supervisores
+			->pluck('name')->toArray()
+		;
+	}
+	
+	//    public function ArrayListaSupervisores(): array {
+	//        $supervisores = $this->supervisCache ?? $this->getSupervisAttribute();
+	//        $centroid = (int)$this->id;
+	//        return $supervisores->map(function (User $user) use ($centroid) {
+	//            if ($user->TieneEsteCentro($centroid)) {
+	//                return $user->name;
+	//            }
+	//            return null;
+	//        })->filter()->toArray();
+	//    }
+	
+	public function users(): BelongsToMany {
+		return $this->BelongstoMany(User::class, 'centro_user');
+	}
+	
+	public function getListaSupervisoresAttribute(): array {
+		$supervisoresAsociados = $this->users()->select(['users.id', 'name'])->get()->toArray();
+		
+		
+		return $supervisoresAsociados ?? [];
+	}
+	
+	public function reportes(): HasMany {
+		return $this->hasMany(Reporte::class);
+	}
+	
+	//    public function getSuperviAttribute($supervisores): string {
+	//        $ArrayListaSupervi = $this->ArrayListaSupervisores($supervisores);
+	//        return implode(',', $ArrayListaSupervi);
+	//    }
+	
+	public function zona(): BelongsTo {
+		return $this->BelongsTo(zona::class);
+	}
+	
+	public function getZounaAttribute(): string {
+		return $this->zona ? $this->zona->nombre : 'Sin zona';
+	}
+	
+	/**
+	 * @param Collection<int, User> $PosiblesSupervisores
+	 */
+	public function ArraySupervisores($centroid, Collection $PosiblesSupervisores): array {
+		$result = [];
+		if ($PosiblesSupervisores->count()) {
+			foreach ($PosiblesSupervisores as $supervisor) {
+				$result[] = $supervisor->ArrayCentrosID();
+			}
+		}
+		
+		
+		return array_unique($result);
+	}
+	
+	public function ArraySupervIDs(): array {
+		$centroid = $this->id;
+		$supervisores = User::UsersWithRol('supervisor')->get();
+		$result = $supervisores->map(function ($user) use ($centroid) {
+			if ($user->TieneEsteCentro($centroid)) {
+				return $user->id;
+			}
+			
+			
+			return null;
+		})->filter()->toArray();
+		
+		
+		return $result;
+	}
+	
+	//deep2 |
+	public function actualizarEstimado($anio, $mes, $parametros): void {
+		$elSelect = ['user_id',
+			DB::raw('COUNT(*) as total'),
+			DB::raw('SUM(horas_trabajadas) as horas_trabajadas'),
+			DB::raw('SUM(almuerzo) as almuerzo'),
+			DB::raw('SUM(diurnas) as diurnas'),
+			DB::raw('SUM(nocturnas) as nocturnas'),
+			DB::raw('SUM(extra_diurnas) as extra_diurnas'),
+			DB::raw('SUM(extra_nocturnas) as extra_nocturnas'),
+			DB::raw('SUM(dominical_diurno) as dominical_diurno'),
+			DB::raw('SUM(dominical_nocturno) as dominical_nocturno'),
+			DB::raw('SUM(dominical_extra_diurno) as dominical_extra_diurno'),
+			DB::raw('SUM(dominical_extra_nocturno) as dominical_extra_nocturno'),
+		];
+		
+		$Reportes = Reporte::Select($elSelect)->Where('centro_costo_id', $this->id)->WhereYear('fecha_ini', $anio)->WhereMonth('fecha_ini', $mes)->Where('valido', 1)->groupBy('user_id')->get()
+		;
+		
+		$CTC = new CentroTableController();
+		[$Reportes, $mano_obra_estimada] = $CTC->MultiplicarPorSalario($Reportes, $this->id);
+		
+		$this->update(['mano_obra_estimada' => $mano_obra_estimada,
+		              ]);
+	}
 }

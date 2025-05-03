@@ -41,9 +41,9 @@ class SolicitudViaticoController extends Controller {
 	}
 	
 	public function index(Request $request) {
-		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' solicitud_viaticos '));
+		$numberPermissions = zzloggingcrud::zilefLogTrace();
+//		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' solicitud_viaticos '));
 		$solicitud_viaticos = $this->Filtros($request)->get();
-		
 		
 		if ($request->has('search3')) {
 			$solicitud_viaticos->filter(function ($item) {
@@ -57,12 +57,7 @@ class SolicitudViaticoController extends Controller {
 		return Inertia::render($this->FromController . '/Index', [
 			'fromController'    => $this->PerPageAndPaginate($request, $solicitud_viaticos),
 			'total'             => $solicitud_viaticos->count(),
-			'breadcrumbs'       => [
-				[
-					'label' => __('app.label.' . $this->FromController),
-					'href'  => route($this->FromController . '.index')
-				]
-			],
+			'breadcrumbs'       => [['label' => __('app.label.' . $this->FromController), 'href'  => route($this->FromController . '.index')]],
 			'title'             => __('app.label.' . $this->FromController),
 			'filters'           => $request->all(['search', 'field', 'order', 'search2', 'search3']),
 			'perPage'           => (int)$perPage,
@@ -91,9 +86,9 @@ class SolicitudViaticoController extends Controller {
 			});
 		}
 		if ($request->has('search3')) {
-			$solicitud_viaticos = $solicitud_viaticos->whereHas('viaticos',function ($query) use ($request) {
+			$solicitud_viaticos = $solicitud_viaticos->whereHas('viaticos', function ($query) use ($request) {
 				$query->where('centro_costo_id', 'LIKE', "%" . $request->search3['id'] . "%");
-			}); 
+			});
 		}
 		
 		if ($request->has(['field', 'order'])) {
@@ -154,8 +149,7 @@ class SolicitudViaticoController extends Controller {
 		return (int)viatico::all()->sum('saldo');
 	}
 	
-	//    public function Dependencias()
-	//    {
+	//    public function Dependencias() {
 	//        $no_nadasSelect = No_nada::all('id','nombre as name')->toArray();
 	//        array_unshift($no_nadasSelect,["name"=>"Seleccione un no_nada",'id'=>0]);
 	
@@ -181,13 +175,12 @@ class SolicitudViaticoController extends Controller {
 		$cuantosViaticos = count($request->centro_costo_id);
 		
 		$elsolicitante = User::find($request->Solicitante['id']);
-		$solViatico = solicitud_viatico::
-		create([
+		$solViatico = solicitud_viatico::create([
 			       'Solicitante'  => $elsolicitante->name,
 			       'Fechasol'     => $request->Fechasol,
 			       'Ciudad'       => $request->Ciudad,
 			       'ObraServicio' => $request->ObraServicio,
-			       'user_id'      => $request->Solicitante['id'],
+			       'user_id'      => $elsolicitante->id,
 			       'saldo_sol'    => 0,
 		       ]);
 		
@@ -213,7 +206,7 @@ class SolicitudViaticoController extends Controller {
 			
 			];
 			$paraellog[] = implode(",", $thearray);
-			$viatico = viatico::create($thearray);
+			viatico::create($thearray);
 			$total += $request->gasto[$index];
 			
 		}
@@ -226,18 +219,33 @@ class SolicitudViaticoController extends Controller {
 		}
 		else {
 			DB::commit();
-			zzloggingcrud::zilefSaveArrayLogTrace($paraellog);
+			zzloggingcrud::zilefStoreArrayLogTrace($paraellog);
 			
 			
 			return back()->with('success', 'Solicitud generada de manera exitosa');
 		}
-		
 	}
 	
 	public function create() {}//fin store
 	
 	//! STORE - UPDATE - DELETE
 	//! STORE functions
+	
+	public function update(Request $request, $id): RedirectResponse {
+		zzloggingcrud::zilefLogTrace();
+		
+		DB::beginTransaction();
+		$viatico = solicitud_viatico::findOrFail($id);
+		$original = $viatico->getOriginal(); // Valores antes de la actualización
+		$viatico->update($request->all());
+		
+		zzloggingcrud::zilefLogUpdate($this, $viatico, $original);
+		
+		DB::commit();
+		
+		
+		return back()->with('success', __('app.label.updated_successfully2', ['nombre' => $viatico->nombre]));
+	}
 	
 	public function EnviaralJefe(Request $request, ?User $myuser, $cuantosViaticos, $total): string {
 		$jefe = User::Where('name', 'Carlos Daniel Anaya Barrios')->first();
@@ -268,23 +276,8 @@ class SolicitudViaticoController extends Controller {
 		return $mensaje;
 	}
 	
-	public function update(Request $request, $id): RedirectResponse {
-		zzloggingcrud::zilefLogTrace();
-		
-		DB::beginTransaction();
-		$viatico = solicitud_viatico::findOrFail($id);
-		$original = $viatico->getOriginal(); // Valores antes de la actualización
-		$viatico->update($request->all());
-		
-		zzloggingcrud::zilefLogUpdate($this, $viatico, $original);
-		
-		DB::commit();
-		
-		
-		return back()->with('success', __('app.label.updated_successfully2', ['nombre' => $viatico->nombre]));
-	}
-	
 	//update3
+	
 	public function legalizarviatico(Request $request, $id): RedirectResponse {
 		zzloggingcrud::zilefLogTrace();
 		
@@ -392,5 +385,6 @@ class SolicitudViaticoController extends Controller {
 		return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
 	}
 	//FIN : STORE - UPDATE - DELETE
+	
 	
 }

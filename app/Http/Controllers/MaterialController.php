@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\LogZilefMessage;
 use App\Models\material;
 use App\helpers\Myhelp;
 use App\helpers\MyModels;
@@ -75,7 +76,7 @@ class MaterialController extends Controller
     //</editor-fold>
 
     public function index(Request $request) {
-        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' materials '));
+        $numberPermissions = (LogZilefMessage::dispatch(' index materials '));
         $materials = $this->Filtros($request)->get();
 //        $losSelect = $this->Dependencias();
 
@@ -100,8 +101,10 @@ class MaterialController extends Controller
     //! STORE functions
 
     public function store(Request $request): RedirectResponse{
-        $permissions = Myhelp::EscribirEnLog($this, ' Begin STORE:materials');
-        DB::beginTransaction();
+		LogZilefMessage::dispatch(' Begin STORE:materials');
+		LogZilefMessage::dispatch('');
+	    
+	    DB::beginTransaction();
 //        $no_nada = $request->no_nada['id'];
 //        $request->merge(['no_nada_id' => $request->no_nada['id']]);
         
@@ -110,7 +113,7 @@ class MaterialController extends Controller
         $material = material::create($request->all());
 
         DB::commit();
-        Myhelp::EscribirEnLog($this, 'STORE:materials EXITOSO', 'material id:' . $material->id . ' | ' . $material->nombre, false);
+		LogZilefMessage::dispatch('STORE:materials EXITOSO' . ' | material id:' . $material->id . ' | ' . $material->nombre);
         return back()->with('success', __('app.label.created_successfully', ['name' => $material->nombre]));
     }
     //fin store functions
@@ -118,15 +121,15 @@ class MaterialController extends Controller
     public function show($id){}public function edit($id){}
 
     public function update(Request $request, $id): RedirectResponse{
-        $permissions = Myhelp::EscribirEnLog($this, ' Begin UPDATE:materials');
-        DB::beginTransaction();
+		LogZilefMessage::dispatch(' Begin UPDATE:materials');
+	    DB::beginTransaction();
         $material = material::findOrFail($id);
         $fecha_adquisicion = (new \App\helpers\Myhelp)->updatingDate($request->fecha_adquisicion);
         $request->merge(['fecha_adquisicion' => $fecha_adquisicion]);
         $material->update($request->all());
 
         DB::commit();
-        Myhelp::EscribirEnLog($this, 'UPDATE:materials EXITOSO', 'material id:' . $material->id . ' | ' . $material->nombre , false);
+		LogZilefMessage::dispatch('UPDATE:materials EXITOSO'. ' | material id:' . $material->id . ' | ' . $material->nombre);
         return back()->with('success', __('app.label.updated_successfully2', ['nombre' => $material->nombre]));
     }
 
@@ -138,11 +141,11 @@ class MaterialController extends Controller
      */
 
     public function destroy($materialid){
-        $permissions = Myhelp::EscribirEnLog($this, 'DELETE:materials');
+		LogZilefMessage::dispatch('DELETE:materials');
         $material = material::find($materialid);
         $elnombre = $material->nombre;
         $material->delete();
-        Myhelp::EscribirEnLog($this, 'DELETE:materials', 'material id:' . $material->id . ' | ' . $material->nombre . ' borrado', false);
+		LogZilefMessage::dispatch('DELETE:materials' . 'material id:' . $material->id . ' | ' . $material->nombre . ' borrado');
         return back()->with('success', __('app.label.deleted_successfully', ['name' => $elnombre]));
     }
 
