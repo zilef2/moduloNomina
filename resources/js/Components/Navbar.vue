@@ -16,7 +16,7 @@ const emit = defineEmits(["open"])
 // }
 
 // let version = "24d2024_domingos"
-let version = "deploy_21_may25"
+let version = "deploy_2_jun25"
 const downloadExcel = async () => {
     window.open('/users/export', '_blank')
 }

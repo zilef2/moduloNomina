@@ -71,6 +71,9 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
     })
 }, 150))
 
+const fechaActual = new Date();
+const opciones = { month: 'long' }; // 'long' para el nombre completo del mes, 'short' para abreviatura
+const nombreMes = fechaActual.toLocaleDateString('es-ES', opciones);
 </script>
 
 <template>
@@ -78,7 +81,7 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
     <AuthenticatedLayout>
         <!--        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />-->
         <h2 class="text-lg mb-1">Esta vista se recarga cada 5 minutos</h2>
-        <h2 class="mb-1">Mano de obra estimada de este mes. Se tiene en cuenta el salario de la persona.
+        <h2 class="mb-1">Mano de obra estimada de este mes ({{nombreMes}}). Se tiene en cuenta el salario de la persona.
             <div v-if="can(['isSuper'])" class="mt-1 block w-full">
                 <label :for="'search2'">
                     <input
