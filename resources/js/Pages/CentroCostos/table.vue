@@ -29,6 +29,7 @@ const data = reactive({
         quincena: props?.filters?.quincena,
         plata: props?.filters?.plata,
     },
+    hayUltimoreporte: true,
     elID: props.elIDD,
     selectedId: [],
     dataSet: usePage().props.app.perpage,
@@ -43,13 +44,19 @@ const data = reactive({
     tdominical_extra_nocturno: 0,
 })
 
-const sumarLoQueSea = () =>{
+const sumarLoQueSea = () => {
     if (data.params?.plata)
         SumarPlata()
     else
         aSumarHoras(0)
 }
+
+
+const verificarExistenciaUltimoReporte = () => {
+    if (props.UltimoReporteRealizado === '_') data.hayUltimoreporte = false
+}
 onMounted(() => {
+    verificarExistenciaUltimoReporte()
     sumarLoQueSea()
     if (!data.params.quincena) data.params.quincena = 1
 
@@ -152,7 +159,8 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
         },
     })
 }, 250))
-watchEffect(() => {})
+watchEffect(() => {
+})
 </script>
 <template>
     <Head :title="props.title"></Head>
@@ -165,14 +173,18 @@ watchEffect(() => {})
                             <h1 class="sm:text-3xl text-2xl font-medium title-font mb-2 text-gray-900">
                                 Reporte de {{ props.title }}
                             </h1>
-                            <p class="text-center">{{props.UltimoReporteRealizado}}</p>
+                            <p class="text-center">{{ props.UltimoReporteRealizado }}</p>
 
-                            <h3 v-show="data.params.quincena"> Seleccione quincena y mes </h3>
+                            <h3 v-if="data.hayUltimoreporte" v-show="data.params.quincena"> Seleccione quincena y mes </h3>
 
                         </div>
                     </div>
                 </div>
-                <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <div v-if="!data.hayUltimoreporte" class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                    <h1 class="text-2xl">No se encontró un reporte para este centro de costo</h1>
+                    
+                </div>
+                <div v-else class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                     <div class="flex justify-between p-2">
                         <div class="flex text-center rounded-xl justify-center mx-auto">
                             <div class="grid grid-cols-3 gap-4 px-2 hover:shadow-xl">
@@ -216,16 +228,46 @@ watchEffect(() => {})
                             <!-- <th class="px-2 py-4 sr-only">Action</th> -->
                             <tr class="dark:bg-gray-900 text-left">
                                 <!--                                    v-on:click="order()"-->
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center col-span-4">Empleado<ChevronUpDownIcon class="w-4 h-4 inline-flex"/></th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">Horas Trabajadas<ChevronUpDownIcon class="w-4 h-4 inline-flex"/></th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">Diurnas<ChevronUpDownIcon class="w-4 h-4 inline-flex"/></th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">Nocturnas<ChevronUpDownIcon class="w-4 h-4 inline-flex"/></th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">Extra diurnas<ChevronUpDownIcon class="w-4 h-4 inline-flex"/></th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">Extra nocturnas<ChevronUpDownIcon class="w-4 h-4 inline-flex"/></th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">Dominical diurno<ChevronUpDownIcon class="w-4 h-4 inline-flex"/></th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">Dominical nocturno<ChevronUpDownIcon class="w-4 h-4 inline-flex"/></th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">Dominical extra diurno<ChevronUpDownIcon class="w-4 h-4 inline-flex"/></th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">Dominical extra nocturno<ChevronUpDownIcon class="w-4 h-4 inline-flex"/></th>
+                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center col-span-4">
+                                    Empleado
+                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
+                                </th>
+                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
+                                    Horas Trabajadas
+                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
+                                </th>
+                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
+                                    Diurnas
+                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
+                                </th>
+                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
+                                    Nocturnas
+                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
+                                </th>
+                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
+                                    Extra diurnas
+                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
+                                </th>
+                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
+                                    Extra nocturnas
+                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
+                                </th>
+                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
+                                    Dominical diurno
+                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
+                                </th>
+                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
+                                    Dominical nocturno
+                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
+                                </th>
+                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
+                                    Dominical extra diurno
+                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
+                                </th>
+                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
+                                    Dominical extra nocturno
+                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
+                                </th>
                             </tr>
                             <!--                            <tr class="dark:bg-gray-900 text-left">-->
                             <!--                            </tr>-->
@@ -236,15 +278,35 @@ watchEffect(() => {})
                                 :class="{ 'bg-gray-200 dark:bg-bg-gray-600': index % 2 === 0 }">
 
                                 <td class="whitespace-nowrap -py-4 px-2">{{ clasegenerica.usera }}</td>
-                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.horas_trabajadas,0,0) }}</td>
-                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.diurnas,0,0) }}</td>
-                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.nocturnas,0,0) }}</td>
-                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.extra_diurnas,0,0) }}</td>
-                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.extra_nocturnas,0,0) }}</td>
-                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.dominical_diurno,0,0) }}</td>
-                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.dominical_nocturno,0,0) }}</td>
-                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.dominical_extra_diurno,0,0) }}</td>
-                                <td class="whitespace-nowrap -py-4 px-2">{{ number_format(clasegenerica.dominical_extra_nocturno,0,0) }}</td>
+                                <td class="whitespace-nowrap -py-4 px-2">
+                                    {{ number_format(clasegenerica.horas_trabajadas, 0, 0) }}
+                                </td>
+                                <td class="whitespace-nowrap -py-4 px-2">{{
+                                        number_format(clasegenerica.diurnas, 0, 0)
+                                    }}
+                                </td>
+                                <td class="whitespace-nowrap -py-4 px-2">{{
+                                        number_format(clasegenerica.nocturnas, 0, 0)
+                                    }}
+                                </td>
+                                <td class="whitespace-nowrap -py-4 px-2">
+                                    {{ number_format(clasegenerica.extra_diurnas, 0, 0) }}
+                                </td>
+                                <td class="whitespace-nowrap -py-4 px-2">
+                                    {{ number_format(clasegenerica.extra_nocturnas, 0, 0) }}
+                                </td>
+                                <td class="whitespace-nowrap -py-4 px-2">
+                                    {{ number_format(clasegenerica.dominical_diurno, 0, 0) }}
+                                </td>
+                                <td class="whitespace-nowrap -py-4 px-2">
+                                    {{ number_format(clasegenerica.dominical_nocturno, 0, 0) }}
+                                </td>
+                                <td class="whitespace-nowrap -py-4 px-2">
+                                    {{ number_format(clasegenerica.dominical_extra_diurno, 0, 0) }}
+                                </td>
+                                <td class="whitespace-nowrap -py-4 px-2">
+                                    {{ number_format(clasegenerica.dominical_extra_nocturno, 0, 0) }}
+                                </td>
                             </tr>
                             <tr class="border border-amber-400 bg-white dark:border-gray-700 hover:bg-gray-300 hover:dark:bg-gray-900/20">
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 font-bold"> Total</td>
@@ -256,7 +318,10 @@ watchEffect(() => {})
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ data.tdominical_diurno }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ data.tdominical_nocturno }}</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ data.tdominical_extra_diurno }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ data.tdominical_extra_nocturno }}</td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{
+                                        data.tdominical_extra_nocturno
+                                    }}
+                                </td>
                             </tr>
                             </tbody>
                         </table>

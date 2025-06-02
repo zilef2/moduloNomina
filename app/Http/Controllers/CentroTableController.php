@@ -112,7 +112,7 @@ class CentroTableController extends Controller
         $titulo = __('app.label.Reportes');
 
         $nombresTabla = $this->noumbresTabla($numberPermissions);
-        $UltimoReporteRealizado = $this->UltimoReporteRealizadx($id);
+        $UltimoReporteRealizado = $this->UltimoReporteRealizadx($id); //return _ when no last report found
 
         [$perPage, $paginated] = $this->TheQuery($id, $request, $request->plata);
 
@@ -206,7 +206,12 @@ class CentroTableController extends Controller
         $ultimorepo = Reporte::Where('centro_costo_id', $idcentrocosto)
             ->latest()
             ->first();
-        $returning = Carbon::parse($ultimorepo->fecha_ini)->diffForHumans();
+		if($ultimorepo && $ultimorepo->fecha_ini){
+			
+            $returning = Carbon::parse($ultimorepo->fecha_ini)->diffForHumans();
+		}else{
+			return '_';
+		}
 
         return 'La ultima modificación de este centro de costos fue: ' . $returning;
     }

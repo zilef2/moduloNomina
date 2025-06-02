@@ -42,7 +42,6 @@ class SolicitudViaticoController extends Controller {
 	
 	public function index(Request $request) {
 		$numberPermissions = zzloggingcrud::zilefLogTrace();
-//		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' solicitud_viaticos '));
 		$solicitud_viaticos = $this->Filtros($request)->get();
 		
 		if ($request->has('search3')) {

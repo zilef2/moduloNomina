@@ -47,7 +47,10 @@ class CentroCostosController extends Controller {
 		$helperSelect = new HelperControllerSelect();
 		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
 		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, $trace[0]['function']));
-		$this->ActualizarPresupuesto();
+		
+        $this->ActualizarPresupuesto();
+		
+		
 		$centroCostos = $this->MapearClasePP($numberPermissions, $request);
 		
 		$listaSupervisores = User::whereHas('roles', function ($q) {
@@ -58,26 +61,26 @@ class CentroCostosController extends Controller {
 		
 		
 		return Inertia::render('CentroCostos/Index', [ //carpeta
-		                                               'fromController'    => $this->PerPageAndPaginate($request, $centroCostos, $perPage),
-		                                               'perPage'           => (int)$perPage,
-		                                               'breadcrumbs'       => [
-			                                               [
-				                                               'label' => __('app.label.CentroCostos'),
-				                                               'href'  => route('CentroCostos.index')
-			                                               ]
-		                                               ],
-		                                               'title'             => __('app.label.CentroCostos'),
-		                                               'filters'           => $request->all([
-			                                                                                    'search',
-			                                                                                    'field',
-			                                                                                    'order',
-			                                                                                    'search2',
-			                                                                                    'searchSCC'
-		                                                                                    ]),
-		                                               'nombresTabla'      => $this->getNombresTabla(),
-		                                               'listaSupervisores' => $listaSupervisores,
-		                                               'numberPermissions' => $numberPermissions,
-		                                               'losSelect'         => $helperSelect->DependenciasCentro('zona'),
+			'fromController'    => $this->PerPageAndPaginate($request, $centroCostos, $perPage),
+			'perPage'           => (int)$perPage,
+			'breadcrumbs'       => [
+				[
+					'label' => __('app.label.CentroCostos'),
+					'href'  => route('CentroCostos.index')
+				]
+			],
+			'title'             => __('app.label.CentroCostos'),
+			'filters'           => $request->all([
+				                                     'search',
+				                                     'field',
+				                                     'order',
+				                                     'search2',
+				                                     'searchSCC'
+			                                     ]),
+			'nombresTabla'      => $this->getNombresTabla(),
+			'listaSupervisores' => $listaSupervisores,
+			'numberPermissions' => $numberPermissions,
+			'losSelect'         => $helperSelect->DependenciasCentro('zona'),
 		
 		]);
 	}
@@ -94,8 +97,8 @@ class CentroCostosController extends Controller {
 				$item->actualizarEstimado($anio, $mes, $this->parametros);
 			}
 			// Actualizar el tiempo de la última llamada en caché
-			Cache::put($cacheKey, $tiempoActual);
 		}
+		Cache::put($cacheKey, $tiempoActual);
 	}
 	
 	public function MapearClasePP($numberPermissions, $request) {
@@ -243,44 +246,44 @@ class CentroCostosController extends Controller {
 		$permissions = Auth()->user()->roles->pluck('name')[0];
 		if ($permissions === 'empleado') { //admin | administrativo
 			$nombresTabla = [//[0]: como se ven //[1] como es la BD
-			                 [
-				                 '#',
-				                 'nombre'
-			                 ],
-			                 [
-				                 null,
-				                 'nombre'
-			                 ],
+				[
+					'#',
+					'nombre'
+				],
+				[
+					null,
+					'nombre'
+				],
 			];
 		}
 		else {
 			$nombresTabla = [//[0]: como se ven //[1] como es la BD
-			                 [
-				                 'Acciones',
-				                 '#',
-				                 'nombre',
-				                 'Mano obra estimada',
-				                 'zona',
-				                 'Supervisores',
-				                 'activo',
-				                 'Facturar',
-				                 'descripcion',
-				                 'clasificacion',
-				                 '# usuarios'
-			                 ],
-			                 [
-				                 null,
-				                 null,
-				                 'nombre',
-				                 'mano_obra_estimada',
-				                 'Zouna',
-				                 null,
-				                 'activo',
-				                 'ValidoParaFacturar',
-				                 'descripcion',
-				                 'clasificacion',
-				                 null
-			                 ],
+				[
+					'Acciones',
+					'#',
+					'nombre',
+					'Mano obra estimada',
+					'zona',
+					'Supervisores',
+					'activo',
+					'Facturar',
+					'descripcion',
+					'clasificacion',
+					'# usuarios'
+				],
+				[
+					null,
+					null,
+					'nombre',
+					'mano_obra_estimada',
+					'Zouna',
+					null,
+					'activo',
+					'ValidoParaFacturar',
+					'descripcion',
+					'clasificacion',
+					null
+				],
 			];
 		}
 		
@@ -321,6 +324,7 @@ class CentroCostosController extends Controller {
 	}
 	
 	public function show($id) {
+		$helperSelect = new HelperControllerSelect();
 		$numberPermissions = \App\helpers\zzloggingcrud::zilefLogTrace();
 		$Reportes = Reporte::query();
 		
@@ -351,105 +355,105 @@ class CentroCostosController extends Controller {
 			$perPage = 100;
 			
 			$nombresTabla = [//0: como se ven //1 como es la BD
-			                 
-			                 [
-				                 'Acciones',
-				                 '#',
-				                 'Centro costo',
-				                 'Trabajador',
-				                 'valido',
-				                 'inicio',
-				                 'fin',
-				                 'horas trabajadas',
-				                 'diurnas',
-				                 'nocturnas',
-				                 'extra diurnas',
-				                 'extra nocturnas',
-				                 'dominical diurno',
-				                 'dominical nocturno',
-				                 'dominical extra diurno',
-				                 'dominical extra nocturno',
-				                 'observaciones'
-			                 ],
-			                 [
-				                 'b_valido',
-				                 't_fecha_ini',
-				                 't_fecha_fin',
-				                 'i_horas_trabajadas',
-				                 'i_diurnas',
-				                 'i_nocturnas',
-				                 'i_extra_diurnas',
-				                 'i_extra_nocturnas',
-				                 'i_dominical_diurno',
-				                 'i_dominical_nocturno',
-				                 'i_dominical_extra_diurno',
-				                 'i_dominical_extra_nocturno',
-				                 's_observaciones'
-			                 ],
-			                 //m for money || t for datetime || d date || i for integer || s string || b boolean
-			                 [
-				                 null,
-				                 null,
-				                 null,
-				                 null,
-				                 'b_valido',
-				                 't_fecha_ini',
-				                 't_fecha_fin',
-				                 'i_horas_trabajadas',
-				                 'i_diurnas',
-				                 'i_nocturnas',
-				                 'i_extra_diurnas',
-				                 'i_extra_nocturnas',
-				                 'i_dominical_diurno',
-				                 'i_dominical_nocturno',
-				                 'i_dominical_extra_diurno',
-				                 'i_dominical_extra_nocturno',
-				                 's_observaciones'
-			                 ],
-			                 //m for money || t for datetime || d date || i for integer || s string || b boolean
+				
+				[
+					'Acciones',
+					'#',
+					'Centro costo',
+					'Trabajador',
+					'valido',
+					'inicio',
+					'fin',
+					'horas trabajadas',
+					'diurnas',
+					'nocturnas',
+					'extra diurnas',
+					'extra nocturnas',
+					'dominical diurno',
+					'dominical nocturno',
+					'dominical extra diurno',
+					'dominical extra nocturno',
+					'observaciones'
+				],
+				[
+					'b_valido',
+					't_fecha_ini',
+					't_fecha_fin',
+					'i_horas_trabajadas',
+					'i_diurnas',
+					'i_nocturnas',
+					'i_extra_diurnas',
+					'i_extra_nocturnas',
+					'i_dominical_diurno',
+					'i_dominical_nocturno',
+					'i_dominical_extra_diurno',
+					'i_dominical_extra_nocturno',
+					's_observaciones'
+				],
+				//m for money || t for datetime || d date || i for integer || s string || b boolean
+				[
+					null,
+					null,
+					null,
+					null,
+					'b_valido',
+					't_fecha_ini',
+					't_fecha_fin',
+					'i_horas_trabajadas',
+					'i_diurnas',
+					'i_nocturnas',
+					'i_extra_diurnas',
+					'i_extra_nocturnas',
+					'i_dominical_diurno',
+					'i_dominical_nocturno',
+					'i_dominical_extra_diurno',
+					'i_dominical_extra_nocturno',
+					's_observaciones'
+				],
+				//m for money || t for datetime || d date || i for integer || s string || b boolean
 			];
 		}
 		$sumhoras_trabajadas = $Reportes->sum('horas_trabajadas');
 		
-		//        $reporController = new ReportesController();
-		//        $showSelect = $reporController->losSelect($valoresSelectConsulta, $showUsers,$valoresSelect,$userFiltro);
+		
 		return Inertia::render('Reportes/Index', [ //carpeta
-		                                           'title'                       => $titulo,
-		                                           'filters'                     => null,
-		                                           'perPage'                     => (int)$perPage,
-		                                           'fromController'              => $Reportes->paginate($perPage),
-		                                           'breadcrumbs'                 => [
-			                                           [
-				                                           'label' => __('app.label.Reportes'),
-				                                           'href'  => route('Reportes.index')
-			                                           ]
-		                                           ],
-		                                           'nombresTabla'                => $nombresTabla,
-		                                           'valoresSelect'               => $valoresSelect,
-		                                           'showSelect'                  => $showSelect,
-		                                           'IntegerDefectoSelect'        => $IntegerDefectoSelect,
-		                                           'showUsers'                   => $showUsers,
-		                                           'sumhoras_trabajadas'         => $sumhoras_trabajadas,
-		                                           'userFiltro'                  => - 1,
-		                                           'quincena'                    => 0,
-		                                           'horasemana'                  => 0,
-		                                           'horasPersonal'               => 0,
-		                                           'startDateMostrar'            => 0,
-		                                           'endDateMostrar'              => 0,
-		                                           'numberPermissions'           => $numberPermissions,
-		                                           'ArrayOrdinarias'             => 0,
-		                                           'sumdiurnas'                  => 0,
-		                                           'sumnocturnas'                => 0,
-		                                           'sumextra_diurnas'            => 0,
-		                                           'sumextra_nocturnas'          => 0,
-		                                           'sumdominical_diurno'         => 0,
-		                                           'sumdominical_nocturno'       => 0,
-		                                           'sumdominical_extra_diurno'   => 0,
-		                                           'sumdominical_extra_nocturno' => 0,
-		                                           'horasTrabajadasHoy'          => $horasTrabajadasHoy2 ?? [],
-		                                           'HorasDeCadaSemana'           => 0,
-		                                           'ArrayHorasSemanales'         => 0,
-		                                       ]);
+			'title'                       => $titulo,
+			'filters'                     => null,
+			'perPage'                     => (int)$perPage,
+			'fromController'              => $Reportes->paginate($perPage),
+			'breadcrumbs'                 => [
+				[
+					'label' => __('app.label.Reportes'),
+					'href'  => route('Reportes.index')
+				]
+			],
+			'nombresTabla'                => $nombresTabla,
+			'valoresSelect'               => $valoresSelect,
+			'showSelect'                  => $showSelect,
+			'IntegerDefectoSelect'        => $IntegerDefectoSelect,
+			'showUsers'                   => $showUsers,
+			'sumhoras_trabajadas'         => $sumhoras_trabajadas,
+			'userFiltro'                  => - 1,
+			'quincena'                    => 0,
+			'horasemana'                  => 0,
+			'horasPersonal'               => 0,
+			'startDateMostrar'            => 0,
+			'endDateMostrar'              => 0,
+			'numberPermissions'           => $numberPermissions,
+			'ArrayOrdinarias'             => 0,
+			'sumdiurnas'                  => 0,
+			'sumnocturnas'                => 0,
+			'sumextra_diurnas'            => 0,
+			'sumextra_nocturnas'          => 0,
+			'sumdominical_diurno'         => 0,
+			'sumdominical_nocturno'       => 0,
+			'sumdominical_extra_diurno'   => 0,
+			'sumdominical_extra_nocturno' => 0,
+			'horasTrabajadasHoy'          => $horasTrabajadasHoy2 ?? [],
+			'HorasDeCadaSemana'           => 0,
+			'ArrayHorasSemanales'         => 0,
+			'losSelect'                   => $helperSelect->DependenciasCentro('zona'),
+		]);
 	}
 	
 	public function edit($id) {

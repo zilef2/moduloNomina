@@ -253,11 +253,7 @@ class UserController extends Controller {
 			}
 		}
 		
-		if ($request->has([
-			                  'field',
-			                  'order'
-		                  ])
-		) {
+		if ($request->has(['field', 'order'])) {
 			//            dd($request->field, $request->order);
 			$users->orderBy($request->field, $request->order);
 		}
@@ -269,6 +265,11 @@ class UserController extends Controller {
 		if ($request->has(['onlySupervis'])) {
 			$users->whereHas('roles', function ($query) {
 				return $query->where('name', 'supervisor');
+			});
+		}
+		if ($request->has(['search1'])) { 
+			$users->whereHas('roles', function ($query) {
+				return $query->wherenull('name');
 			});
 		}
 		if ($isTrashed === 'trashed') {
@@ -296,7 +297,6 @@ class UserController extends Controller {
 		try {
 			
 			$elCentroId = $request->centroid == 0 ? null : $request->centroid;
-			
 			$user = User::create([
 				                     'name'             => $request->name,
 				                     'email'            => $request->email,
@@ -312,10 +312,10 @@ class UserController extends Controller {
 				                     'numero_contrato'  => $request->numero_contrato,
 			                     ]);
 			
+			$user->assignRole($request->role);
 			if ($elCentroId) {
-				$user->assignRole($request->role);
-			}
 			$user->centros()->sync($elCentroId);
+			}
 			
 			DB::commit();
 			

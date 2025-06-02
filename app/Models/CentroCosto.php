@@ -49,7 +49,8 @@ class CentroCosto extends Model {
 	
 	protected Collection $supervisCache; // Propiedad para almacenar el valor calculado
 	
-	protected $fillable = ['nombre',
+	protected $fillable = [
+		'nombre',
 		'mano_obra_estimada',
 		'activo', //finish_at 27mayo2024
 		'descripcion',
@@ -58,7 +59,8 @@ class CentroCosto extends Model {
 		'zona_id',
 	];
 	
-	protected $appends = ['Zouna',
+	protected $appends = [
+		'Zouna',
 		'supervi',
 		'ListaSupervisores',
 	];
@@ -92,8 +94,8 @@ class CentroCosto extends Model {
 	//        })->filter()->toArray();
 	//    }
 	
-	public function users(): BelongsToMany {
-		return $this->BelongstoMany(User::class, 'centro_user');
+	public function users(): belongsToMany {
+		return $this->belongstoMany(User::class, 'centro_user');
 	}
 	
 	public function getListaSupervisoresAttribute(): array {
@@ -153,7 +155,8 @@ class CentroCosto extends Model {
 	
 	//deep2 |
 	public function actualizarEstimado($anio, $mes, $parametros): void {
-		$elSelect = ['user_id',
+		$elSelect = [
+			'user_id',
 			DB::raw('COUNT(*) as total'),
 			DB::raw('SUM(horas_trabajadas) as horas_trabajadas'),
 			DB::raw('SUM(almuerzo) as almuerzo'),
@@ -167,13 +170,11 @@ class CentroCosto extends Model {
 			DB::raw('SUM(dominical_extra_nocturno) as dominical_extra_nocturno'),
 		];
 		
-		$Reportes = Reporte::Select($elSelect)->Where('centro_costo_id', $this->id)->WhereYear('fecha_ini', $anio)->WhereMonth('fecha_ini', $mes)->Where('valido', 1)->groupBy('user_id')->get()
-		;
+		$Reportes = Reporte::Select($elSelect)->Where('centro_costo_id', $this->id)->WhereYear('fecha_ini', $anio)->WhereMonth('fecha_ini', $mes)->Where('valido', 1)->groupBy('user_id')->get();
 		
 		$CTC = new CentroTableController();
 		[$Reportes, $mano_obra_estimada] = $CTC->MultiplicarPorSalario($Reportes, $this->id);
 		
-		$this->update(['mano_obra_estimada' => $mano_obra_estimada,
-		              ]);
+		$this->update(['mano_obra_estimada' => $mano_obra_estimada,]);
 	}
 }

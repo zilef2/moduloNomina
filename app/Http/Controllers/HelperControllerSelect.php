@@ -6,7 +6,7 @@ use App\Models\zona;
 
 class HelperControllerSelect extends Controller {
 	
-	//todo: thisisnew!!!
+	//todo: sync (ene25)
 	public function DependenciasCentro($selecioneUno, $elNombre = 'nombre'): array {
 		$dependexsSelect = zona::all(['id as value', $elNombre])->map(function ($item) {
 			return [

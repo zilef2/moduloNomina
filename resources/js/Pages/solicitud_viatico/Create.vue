@@ -133,7 +133,7 @@ watch(() => form.fecha_inicial, (new_fecha_inicial) => {
     });
 }, {deep: true});
 
-
+// import {formatPesosCol} from '@/global.ts';
 const formattedValor = {
     get: (index) => {
         return form.gasto && form.gasto[index]
