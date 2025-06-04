@@ -2,6 +2,7 @@
 
 return [
     'label' => [
+		'back' => 'Atras',
 		'centrou' => 'Centro de costo',
 		'zona' => 'Zona',
 		'Totalsolicitado' => 'Solicitado',
@@ -288,6 +289,7 @@ return [
 		//aquipues
     ],
     'button' => [
+		'back' => 'Atras',
         'Recontratar' => 'Recontratar',
         //edit reportes
         'correct' => 'corregir',

@@ -442,6 +442,7 @@ export function formatPesosCol(number): string {
     });
 
     // Reemplazar la coma por un punto como separador decimal
+    console.log("🚀 ~ formatPesosCol ~ formattedNumber: ", formattedNumber);
     return '$ ' + formattedNumber;
     // return '$ ' + number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
 }

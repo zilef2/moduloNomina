@@ -80,7 +80,7 @@ const order = (field) => {
     }
 }
 
-const aSumarHoras = (veces) => {
+const aSumarHoras = (veces) => { //suma horas, no dinero
     data.thoras_trabajadas = 0
     data.tdiurnas = 0
     data.tnocturnas = 0
@@ -96,21 +96,21 @@ const aSumarHoras = (veces) => {
             props.fromController.data.forEach(element => {
                 data.thoras_trabajadas += parseInt(element.horas_trabajadas)
 
-                data.tdiurnas += parseInt(element.diurnas)
-                data.tnocturnas += parseInt(element.nocturnas)
-                data.textra_diurnas += parseInt(element.extra_diurnas)
-                data.textra_nocturnas += parseInt(element.extra_nocturnas)
-                data.tdominical_diurno += parseInt(element.dominical_diurno)
-                data.tdominical_nocturno += parseInt(element.dominical_nocturno)
-                data.tdominical_extra_diurno += parseInt(element.dominical_extra_diurno)
-                data.tdominical_extra_nocturno += parseInt(element.dominical_extra_nocturno)
+                data.tdiurnas += element.diurnas ? parseInt(element.diurnas) : 0
+                data.tnocturnas += element.nocturnas ? parseInt(element.nocturnas) : 0
+                data.textra_diurnas += element.extra_diurnas ? parseInt(element.extra_diurnas) : 0
+                data.textra_nocturnas += element.extra_nocturnas ? parseInt(element.extra_nocturnas) : 0
+                data.tdominical_diurno += element.dominical_diurno ? parseInt(element.dominical_diurno) : 0
+                data.tdominical_nocturno += element.dominical_nocturno ? parseInt(element.dominical_nocturno) : 0
+                data.tdominical_extra_diurno += element.dominical_extra_diurno ? parseInt(element.dominical_extra_diurno) : 0
+                data.tdominical_extra_nocturno += element.dominical_extra_nocturno ? parseInt(element.dominical_extra_nocturno) : 0
             });
         } else {
             aSumarHoras(veces)
         }
     }, 500)
 }
-const SumarPlata = () => {
+const SumarPlata = () => { ////suma dinero, no horas
     let datathoras_trabajadas = 0
     let datatdiurnas = 0
     let datatnocturnas = 0
@@ -175,14 +175,15 @@ watchEffect(() => {
                             </h1>
                             <p class="text-center">{{ props.UltimoReporteRealizado }}</p>
 
-                            <h3 v-if="data.hayUltimoreporte" v-show="data.params.quincena"> Seleccione quincena y mes </h3>
+                            <h3 v-if="data.hayUltimoreporte" v-show="data.params.quincena"> Seleccione quincena y
+                                mes </h3>
 
                         </div>
                     </div>
                 </div>
                 <div v-if="!data.hayUltimoreporte" class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                     <h1 class="text-2xl">No se encontró un reporte para este centro de costo</h1>
-                    
+
                 </div>
                 <div v-else class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                     <div class="flex justify-between p-2">
@@ -310,17 +311,32 @@ watchEffect(() => {
                             </tr>
                             <tr class="border border-amber-400 bg-white dark:border-gray-700 hover:bg-gray-300 hover:dark:bg-gray-900/20">
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 font-bold"> Total</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ data.thoras_trabajadas }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ data.tdiurnas }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ data.tnocturnas }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ data.textra_diurnas }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ data.textra_nocturnas }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ data.tdominical_diurno }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ data.tdominical_nocturno }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ data.tdominical_extra_diurno }}</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{
-                                        data.tdominical_extra_nocturno
-                                    }}
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                    {{ isNaN(data.thoras_trabajadas) ? 0 : data.thoras_trabajadas }}
+                                </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                    {{ isNaN(data.tdiurnas) ? 0 : data.tdiurnas }}
+                                </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                    {{ isNaN(data.tnocturnas) ? 0 : data.tnocturnas }}
+                                </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                    {{ isNaN(data.textra_diurnas) ? 0 : data.textra_diurnas }}
+                                </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                    {{ isNaN(data.textra_nocturnas) ? 0 : data.textra_nocturnas }}
+                                </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                    {{ isNaN(data.tdominical_diurno) ? 0 : data.tdominical_diurno }}
+                                </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                    {{ isNaN(data.tdominical_nocturno) ? 0 : data.tdominical_nocturno }}
+                                </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                    {{ isNaN(data.tdominical_extra_diurno) ? 0 : data.tdominical_extra_diurno }}
+                                </td>
+                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                    {{ isNaN(data.tdominical_extra_nocturno) ? 0 : data.tdominical_extra_nocturno }}
                                 </td>
                             </tr>
                             </tbody>
@@ -331,6 +347,11 @@ watchEffect(() => {
                     <!--                </div>-->
                 </div>
             </div>
+            <Link :href="route('CentroCostos.index')" class="block self-center items-center mx-auto my-6">
+                <PrimaryButton class="rounded-xl">
+                    {{ lang().button.back }}
+                </PrimaryButton>
+            </Link>
         </section>
     </AuthenticatedLayout>
 </template>

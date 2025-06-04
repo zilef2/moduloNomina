@@ -39,7 +39,7 @@ onMounted(async () => {
             .then(response => response.json())
             .then(datau => {
                 const city = datau.results[0].components.city || datau.results[0].components.town;
-                console.log("City:", city); // Resultado: Medellín
+                console.log("City calculated:", city); // Resultado: Medellín
                 data.thecity = city
                 enviarCiudad()
             }).catch(error => console.error('Errorsini:',
@@ -59,9 +59,9 @@ onMounted(async () => {
                 <a href="" target="_blank"
                    class="font-bold text-primary">Ec Ingenieria Electrica S.A.S.</a>
             </p>
-            <div v-if="route().current('dashboard')">
-                <p class="text-center mx-4"> Repontandose desde <b>{{ data?.thecity }}</b></p>
-            </div>
+<!--            <div v-if="route().current('dashboard')">-->
+<!--                <p class="text-center mx-4"> Repontandose desde <b>{{ data?.thecity }}</b></p>-->
+<!--            </div>-->
         </div>
     </footer>
 </template>
