@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('peusuarios', function (Blueprint $table) {
             $table->string('nombre_solicitante_PE');
+            $table->string('clasificacion');
             $table->id();
             $table->timestamps();
         });

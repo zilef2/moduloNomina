@@ -30,7 +30,7 @@ const props = defineProps({
     cotizacionInicial2: Number,
 })
 
-let clasedelgrid = 'my-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-12'
+let clasedelgrid = 'my-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-8'
 const emit = defineEmits(["close"]);
 
 const data = reactive({
@@ -196,7 +196,6 @@ onMounted(() => {
     form.estado_cliente = {value: 'Por aprobar', label: 'Por aprobar'}
     form.fecha_solicitud = Now_Date_to_html()
     form.estado = {value: 'por ejecutar', label: 'Por ejecutar'}
-    form.persona_que_realiza_la_pe = {value: 'Yasmin Fleres', label: 'Yasmin Fleres'}
     form.persona_que_solicita_la_propuesta_economica = {value: 'Seleccione una persona', label: 'Seleccione una persona'}
 
 });
@@ -574,7 +573,7 @@ const create = () => {
                         />
                     </div>
 
-                    <div class="rounded-xl col-span-2">
+                    <div class="rounded-xl xs:col-span-2 sm:col-span-1 lg:col-span-1 2xl:col-span-1">
                         <label name="persona_que_realiza_la_pe">
                             {{ lang().label.persona_que_realiza_la_pe }} </label>
                         <v-select v-model="form.persona_que_realiza_la_pe" :options="props.losSelect['listausers']"
@@ -582,14 +581,19 @@ const create = () => {
                     </div>
                   
 
-                    <div class="rounded-xl"><label name="cliente"> {{ lang().label.cliente }} </label>
-                        <TextInput v-model="form.cliente" :error="form.errors.cliente"
-                                   :placeholder="lang().label.cliente"
-                                   class="mt-1 block w-full"
-                                   type="text"/>
-                    </div>
-                    
-                      <div class="rounded-xl col-span-2">
+<!--                    <div class="rounded-xl"><label name="cliente"> {{ lang().label.cliente }} </label>-->
+<!--                        <TextInput v-model="form.cliente" :error="form.errors.cliente"-->
+<!--                                   :placeholder="lang().label.cliente"-->
+<!--                                   class="mt-1 block w-full"-->
+<!--                                   type="text"/>-->
+<!--                    </div>-->
+                      <div class="rounded-xl xs:col-span-2 sm:col-span-1 lg:col-span-1 2xl:col-span-2">
+                        <label name="cliente">
+                            {{ lang().label.cliente }} </label>
+                        <v-select v-model="form.cliente" :options="props.losSelect['peEmpresa']"
+                                  label="label" class="mt-2"></v-select>
+                      </div>
+                      <div class="rounded-xl  xs:col-span-2 sm:col-span-1 lg:col-span-1 2xl:col-span-2">
                         <label name="persona_que_realiza_la_pe">
                             {{ lang().label.persona_que_solicita_la_propuesta_economica }} </label>
                         <v-select v-model="form.persona_que_solicita_la_propuesta_economica" :options="props.losSelect['peUser']"
@@ -618,7 +622,7 @@ const create = () => {
                                    class="mt-1 block w-full"
                                    type="text"/>
                     </div>
-                    <div class="rounded-xl"><label name="observaciones"> {{ lang().label.observaciones }} </label>
+                    <div class="rounded-xl col-span-2"><label name="observaciones"> {{ lang().label.observaciones }} </label>
                         <TextInput v-model="form.observaciones" :error="form.errors.observaciones"
                                    :placeholder="lang().label.observaciones" class="mt-1 block w-full"
                                    type="text"/>

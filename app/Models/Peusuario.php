@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-    class peusuario extends Model
+    class Peusuario extends Model
 {
     use HasFactory;
     protected $fillable = [
-		'nombre_solicitante_PE'
+		'nombre_solicitante_PE',
+		'clasificacion',
     ];
 
 }

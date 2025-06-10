@@ -160,11 +160,11 @@ class CotizacionController extends Controller {
 		})->get();
 		
 		$dependexsSelect = CentroCosto::all([
-                'id as value',
-                'nombre',
-                'descripcion'
-            ])->map(function ($item) {
-			$descrip = $item->descripcion == '' ? ' - No descripción ' : ' - ' . mb_substr($item->descripcion, 0, 17);
+			                                    'id as value',
+			                                    'nombre',
+			                                    'descripcion'
+		                                    ])->map(function ($item) {
+		$descrip = $item->descripcion == '' ? ' - No descripción ' : ' - ' . mb_substr($item->descripcion, 0, 17);
 			
 			
 			return [
@@ -184,16 +184,24 @@ class CotizacionController extends Controller {
 			'value' => 0
 		]);
 		
-		$peUser = \App\Models\Peusuario::all('nombre_solicitante_PE as value', 'nombre_solicitante_PE as label')->toArray();
-		array_unshift($zonas, [
+		$peUser = \App\Models\Peusuario::select('nombre_solicitante_PE as value', 'nombre_solicitante_PE as label')->Where('clasificacion', 'persona')->get()->toArray();
+		array_unshift($peUser, [
 			"label" => "Seleccione una persona",
 			'value' => "Seleccione una persona"
 		]);
 		
+		$peEmpresa = \App\Models\Peusuario::select('nombre_solicitante_PE as value', 'nombre_solicitante_PE as label')->Where('clasificacion', 'empresa')->get()->toArray();
+		array_unshift($peEmpresa, [
+			"label" => "Seleccione una empresa",
+			'value' => "Seleccione una empresa"
+		]);
+		
+		
 		return [
 			'centros'    => $dependexsSelect,
 			'zonas'      => $zonas,
-			'peUser'      => $peUser,
+			'peUser'     => $peUser,
+			'peEmpresa'  => $peEmpresa,
 			'listausers' => $listausers,
 		];
 	}
@@ -224,7 +232,8 @@ class CotizacionController extends Controller {
 			'tipo_de_mantenimiento',
 			'zona_id',
 			'persona_que_realiza_la_pe',
-			//            'persona_que_solicita_la_propuesta_economica',
+            'persona_que_solicita_la_propuesta_economica',
+            'cliente',
 		]);
 		
 		$cotizacion = cotizacion::create($request->all());
@@ -295,7 +304,7 @@ class CotizacionController extends Controller {
 				                              'zona_id'            => $cotizacion->zona_id,
 			                              ]);
 			\Illuminate\Support\Facades\Log::info('Creando centrocosto para cotización ID: ' . $id);
-
+			
 			$request->merge(['centro_costo_id' => $centro->id]);
 			$request->merge(['fecha_aprobacion_cot' => Carbon::now()]);
 			$cotizacion->update($request->all());
@@ -392,8 +401,5 @@ class CotizacionController extends Controller {
 		
 		return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.cotizacion')]));
 	}
-	
-	
-
 	
 }
