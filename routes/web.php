@@ -129,6 +129,7 @@ Route::middleware('auth', 'verified')->group(function () {
 	//para mi 
 	Route::get('/FuncionPruebas', [ReportesController::class, 'FuncionPruebas'])->name('FuncionPruebas');
 	Route::get('/FuncionPruebas2', [ReportesController::class, 'FuncionPruebas2'])->name('FuncionPruebas2');
+	Route::resource("/peusuario", \App\Http\Controllers\PeusuarioController::class);
 	//aquipues
 }); //fin verified
 
@@ -138,7 +139,6 @@ Route::middleware('auth', 'verified')->group(function () {
 
 
 // <editor-fold desc="Artisan">
-
 Route::get('/exception', function () {
     $ReportesDeHoy = \App\Models\Reporte::Where('fecha_ini', \Carbon\Carbon::today())->first();
     if ($ReportesDeHoy) {

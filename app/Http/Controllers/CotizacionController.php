@@ -8,8 +8,10 @@ use App\helpers\zzloggingcrud;
 use App\Http\Requests\CotizacionesStoreRequest;
 use App\Models\CentroCosto;
 use App\Models\cotizacion;
+use App\Models\peusuario;
 use App\Models\User;
 use Carbon\Carbon;
+use Database\Seeders\PeusuarioSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -158,10 +160,10 @@ class CotizacionController extends Controller {
 		})->get();
 		
 		$dependexsSelect = CentroCosto::all([
-			                                    'id as value',
-			                                    'nombre',
-			                                    'descripcion'
-		                                    ])->map(function ($item) {
+                'id as value',
+                'nombre',
+                'descripcion'
+            ])->map(function ($item) {
 			$descrip = $item->descripcion == '' ? ' - No descripción ' : ' - ' . mb_substr($item->descripcion, 0, 17);
 			
 			
@@ -182,10 +184,16 @@ class CotizacionController extends Controller {
 			'value' => 0
 		]);
 		
+		$peUser = \App\Models\Peusuario::all('nombre_solicitante_PE as value', 'nombre_solicitante_PE as label')->toArray();
+		array_unshift($zonas, [
+			"label" => "Seleccione una persona",
+			'value' => "Seleccione una persona"
+		]);
 		
 		return [
 			'centros'    => $dependexsSelect,
 			'zonas'      => $zonas,
+			'peUser'      => $peUser,
 			'listausers' => $listausers,
 		];
 	}
@@ -201,31 +209,6 @@ class CotizacionController extends Controller {
 		$data = $request->validated();
 		
 		DB::beginTransaction();
-		
-		//        if ($request->modoaiu && (!$request->precio_cot || !$request->por_u)) {
-		//            return back()->with('error', 'Faltan datos en la cotización');
-		//        }
-		//        $retornarError = false;
-		//        $ValidarSiEsNormal = $this->validarEsNormal($request);
-		//        if ($ValidarSiEsNormal) {
-		//            $request->merge(['precio_cot' => 0]);
-		//        
-		//            $request->merge(['admi' => 0]);
-		//            $request->merge(['por_a' => 0]);
-		//
-		//            $request->merge(['por_i' => 0]);
-		//            $request->merge(['impr' => 0]);
-		//
-		//            $request->merge(['por_u' => 0]);
-		//            $request->merge(['util' => 0]);
-		//
-		//        } else if ($ValidarSiEsNormal === 0) {
-		//            if ($request->util == 0)
-		//                $retornarError = true;
-		//        } else {
-		//            $retornarError = true;
-		//        }
-		//        if ($retornarError) return back()->with('error', 'Error general en la cotización');
 		
 		$request->merge(['aprobado_cot' => false]);
 		$request->merge(['user_id' => Myhelp::AuthUid()]);
@@ -409,5 +392,8 @@ class CotizacionController extends Controller {
 		
 		return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.cotizacion')]));
 	}
+	
+	
+
 	
 }

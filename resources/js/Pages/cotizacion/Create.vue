@@ -196,7 +196,8 @@ onMounted(() => {
     form.estado_cliente = {value: 'Por aprobar', label: 'Por aprobar'}
     form.fecha_solicitud = Now_Date_to_html()
     form.estado = {value: 'por ejecutar', label: 'Por ejecutar'}
-    form.persona_que_realiza_la_pe = {value: '2', label: 'Admin ModNomina'}
+    form.persona_que_realiza_la_pe = {value: 'Yasmin Fleres', label: 'Yasmin Fleres'}
+    form.persona_que_solicita_la_propuesta_economica = {value: 'Seleccione una persona', label: 'Seleccione una persona'}
 
 });
 
@@ -579,6 +580,7 @@ const create = () => {
                         <v-select v-model="form.persona_que_realiza_la_pe" :options="props.losSelect['listausers']"
                                   label="label" class="mt-2"></v-select>
                     </div>
+                  
 
                     <div class="rounded-xl"><label name="cliente"> {{ lang().label.cliente }} </label>
                         <TextInput v-model="form.cliente" :error="form.errors.cliente"
@@ -586,14 +588,21 @@ const create = () => {
                                    class="mt-1 block w-full"
                                    type="text"/>
                     </div>
-                    <div class="rounded-xl"><label name="persona_que_solicita_la_propuesta_economica">
-                        {{ lang().label.persona_que_solicita_la_propuesta_economica }} </label>
-                        <TextInput v-model="form.persona_que_solicita_la_propuesta_economica"
-                                   :error="form.errors.persona_que_solicita_la_propuesta_economica"
-                                   :placeholder="lang().label.persona_que_solicita_la_propuesta_economica"
-                                   class="mt-1 block w-full"
-                                   type="text"/>
+                    
+                      <div class="rounded-xl col-span-2">
+                        <label name="persona_que_realiza_la_pe">
+                            {{ lang().label.persona_que_solicita_la_propuesta_economica }} </label>
+                        <v-select v-model="form.persona_que_solicita_la_propuesta_economica" :options="props.losSelect['peUser']"
+                                  label="label" class="mt-2"></v-select>
                     </div>
+<!--                    <div class="rounded-xl"><label name="persona_que_solicita_la_propuesta_economica">-->
+<!--                        {{ lang().label.persona_que_solicita_la_propuesta_economica }} </label>-->
+<!--                        <TextInput v-model="form.persona_que_solicita_la_propuesta_economica"-->
+<!--                                   :error="form.errors.persona_que_solicita_la_propuesta_economica"-->
+<!--                                   :placeholder="lang().label.persona_que_solicita_la_propuesta_economica"-->
+<!--                                   class="mt-1 block w-full"-->
+<!--                                   type="text"/>-->
+<!--                    </div>-->
                     <!--                    <div class="rounded-xl col-span-2">-->
                     <!--                        <label name="persona_que_solicita_la_propuesta_economica">-->
                     <!--                            {{ lang().label.persona_que_solicita_la_propuesta_economica }} </label>-->
