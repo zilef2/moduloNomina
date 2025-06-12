@@ -69,7 +69,7 @@ const data = reactive({
         terminaLunes: false,
         EsFestivo: false,
 
-        MostrarTrabajadaSemana: false,
+        MostrarTrabajadaSemana: true,
         MostrarAlmuersini: false,
         ValorRealalmuerzo: 0,
     },
@@ -648,7 +648,7 @@ const formatfin = (date) => {
                     <InputError class="mt-2" :message="form.errors.observaciones" />
                 </div> -->
 
-                <div class="flex justify-end">
+                <div class="flex justify-end mx-2 mt-1">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{
                             lang().button.close
                         }}
@@ -658,10 +658,13 @@ const formatfin = (date) => {
                                    @mouseup="create" @keyup.enter="create">
                         {{ form.processing ? lang().button.add + '...' : lang().button.add }}
                     </PrimaryButton>
-                    <p v-else>{{ data.StringRestriccionNoFActura }}</p>
+                    <p v-else class="ml-4 mt-1">{{ data.StringRestriccionNoFActura }}</p>
                 </div>
                 <div class="flex justify-end my-3">
-                    <p v-if="props.ArrayOrdinarias[props.ArrayOrdinarias.length] > 8" class="mx-2">Hay pendientes
+                    <p class="mx-1">Hay pendientes</p>
+                    
+                    <p v-if="props.ArrayOrdinarias[props.ArrayOrdinarias.length] > 8" class="mx-2">
+                        
                         {{ props.ArrayOrdinarias[props.ArrayOrdinarias.length] }} horas (11:59pm)</p>
                     <p v-if="props.ArrayOrdinarias[0] > data.const.HORAS_SEMANALES_MENOS_ESTANDAR &&
                                 form.diurnas + form.nocturnas > 8"

@@ -166,9 +166,9 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
         let horasFinOme:number = parseInt(String(new Date(form.fecha_fin).getHours()))
         let CuandoEmpiezaExtra:number = horasInicioome
         let horasTrab:number = horasFinOme - horasInicioome
-        console.log("=>(HelpingCreate.ts:170) ExtrasPrematuras", ExtrasPrematuras);
+        console.log("HelpingCreate -antes - ExtrasPrematuras", ExtrasPrematuras);
         ExtrasPrematuras -= (data.TrabajadasSemana)
-        console.log("=>(HelpingCreate.ts:170) ExtrasPrematuras", ExtrasPrematuras);
+        console.log("ExtrasPrematuras - TrabajadasSemana", ExtrasPrematuras);
 
 
         if(data.TrabajadasSemana < 40) //todo: 40 porque? deberia venir de db no?

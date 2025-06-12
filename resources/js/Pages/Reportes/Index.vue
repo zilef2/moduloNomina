@@ -432,8 +432,8 @@ const handleCheckboxChange = (values) => {
                     </thead>
                     <tbody>
                     <tr v-for="(clasegenerica, index) in fromController.data" :key="index"
-                        class="border-t border-gray-200 dark:border-gray-700 hover:bg-indigo-300/30 hover:dark:bg-indigo-600"
-                        :class="{ 'bg-gray-200/75 dark:bg-gray-600': index % 2 === 0 }"
+                        class="border-t border-gray-200 dark:border-gray-800 hover:bg-indigo-300/30 hover:dark:bg-indigo-600"
+                        :class="{ 'bg-gray-300 dark:bg-gray-600': index % 2 === 0 }"
                     >
                         <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
                             <input type="checkbox" @change="select" :value="clasegenerica.id"
@@ -479,9 +479,7 @@ const handleCheckboxChange = (values) => {
                             </div>
                         </td>
                         <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (index + 1) }}</td>
-                        <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{
-                                showSelect[clasegenerica.centro_costo_id]
-                            }}
+                        <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ showSelect[clasegenerica.centro_costo_id] }}
                         </td>
                         <td v-show="can(['updateCorregido reporte'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
                             {{ showUsers[clasegenerica.user_id] }}
@@ -584,10 +582,10 @@ const handleCheckboxChange = (values) => {
             <TextInput v-model="data.params.search4"
                        type="number" min="2019" max="2099" class="hidden sm:block w-22 rounded-lg"
                        placeholder="año"/>
-            <div class="flex justify-betwween items-center p-2 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex justify-betwween items-center p-2 border-t border-gray-200 dark:border-gray-700 overflow-x-auto">
                 <Pagination :links="props.fromController" :filters="data.params"/>
-                <span class="ml-4 my-auto hidden 2xl:block">Registros por página</span>
-                <span class="ml-4 my-auto block 2xl:hidden">Reg/pag</span>
+                <span class="mx-8 my-auto hidden 2xl:block">Registros por página</span>
+                <span class="ml-8 my-auto block 2xl:hidden">Reg/pag</span>
                 <SelectInput v-if="filters !== null" v-model="data.params.perPage" :dataSet="data.dataSet"/>
             </div>
         </div>

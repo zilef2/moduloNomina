@@ -103,8 +103,7 @@ class PeusuarioController extends Controller {
     public function store(Request $request): RedirectResponse {
         $permissions = Myhelp::EscribirEnLog($this, ' Begin STORE:peusuarios');
         DB::beginTransaction();
-//        $no_nada = $request->no_nada['id'];
-//        $request->merge(['no_nada_id' => $request->no_nada['id']]);
+        $request->merge(['clasificacion' => $request->clasificacion['id']]);
         $peusuario = peusuario::create($request->all());
 
         DB::commit();

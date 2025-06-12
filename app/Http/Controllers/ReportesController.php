@@ -38,6 +38,9 @@ class ReportesController extends Controller {
 		$endDateMostrar = $endDate->isoFormat('dddd D [de] MMMM');
 		
 		$perPage = $request->has('perPage') ? $request->perPage : 50;
+		if(!$request->has('perPage') && $numberPermissions < 2) {
+			$perPage = 5; //si es empleado
+		}
 		
 		//  aqui se filtra
 		$fnombresT = $this->fNombresTabla($numberPermissions, $Reportes, $Authuser, $request, $titulo);

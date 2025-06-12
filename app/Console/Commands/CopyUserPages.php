@@ -26,35 +26,32 @@ class CopyUserPages extends Command {
 	
 	//notacion de notas:
 	// //todo:
-	// nexttochange:
-	//heyRemember:
 	//very usefull
+	//heyRemember:
+	// nexttochange:
 	// todo: sync: añadir a los demas repos
 	// justtesting: cuando hay que qutiar cosas que solo deberian aparecer en la version de pruebas
 	//thisisnew!!!
-	
-	
-	protected function generateAttributes(): array {
-		// text //string // number // dinero // date // datetime // foreign
-		 return [
-			 'nombre_solicitante_PE'  => 'string', 
-		 ];
-	}
-	
-	protected function generateForeign(): array {
+	protected function aagenerateAttributes(): array {
+		//string text number dinero date datetime boolean foreign json
 		return [
-			//			'oferta_id' => 'oferta_id',
+			'llave_proceso'          => 'number',
+			'id_proceso'             => 'number',
+			'id_conexion'            => 'text',
+			'fecha_proceso'          => 'datetime',
+			'fecha_ultima_actuacion' => 'datetime',
+			'despacho'               => 'string',
+			'departamento'           => 'string',
+			'sujetos_procesales'     => 'text',
+			'es_privado'             => 'string',
+			'cant_filas'             => 'number',
+			'validacioncini'         => 'bool',
+			'pdf_name'               => 'string',
+			'pdf_size'               => 'string',
+			'pdf_sumarized'          => 'string',
+			'pdf_path'               => 'string',
 		];
-		/*
-	//            'valor_consig' => 'biginteger',
-	//            'texto' => 'text',
-	//            'fecha_legalizacion' => 'datetime',
-	//            'descripcion' => 'text',
-	//            'precio' => 'decimal',
-		*/
-		
 	}
-	
 	public function handle(): int {
 		try {
 			$this->generando = self::getMessage('generando');
@@ -62,7 +59,7 @@ class CopyUserPages extends Command {
 			$this->contadorMetodos = 0;
 			$submetodo['Lenguaje'] = 0;
 			
-			$modelName = $this->ask('¿Cuál es el nombre del modelo?');
+			$modelName = $this->ask('¿Cuál es el nombre del modelo? Recuerde revisar los atributos.');
 			if (!$modelName || $modelName == '') {
 				$this->info('Sin modelo');
 				
@@ -70,22 +67,19 @@ class CopyUserPages extends Command {
 				return 0;
 			}
 			
-			$progressBar = $this->output->createProgressBar(5);
+			$progressBar = $this->output->createProgressBar(2);
 			$progressBar->start();
-
+			
 			$this->MetodologiaInicial($modelName, 'generic', '');
-			$progressBar->advance();
 			$this->AddAttributesVue($modelName);
-			$progressBar->advance();
 			$this->Paso2($modelName, $submetodo);
 			$progressBar->advance();
 			
-			
 			$this->info(Artisan::call('optimize'));
-			$progressBar->advance();
 			$this->info(Artisan::call('optimize:clear'));
 			$progressBar->advance();
 			$progressBar->finish();
+			
 			
 			return 1;
 		} catch (Exception $e) {
@@ -125,9 +119,9 @@ class CopyUserPages extends Command {
 		
 		if ($RealizoControllerConExito || $RealizoVueConExito) {
 			$this->replaceWordInFiles($plantillaActual, [
-				                                          'vue' => $RealizoVueConExito,
-				                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       'controller' => $RealizoControllerConExito
-			                                          ], $modelName, $depende);
+				'vue'        => $RealizoVueConExito,
+				'controller' => $RealizoControllerConExito
+			],                        $modelName, $depende);
 		}
 		
 		
@@ -265,7 +259,7 @@ class CopyUserPages extends Command {
 		$content = File::get($vueFilePath);
 		
 		// Convertir los atributos en formato Vue
-		$titulosArray = collect($this->generateAttributes())->map(function ($type, $key) {
+		$titulosArray = collect($this->aagenerateAttributes())->map(function ($type, $key) {
 			return "    { order: '$key', label: '$key', type: '$type' },";
 		})->implode("\n");
 		
@@ -291,6 +285,7 @@ class CopyUserPages extends Command {
 		
 		return 1;
 	}
+	
 	
 	
 	private function Paso2($modelName, &$submetodo): int {
@@ -372,7 +367,7 @@ class CopyUserPages extends Command {
 			$this->info('DoAppLenguaje' . self::MSJ_EXITO);
 			$this->contadorMetodos ++;
 			
-			foreach ($this->generateAttributes() as $key => $generateAttribute) {
+			foreach ($this->aagenerateAttributes() as $key => $generateAttribute) {
 				$this->DoAppLenguaje($key);
 				$submetodo['Lenguaje'] ++;
 			}
@@ -433,7 +428,18 @@ class CopyUserPages extends Command {
 		
 	}
 	
-	
+	protected function generateForeign(): array {
+		return [//			'oferta_id' => 'oferta_id',
+		];
+		/*
+	//            'valor_consig' => 'biginteger',
+	//            'texto' => 'text',
+	//            'fecha_legalizacion' => 'datetime',
+	//            'descripcion' => 'text',
+	//            'precio' => 'decimal',
+		*/
+		
+	}
 	
 	private function DoSideBar($resource): int {
 		$directory = 'resources/js/Components/SideBarMenu.vue';
@@ -470,7 +476,7 @@ class CopyUserPages extends Command {
 	}
 	
 	protected function DoFillable($modelName): int {
-		$attributes = array_merge($this->generateAttributes(), $this->generateForeign());
+		$attributes = array_merge($this->aagenerateAttributes(), $this->generateForeign());
 		
 		// Generar el fillable
 		$fillable = array_keys($attributes);
@@ -524,6 +530,8 @@ class CopyUserPages extends Command {
 		$atributos = $this->generateAttributes();
 		$migrationFile = collect(glob(database_path('migrations/*.php')))->first(fn($file) => str_contains($file, 'create_' . Str::snake(Str::plural($modelName)) . '_table'))
 		;
+		$atributos = $this->aagenerateAttributes();
+		$migrationFile = collect(glob(database_path('migrations/*.php')))->first(fn($file) => str_contains($file, 'create_' . Str::snake(Str::plural($modelName)) . '_table'));
 		
 		if (!$migrationFile) {
 			$this->error("No se encontró la migración para $modelName");
@@ -533,15 +541,22 @@ class CopyUserPages extends Command {
 		}
 		
 		$columns = collect($atributos)->map(function ($type, $name) {
+			if ($type === 'dinero') {
+				return "\$table->decimal('$name', 62, 2)->default(0);"; 
+			}
+			if ($type === 'dateTime') {
+				return "\$table->dateTime('$name')->default(now());"; 
+			}
+			if ($type === 'boolean') {
+				return "\$table->boolean('$name')->default(false);"; 
+			}
+			
 			if ($type === 'number') {
 				$type = 'integer';
 			}
-			if ($type === 'dinero') {
-				$type = 'decimal';
-			}
 			
 			
-			return "\$table->$type('$name');";
+			return "\$table->$type('$name')->nullable();";
 		})->implode("\n            ");
 		
 		$content = file_get_contents($migrationFile);

@@ -12,7 +12,7 @@ class PeusuarioSeeder extends Seeder {
 	/**
 	 * Run the database seeds.
 	 php artisan migrate:rollback && php artisan migrate && php artisan db:seed --class=PeusuarioSeeder
-	 php artisan db:seed --class=PeusuarioSeeder
+	  php artisan migrate && php artisan db:seed --class=PeusuarioSeeder
 	 *
 	 */
 	public function run(): void {
@@ -97,7 +97,7 @@ class PeusuarioSeeder extends Seeder {
 		Peusuario::create(['nombre_solicitante_PE' => 'Sergio Bañol', 'clasificacion' => 'persona']);
 		Peusuario::create(['nombre_solicitante_PE' => 'Sneider Mejia', 'clasificacion' => 'persona']);
 		Peusuario::create(['nombre_solicitante_PE' => 'Stiven Madrigal', 'clasificacion' => 'persona']);
-		Peusuario::create(['nombre_solicitante_PE' => 'Wilmer Reyes', 'clasificacion' => 'persona']);
+		Peusuario::create(['nombre_solicitante_PE' => 'Wilmer de los Reyes', 'clasificacion' => 'persona']);
 		Peusuario::create(['nombre_solicitante_PE' => 'Yhon Dairo Zapata', 'clasificacion' => 'persona']);
 		
 		Peusuario::create(['nombre_solicitante_PE' => 'AMBIENTE SOLAR', 'clasificacion' => 'empresa']);

@@ -10,7 +10,6 @@ import {onMounted, reactive, watchEffect} from 'vue';
 import '@vuepic/vue-datepicker/dist/main.css'
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
-
 // --------------------------- ** -------------------------
 
 const props = defineProps({
@@ -31,7 +30,7 @@ const data = reactive({
 
 //very usefull
 let justNames = props.titulos.map(names =>{
-    if(names['order'] !== 'noquiero' 
+    if(names['order'] !== 'noquieroome' 
         // &&
         // names['order'] !== 'noquiero1'
         )
@@ -52,7 +51,7 @@ onMounted(() => {
 
 const printForm =[];
 props.titulos.forEach(names =>{
- if(names['order'] !== 'noquiero'
+ if(names['order'] !== 'clasificacion'
      // && names['order'] !== 'noquiero1'
  )   
     printForm.push ({
@@ -74,7 +73,6 @@ function ValidarVacios(){
 
 const create = () => {
     if(ValidarVacios()){
-        // console.log("🧈 debu pieza_id:", form.pieza_id);
         form.post(route('peusuario.store'), {
             preserveScroll: true,
             onSuccess: () => {
@@ -119,17 +117,6 @@ const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }
                             <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
                         </div>
 
-
-                        <!-- tiempo -->
-                        <div v-else-if="atributosform.type === 'time'" id="SelectVue">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
-                            <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
-                                v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                :error="form.errors[atributosform.idd]" step="3600" />
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
-                        </div>
-
-
                         <!-- normal -->
                         <div v-else class="">
                             <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
@@ -139,6 +126,12 @@ const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }
                             <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
                     </div>
+                     <div id="SelectVue2" class="">
+                            <label name="labelSelectVue2"> Persona o Empresa </label>
+                            <vSelect :options="[{label: 'Persona', id: 'persona'},{label: 'Empresa', id: 'empresa'}]"
+                                      v-model="form['clasificacion']" 
+                            ></vSelect>
+                        </div>
                 </div>
                 <div class=" my-8 flex justify-end">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}

@@ -123,6 +123,15 @@ const ButtonsInformes = [ //SAME AS WEB.PHP
                     </Link>
                 </li>
             </div>
+            <div class="">
+                <li class="text-white rounded-lg hover:bg-primary"
+                    :class="route().current('peusuario.index') ? 'bg-primary' : 'bg-gray-700'">
+                    <Link :href="route('peusuario.index')" class="flex items-center py-2 px-4">
+                        <PresentationChartLineIcon class="w-5 h-auto"/>
+                        <span class="ml-3">Empresas y clientes</span>
+                    </Link>
+                </li>
+            </div>
         </ul>
         <button @click="toggleContent3" v-show="can(['isAdmin', 'isadministrativo'])" class="mt-1 text-blue-400">
             {{ (data.showContent3 ? '' : 'Ver ') + 'Administrador' }}

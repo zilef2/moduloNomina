@@ -2,6 +2,9 @@
 
 return [
     'label' => [
+		'peusuario' => 'Empresas o clientes',
+		'nombre_solicitante_PE' => 'Empresas o clientes',
+	    
 		'back' => 'Atras',
 		'centrou' => 'Centro de costo',
 		'zona' => 'Zona',
@@ -75,9 +78,6 @@ return [
 		'Fechasol' => 'Fecha solicitud',
 		'Ciudad' => 'Ciudad',
 		'ObraServicio' => 'Obra o Servicio',
-		'peusuario' => 'Peusuario',
-		'peusuario' => 'peusuario',
-		'nombre_solicitante_PE' => 'nombre_solicitante_PE',
 		//aquipues
         
         'viatico' => 'viático',
@@ -289,9 +289,8 @@ return [
 		'Fechasol' => 'Fechasol',
 		'Ciudad' => 'Ciudad',
 		'ObraServicio' => 'Obra o Servicio',
-		'peusuario' => 'Peusuario',
-		'peusuario' => 'peusuario',
-		'nombre_solicitante_PE' => 'nombre_solicitante_PE',
+		'peusuario' => 'Empresas o clientes',
+		'nombre_solicitante_PE' => 'Empresas o clientes',
 		//aquipues
     ],
     'button' => [

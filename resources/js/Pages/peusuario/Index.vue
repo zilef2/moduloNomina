@@ -91,6 +91,7 @@ const select = () => data.multipleSelect = props.fromController?.data.length ===
 // text - string // number // dinero // date // datetime // foreign
 const titulos = [
     { order: 'nombre_solicitante_PE', label: 'nombre_solicitante_PE', type: 'string' },
+    { order: 'clasificacion', label: 'clasificacion', type: 'string' },
 ];
 
 </script>
@@ -105,15 +106,15 @@ const titulos = [
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">
                     <PrimaryButton class="rounded-none" @click="data.createOpen = true"
-                        v-if="can(['create peusuario'])">
-                        {{ lang().button.new }}
+                        v-if="can(['create peusuario','isadministrativo'])">
+                        {{ lang().button.new }} Cliente o empresa
                     </PrimaryButton>
 
-                    <Create v-if="can(['create peusuario'])" :numberPermissions="props.numberPermissions"
+                    <Create v-if="can(['create peusuario','isadministrativo'])" :numberPermissions="props.numberPermissions"
                         :titulos="titulos" :show="data.createOpen" @close="data.createOpen = false" :title="props.title"
                         :losSelect=props.losSelect />
 
-                    <Edit v-if="can(['update peusuario'])" :titulos="titulos"
+                    <Edit v-if="can(['update peusuario','isadministrativo'])" :titulos="titulos"
                         :numberPermissions="props.numberPermissions" :show="data.editOpen" @close="data.editOpen = false"
                         :peusuarioa="data.peusuarioo" :title="props.title" :losSelect=props.losSelect />
 
@@ -139,9 +140,9 @@ const titulos = [
                     <table v-if="props.total > 0" class="w-full">
                         <thead class="uppercase text-sm border-t border-gray-200 dark:border-gray-700">
                             <tr class="dark:bg-gray-900/50 text-left">
-                                <th class="px-2 py-4 text-center">
-                                    <Checkbox v-model:checked="data.multipleSelect" @change="selectAll" />
-                                </th>
+<!--                                <th class="px-2 py-4 text-center">-->
+<!--                                    <Checkbox v-model:checked="data.multipleSelect" @change="selectAll" />-->
+<!--                                </th>-->
                                 <th v-if="numberPermissions > 1" class="px-2 py-4">Accion</th>
 
                                 <th class="px-2 py-4 text-center">#</th>
@@ -164,15 +165,16 @@ const titulos = [
                             <tr v-for="(claseFromController, indexu) in props.fromController.data" :key="indexu"
                                 class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
 
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
-                                    <input
-                                        class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary dark:text-primary shadow-sm focus:ring-primary/80 dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-primary dark:checked:border-primary"
-                                        type="checkbox" @change="select" :value="claseFromController.id"
-                                        v-model="data.selectedId" />
-                                </td>
+<!--                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">-->
+<!--                                    <input-->
+<!--                                        class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary dark:text-primary shadow-sm focus:ring-primary/80 dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-primary dark:checked:border-primary"-->
+<!--                                        type="checkbox" @change="select" :value="claseFromController.id"-->
+<!--                                        v-model="data.selectedId" />-->
+<!--                                </td>-->
                                 <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 w-12 px-2 sm:py-3">
                                     <div class="flex justify-center items-center">
                                         <div class="rounded-md overflow-hidden">
+<!--                                            ,'isadministrativo'-->
                                             <InfoButton v-show="can(['update peusuario'])" type="button"
                                                 @click="(data.editOpen = true), (data.peusuarioo = claseFromController)"
                                                 class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">

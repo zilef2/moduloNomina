@@ -28,10 +28,6 @@ class CalculoReportes {
             : 'NULL';  // Manejar caso vacío para evitar IN ()
 
         foreach ($vector as $vec) {
-//            $horasemana[$vec['numero_semana']] = (int)Reporte::Where('user_id', $Authuser->id)
-//                ->WhereBetween('fecha_ini', [$vec['primer_dia_semana'], $vec['ultimo_dia_semana']])
-//                ->selectRaw('fecha_ini, (diurnas + nocturnas) as ordinarias')
-//                ->get()->sum('ordinarias');
 
             $horasemana[$vec['numero_semana']] = (int)Reporte::where('user_id', $AuthuserId)
                 ->whereBetween('fecha_ini', [$vec['primer_dia_semana'], $vec['ultimo_dia_semana']])
