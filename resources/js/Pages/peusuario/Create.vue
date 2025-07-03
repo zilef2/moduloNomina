@@ -100,7 +100,7 @@ const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }
 
 <template>
     <section class="space-y-6">
-        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl4'">
+        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl2'">
             <form class="p-6" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     {{ lang().label.add }} {{ props.title }}
@@ -131,6 +131,7 @@ const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }
                             <vSelect :options="[{label: 'Persona', id: 'persona'},{label: 'Empresa', id: 'empresa'}]"
                                       v-model="form['clasificacion']" 
                             ></vSelect>
+                            <InputError class="mt-2" :message="form.errors.clasificacion"/>
                         </div>
                 </div>
                 <div class=" my-8 flex justify-end">

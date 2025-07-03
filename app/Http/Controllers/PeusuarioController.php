@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorepeusuarioRequest;
 use App\Models\peusuario;
 use App\helpers\Myhelp;
 use App\helpers\MyModels;
@@ -37,19 +38,9 @@ class PeusuarioController extends Controller {
         return Inertia::render($this->FromController . '/Index', [
             'fromController' => $this->PerPageAndPaginate($request, $peusuarios),
             'total' => $peusuarios->count(),
-
-            'breadcrumbs' => [
-                [
-                    'label' => __('app.label.' . $this->FromController),
-                    'href' => route($this->FromController . '.index')
-                ]
-            ],
+            'breadcrumbs' => [['label' => __('app.label.' . $this->FromController), 'href' => route($this->FromController . '.index')]],
             'title' => __('app.label.' . $this->FromController),
-            'filters' => $request->all([
-                                           'search',
-                                           'field',
-                                           'order'
-                                       ]),
+            'filters' => $request->all(['search', 'field', 'order']),
             'perPage' => (int)$perPage,
             'numberPermissions' => $numberPermissions,
             'losSelect' => $losSelect ?? [],
@@ -60,8 +51,8 @@ class PeusuarioController extends Controller {
         $peusuarios = peusuario::query();
         if ($request->has('search')) {
             $peusuarios = $peusuarios->where(function ($query) use ($request) {
-                $query->where('nombre', 'LIKE', "%" . $request->search . "%")
-                    //                    ->orWhere('codigo', 'LIKE', "%" . $request->search . "%")
+                $query->where('nombre_solicitante_PE', 'LIKE', "%" . $request->search . "%")
+                                        ->orWhere('clasificacion', 'LIKE', "%" . $request->search . "%")
                     //                    ->orWhere('identificacion', 'LIKE', "%" . $request->search . "%")
                 ;
             });
@@ -100,7 +91,7 @@ class PeusuarioController extends Controller {
         return $paginated;
     }
 
-    public function store(Request $request): RedirectResponse {
+    public function store(StorepeusuarioRequest $request): RedirectResponse {
         $permissions = Myhelp::EscribirEnLog($this, ' Begin STORE:peusuarios');
         DB::beginTransaction();
         $request->merge(['clasificacion' => $request->clasificacion['id']]);

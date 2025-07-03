@@ -94,6 +94,7 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::get('/qrscanner', [QRController::class, 'index'])->name('qrscanner');
     //16mayo2024
     Route::put('/eporte_Super_Edit/{id}', [ReportesController::class, 'Reporte_Super_Edit'])->name('Reporte_Super_Edit');
+    Route::put('/Reporte_Edit_Brus/{id}', [ReportesController::class, 'Reporte_Edit_Brus'])->name('Reporte_Edit_Brus');
     Route::get('/CentroCostoTable/{id}', [CentroTableController::class, 'table'])->name('CentroCostos.table');
     Route::get('/AproxDestroy', [CentroCostosController::class, 'AproxDestroy'])->name('AproxDestroy');
     Route::get('/DescompresionDespliegue/{esAmbientePruebas}', [ZipController::class, 'DescompresionDespliegue']);

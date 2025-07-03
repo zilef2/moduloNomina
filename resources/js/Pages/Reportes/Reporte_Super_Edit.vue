@@ -84,7 +84,7 @@ const form = useForm({
 });
 
 const update = () => {
-    form.put(route('Reporte_Super_Edit', props.Reporte?.id), {
+    form.put(route('Reporte_Edit_Brus', props.Reporte?.id), {
         preserveScroll: true,
         onSuccess: () => {
             emit("close")
@@ -218,7 +218,7 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                     </div>
                 </div>
                 <div class="my-6 ">
-                    <InputLabel for="observaciones" :value="lang().label.observaciones + ' (Porque se esta rechazando)'" />
+                    <InputLabel for="observaciones" :value="lang().label.observaciones + ' (Porque se esta alterando)'" />
                         <textarea :disabled="(correccionUsuario)"
                             id="observaciones" type="text" v-model="form.observaciones"
                             class="mt-1 block w-full rounded-md shadow-sm dark:bg-black dark:text-white placeholder:text-gray-400 placeholder:dark:text-gray-400/50"
@@ -235,7 +235,7 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                     </PrimaryButton>
                     <PrimaryButton v-else class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                         @click="update">
-                        {{ form.processing ? lang().button.reject + '...' : lang().button.reject }}
+                        {{ form.processing ? 'Alterar' + '...' : 'Alterar' }}
                     </PrimaryButton>
                 </div>
             </form>

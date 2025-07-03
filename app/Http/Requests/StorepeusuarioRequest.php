@@ -11,7 +11,7 @@ class StorepeusuarioRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,9 @@ class StorepeusuarioRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+			'nombre_solicitante_PE'  => 'required|string|min:0',
+			'clasificacion'     => 'required|array',
+		
         ];
     }
 }

@@ -445,11 +445,11 @@ const handleCheckboxChange = (values) => {
                             <div class="flex justify-start items-center">
                                 <div class="flex rounded-md overflow-hidden">
                                     <form @submit.prevent="updateThisReporte">
-                                        <InfoButton v-if="can(['update reporte'])" type="button"
+                                        <DangerButton v-if="can(['update reporte'])" type="button"
                                                     @click="(data.editOpen = true), (data.generico = clasegenerica)"
-                                                    class="px-2 py-1.5 rounded-sm" v-tooltip="lang().tooltip.edit">
+                                                    class="px-2 py-1.5 rounded-sm" v-tooltip="'Rechazar'">
                                             <PencilIcon class="w-6 h-6"/>
-                                        </InfoButton>
+                                        </DangerButton>
                                         <SuccessButton v-if="can(['update reporte'])" type="button"
                                                        class="mx-1 w-12 h-10 rounded-lg-r"
                                                        :class="{ 'opacity-25': form.processing }"
@@ -459,15 +459,16 @@ const handleCheckboxChange = (values) => {
                                             <CheckIcon class="w-6 h-6"/>
                                         </SuccessButton>
                                     </form>
+                                    
                                     <!--                                            <InfoButton v-if="(can(['isSuper']))"-->
                                     <!--                                                type="button"-->
                                     <!--                                                @click="(data.editCorregirOpen = true), (data.generico = clasegenerica)"-->
                                     <!--                                                class="px-2 py-1.5 rounded-l-md" v-tooltip="'Corregir'">-->
                                     <!--                                                <DocumentCheckIcon class="w-6 h-6" />-->
                                     <!--                                            </InfoButton>-->
-                                    <InfoButton v-if="can(['isSuper'])" type="button"
+                                    <InfoButton v-if="can(['isSuper']) || can(['isingeniero','isadmin','isadministrativo','issupervisor'])" type="button"
                                                 @click="(data.Reporte_Super_EditOpen = true), (data.generico = clasegenerica)"
-                                                class="px-2 py-1.5 rounded-sm" v-tooltip="'Edit super'">
+                                                class="px-2 py-1.5 rounded-sm" v-tooltip="'Editar Horas'">
                                         <DocumentCheckIcon class="w-5 h-5"/>
                                     </InfoButton>
                                     <DangerButton v-if="(can(['delete reporte']))" type="button"

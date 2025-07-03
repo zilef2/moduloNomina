@@ -134,7 +134,7 @@ const titulos = [
                         </DangerButton> -->
                     </div>
                     <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"
-                        class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg" placeholder="Nombre, codigo" />
+                        class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg" placeholder="Nombre" />
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <table v-if="props.total > 0" class="w-full">

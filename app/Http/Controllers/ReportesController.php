@@ -704,7 +704,7 @@ class ReportesController extends Controller {
 			$Reportes->id_aprobo = $theuserAprobo->id;
 			
 			if ($request->valido === 1 || $request->valido === true) {
-				$Reportes->valido = $request->valido; //0 creado //1 aceptado //2 rechazado
+				$Reportes->valido = $request->valido; //0 creado //1 aceptado //2 rechazado // 3  alterado 
 				
 			}
 			else {
@@ -722,7 +722,7 @@ class ReportesController extends Controller {
 				$Reportes->dominical_extra_diurno = $request->dominical_extra_diurno;
 				$Reportes->dominical_extra_nocturno = $request->dominical_extra_nocturno;
 				
-				$Reportes->valido = $request->valido; //0 creado //1 aceptado //2 rechazado
+				$Reportes->valido = $request->valido; //0 creado //1 aceptado //2 rechazado // 3  alterado 
 				$Reportes->observaciones = $request->observaciones;
 				$Reportes->centro_costo_id = $request->centro_costo_id;
 			}
@@ -889,7 +889,7 @@ class ReportesController extends Controller {
 			$Reporte->dominical_extra_diurno = $request->dominical_extra_diurnas;
 			$Reporte->dominical_extra_nocturno = $request->dominical_extra_nocturnas;
 			
-			//            $Reporte->valido = $request->valido;//0 creado //1 aceptado //2 rechazado
+			//            $Reporte->valido = $request->valido;//0 creado //1 aceptado //2 rechazado // 3  alterado 
 			//            $Reporte->observaciones = $request->observaciones;
 			//            $Reporte->centro_costo_id = $request->centro_costo_id;
 			$Reporte->save();
@@ -901,6 +901,62 @@ class ReportesController extends Controller {
 			DB::rollback();
 			myhelp::EscribirEnLog($this, 'reportes reporte super edit', $th->getMessage(), 0, 1);
 			
+			
+			return back()->with('error', __('app.label.updated_error', ['name' => __('app.label.Reportes')]) . $th->getMessage());
+		}
+	}
+	
+	public function Reporte_Edit_Brus(Request $request, $id) {
+		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' Reporte_Edit_Brus| ', 'ingreso al index')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+		$user = Myhelp::AuthU();
+		if($numberPermissions < 2) {
+			myhelp::EscribirEnLog($this, 'Reporte_Edit_Brus ', 'Esta persona No esta autorizado '.$user->name, 0, 1);
+			return back()->with('error', 'No esta autorizado');
+		}
+		
+		
+		DB::beginTransaction();
+		try {
+			
+			if(!$this->validacionesBrusco($request)){
+				myhelp::EscribirEnLog($this, 'Reporte_Edit_Brus|','reporte no valido '.$user->name, 0, 1);
+				DB::rollback();
+				return back()->with('error', 'Reporte no valido');
+			}
+			
+			$Reporte = Reporte::findOrFail($id);
+			
+			$Reporte->horas_trabajadas = $request->horas_trabajadas;
+			$Reporte->almuerzo = $request->almuerzo;
+			$Reporte->diurnas = $request->diurnas;
+			$Reporte->nocturnas = $request->nocturnas;
+			$Reporte->extra_diurnas = $request->extra_diurnas;
+			$Reporte->extra_nocturnas = $request->extra_nocturnas;
+			
+			$Reporte->dominical_diurno = $request->dominical_diurnas;
+			$Reporte->dominical_nocturno = $request->dominical_nocturnas;
+			$Reporte->dominical_extra_diurno = $request->dominical_extra_diurnas;
+			$Reporte->dominical_extra_nocturno = $request->dominical_extra_nocturnas;
+			
+            $Reporte->valido = 1 ;//0 creado //1 aceptado //2 rechazado // 3  alterado  // 3  alterado 
+			$Reporte->observaciones = $Reporte->observaciones . ' Alterado por: ' . $user->name . ' el ' . Carbon::now()->format('Y-m-d') . ' -- ';
+			//            $Reporte->observaciones = $request->observaciones;
+			//            $Reporte->centro_costo_id = $request->centro_costo_id;
+			$Reporte->save();
+			DB::commit();
+			myhelp::EscribirEnLog($this, 'Reporte_Edit_Brus ', ' Por: ' . $user->name . ' el ' . Carbon::now()->format('Y-m-d H:i:s'), 0, 1);
+			
+			
+			return back()->with('success', __('app.label.updated_successfully', ['name' => 'Reporte']));
+		} catch (\Throwable $th) {
+			DB::rollback();
+			$mensajeError = $th->getMessage() . ' L:' . $th->getLine() . ' Ubi:' . $th->getFile();
+			myhelp::EscribirEnLog($this, 'Reporte_Edit_Brus', $mensajeError, 0, 1);
+	        if (app()->environment('test')) {
+				dd(
+				    $mensajeError
+				);
+	        }
 			
 			return back()->with('error', __('app.label.updated_error', ['name' => __('app.label.Reportes')]) . $th->getMessage());
 		}
@@ -1034,6 +1090,25 @@ class ReportesController extends Controller {
 		
 		$centrosSinZona = CentroCosto::whereIn('id', $reportes)->get()->pluck('nombre')->toArray();
 		dd($centrosSinZona);
+	}
+	
+	/**
+	 * @param \Illuminate\Http\Request $request
+	 * @return void
+	 */
+	public function validacionesBrusco(Request $request): bool {
+		if($request->almuerzo > 4) return false;
+		
+		$totalsinAlmuerzo = $request->horas_trabajadas;
+		$sumahoras = (int)($request->diurnas) + (int)($request->nocturnas) + (int)($request->extra_diurnas) 
+			+ (int)($request->extra_nocturnas) + (int)($request->dominical_diurnas) + (int)($request->dominical_nocturnas) 
+			+ (int)($request->dominical_extra_diurnas) + (int)($request->dominical_extra_nocturnas);
+		
+		if($totalsinAlmuerzo != $sumahoras) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 }
