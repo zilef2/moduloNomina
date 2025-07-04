@@ -287,7 +287,7 @@ const handleCheckboxChange = (values) => {
                         <div v-else
                              v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro"
                              class="mx-4">
-                            <p class="pt-1 mt-6 font-extrabold">Sin reportes</p>
+                            <p class="pt-1 mt-6 font-extrabold">Usted no necesita reportar</p>
                         </div>
                     </div>
 

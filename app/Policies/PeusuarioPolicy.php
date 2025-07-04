@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\peusuario;
+use App\Models\Peusuario;
 use Illuminate\Auth\Access\Response;
 
 class PeusuarioPolicy

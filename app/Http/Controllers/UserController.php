@@ -150,7 +150,7 @@ class UserController extends Controller {
 		//     Log::channel('stevebauman')->info('Vista: welcome. User => '  .Auth::user()->name .' '. $positio); }
 		
 		return Inertia::render('Dashboard', [
-			'versionZilef'      => '0.9.1',
+			'versionZilef'      => '25.6.1',
 			'users'             => (int)User::count(),
 			'roles'             => (int)Role::count(),
 			'permissions'       => (int)Permission::count(),

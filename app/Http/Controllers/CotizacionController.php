@@ -8,7 +8,7 @@ use App\helpers\zzloggingcrud;
 use App\Http\Requests\CotizacionesStoreRequest;
 use App\Models\CentroCosto;
 use App\Models\cotizacion;
-use App\Models\peusuario;
+use App\Models\Peusuario;
 use App\Models\User;
 use Carbon\Carbon;
 use Database\Seeders\PeusuarioSeeder;
