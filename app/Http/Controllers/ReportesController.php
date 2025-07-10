@@ -917,14 +917,20 @@ class ReportesController extends Controller {
 		
 		DB::beginTransaction();
 		try {
+			$Reporte = Reporte::findOrFail($id);
 			
+			$reporteUser = $Reporte->nameUser();
 			if(!$this->validacionesBrusco($request)){
-				myhelp::EscribirEnLog($this, 'Reporte_Edit_Brus|','reporte no valido '.$user->name, 0, 1);
+				myhelp::EscribirEnLog($this, 'Reporte_Edit_Brus|','reporte no valido '
+				                           .' :: Persona logueada '.$user->name
+				                           .' :: ID Persona logueada '.$user->id
+				                           .' :: Persona del reporte '.$reporteUser
+				                           .' :: Era un reporte valido = '.$Reporte->valido . ' || explicacion: 0 creado 1 aceptado 2 rechazado '
+					, 0, 1);
 				DB::rollback();
 				return back()->with('error', 'Reporte no valido');
 			}
 			
-			$Reporte = Reporte::findOrFail($id);
 			
 			$Reporte->horas_trabajadas = $request->horas_trabajadas;
 			$Reporte->almuerzo = $request->almuerzo;
@@ -938,16 +944,19 @@ class ReportesController extends Controller {
 			$Reporte->dominical_extra_diurno = $request->dominical_extra_diurnas;
 			$Reporte->dominical_extra_nocturno = $request->dominical_extra_nocturnas;
 			
-            $Reporte->valido = 1 ;//0 creado //1 aceptado //2 rechazado // 3  alterado  // 3  alterado 
+            $Reporte->valido = 1 ;//0 creado //1 aceptado //2 rechazado
 			$Reporte->observaciones = $Reporte->observaciones . ' Alterado por: ' . $user->name . ' el ' . Carbon::now()->format('Y-m-d') . ' -- ';
-			//            $Reporte->observaciones = $request->observaciones;
-			//            $Reporte->centro_costo_id = $request->centro_costo_id;
+			
 			$Reporte->save();
 			DB::commit();
-			myhelp::EscribirEnLog($this, 'Reporte_Edit_Brus ', ' Por: ' . $user->name . ' el ' . Carbon::now()->format('Y-m-d H:i:s'), 0, 1);
+			myhelp::EscribirEnLog($this, 'Reporte_Edit_Brus ', ' Editado por: ' . $user->name 
+				                        .' :: Persona del reporte '.$reporteUser
+		                                . ' el ' . Carbon::now()->format('Y-m-d H:i:s')
+				, 0, 1);
 			
 			
 			return back()->with('success', __('app.label.updated_successfully', ['name' => 'Reporte']));
+			
 		} catch (\Throwable $th) {
 			DB::rollback();
 			$mensajeError = $th->getMessage() . ' L:' . $th->getLine() . ' Ubi:' . $th->getFile();

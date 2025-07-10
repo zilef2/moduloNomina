@@ -18,6 +18,12 @@ import {Now_Date_to_html} from '@/global.ts';
 
 // --------------------------- ** -------------------------
 
+let clasedelgrid = 'my-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-8'
+const emit = defineEmits(["close"]);
+
+
+
+// <!--<editor-fold desc="props -- data ">-->
 const props = defineProps({
     show: Boolean,
     title: String,
@@ -29,9 +35,6 @@ const props = defineProps({
     consecutivoCotizacion: Number,
     cotizacionInicial2: Number,
 })
-
-let clasedelgrid = 'my-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-8'
-const emit = defineEmits(["close"]);
 
 const data = reactive({
     params: {
@@ -77,6 +80,9 @@ const data = reactive({
         ],
     }
 })
+    // <!--</editor-fold>-->
+
+
 let CamposExcluidos = [ //excluidos del form
     'fecha_aprobacion_cot',
     'factura',
