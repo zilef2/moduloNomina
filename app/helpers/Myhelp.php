@@ -75,6 +75,7 @@ class Myhelp {
 		$permissions = $returnPermission ? self::AuthU()->roles->pluck('name')[0] : null;
 		$ListaControladoresYnombreClase = (explode('\\', get_class($thiis)));
 		$nombreC = end($ListaControladoresYnombreClase);
+		$esCritico = !$critico;
 		if (!$critico) {
 			$ElMensaje = $nombreC . ' ::' . self::AuthU()->name . ' | clase: ' . $clase;
 			if ($permissions == 'admin' || $permissions == 'superadmin') {
@@ -98,7 +99,7 @@ class Myhelp {
 			return $permissions;
 		}
 		else {
-			Log::critical('Vista: ' . ($nombreC ?? 'null') . 'U:' . self::AuthU()->name . ' ||' . ($clase ?? 'null') . '|| ' . ' Mensaje: ' . ($mensaje ?? 'null'));
+			Log::critical('Es critico ' . $esCritico .'Vista: ' . ($nombreC ?? ' sin vista ') . ' U:' . self::AuthU()->name . ' ||' . ($clase ?? ' sin clase') . '||  Mensaje: ' . ($mensaje ?? ' sin mensaje'));
 		}
 	}
 	

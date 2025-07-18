@@ -914,7 +914,6 @@ class ReportesController extends Controller {
 			return back()->with('error', 'No esta autorizado');
 		}
 		
-		
 		DB::beginTransaction();
 		try {
 			$Reporte = Reporte::findOrFail($id);
@@ -925,8 +924,7 @@ class ReportesController extends Controller {
 				                           .' :: Persona logueada '.$user->name
 				                           .' :: ID Persona logueada '.$user->id
 				                           .' :: Persona del reporte '.$reporteUser
-				                           .' :: Era un reporte valido = '.$Reporte->valido . ' || explicacion: 0 creado 1 aceptado 2 rechazado '
-					, 0, 1);
+				                           .' :: Era un reporte valido = '.$Reporte->valido . ' || explicacion: 0 creado 1 aceptado 2 rechazado '  , 0);
 				DB::rollback();
 				return back()->with('error', 'Reporte no valido');
 			}
@@ -943,16 +941,17 @@ class ReportesController extends Controller {
 			$Reporte->dominical_nocturno = $request->dominical_nocturnas;
 			$Reporte->dominical_extra_diurno = $request->dominical_extra_diurnas;
 			$Reporte->dominical_extra_nocturno = $request->dominical_extra_nocturnas;
+			$Reporte->centro_costo_id = $request->centro_costo_id;
 			
             $Reporte->valido = 1 ;//0 creado //1 aceptado //2 rechazado
-			$Reporte->observaciones = $Reporte->observaciones . ' Alterado por: ' . $user->name . ' el ' . Carbon::now()->format('Y-m-d') . ' -- ';
+			$Reporte->observaciones = $Reporte->observaciones . 
+				' Alterado por: ' . $user->name . ' el ' . Carbon::now()->format('Y-m-d') . ' -- ';
 			
 			$Reporte->save();
 			DB::commit();
 			myhelp::EscribirEnLog($this, 'Reporte_Edit_Brus ', ' Editado por: ' . $user->name 
 				                        .' :: Persona del reporte '.$reporteUser
-		                                . ' el ' . Carbon::now()->format('Y-m-d H:i:s')
-				, 0, 1);
+		                                . ' el ' . Carbon::now()->format('Y-m-d H:i:s'), 0);
 			
 			
 			return back()->with('success', __('app.label.updated_successfully', ['name' => 'Reporte']));
@@ -961,11 +960,9 @@ class ReportesController extends Controller {
 			DB::rollback();
 			$mensajeError = $th->getMessage() . ' L:' . $th->getLine() . ' Ubi:' . $th->getFile();
 			myhelp::EscribirEnLog($this, 'Reporte_Edit_Brus', $mensajeError, 0, 1);
-	        if (app()->environment('test')) {
-				dd(
-				    $mensajeError
-				);
-	        }
+			
+	        if (app()->environment('test')) dd($mensajeError);
+	        
 			
 			return back()->with('error', __('app.label.updated_error', ['name' => __('app.label.Reportes')]) . $th->getMessage());
 		}
