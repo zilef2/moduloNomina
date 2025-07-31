@@ -313,7 +313,7 @@ return [
         'confirm_password' => 'Confirmar',
         'resend_email' => 'Re-enviar Email de verificacion',
         'logout' => 'Cerrar sesion',
-        'add' => 'Crear',
+        'add' => 'CREAR',
         'close' => 'Cerrar',
         'save' => 'Guardar',
         'saving' => 'Guardando...',

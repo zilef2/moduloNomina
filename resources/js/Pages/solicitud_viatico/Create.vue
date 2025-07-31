@@ -12,7 +12,7 @@ import "vue-select/dist/vue-select.css";
 import VueDatePicker from '@vuepic/vue-datepicker';
 import Thex from "@/Components/imfeng/thex.vue";
 import {formatPesosCol} from '@/global.ts';
-import {onMounted, reactive, watchEffect, watch} from "vue";
+import {onMounted, reactive, ref, watchEffect, watch, nextTick, onBeforeUpdate} from "vue";
 
 // --------------------------- ** -------------------------
 
@@ -25,6 +25,11 @@ const props = defineProps({
     numberPermissions: Number,
 })
 const emit = defineEmits(["close"]);
+
+const gastoInputs = ref([]);
+onBeforeUpdate(() => {
+    gastoInputs.value = [];
+});
 
 const data = reactive({
     params: {
@@ -49,25 +54,40 @@ const form = useForm({
 });
 
 const addUser = () => {
-    form.user_id.push(null);
-    form.centro_costo_id.push(null);
-    form.descripcion.push(null);
+    const lenghtt = form.user_id.length - 1
+    if (!form.user_id[lenghtt] 
+        || !form.gasto[lenghtt]
+        || !form.fecha_inicial[lenghtt] 
+        || !form.descripcion[lenghtt]
+    ){
+        alert('Debe seleccionar los datos antes de agregar una nueva fila'); return
+    }
+    
+    form.user_id.push(form.user_id[lenghtt]);
+    form.descripcion.push(form.descripcion[lenghtt]);
     form.gasto.push(0);
-    form.fecha_inicial.push(0);
-    form.fecha_final.push(0);
-    form.numerodias.push(0);
+    form.fecha_inicial.push(form.fecha_inicial[lenghtt]);
+    form.fecha_final.push(form.fecha_final[lenghtt]);
+    form.numerodias.push(form.numerodias[lenghtt]);
+    
+    nextTick(() => {
+        const lastInput = gastoInputs.value[gastoInputs.value.length - 1];
+        if (lastInput) {
+            lastInput.focus();
+        }
+    });
 };
 
 const removeUser = (index) => {
     if (form.user_id.length > 1) {
         form.user_id.splice(index, 1);
-        form.centro_costo_id.splice(index, 1);
         form.descripcion.splice(index, 1);
-        formattedValor.gasto(index, 0)
         form.gasto.splice(index, 1);
         form.fecha_inicial.splice(index, 1);
         form.fecha_final.splice(index, 1);
         form.numerodias.splice(index, 1);
+        
+        formattedValor.gasto(index, 0)
     }
     // form.gasto.forEach((ele, inde) => {
     //     formattedValor.set(inde, 0)
@@ -87,7 +107,7 @@ onMounted(() => {
         form.Ciudad = 'Medellin';
         form.ObraServicio = 'Una obra ejemplo';
 
-        form.descripcion[0] = valueRAn + ''
+        form.descripcion[0] = 'observacion genérica ' + (valueRAn);
         form.gasto[0] = valueRAn
         form.Solicitante = props.losSelect[3][0]
 
@@ -202,17 +222,21 @@ const create = () => {
         alert('Faltan campos por diligenciar')
     }
 }
+const ciudades = [
+    'Medellin', 'Santamarta', 'Cartagena', 'Valledupar', 'Monteria',
+    'Bucaramanga', 'Cucuta', 'Neiva', 'Ibague', 'Girardot', 'Pereira', 'Armenia'
+]
 </script>
 
 <template>
     <section class="space-y-6">
-        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl4'">
+        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl8'">
             <form class="p-6 mb-36" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     {{ lang().label.add }} {{ props.title }}
                 </h2>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="grid xs:grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
                     <div class="w-full">
                         <label class="dark:text-gray-50">Quién realiza la solicitud</label>
                         <!--                        SolicitudViaticoController/ Dependencias-->
@@ -227,42 +251,48 @@ const create = () => {
                     </div>
                     <div class="w-full">
                         <label class="dark:text-gray-50">Ciudad</label>
-                        <TextInput v-model="form.Ciudad" class="py-1 mx-1 w-full"></TextInput>
+                        <vSelect v-model="form.Ciudad" :options="ciudades"
+                                 label="name" placeholder="Seleccione una ciudad"></vSelect>
                     </div>
                     <div class="w-full">
                         <label class="dark:text-gray-50">Obra o Servicio</label>
                         <TextInput v-model="form.ObraServicio" class="py-1 mx-1 w-full"></TextInput>
                     </div>
-
-                </div>
-
-                <div v-for="(user, index) in form.user_id" :key="index"
-                     class="flex flex-wrap items-center gap-2 mb-4"
-                     :class="{'mt-16':index !== 0}"
-                >
-                    <div class="w-4/12">
-                        <label class="dark:text-gray-50">Quién necesita el viático</label>
-                        <vSelect v-model="form.user_id[index]" :options="props.losSelect[0]"
-                                 label="name"></vSelect>
-                    </div>
-                    <div class="w-4/12">
+                    <div class="">
                         <label class="dark:text-gray-50">Centro de costo</label>
                         <vSelect v-model="form.centro_costo_id[index]" :options="props.losSelect[1]"
                                  label="name"></vSelect>
                     </div>
-                    <div class="w-3/12">
+                </div>
+                <hr class="border-0 h-0.5 bg-gradient-to-r  mb-4
+                from-blue-800 via-blue-600 to-blue-100 animate-pulse delay-200 
+                rounded-full shadow-lg shadow-indigo-500/50" />
+
+
+                <div v-for="(user, index) in form.user_id" :key="index"
+                     class="grid xs:grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6"
+                     :class="{'mt-16':index !== 0}"
+                >
+                    <div class="col-span-2">
+                        <label class="dark:text-gray-50">Quién necesita el viático</label>
+                        <vSelect v-model="form.user_id[index]" :options="props.losSelect[0]"
+                                 label="name"></vSelect>
+                    </div>
+                   
+                    <div class="">
                         <label class="dark:text-gray-50">Cuanto necesita</label>
                         <TextInput
+                            :ref="el => gastoInputs[index] = el"
                             :modelValue="formattedValor.get(index)"
                             @update:modelValue="(value) => formattedValor.set(index, value)"
                             :error="form.errors[`gasto.${index}`]"
                             class="py-1 mx-1 w-full"></TextInput>
                     </div>
-                    <div class="w-10/12">
+                    <div class="col-span-5">
                         <label class="dark:text-gray-50">Descripción</label>
-                        <TextInput v-model="form.descripcion[index]" class="py-1 mx-1 w-full"></TextInput>
+                        <TextInput v-model="form.descripcion[index]" class="py-1 mx-1 w-full text-sm"></TextInput>
                     </div>
-                    <div class="w-6/12 mt-5">
+                    <div class="col-span-2">
                         <InputLabel :for="'fecha_ini'+index" value="Rango de Fechas"/>
                         <VueDatePicker
                             :enable-time-picker="false" :time-picker="false"
@@ -272,28 +302,31 @@ const create = () => {
                             class="mt-1 block w-full border-0 border-white"
                         />
                     </div>
-                    <div class="w-2/12 ml-4 mt-4">
+                    <div class="">
                         <label class="ml-2 dark:text-gray-50">Numero de días</label>
                         <TextInput disabled type="number" v-model="form.numerodias[index]"
                                    class="py-1 mx-1 w-full bg-gray-400"></TextInput>
                     </div>
-
+                    <div class="">
                     <button type="button" v-if="form.user_id.length > 1"
                             @click="removeUser(index)"
                             v-tooltip="'Eliminar viático'"
-                            class="w-7 mt-10 bg-red-600 text-white rounded">
+                            class="w-8 h-8 mt-6 bg-red-600 text-white rounded">
                         <Thex></Thex>
                     </button>
+                    </div>
+
                     <hr>
                 </div>
-                <button type="button" @click="addUser" class="p-1 m-2 bg-green-700 text-white rounded">Agregar Persona
+                <button type="button" @click="addUser" class="p-1 m-2 bg-green-700 text-white rounded">
+                    Agregar fila
                 </button>
 
 
-                <div class=" my-8 flex justify-end">
+                <div class=" my-8 flex justify-start">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}
                     </SecondaryButton>
-                    <PrimaryButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
+                    <PrimaryButton class="ml-3 uppercase" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                                    @click="create">
                         {{ lang().button.add }} {{ form.processing ? '...' : '' }}
                     </PrimaryButton>

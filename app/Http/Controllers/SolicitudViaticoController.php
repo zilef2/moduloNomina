@@ -160,19 +160,13 @@ class SolicitudViaticoController extends Controller {
 	
 	//</editor-fold>
 	
-	private function totallegalizado(): int {
-		$viaticos = viatico::all()->sum('Totallegalizadou');
-		
-		
-		return $viaticos;
-	}
+	private function totallegalizado(): int {return viatico::all()->sum('Totallegalizadou'); }
 	
 	public function store(Request $request): RedirectResponse {
 		Myhelp::EscribirEnLog($this, ' Begin STORE:viaticos');
 		DB::beginTransaction();
 		$myuser = Myhelp::AuthU();
-		$cuantosViaticos = count($request->centro_costo_id);
-		
+		$cuantosViaticos = count($request->descripcion);
 		$elsolicitante = User::find($request->Solicitante['id']);
 		$solViatico = solicitud_viatico::create([
 			       'Solicitante'  => $elsolicitante->name,
@@ -185,7 +179,7 @@ class SolicitudViaticoController extends Controller {
 		
 		$total = 0;
 		$paraellog = [];
-		foreach ($request->centro_costo_id as $index => $centro) {
+		foreach ($request->descripcion as $index => $descrip) {
 			
 			$date = new DateTime($request->fecha_inicial[$index][0]);
 			$ini = $date->format('Y-m-d');
@@ -193,7 +187,7 @@ class SolicitudViaticoController extends Controller {
 			$fini = $date->format('Y-m-d');
 			
 			$thearray = [
-				'centro_costo_id'      => $centro['id'],
+				'centro_costo_id'      => $request->centro_costo_id[0]['id'],
 				'user_id'              => $request->user_id[$index]['id'],
 				'descripcion'          => $request->descripcion[$index],
 				'gasto'                => $request->gasto[$index],
@@ -204,7 +198,9 @@ class SolicitudViaticoController extends Controller {
 				'solicitud_viatico_id' => $solViatico->id,
 			
 			];
-			$paraellog[] = implode(",", $thearray);
+			
+			$paraellog[] = 
+				implode(",", $thearray);
 			viatico::create($thearray);
 			$total += $request->gasto[$index];
 			
