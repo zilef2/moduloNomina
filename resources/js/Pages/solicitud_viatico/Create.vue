@@ -190,6 +190,7 @@ watch(() => form.fecha_inicial, (new_fecha_inicial) => {
 // <!--</editor-fold>-->
 
 
+// <!--<editor-fold desc="validate and send">-->
 
 const ValidarForm = [];
 const ValidarArrayForm = [
@@ -262,6 +263,7 @@ const create = () => {
     }
 }
 
+// <!--</editor-fold>-->
 
 
 </script>
