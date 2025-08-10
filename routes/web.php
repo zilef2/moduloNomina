@@ -5,6 +5,7 @@ use App\Http\Controllers\CentroCostosController;
 use App\Http\Controllers\CentroTableController;
 use App\Http\Controllers\ConsignarViaticoController;
 use App\Http\Controllers\CotizacionController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeudaSingularController;
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\ExcelController;
@@ -131,6 +132,7 @@ Route::middleware('auth', 'verified')->group(function () {
 	Route::get('/FuncionPruebas', [ReportesController::class, 'FuncionPruebas'])->name('FuncionPruebas');
 	Route::get('/FuncionPruebas2', [ReportesController::class, 'FuncionPruebas2'])->name('FuncionPruebas2');
 	Route::resource("/peusuario", \App\Http\Controllers\PeusuarioController::class);
+	Route::get('/ProbarJob', [DashboardController::class, 'ProbarJob'])->name('ProbarJob');
 	//aquipues
 }); //fin verified
 

@@ -179,15 +179,17 @@ class SolicitudViaticoController extends Controller {
 		
 		$total = 0;
 		$paraellog = [];
+		
+		$IntCentroid = $request->centro_costo_id['id'];
 		foreach ($request->descripcion as $index => $descrip) {
-			
 			$date = new DateTime($request->fecha_inicial[$index][0]);
 			$ini = $date->format('Y-m-d');
 			$date = new DateTime($request->fecha_inicial[$index][1]);
 			$fini = $date->format('Y-m-d');
 			
+			
 			$thearray = [
-				'centro_costo_id'      => $request->centro_costo_id[0]['id'],
+				'centro_costo_id'      => $IntCentroid,
 				'user_id'              => $request->user_id[$index]['id'],
 				'descripcion'          => $request->descripcion[$index],
 				'gasto'                => $request->gasto[$index],
@@ -199,8 +201,7 @@ class SolicitudViaticoController extends Controller {
 			
 			];
 			
-			$paraellog[] = 
-				implode(",", $thearray);
+			$paraellog[] = implode(",", $thearray);
 			viatico::create($thearray);
 			$total += $request->gasto[$index];
 			

@@ -42,9 +42,9 @@ const form = useForm({
     Fechasol: '',
     Ciudad: '',
     ObraServicio: '',
+    centro_costo_id: null,
 
     user_id: [null],
-    centro_costo_id: [null],
     descripcion: [null],
     gasto: [null],
     numerodias: [null],
@@ -52,6 +52,61 @@ const form = useForm({
     fecha_final: [null],
     routeadmin: '', //este componente se usa para los supervisores y el admin
 });
+
+onMounted(() => {
+    if (props.numberPermissions > 9) {
+
+        const valueRAn = Math.floor(Math.random() * (90000) + 1)
+        form.nombre = 'nombre genenerico ' + (valueRAn);
+        form.codigo = (valueRAn);
+        // form.hora_inicial = '0'+valueRAn+':00'//temp
+        // form.fecha = '2023-06-01'
+
+        form.Fechasol = '2025-03-26';
+        form.Ciudad = 'Medellin';
+        form.ObraServicio = 'Una obra ejemplo';
+
+        form.descripcion[0] = 'observacion genérica ' + (valueRAn);
+        form.gasto[0] = valueRAn
+        form.Solicitante = props.losSelect[3][0]
+
+        setTimeout(buscarSelects, 2000);
+
+    }
+});
+
+
+// <!--<editor-fold desc="mafunctions">-->
+const formattedValor = {
+    get: (index) => {
+        return form.gasto && form.gasto[index]
+            ? formatPesosCol(form.gasto[index])
+            : "";
+    },
+    set: (index, value) => {
+        // Asegurar que gasto es un array
+        if (!Array.isArray(form.gasto)) {
+            form.gasto = [];
+        }
+
+        // Permitir solo números y actualizar el form sin espacios ni símbolos
+        form.gasto[index] = value.replace(/\D/g, "");
+    }
+};
+const daynames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
+const ciudades = [
+    'Medellin', 'Santamarta', 'Cartagena', 'Valledupar', 'Monteria',
+    'Bucaramanga', 'Cucuta', 'Neiva', 'Ibague', 'Girardot', 'Pereira', 'Armenia'
+];
+const tipoViaticos = [
+    'Transporte (ida y regreso)', 
+    'Transporte (ida)', 
+    'Transporte (regreso)', 
+    'Alimentación', 
+    'Estadia',
+    'Caja menor',
+]
+
 
 const addUser = () => {
     const lenghtt = form.user_id.length - 1
@@ -77,7 +132,6 @@ const addUser = () => {
         }
     });
 };
-
 const removeUser = (index) => {
     if (form.user_id.length > 1) {
         form.user_id.splice(index, 1);
@@ -93,35 +147,14 @@ const removeUser = (index) => {
     //     formattedValor.set(inde, 0)
     // })
 };
-
-onMounted(() => {
-    if (props.numberPermissions > 9) {
-
-        const valueRAn = Math.floor(Math.random() * (90000) + 1)
-        form.nombre = 'nombre genenerico ' + (valueRAn);
-        form.codigo = (valueRAn);
-        // form.hora_inicial = '0'+valueRAn+':00'//temp
-        // form.fecha = '2023-06-01'
-
-        form.Fechasol = '2025-03-26';
-        form.Ciudad = 'Medellin';
-        form.ObraServicio = 'Una obra ejemplo';
-
-        form.descripcion[0] = 'observacion genérica ' + (valueRAn);
-        form.gasto[0] = valueRAn
-        form.Solicitante = props.losSelect[3][0]
-
-        setTimeout(buscarSelects, 2000);
-
-    }
-});
-
 function buscarSelects() {
     form.user_id[0] = props.losSelect[0][1]
-    form.centro_costo_id[0] = props.losSelect[1][1]
+    form.centro_costo_id = props.losSelect[1][1]
 }
+// <!--</editor-fold>-->
 
 
+// <!--<editor-fold desc="waches">-->
 watchEffect(() => {
     if (props.show) {
         form.errors = {}
@@ -154,54 +187,62 @@ watch(() => form.fecha_inicial, (new_fecha_inicial) => {
 }, {deep: true});
 
 // import {formatPesosCol} from '@/global.ts';
-const formattedValor = {
-    get: (index) => {
-        return form.gasto && form.gasto[index]
-            ? formatPesosCol(form.gasto[index])
-            : "";
-    },
-    set: (index, value) => {
-        // Asegurar que gasto es un array
-        if (!Array.isArray(form.gasto)) {
-            form.gasto = [];
-        }
+// <!--</editor-fold>-->
 
-        // Permitir solo números y actualizar el form sin espacios ni símbolos
-        form.gasto[index] = value.replace(/\D/g, "");
-    }
-};
-
-const daynames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
 
 
 const ValidarForm = [];
+const ValidarArrayForm = [
+    {idd: 'user_id', label: 'Persona', type: 'foreign'},
+    {idd: 'descripcion', label: 'Descripción', type: 'text'},
+    {idd: 'gasto', label: 'Gasto', type: 'text'},
+    {idd: 'numerodias', label: 'Numero de dias', type: 'text'},
+    {idd: 'fecha_inicial', label: 'Fecha inicial', type: 'text'},
+];
+
 props.titulos.forEach(names => {
-    if (names['order'] !== 'noquiero'
-        // && names['order'] !== 'noquiero1'
-    )
+    if (names['order'] !== 'noquiero'){
         ValidarForm.push({
             idd: names['order'], label: names['label'], type: names['type']
         })
-
-    ValidarForm.push({idd: 'user_id', label: 'user_id', type: 'foreign'})
-    ValidarForm.push({idd: 'centro_costo_id', label: 'centro_costo_id', type: 'foreign'})
-
-    ValidarForm.push({idd: 'descripcion', label: 'descripcion', type: 'text'})
-    ValidarForm.push({idd: 'gasto', label: 'gasto', type: 'text'})
-    ValidarForm.push({idd: 'numerodias', label: 'numerodias', type: 'text'})
-    ValidarForm.push({idd: 'fecha_inicial', label: 'fecha_inicial', type: 'text'})
-    ValidarForm.push({idd: 'fecha_final', label: 'fecha_final', type: 'text'})
-
+        ValidarForm.push({idd: 'centro_costo_id', label: 'centro_costo_id', type: 'foreign'})
+    }
 });
 
 function ValidarVacios() {
     let result = true
     ValidarForm.forEach(element => {
+        console.log(" achu, espere, validando: ", element.idd, form[element.idd]);
+        console.log("1",!form[element.idd]);
+        console.log("0", element.idd);
+        
         if (!form[element.idd]) {
-            console.log("=>(Create.vue:70) falta esto papa element.idd", element.idd);
+            console.log("Falta el siguiente campo: ", element.label);
+            alert("Falta El siguiente campo: " + element.label);
             result = false
-            return result
+            return false
         }
+    });
+    
+    //asumimos que es true
+    if (!form.centro_costo_id) {
+        console.log(form.centro_costo_id);
+        alert("Debe agregar un centro de costo");
+            result = false
+        return false;
+    }
+    
+    
+    ValidarArrayForm.forEach(element => {
+      console.log("🚀 ~ ValidarVacios ~ element: ", element);
+        form[element.idd].forEach(ele => {
+            if (!ele) {
+                console.log("En uno de los viaticos. falta el siguiente campo: ", element.label);
+                alert("Falta el siguiente campo: " + element.label);
+                result = false
+                return false
+            }
+        });
     });
     return result
 }
@@ -218,25 +259,22 @@ const create = () => {
             onError: () => null,
             onFinish: () => null,
         })
-    } else {
-        alert('Faltan campos por diligenciar')
     }
 }
-const ciudades = [
-    'Medellin', 'Santamarta', 'Cartagena', 'Valledupar', 'Monteria',
-    'Bucaramanga', 'Cucuta', 'Neiva', 'Ibague', 'Girardot', 'Pereira', 'Armenia'
-]
+
+
+
 </script>
 
 <template>
     <section class="space-y-6">
         <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl8'">
-            <form class="p-6 mb-36" @submit.prevent="create">
+            <form class="p-4 mb-36" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     {{ lang().label.add }} {{ props.title }}
                 </h2>
 
-                <div class="grid xs:grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                <div class="grid xs:grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div class="w-full">
                         <label class="dark:text-gray-50">Quién realiza la solicitud</label>
                         <!--                        SolicitudViaticoController/ Dependencias-->
@@ -254,14 +292,14 @@ const ciudades = [
                         <vSelect v-model="form.Ciudad" :options="ciudades"
                                  label="name" placeholder="Seleccione una ciudad"></vSelect>
                     </div>
+                    <div class="">
+                        <label class="dark:text-gray-50">Centro de costo</label>
+                        <vSelect v-model="form.centro_costo_id" :options="props.losSelect[1]"
+                                 label="name"></vSelect>
+                    </div>
                     <div class="w-full">
                         <label class="dark:text-gray-50">Obra o Servicio</label>
                         <TextInput v-model="form.ObraServicio" class="py-1 mx-1 w-full"></TextInput>
-                    </div>
-                    <div class="">
-                        <label class="dark:text-gray-50">Centro de costo</label>
-                        <vSelect v-model="form.centro_costo_id[index]" :options="props.losSelect[1]"
-                                 label="name"></vSelect>
                     </div>
                 </div>
                 <hr class="border-0 h-0.5 bg-gradient-to-r  mb-4
@@ -270,7 +308,7 @@ const ciudades = [
 
 
                 <div v-for="(user, index) in form.user_id" :key="index"
-                     class="grid xs:grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6"
+                     class="grid xs:grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4"
                      :class="{'mt-16':index !== 0}"
                 >
                     <div class="col-span-2">
@@ -278,21 +316,21 @@ const ciudades = [
                         <vSelect v-model="form.user_id[index]" :options="props.losSelect[0]"
                                  label="name"></vSelect>
                     </div>
-                   
-                    <div class="">
-                        <label class="dark:text-gray-50">Cuanto necesita</label>
+                   <div class="col-span-3">
+                        <label class="dark:text-gray-50">Descripción</label>
+                        <vSelect v-model="form.descripcion[index]" :options="tipoViaticos"
+                                 label="name"></vSelect>
+                    </div>
+                    <div class="mt-0.5">
+                        <label class="dark:text-gray-50">Valor total</label>
                         <TextInput
                             :ref="el => gastoInputs[index] = el"
                             :modelValue="formattedValor.get(index)"
                             @update:modelValue="(value) => formattedValor.set(index, value)"
                             :error="form.errors[`gasto.${index}`]"
-                            class="py-1 mx-1 w-full"></TextInput>
+                            class="py-1 h-8.5 mx-1 w-full"></TextInput>
                     </div>
-                    <div class="col-span-5">
-                        <label class="dark:text-gray-50">Descripción</label>
-                        <TextInput v-model="form.descripcion[index]" class="py-1 mx-1 w-full text-sm"></TextInput>
-                    </div>
-                    <div class="col-span-2">
+                    <div class="col-span-3">
                         <InputLabel :for="'fecha_ini'+index" value="Rango de Fechas"/>
                         <VueDatePicker
                             :enable-time-picker="false" :time-picker="false"
@@ -303,7 +341,7 @@ const ciudades = [
                         />
                     </div>
                     <div class="">
-                        <label class="ml-2 dark:text-gray-50">Numero de días</label>
+                        <label class="ml-1 text-sm dark:text-gray-50">Numero de días</label>
                         <TextInput disabled type="number" v-model="form.numerodias[index]"
                                    class="py-1 mx-1 w-full bg-gray-400"></TextInput>
                     </div>

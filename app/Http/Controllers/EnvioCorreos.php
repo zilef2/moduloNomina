@@ -19,12 +19,13 @@ class EnvioCorreos extends Controller {
                               Haga click aqui:   https://modnom.ecnomina.com/solicitud_viatico  si desea ver los pendientes."
 			];
 			if (\Illuminate\Support\Facades\App::environment('production')) {
-				EnviarViaticoJob::dispatch($jefe->email, $detalle)->delay(now()->addSeconds(5));
-				EnviarViaticoJob::dispatch('ajelof2@gmail.com', $detalle)->delay(now()->addSeconds(5));
+				EnviarViaticoJob::dispatch($jefe->email, $detalle)->delay(now()->addSeconds(3));
+				EnviarViaticoJob::dispatch('ajelof2@gmail.com', $detalle)->delay(now()->addSeconds(3));
+			
 				$mensaje = "Correo enviado. $cuantosViaticos viáticos por un valor de $total.";
 			}
 			else {
-				EnviarViaticoJob::dispatch('alejofg2@gmail.com', $detalle)->delay(now()->addSeconds(5));
+				EnviarViaticoJob::dispatch('alejofg2@gmail.com', $detalle)->delay(now()->addSeconds(15));
 				$mensaje = "Correo enviado solo al desarrollador";
 				
 			}

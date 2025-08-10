@@ -269,11 +269,11 @@ let classbotones = "w-6 h-6"
                             <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 w-12 px-2 sm:py-3">
                                 <div class="flex justify-center items-center">
                                     <div class="rounded-md overflow-hidden">
-                                        <InfoButton v-show="can(['update viatico'])" type="button"
-                                                    @click="(data.editOpen = true), (data.sol_viatico = claseFromController)"
-                                                    class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
-                                            <PencilIcon :class="classbotones"/>
-                                        </InfoButton>
+<!--                                        <InfoButton v-show="can(['update viatico'])" type="button"-->
+<!--                                                    @click="(data.editOpen = true), (data.sol_viatico = claseFromController)"-->
+<!--                                                    class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">-->
+<!--                                            <PencilIcon :class="classbotones"/>-->
+<!--                                        </InfoButton>-->
                                         <InfoButton v-show="can(['update2 viatico']) && claseFromController['saldo_sol'] > 0" type="button" :thecolor="'green'"
                                                     @click="(data.AprobarOpen = true), (data.sol_viatico = claseFromController)"
                                                     class="px-2 py-1.5 rounded-none"
@@ -287,7 +287,7 @@ let classbotones = "w-6 h-6"
                                             class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.legalizar">
                                             <ShieldExclamationIcon :class="classbotones"/>
                                         </InfoButton>
-                                        <DangerButton v-show="can(['isSuper'])" type="button"
+                                        <DangerButton v-show="can(['delete viatico'])" type="button"
                                                       @click="(data.deleteOpen = true), (data.sol_viatico = claseFromController)"
                                                       class="px-2 py-1.5 rounded-none"
                                                       v-tooltip="lang().tooltip.delete">
