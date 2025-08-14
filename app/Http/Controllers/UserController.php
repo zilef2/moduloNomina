@@ -1009,6 +1009,7 @@ class UserController extends Controller {
 			User::select('id', 'name')->Where('name', 'like', '%Juan Ignacio Duque Lopera%')->first(),
 			User::select('id', 'name')->Where('name', 'like', '%Romario Ahumada Tejera%')->first(),
 			User::select('id', 'name')->Where('name', 'like', '%Kevin Solano Ortiz%')->first(),
+			User::select('id', 'name')->Where('name', 'like', '%John Anderson Franco Alvarez%')->first(),
 		];
 		foreach ($arrayReturn as $index => $item) {
 			if($item){
