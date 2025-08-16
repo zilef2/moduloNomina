@@ -162,13 +162,9 @@ const valorConsigInput = ref(null);
                         <label class="my-2 py-4 text-black dark:text-white text-lg"> {{ data.valorConsig }} Pesos
                             colombianos</label>
                     </div>
-
                 </div>
                 <div class=" my-8 flex justify-end">
-                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{
-                            lang().button.close
-                        }}
-                    </SecondaryButton>
+                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}</SecondaryButton>
                     <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="ml-3"
                                    @click="update">
                         {{ form.processing ? lang().button.save + '...' : lang().button.save }}

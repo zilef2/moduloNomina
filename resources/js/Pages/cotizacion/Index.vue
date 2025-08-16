@@ -1,11 +1,11 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import {Head, router, usePage} from '@inertiajs/vue3';
+import {Head, Link, router, usePage} from '@inertiajs/vue3';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SelectInput from '@/Components/SelectInput.vue';
-import {reactive, watch} from 'vue';
+import {reactive, watch,onMounted} from 'vue';
 
 import DangerButton from '@/Components/DangerButton.vue';
 import pkg from 'lodash';
@@ -52,6 +52,7 @@ const data = reactive({
         search3: props.filters.search3,
         search4: props.filters.search4,
         // search5: props.filters.search5, //zonaid
+        search6: props.filters.search6, //tipo
         field: props.filters.field,
         order: props.filters.order,
         perPage: props.perPage,
@@ -69,6 +70,11 @@ const data = reactive({
     dataSet: usePage().props.app.perpage,
 })
 
+onMounted(() => {
+    if(!data.params.search2){
+        data.params.search2 = props.losSelect['zonas'][0]
+    }
+})
 // <!--<editor-fold desc="order, watchclone, select">-->
 const order = (field) => {
     data.params.field = field
@@ -118,7 +124,7 @@ let titulos = [
     {order: 'lugar', label: 'lugar', type: 'text'},
     {order: 'descripcion_cot', label: 'descripcion_cot', type: 'text'},
     {order: 'tipo', label: 'tipo', type: 'text'},
-    {order: 'tipo_de_mantenimiento', label: 'tipo_de_mantenimiento', type: 'text'},
+    // {order: 'tipo_de_mantenimiento', label: 'tipo_de_mantenimiento', type: 'text'},
     
     {order: 'precio_cot', label: 'precio_cot', type: 'number'},
     {order: 'por_a', label: 'por_a', type: 'porcentaje'},
@@ -157,8 +163,8 @@ const ocultar11 = () => {
             {order: 'fecha_aprobacion_cot', label: 'fecha_aprobacion_cot', type: 'date'},
             {order: 'mes_pedido', label: 'mes_pedido', type: 'text'},
             {order: 'lugar', label: 'lugar', type: 'text'},
-            {order: 'descripcion_cot', label: 'descripcion_cot', type: 'text'},
-            {order: 'tipo', label: 'tipo', type: 'text'},
+            // {order: 'descripcion_cot', label: 'descripcion_cot', type: 'text'},
+            // {order: 'tipo', label: 'tipo', type: 'text'},
             {order: 'precio_cot', label: 'precio_cot', type: 'number'},
             {order: 'admi', label: 'admi', type: 'number'},
             {order: 'impr', label: 'impr', type: 'number'},
@@ -191,8 +197,8 @@ const ocultar11 = () => {
             {order: 'mes_pedido', label: 'mes_pedido', type: 'text'},
             {order: 'lugar', label: 'lugar', type: 'text'},
             {order: 'descripcion_cot', label: 'descripcion_cot', type: 'text'},
-            {order: 'tipo', label: 'tipo', type: 'text'},
-            {order: 'tipo_de_mantenimiento', label: 'tipo_de_mantenimiento', type: 'text'},
+            {order: 'tipo', label: 'tipo', type: 'text123'},
+            // {order: 'tipo_de_mantenimiento', label: 'tipo_de_mantenimiento', type: 'text'},
             {order: 'precio_cot', label: 'precio_cot', type: 'number'},
             {order: 'por_a', label: 'por_a', type: 'number'},
             {order: 'por_i', label: 'por_i', type: 'number'},
@@ -220,6 +226,12 @@ const ocultar11 = () => {
 watch(() => data.ocultar1, (newX) => {
     ocultar11()
 })
+
+const tipoSelectable = [
+    {label: 'Matenimiento', value: 'Preventivo'},
+    {label: 'Servicio', value: 'Correctivo'},
+    {label: 'Proyecto', value: 'Predictivo'},
+]
 </script>
 
 <template>
@@ -234,6 +246,12 @@ watch(() => data.ocultar1, (newX) => {
                                    v-if="can(['create cotizacion'])">
                         {{ lang().button.new }}
                     </PrimaryButton>
+                    <Link :href="route('peusuario.index')" class="inline-flex">
+                        <PrimaryButton class="rounded-none"
+                                       v-if="can(['create cotizacion'])">
+                                Empresas y Clientes a
+                        </PrimaryButton>
+                    </Link>
 
                     <Create v-if="can(['create cotizacion'])" :numberPermissions="props.numberPermissions"
                             :titulos="titulos" :show="data.createOpen" @close="data.createOpen = false"
@@ -277,7 +295,7 @@ watch(() => data.ocultar1, (newX) => {
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="flex justify-between p-2">
+                <div class="flex justify-between py-2 xs:px-1 2xl:pr-12 pl-3">
                     <div class="flex space-x-2">
                         <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet"/>
                         <DangerButton @click="data.deleteBulkOpen = true"
@@ -286,26 +304,28 @@ watch(() => data.ocultar1, (newX) => {
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton>
                     </div>
-                    <div class="flex space-x-2">
-                        <p class="text-sm -mx-1 px-4">Solo Números</p>
+                    <div class="flex space-x-3">
+                        <p class="hidden 2xl:flex text-xs 2xl:text-sm mt-1 px-1 w-48">Solo Números</p>
                         <checkbox v-if="props.numberPermissions > 1" v-model="data.params.search4"
-                                  class="p-2 mx-12 my-3"/>
-                        <label name="centro_costo_id" class="text-sm mx-2 px-4 mt-2">{{ lang().label.zona }}</label>
+                                  class="hidden 2xl:flex p-2 mx-12 mt-3"/>
+                        <p class="hidden 2xl:flex text-sm mt-1 px-1">Ocultar porcentajes</p>
+                        <checkbox v-if="props.numberPermissions > 9" v-model="data.ocultar1"
+                                  class="hidden 2xl:flex p-2 mx-12 mt-3"/>
+                        
                         <v-select v-model="data.params.search2" :options="props.losSelect['zonas']" label="label"
-                                  class="w-full">
+                                  class="w-full mt-1 h-8">
                         </v-select>
-                        <!--                        <p class="text-sm -mx-1 px-4">Ocultar porcentajes</p>-->
-                        <!--                        <checkbox v-if="props.numberPermissions > 9" v-model="data.ocultar1"-->
-                        <!--                                  class="p-2 mx-12 my-3"/>-->
+                        
                         <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"
-                                   class="block w-full lg:w-5/6 rounded-xl" placeholder="Número"/>
+                                   class="hidden xl:flex xs:w-32 md:w-44 rounded-xl h-9 mt-1" placeholder="Número"/>
+                        <v-select v-model="data.params.search6" :options="tipoSelectable" label="label"
+                                  class="min-w-44 mt-1 h-8">
+                        </v-select>
                         <!--                        <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search2" type="text"-->
                         <!--                                   class="block w-full lg:w-5/6 rounded-xl mx-2" placeholder="Descripción"/>-->
-                        <p class="text-sm mx-8 px-4">
-                            Fecha Aprobación
-                        </p>
+                        <p class="text-sm mt-3 ml-5 mr-0 px-2">Aprobación</p>
                         <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search3" type="date"
-                                   class="block w-full lg:w-5/6 rounded-xl mx-4" placeholder=""/>
+                                   class="block w-full lg:w-5/6 rounded-xl mx-4 h-9 mt-1" placeholder=""/>
                     </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
@@ -381,7 +401,11 @@ watch(() => data.ocultar1, (newX) => {
                             </td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++indexu }}</td>
                             <td v-for="titulo in titulos" class="py-4 px-2 sm:py-3">
-                                <span v-if="titulo['type'] === 'text'" class=""> {{
+                                <span v-if="titulo['type'] === 'text123'" class=""> 
+                                    {{ claseFromController['tipo'] }} 
+                                    {{ claseFromController['tipo_de_mantenimiento'] }} 
+                                </span>
+                                <span v-if="titulo['type'] === 'text'" class="whitespace-nowrap min-w-72"> {{
                                         claseFromController[titulo['order']]
                                     }} </span>
                                 <span v-if="titulo['type'] === 'string'" class="whitespace-nowrap"> {{

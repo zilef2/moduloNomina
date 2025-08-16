@@ -76,12 +76,13 @@ class CotizacionController extends Controller {
 				;
 			});
 		}
-		if ($request->has('search2') && $request->search2['value']) {
-			$cotizacions = $cotizacions->where('zona_id', (int)$request->search2['value']);
-			//            $cotizacions = $cotizacions->where(function ($query) use ($request) {
-			//                $query->where('descripcion_cot', 'LIKE', "%" . $request->search2 . "%");
-			//            });
+		if ($request->has('search2')) {
+			$zouna = $request->search2;
+			if($zouna['value'] && ((int)$zouna['value']) !== 0){
+				$cotizacions = $cotizacions->where('zona_id', (int)$request->search2['value']);
+			}
 		}
+		
 		if ($request->has('search3')) {
 			$cotizacions = $cotizacions->where(function ($query) use ($request) {
 				$query->where('fecha_aprobacion_cot', 'LIKE', "%" . $request->search3 . "%");
@@ -96,6 +97,11 @@ class CotizacionController extends Controller {
 		if ($request->has('search5')) { //todo: esto aun no se implementa, 
 			$cotizacions = $cotizacions->where(function ($query) use ($request) {
 				$query->whereRaw("numero_cot REGEXP '^[A-Za-z]+-[0-9]+$'");
+			});
+		}
+		if ($request->has('search6')) { 
+			$cotizacions = $cotizacions->where(function ($query) use ($request) {
+				$query->where("tipo", $request->search6);
 			});
 		}
 		

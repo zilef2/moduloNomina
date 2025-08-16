@@ -6,6 +6,7 @@ use App\helpers\CalculoReportes;
 use App\helpers\Myhelp;
 use App\helpers\MyModels;
 use App\Http\Requests\ReporteRequest;
+use App\Jobs\EnviarReporteActualizadoJob;
 use App\Models\CentroCosto;
 use App\Models\Parametro;
 use App\Models\Reporte;
@@ -929,6 +930,17 @@ class ReportesController extends Controller {
 				return back()->with('error', 'Reporte no valido');
 			}
 			
+			$year = Carbon::now()->format('Y');
+			$url = "https://modnom.ecnomina.com/Reportes?FiltroUser=".$user->id
+				."&perPage=20&search4=$year";
+			EnviarReporteActualizadoJob::dispatch(
+			    $user->email,
+			    [
+					'empleado' => $reporteUser,
+					'supervisor' => $user->name,
+					'url' => $url,
+			    ]
+			)->delay(now()->addSeconds());
 			
 			$Reporte->horas_trabajadas = $request->horas_trabajadas;
 			$Reporte->almuerzo = $request->almuerzo;

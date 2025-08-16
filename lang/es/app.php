@@ -34,8 +34,8 @@ return [
         'subtotal' => 'Subtotal',
         'iva' => 'Iva',
         'total' => 'Total',
-        'persona_que_realiza_la_pe' => 'Persona realiza la pe',
-        'persona_que_solicita_la_propuesta_economica' => 'Persona solicita la pe',
+        'persona_que_realiza_la_pe' => 'Persona que realiza la PE',
+        'persona_que_solicita_la_propuesta_economica' => 'Persona que solicita la PE',
         'orden_de_compra' => 'Orden de compra',
         'hes' => 'HES',
         //fin cotizacion
@@ -90,6 +90,7 @@ return [
         'numero_cot' => 'Número',
         'descripcion_cot' => 'Descripción',
         'precio_cot' => 'Antes del iva',
+        'Prealiza' => 'Persona que realiza la PE',
         'aprobado_cot' => 'Aprobado',
         'fecha_aprobacion_cot' => 'Fecha aprobación',
 

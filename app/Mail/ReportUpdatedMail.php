@@ -2,6 +2,8 @@
 
 namespace App\Mail;
 
+use App\Models\Reporte;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -9,15 +11,17 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class MailViaticoGenerado extends Mailable
+class ReportUpdatedMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public array $detalle;
-
-    public function __construct($detalle)
-    {
-        $this->detalle = $detalle;
+    public Array $data;
+	
+    /**
+     * Create a new message instance.
+     */
+    public function __construct($data) {
+        $this->data = $data;
     }
 
     /**
@@ -25,7 +29,7 @@ class MailViaticoGenerado extends Mailable
      */
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Viatico Generado');
+        return new Envelope(subject: 'Tu reporte fue modificado');
     }
 
     /**
@@ -33,12 +37,14 @@ class MailViaticoGenerado extends Mailable
      */
     public function content(): Content
     {
-       return new Content(
-            view: 'mails.viaticogeneradou',
-            with: ['detalle' => $this->detalle]
+        return new Content(
+            view: 'mails.reportsupdated',
+            with: [
+				'data' => $this->data,
+            ]
         );
     }
-
+	
     /**
      * Get the attachments for the message.
      *

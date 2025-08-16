@@ -71,8 +71,8 @@ class SolicitudViaticoController extends Controller {
 		$solicitud_viaticos = solicitud_viatico::query();
 		if ($request->has('search')) {
 			$solicitud_viaticos = $solicitud_viaticos->where(function ($query) use ($request) {
-				$query->where('nombre', 'LIKE', "%" . $request->search . "%")
-					//                    ->orWhere('codigo', 'LIKE', "%" . $request->search . "%")
+				$query->where('Ciudad', 'LIKE', "%" . $request->search . "%")
+	                  ->orWhere('ObraServicio', 'LIKE', "%" . $request->search . "%")
 					//                    ->orWhere('identificacion', 'LIKE', "%" . $request->search . "%")
 				;
 			});
@@ -84,7 +84,7 @@ class SolicitudViaticoController extends Controller {
 				;
 			});
 		}
-		if ($request->has('search3')) {
+		if ($request->has('search3') && $request->search3['id'] != 0) {
 			$solicitud_viaticos = $solicitud_viaticos->whereHas('viaticos', function ($query) use ($request) {
 				$query->where('centro_costo_id', 'LIKE', "%" . $request->search3['id'] . "%");
 			});
@@ -361,13 +361,18 @@ class SolicitudViaticoController extends Controller {
 	 */
 	
 	public function destroy($solicitud_viaticoid) {
-		$permissions = Myhelp::EscribirEnLog($this, 'DELETE:solicitud_viaticos');
+		Myhelp::EscribirEnLog($this, 'DELETE:solicitud_viaticos');
 		$solicitud_viatico = solicitud_viatico::find($solicitud_viaticoid);
 		$elSolicitante = $solicitud_viatico->Solicitante;
 		$elFechasol = $solicitud_viatico->Fechasol;
 		$elCiudad = $solicitud_viatico->Ciudad;
 		$solicitud_viatico->delete();
-		Myhelp::EscribirEnLog($this, 'DELETE:solicitud_viaticos', 'solicitud_viatico id:' . $solicitud_viatico->id . ' | el Solicitante: ' . $elSolicitante . ' | el Fechasol: ' . $elFechasol . ' | el Ciudad: ' . $elCiudad . ' ha sido borrado', false);
+		Myhelp::EscribirEnLog($this, 'DELETE:solicitud_viaticos',
+		                      'solicitud_viatico id:' . $solicitud_viatico->id .
+		                      ' | el Solicitante: ' . $elSolicitante .
+		                      ' | el Fechasol: ' . $elFechasol .
+		                      ' | el Ciudad: ' . $elCiudad .
+		                      ' ha sido borrado', false);
 		
 		
 		return back()->with('success', __('app.label.deleted_successfully', ['name' => $elSolicitante]));

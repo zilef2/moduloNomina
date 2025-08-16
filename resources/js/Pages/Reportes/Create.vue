@@ -660,7 +660,15 @@ const formatfin = (date) => {
                     </PrimaryButton>
                     <p v-else class="ml-4 mt-1">{{ data.StringRestriccionNoFActura }}</p>
                 </div>
-                <div class="flex justify-end my-3">
+                <div 
+                    v-if="props.ArrayOrdinarias[props.ArrayOrdinarias.length] > 8 ||
+                        props.ArrayOrdinarias[0] > data.const.HORAS_SEMANALES_MENOS_ESTANDAR && form.diurnas + form.nocturnas > 8 ||
+                        data.HorasDelDiaAnterior59 ||
+                        data.MensajeError !== '' ||
+                        data.TrabajadasSemana ||
+                        data.TrabajadasHooy ||
+                        data.debugHorasSemana"
+                     class="flex justify-end my-3">
                     <p class="mx-1">Hay pendientes</p>
                     
                     <p v-if="props.ArrayOrdinarias[props.ArrayOrdinarias.length] > 8" class="mx-2">

@@ -212,16 +212,17 @@ const daynames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
                         <InputError class="mt-2" :message="form.errors.centro_costo_id" />
                     </div>
 
-                    <div v-if="form.dominicales == 'si'" class="">
+                    <div v-if="form.dominicales === 'si'" class="">
                         <label class="dark:text-white">Horario</label>
                         <TextInput id="dominicales" type="text" class="bg-gray-100 dark:bg-gray-700 block w-full" v-model="TextFestivo" />
                     </div>
                 </div>
                 <div class="my-6 ">
-                    <InputLabel for="observaciones" :value="lang().label.observaciones + ' (Porque se esta alterando)'" />
-                        <textarea :disabled="(correccionUsuario)"
+                    <InputLabel for="observaciones" :value="lang().label.observaciones" />
+                        <textarea disabled="disabled" 
                             id="observaciones" type="text" v-model="form.observaciones"
-                            class="mt-1 block w-full rounded-md shadow-sm dark:bg-black dark:text-white placeholder:text-gray-400 placeholder:dark:text-gray-400/50"
+                            class="mt-1 block w-full rounded-md shadow-sm 
+                            dark:bg-black bg-gray-400 dark:text-white placeholder:text-gray-400 placeholder:dark:text-gray-400/50"
                             cols="30" rows="3" :error="form.errors.observaciones">
                         </textarea>
                     <InputError class="mt-2" :message="form.errors.observaciones" />

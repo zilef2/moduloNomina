@@ -16,7 +16,7 @@ import Aprobar from '@/Pages/solicitud_viatico/Aprobar.vue';
 import Legalizar from '@/Pages/solicitud_viatico/Legalizar.vue';
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
-import {reactive, watch, computed} from 'vue';
+import {reactive, watch, onMounted, computed} from 'vue';
 import {ChevronUpDownIcon, PencilIcon, TrashIcon, CurrencyDollarIcon, ShieldExclamationIcon} from '@heroicons/vue/24/solid';
 import {formatDate, number_format, formatPesosCol} from '@/global.ts';
 import vSelect from "vue-select";
@@ -44,8 +44,7 @@ const data = reactive({
     params: {
         search: props.filters.search,
         search2: props.filters.search2, //persona
-        search3: props.filters.search3, //centro
-        // search3: props.filters.search3, //mostrar todo para el admin
+        search3: props.filters.search3, //centro_Array
         field: props.filters.field,
         order: props.filters.order,
         perPage: props.perPage,
@@ -64,6 +63,12 @@ const data = reactive({
     
     DetalleOpen: false,
     sol_viatico: false,
+})
+
+onMounted(() => {
+    if(!data.params.search3){
+        data.params.search3 = props.losSelect[1][0]
+    }
 })
 
 // <!--<editor-fold desc="order, watchclone, select">-->
@@ -106,7 +111,6 @@ const totalSaldo = computed(() => {
 const subtitulos = [
     {order: 'gasto', label: 'gasto', type: 'number'},
     {order: 'user_id', label: 'user_id', type: 'foreign', nameid: 'userino'},
-    {order: 'descripcion', label: 'descripcion', type: 'text2'},
     {order: 'Consignaciona', label: 'Consignaciona', type: 'number'},
     {order: 'fechaconsig', label: 'fechaconsig', type: 'date'},
     {order: 'saldo', label: 'saldo', type: 'number'},
@@ -118,6 +122,7 @@ const subtitulos = [
     {order: 'descripcion_legalizacion', label: 'descripcion_legalizacion', type: 'text'},
     {order: 'fecha_legalizacion', label: 'fecha_legalizacion', type: 'datetime'},
     {order: 'centro_costo_id', label: 'centro_costo_id', type: 'foreign', nameid: 'centrou'},
+    {order: 'descripcion', label: 'descripcion', type: 'text2'},
     // { order: 'inventario', label: 'inventario', type: 'foreign',nameid:'nombre'},
 ];
 
@@ -125,7 +130,7 @@ const titulos = [
     {order: 'Solicitante', label: 'Solicitante', type: 'text'},
     {order: 'Fechasol', label: 'Fechasol', type: 'date'},
     {order: 'Ciudad', label: 'Ciudad', type: 'text'},
-    {order: 'ObraServicio', label: 'ObraServicio', type: 'text'},
+    // {order: 'ObraServicio', label: 'ObraServicio', type: 'text'},
 ];
 
 let classbotones = "w-6 h-6"
@@ -153,11 +158,15 @@ let classbotones = "w-6 h-6"
                           @close="data.editOpen = false"
                           :solicitud_viaticoa="data.sol_viatico" :title="props.title"
                           :losSelect=props.losSelect />
+                    
+                    
                     <Aprobar v-if="can(['update2 viatico'])" :titulos="titulos"
                              :numberPermissions="props.numberPermissions" :show="data.AprobarOpen"
                              @close="data.AprobarOpen = false"
                              :solicitud_viaticoa="data.sol_viatico" :title="props.title" 
                              :losSelect=props.losSelect />
+                    
+                    
                     <Legalizar v-if="can(['update3 viatico'])" :titulos="titulos"
                                :numberPermissions="props.numberPermissions" :show="data.LegalizarOpen"
                                @close="data.LegalizarOpen = false"
@@ -196,9 +205,6 @@ let classbotones = "w-6 h-6"
                         <vSelect v-if="props.numberPermissions > 1" v-model="data.params.search3" 
                                   :options="props.losSelect[1]" label="name"
                         class="block w-5/6 md:w-5/6 lg:w-full mx-1 mt-1 rounded-lg"></vSelect>
-                        <!--                      <p class="text-sm -mx-1 px-4">Mostrar todos</p>-->
-                        <!--                        <checkbox v-if="props.numberPermissions > 8" v-model="data.params.search3"-->
-                        <!--                                  class="p-2 mx-12 my-3"/>-->
                     </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
@@ -244,6 +250,13 @@ let classbotones = "w-6 h-6"
                                     v-on:click="order('saldo_sol')">
                                     <div class="flex justify-between items-center">
                                         <span>{{ lang().label.saldo_sol }}</span>
+                                        <ChevronUpDownIcon class="w-4 h-4"/>
+                                    </div>
+                                </th>
+                                <th class="px-2 py-4 cursor-pointer"
+                                    v-on:click="order('ObraServicio')">
+                                    <div class="flex justify-between items-center">
+                                        <span>{{ lang().label.ObraServicio }}</span>
                                         <ChevronUpDownIcon class="w-4 h-4"/>
                                     </div>
                                 </th>
@@ -302,11 +315,11 @@ let classbotones = "w-6 h-6"
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['Solicitante'] }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['Fechasol'] }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['Ciudad'] }}</td>
-                            <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['ObraServicio'] }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['centrou'] }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ formatPesosCol(claseFromController['Totalsolicitado']) }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ formatPesosCol(claseFromController['TotalConsignado']) }}</td>
                             <td class="whitespace-nowrap py-2 px-2"> {{ formatPesosCol(claseFromController['saldo_sol']) }}</td>
+                            <td class="p-2 text-sm"> {{ claseFromController['ObraServicio'] }}</td>
 <!--                                    v-if="claseFromController.viaticos.length > 0"-->
                             <td v-tooltip="lang().tooltip.detail"
                                     @click="(data.DetalleOpen = true), (data.sol_viatico = claseFromController)"
