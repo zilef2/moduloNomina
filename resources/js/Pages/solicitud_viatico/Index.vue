@@ -21,7 +21,7 @@ import {ChevronUpDownIcon, PencilIcon, TrashIcon, CurrencyDollarIcon, ShieldExcl
 import {formatDate, number_format, formatPesosCol} from '@/global.ts';
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
-// import DeleteBulk from '@/Pages/viatico/DeleteBulk.vue';
+import DeleteBulk from '@/Pages/viatico/DeleteBulk.vue';
 
 
 const {_, debounce, pickBy} = pkg
@@ -176,9 +176,9 @@ let classbotones = "w-6 h-6"
                     <Delete v-if="can(['delete viatico'])" :numberPermissions="props.numberPermissions"
                             :show="data.deleteOpen" @close="data.deleteOpen = false" :solicitud_viaticoa="data.sol_viatico"
                             :title="props.title"/>
-<!--                    <DeleteBulk v-if="can(['isSuper'])" :show="data.deleteBulkOpen"-->
-<!--                                @close="data.deleteBulkOpen = false, data.multipleSelect = false, data.selectedId = []"-->
-<!--                                :selectedId="data.selectedId" :title="props.title"/>-->
+                    <DeleteBulk v-if="can(['isSuper'])" :show="data.deleteBulkOpen"
+                                @close="data.deleteBulkOpen = false, data.multipleSelect = false, data.selectedId = []"
+                                :selectedId="data.selectedId" :title="props.title"/>
                         
                         <Detalle :show="data.DetalleOpen" :viaticoa="data.sol_viatico" 
                              @close="data.DetalleOpen = false" 

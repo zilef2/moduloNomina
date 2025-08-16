@@ -102,7 +102,7 @@ Route::middleware('auth', 'verified')->group(function () {
 
     Route::resource("/cotizacion", CotizacionController::class);
     Route::post('/cotizacion/destroy-bulk', [CotizacionController::class, 'destroyBulk'])->name('cotizacion.destroy-bulk');
-    Route::post('/viatico/destroy-bulk', [ViaticoController::class, 'destroyBulk'])->name('viatico.destroy-bulk');
+    Route::post('/viatico/destroy-bulk', [SolicitudViaticoController::class, 'destroyBulk'])->name('viatico.destroy-bulk');
     Route::put('/cotiza/{id}', [CotizacionController::class, 'update2'])->name('cotizacion.update2');
     Route::put('/cotiza3/{id}', [CotizacionController::class, 'update3'])->name('cotizacion.update3');
     Route::get('/deuda', [DeudaSingularController::class, 'index'])->name('deuda.index');

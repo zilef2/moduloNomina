@@ -52,7 +52,7 @@ watchEffect(() => {
                     </SecondaryButton>
                     <DangerButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                         @click="destory">
-                        {{ form.processing ? 'Delete...' : 'Delete' }}
+                        {{ form.processing ? 'Eliminando...' : 'Eliminar' }}
                     </DangerButton>
                 </div>
             </form>

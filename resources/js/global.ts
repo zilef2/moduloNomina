@@ -34,6 +34,7 @@
 //FROM others projects
 import FestivosColombia from 'festivos-colombia';
 import {isNullOrUndef} from "chart.js/helpers";
+import {toRaw} from "vue";
 
 export function CuantosFestivosEstaQuincena2(numQuicena, elmes, anio) {
     let dateFestivos, dateArr, monthFestivo, arrayFechas = [];
@@ -547,7 +548,11 @@ export function vectorSelect(vectorSelect, propsVector, genero = 'uno') {
     vectorSelect.unshift({label: 'Seleccione ' + genero, value: 0})
     return vectorSelect;
 }
-
+export function dd(variableArray: any) : void {
+    console.log({ variableArray });
+    console.log(typeof(variableArray));
+    console.log("🗣️🗣️imprimiendo:  ", JSON.stringify(toRaw(variableArray), null, 2));
+} 
 /*
 watch(() => form.tipoRes, (newX) => {
     data.selectedPrompID = 'Selecciona un promp'

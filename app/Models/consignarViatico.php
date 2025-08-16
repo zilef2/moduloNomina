@@ -19,13 +19,14 @@ class consignarViatico extends Model {
 	protected $fillable = [
 		'valor_consig',
 		'fecha_consig',
-		'user_id',
+//		'user_id',
 		//        'viatico_id',
 		'solicitud_viatico_id',
-		
 		'valor_legalizado',
 		'fecha_legalizado',
 		'descripcion_legalizacion',
+		'remitente_user_id',
+		'destinatiario_user_id',
 	];
 	
 	public function getValoresCoincidenAttribute(): bool {

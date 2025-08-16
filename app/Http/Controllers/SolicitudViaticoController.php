@@ -52,11 +52,15 @@ class SolicitudViaticoController extends Controller {
 		
 		$perPage = $request->has('perPage') ? $request->perPage : 10;
 		
-		
 		return Inertia::render($this->FromController . '/Index', [
 			'fromController'    => $this->PerPageAndPaginate($request, $solicitud_viaticos),
 			'total'             => $solicitud_viaticos->count(),
-			'breadcrumbs'       => [['label' => __('app.label.' . $this->FromController), 'href'  => route($this->FromController . '.index')]],
+			'breadcrumbs'       => [
+				[
+					'label' => __('app.label.' . $this->FromController),
+					'href'  => route($this->FromController . '.index')
+				]
+			],
 			'title'             => __('app.label.' . $this->FromController),
 			'filters'           => $request->all(['search', 'field', 'order', 'search2', 'search3']),
 			'perPage'           => (int)$perPage,
@@ -71,9 +75,8 @@ class SolicitudViaticoController extends Controller {
 		$solicitud_viaticos = solicitud_viatico::query();
 		if ($request->has('search')) {
 			$solicitud_viaticos = $solicitud_viaticos->where(function ($query) use ($request) {
-				$query->where('Ciudad', 'LIKE', "%" . $request->search . "%")
-	                  ->orWhere('ObraServicio', 'LIKE', "%" . $request->search . "%")
-					//                    ->orWhere('identificacion', 'LIKE', "%" . $request->search . "%")
+				$query
+					->where('Ciudad', 'LIKE', "%" . $request->search . "%")->orWhere('ObraServicio', 'LIKE', "%" . $request->search . "%")//                    ->orWhere('identificacion', 'LIKE', "%" . $request->search . "%")
 				;
 			});
 		}
@@ -97,14 +100,12 @@ class SolicitudViaticoController extends Controller {
 			$solicitud_viaticos = $solicitud_viaticos->orderByRaw('CASE WHEN saldo_sol != 0 THEN 0 ELSE 1 END ASC, created_at DESC');
 		}
 		
-		
 		return $solicitud_viaticos;
 	}
 	
 	public function PerPageAndPaginate($request, $solicitud_viaticos) {
 		$perPage = $request->has('perPage') ? $request->perPage : 10;
 		$page = request('page', 1); // Current page number
-		
 		
 		return new LengthAwarePaginator($solicitud_viaticos->forPage($page, $perPage), $solicitud_viaticos->count(), $perPage, $page, ['path' => request()->url()]);
 	}
@@ -135,7 +136,6 @@ class SolicitudViaticoController extends Controller {
 		]);
 		$usercontroller = new UserController();
 		
-		
 		return [
 			$Empleados,
 			$centroSelect,
@@ -160,7 +160,7 @@ class SolicitudViaticoController extends Controller {
 	
 	//</editor-fold>
 	
-	private function totallegalizado(): int {return viatico::all()->sum('Totallegalizadou'); }
+	private function totallegalizado(): int { return viatico::all()->sum('Totallegalizadou'); }
 	
 	public function store(Request $request): RedirectResponse {
 		Myhelp::EscribirEnLog($this, ' Begin STORE:viaticos');
@@ -169,13 +169,13 @@ class SolicitudViaticoController extends Controller {
 		$cuantosViaticos = count($request->descripcion);
 		$elsolicitante = User::find($request->Solicitante['id']);
 		$solViatico = solicitud_viatico::create([
-			       'Solicitante'  => $elsolicitante->name,
-			       'Fechasol'     => $request->Fechasol,
-			       'Ciudad'       => $request->Ciudad,
-			       'ObraServicio' => $request->ObraServicio,
-			       'user_id'      => $elsolicitante->id,
-			       'saldo_sol'    => 0,
-		       ]);
+			                                        'Solicitante'  => $elsolicitante->name,
+			                                        'Fechasol'     => $request->Fechasol,
+			                                        'Ciudad'       => $request->Ciudad,
+			                                        'ObraServicio' => $request->ObraServicio,
+			                                        'user_id'      => $elsolicitante->id,
+			                                        'saldo_sol'    => 0,
+		                                        ]);
 		
 		$total = 0;
 		$paraellog = [];
@@ -186,7 +186,6 @@ class SolicitudViaticoController extends Controller {
 			$ini = $date->format('Y-m-d');
 			$date = new DateTime($request->fecha_inicial[$index][1]);
 			$fini = $date->format('Y-m-d');
-			
 			
 			$thearray = [
 				'centro_costo_id'      => $IntCentroid,
@@ -217,7 +216,6 @@ class SolicitudViaticoController extends Controller {
 			DB::commit();
 			zzloggingcrud::zilefStoreArrayLogTrace($paraellog);
 			
-			
 			return back()->with('success', 'Solicitud generada de manera exitosa');
 		}
 	}
@@ -238,7 +236,6 @@ class SolicitudViaticoController extends Controller {
 		zzloggingcrud::zilefLogUpdate($this, $viatico, $original);
 		
 		DB::commit();
-		
 		
 		return back()->with('success', __('app.label.updated_successfully2', ['nombre' => $viatico->nombre]));
 	}
@@ -267,7 +264,6 @@ class SolicitudViaticoController extends Controller {
 			$mensaje = "-";
 			Myhelp::EscribirEnLog($this, ' ERROR: no se encontro al jefe');
 		}
-		
 		
 		return $mensaje;
 	}
@@ -299,7 +295,6 @@ class SolicitudViaticoController extends Controller {
 		DB::commit();
 		Myhelp::EscribirEnLog($this, 'UPDATE3:sol_viaticos EXITOSO', 'sol_viatico id:' . $solviatico->id . ' |solicitado por ' . $solviatico->Solicitante, false);
 		
-		
 		return back()->with('success', __('app.label.updated_successfully2'));
 	}
 	
@@ -319,19 +314,23 @@ class SolicitudViaticoController extends Controller {
 		$original = $sol_viatico->getOriginal(); // Valores antes de la actualización
 		
 		$now = Carbon::now();
-		$consignarViatico = consignarViatico::
-		create([
-			       'valor_consig'         => $request->valor_consig,
-			       'fecha_consig'         => $now,
-			       'solicitud_viatico_id' => $sol_viatico->id,
-			       'user_id'              => Myhelp::AuthUid(),
-		       ]);
+		foreach ($request->valor_consig as $index => $valor) {
+			
+			$consignarViatico = consignarViatico::create([
+				                                             'valor_consig'          => (int)$valor,
+				                                             'fecha_consig'          => $now,
+				                                             'solicitud_viatico_id'  => $sol_viatico->id,
+				                                             'remitente_user_id'     => Myhelp::AuthUid(),
+				                                             'destinatiario_user_id' => $sol_viatico->viaticos[$index]->user_id,
+			                                             ]);
+			
+			Myhelp::EscribirEnLog($this, 'se genero un consignarViatico::' . implode(', ', $consignarViatico->getAttributes()));
+		}
 		
 		$sol_viatico->update(['saldo_sol' => $this->getSaldo($sol_viatico)]);
 		
 		DB::commit();
 		zzloggingcrud::zilefLogUpdate($this, $sol_viatico, $original, 'saldo');
-		Myhelp::EscribirEnLog($this, 'ADEMAS, se genero un consignarViatico::' . implode(', ', $consignarViatico->getAttributes()));
 		
 		//		if ($request->routeadmin == 'index2') {
 		//			return redirect()->route('viatico2')->with('success', __('app.label.updated_successfully2'));
@@ -348,7 +347,6 @@ class SolicitudViaticoController extends Controller {
 	public function getSaldo($sol_viatico): int {
 		$Int_consignaciones = (int)consignarViatico::Where('solicitud_viatico_id', $sol_viatico->id)->sum('valor_consig');
 		$saldo = (int)$sol_viatico->Totalsolicitado - $Int_consignaciones;
-		
 		
 		return $saldo;
 	}
@@ -367,13 +365,7 @@ class SolicitudViaticoController extends Controller {
 		$elFechasol = $solicitud_viatico->Fechasol;
 		$elCiudad = $solicitud_viatico->Ciudad;
 		$solicitud_viatico->delete();
-		Myhelp::EscribirEnLog($this, 'DELETE:solicitud_viaticos',
-		                      'solicitud_viatico id:' . $solicitud_viatico->id .
-		                      ' | el Solicitante: ' . $elSolicitante .
-		                      ' | el Fechasol: ' . $elFechasol .
-		                      ' | el Ciudad: ' . $elCiudad .
-		                      ' ha sido borrado', false);
-		
+		Myhelp::EscribirEnLog($this, 'DELETE:solicitud_viaticos', 'solicitud_viatico id:' . $solicitud_viatico->id . ' | el Solicitante: ' . $elSolicitante . ' | el Fechasol: ' . $elFechasol . ' | el Ciudad: ' . $elCiudad . ' ha sido borrado', false);
 		
 		return back()->with('success', __('app.label.deleted_successfully', ['name' => $elSolicitante]));
 	}
@@ -382,10 +374,8 @@ class SolicitudViaticoController extends Controller {
 		$solicitud_viatico = solicitud_viatico::whereIn('id', $request->id);
 		$solicitud_viatico->delete();
 		
-		
 		return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
 	}
 	//FIN : STORE - UPDATE - DELETE
-	
 	
 }

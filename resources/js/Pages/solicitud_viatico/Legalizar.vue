@@ -6,7 +6,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import {useForm} from '@inertiajs/vue3';
-import {computed, watch, ref, nextTick, onMounted, reactive, watchEffect} from 'vue';
+import {watch, ref, nextTick, onMounted, reactive, watchEffect} from 'vue';
 import "vue-select/dist/vue-select.css";
 import {formatPesosCol, DateTime_to_html} from '@/global.ts';
 
@@ -39,7 +39,6 @@ const form = useForm({
 
 // <!--<editor-fold desc="onmounted, watchers y mas">-->
 onMounted(() => {
-
     // setTimeout(() => {
     //     if (props.numberPermissions > 9) {
     //         setFecha(0, '2025-04-01T10:39')
@@ -69,15 +68,10 @@ watch(() => props.show, () => {
 watchEffect(() => {
     if (props.show) {
 
-        // data.valorConsig = formatPesosCol(form.valor_legalizacion)
         form.errors = {}
 
         form.valor_legalizacion = form.valor_legalizacion < 0 ? form.valor_legalizacion * -1 : form.valor_legalizacion
         if (data.AutoActualizarse) {
-            // form.valor_legalizacion = props.solicitud_viaticoa?.valor_legalizacion
-            // form.descripcion_legalizacion = props.solicitud_viaticoa?.descripcion_legalizacion
-            // data.valorConsig = formatPesosCol(form.valor_legalizacion)
-
             data.AutoActualizarse = false
         }
     } else {
@@ -192,31 +186,20 @@ const ensureArraySize = () => {
 
     data.consignaciones = Object.values(props.solicitud_viaticoa?.Consignaciona); //transforma en array
 
-    //todo: se asume que tiene que haber una consignacion para legalizar
-    //todo: validar desde el index.vue
     data.consignaciones.map((val, inde) => {
         console.log("=>(Legalizar.vue:181) inde", inde);
         console.table(val);
         form.consignacion_id[inde] = val.consignacion_id
         if (val.valor_legalizacion) {
-            console.log("=>(Legalizar.vue:192) form.valor_legalizacion", form.valor_legalizacion);
             form.valor_legalizacion[inde] = val.valor_legalizacion
             setFecha(inde, DateTime_to_html(val.fecha_legalizacion))
-            // setFecha(inde,'2025-01-01T08:00')  
-            // console.log("=>(Legalizar.vue:190) DateTime_to_html(val.fecha_legalizacion)",
-            //     DateTime_to_html(val.fecha_legalizacion));
-
-            // form.fecha_legalizacion[inde] = '2025-02-08T07:00'
-
             form.descripcion_legalizacion[inde] = val.descripcion_legalizacion
         } else {
             //     form.valor_legalizacion[inde] = ''
             //     form.fecha_legalizacion[inde] = ''
             //     form.descripcion_legalizacion[inde] = ''
-            //    
         }
 
-        // form.consignacion_id[i] = props.solicitud_viaticoa.Consignaciona[i].consignacion_id
     });
 };
 
@@ -224,11 +207,7 @@ const validarForm = () => {
     let isRight = true
     for (let consignacionesKey in data.consignaciones) {
         if (form.valor_legalizacion[consignacionesKey]) {
-
             isRight = parseInt(data.consignaciones[consignacionesKey].valor) >= parseInt(form.valor_legalizacion[consignacionesKey])
-            console.log("=>(Legalizar.vue:225) form.valor_legalizacion", form.valor_legalizacion[consignacionesKey]);
-            console.log((data.consignaciones[consignacionesKey].valor));
-            console.log("=>(Legalizar.vue:227) isRight", isRight);
         } else {
             continue
         }

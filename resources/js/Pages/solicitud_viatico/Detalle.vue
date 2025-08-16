@@ -76,7 +76,8 @@ watchEffect(() => {
                             </div>
                         </div>
                         
-                        <div v-if="data.mostrarGeneral === 1" v-for="(consignacion, index) in props.viaticoa?.Consignaciona" :key="index"
+                        <div v-if="data.mostrarGeneral === 1"
+                             v-for="(consignacion, index) in props.viaticoa?.Consignaciona" :key="index"
                              class="lg:w-1/2 w-full lg:pr-10 lg:py-6 mb-6 lg:mb-0">
                             <h2 class="text-sm title-font text-gray-500 tracking-widest">
                                 Consignación N°{{ index + 1 }}

@@ -18,7 +18,7 @@ const form = useForm({
 })
 
 const destory = () => {
-    form.post(route('user.destroy-bulk'), {
+    form.post(route('viatico.destroy-bulk'), {
         preserveScroll: true,
         onSuccess: () => {
             emit("close")
@@ -52,7 +52,7 @@ watchEffect(() => {
                     </SecondaryButton>
                     <DangerButton class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                         @click="destory">
-                        {{ form.processing ? 'Delete...' : 'Delete' }}
+                        {{ form.processing ? 'Eliminando...' : 'Eliminar' }}
                     </DangerButton>
                 </div>
             </form>
