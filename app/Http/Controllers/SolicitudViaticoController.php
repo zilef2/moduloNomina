@@ -41,7 +41,9 @@ class SolicitudViaticoController extends Controller {
 	}
 	
 	public function index(Request $request) {
-		$numberPermissions = zzloggingcrud::zilefLogTrace();
+		$helperSelect = new HelperControllerSelect();
+		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, $trace[0]['function']));
 		$solicitud_viaticos = $this->Filtros($request)->get();
 		
 		if ($request->has('search3')) {
@@ -377,22 +379,26 @@ class SolicitudViaticoController extends Controller {
 	}
 	
 	public function destroyBulk(Request $request) {
-		Myhelp::EscribirEnLog($this, 'DELETE Bulk:solicitud_viaticos');
+		$helperSelect = new HelperControllerSelect();
+		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, $trace[0]['function']));
 		
 		$solicitud_viaticos = solicitud_viatico::whereIn('id', $request->id)->get();
 		
 		foreach ($solicitud_viaticos as $sol) {
-			
-			
-					$sol->delete();
-			if(!$sol->consignacion()->exists()) {
-				if($sol->created_at->isToday()) {
-					$sol->delete();
-				}else {
-					return back()->with('error', 'Ya paso el tiempo para eliminar viáticos');
+			if($numberPermissions > 9) $sol->delete();
+			else {
+				if (!$sol->consignacion()->exists()) {
+					if ($sol->created_at->isToday()) {
+						$sol->delete();
+					}
+					else {
+						return back()->with('error', 'Ya paso el tiempo para eliminar viáticos');
+					}
 				}
-			}else{
-				return back()->with('error', 'Ya existen consignaciones para estos viáticos, no se pueden eliminar');
+				else {
+					return back()->with('error', 'Ya existen consignaciones para estos viáticos, no se pueden eliminar');
+				}
 			}
 		}
 		Myhelp::EscribirEnLog($this, 'DELETE:solicitud_viaticos', 'solicitud_viatico ids:: '. implode($request->id) .' han sido borrados', false);
