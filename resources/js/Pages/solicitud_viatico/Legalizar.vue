@@ -27,6 +27,10 @@ const data = reactive({
     valorFormateado: '',
     valorConsig: '0',
     consignaciones: '0',
+
+    //mensajes error
+    Mensaje_consignacion_legalizacion: '',
+    Mensaje_fecha_legalizacion: '',
 })
 
 const form = useForm({
@@ -105,8 +109,11 @@ const formattedValor = {
 };
 const valoconsignacion = (arrayValor) => {
     if (arrayValor && arrayValor['valor']) {
-
-        return '(Consignados: ' + formatPesosCol(arrayValor['valor']) + ')'
+        const partea = '(Consignados: ' + formatPesosCol(arrayValor['valor']) + ')'
+        //todo: si me piden cambio
+        // const parteb = '(Pendientes: ' + formatPesosCol(arrayValor['valor'] - arrayValor['valor_legalizacion']) + ')'
+        // return partea + ' - ' + parteb
+        return partea
     }
     return ''
 }
@@ -205,18 +212,29 @@ const ensureArraySize = () => {
 
 const validarForm = () => {
     let isRight = true
+    let itneedsDate = true
     for (let consignacionesKey in data.consignaciones) {
         if (form.valor_legalizacion[consignacionesKey]) {
-            isRight = parseInt(data.consignaciones[consignacionesKey].valor) >= parseInt(form.valor_legalizacion[consignacionesKey])
-        } else {
-            continue
+            isRight = parseInt(data.consignaciones[consignacionesKey].valor) === parseInt(form.valor_legalizacion[consignacionesKey])
+            itneedsDate = !!form.fecha_legalizacion[consignacionesKey]
+            if (!isRight) {
+                data.Mensaje_consignacion_legalizacion = 'El valor legalizado es diferente al consignado'
+                return false
+            }
+            if (!itneedsDate) {
+                data.Mensaje_fecha_legalizacion = 'Debe ingresar la fecha de legalización'
+                return false
+            }
+
         }
-        if (!isRight) return isRight
     }
-    return isRight
+    data.Mensaje_consignacion_legalizacion = ''
+    data.Mensaje_fecha_legalizacion = ''
+    return true
 }
 
 const update = () => {
+    // console.log("🚀 ~ update ~ validarForm: ", validarForm());
     if (validarForm())
         form.put(route('legalizarviatico', props.solicitud_viaticoa?.id), {
             preserveScroll: true,
@@ -251,12 +269,15 @@ const update = () => {
                                     :value="lang().label['valor_legalizacion'] + valoconsignacion(valor)"
                                     class=""
                         />
-
-                        <TextInput v-if="valor.valor_legalizacion"
-                                   :id="`valor_legalizacion_${index}`"
-                                   v-model="valor.valor_legalizacion"
-                                   placeholder="Valor legalización" type="text"
-                                   class="my-2 block w-full bg-gray-300" disabled
+                        <!--                        a {{valor.valor_legalizacion === valor.valor}}-->
+                        <!--                        b {{ valor.valor}}-->
+                        <!--                        c {{valor.valor_legalizacion }}-->
+                        <TextInput
+                            v-if="valor.valor_legalizacion === valor.valor"
+                            :id="`valor_legalizacion_${index}`"
+                            v-model="valor.valor_legalizacion"
+                            placeholder="Valor legalización" type="text"
+                            class="my-2 block w-full bg-gray-300" disabled
                         />
                         <TextInput v-else
                                    :id="`valor_legalizacion_${index}`"
@@ -300,6 +321,9 @@ const update = () => {
                     </div>
 
                 </div>
+                <InputError :message="data.Mensaje_consignacion_legalizacion" class="mt-2"/>
+                <InputError :message="data.Mensaje_fecha_legalizacion" class="mt-2"/>
+
                 <div class=" my-8 flex justify-end">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{
                             lang().button.close

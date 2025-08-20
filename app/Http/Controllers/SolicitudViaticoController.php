@@ -314,15 +314,22 @@ class SolicitudViaticoController extends Controller {
 		$original = $sol_viatico->getOriginal(); // Valores antes de la actualización
 		
 		$now = Carbon::now();
-		foreach ($request->valor_consig as $index => $valor) {
+		$viaticos = $sol_viatico->viaticos;
+//		foreach ($request->valor_consig as $index => $valor) {
+		foreach ($viaticos as $index => $viatic) {
+			$valorconsig = isset($request->valor_consig[$index]) ? (int)$request->valor_consig[$index] : 0;
+			if($valorconsig === 0) {
+				continue;
+			}
 			
 			$consignarViatico = consignarViatico::create([
-				                                             'valor_consig'          => (int)$valor,
-				                                             'fecha_consig'          => $now,
-				                                             'solicitud_viatico_id'  => $sol_viatico->id,
-				                                             'remitente_user_id'     => Myhelp::AuthUid(),
-				                                             'destinatiario_user_id' => $sol_viatico->viaticos[$index]->user_id,
-			                                             ]);
+                 'valor_consig'          => $valorconsig,
+                 'fecha_consig'          => $now,
+                 'solicitud_viatico_id'  => $sol_viatico->id,
+                 'remitente_user_id'     => Myhelp::AuthUid(),
+                 'destinatiario_user_id' => $sol_viatico->viaticos[$index]->user_id,
+             ]);
+			$viatic->update(['saldo' => $viatic->saldo - $valorconsig]);
 			
 			Myhelp::EscribirEnLog($this, 'se genero un consignarViatico::' . implode(', ', $consignarViatico->getAttributes()));
 		}
@@ -359,7 +366,6 @@ class SolicitudViaticoController extends Controller {
 	 */
 	
 	public function destroy($solicitud_viaticoid) {
-		Myhelp::EscribirEnLog($this, 'DELETE:solicitud_viaticos');
 		$solicitud_viatico = solicitud_viatico::find($solicitud_viaticoid);
 		$elSolicitante = $solicitud_viatico->Solicitante;
 		$elFechasol = $solicitud_viatico->Fechasol;
@@ -371,10 +377,28 @@ class SolicitudViaticoController extends Controller {
 	}
 	
 	public function destroyBulk(Request $request) {
-		$solicitud_viatico = solicitud_viatico::whereIn('id', $request->id);
-		$solicitud_viatico->delete();
+		Myhelp::EscribirEnLog($this, 'DELETE Bulk:solicitud_viaticos');
 		
-		return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
+		$solicitud_viaticos = solicitud_viatico::whereIn('id', $request->id)->get();
+		
+		foreach ($solicitud_viaticos as $sol) {
+			
+			
+					$sol->delete();
+			if(!$sol->consignacion()->exists()) {
+				if($sol->created_at->isToday()) {
+					$sol->delete();
+				}else {
+					return back()->with('error', 'Ya paso el tiempo para eliminar viáticos');
+				}
+			}else{
+				return back()->with('error', 'Ya existen consignaciones para estos viáticos, no se pueden eliminar');
+			}
+		}
+		Myhelp::EscribirEnLog($this, 'DELETE:solicitud_viaticos', 'solicitud_viatico ids:: '. implode($request->id) .' han sido borrados', false);
+		
+		
+		return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' viaticos ']));
 	}
 	//FIN : STORE - UPDATE - DELETE
 	

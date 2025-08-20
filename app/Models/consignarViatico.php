@@ -13,14 +13,13 @@ class consignarViatico extends Model {
 	use HasFactory;
 	
 	protected $appends = [
-		'ValoresCoinciden'
+		'ValoresCoinciden',
+		'destinatiariu',
 	];
 	
 	protected $fillable = [
 		'valor_consig',
 		'fecha_consig',
-//		'user_id',
-		//        'viatico_id',
 		'solicitud_viatico_id',
 		'valor_legalizado',
 		'fecha_legalizado',
@@ -31,6 +30,12 @@ class consignarViatico extends Model {
 	
 	public function getValoresCoincidenAttribute(): bool {
 		return $this->valor_consig === $this->valor_legalizado;
+	}
+	public function getDestinatiariuAttribute(): string {
+		$user = User::find($this->destinatiario_user_id);
+		if($user)
+			return $user->name;
+		return 'No hay destinatario';
 	}
 	
 	public function viatico(): BelongsTo {

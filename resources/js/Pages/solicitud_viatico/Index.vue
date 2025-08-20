@@ -173,10 +173,10 @@ let classbotones = "w-6 h-6"
                                :solicitud_viaticoa="data.sol_viatico" 
                                :title="props.title" :losSelect=props.losSelect />
 
-                    <Delete v-if="can(['delete viatico'])" :numberPermissions="props.numberPermissions"
-                            :show="data.deleteOpen" @close="data.deleteOpen = false" :solicitud_viaticoa="data.sol_viatico"
-                            :title="props.title"/>
-                    <DeleteBulk v-if="can(['isSuper'])" :show="data.deleteBulkOpen"
+<!--                    <Delete v-if="can(['delete viatico'])" :numberPermissions="props.numberPermissions"-->
+<!--                            :show="data.deleteOpen" @close="data.deleteOpen = false" :solicitud_viaticoa="data.sol_viatico"-->
+<!--                            :title="props.title"/>-->
+                    <DeleteBulk v-if="can(['delete viatico'])" :show="data.deleteBulkOpen"
                                 @close="data.deleteBulkOpen = false, data.multipleSelect = false, data.selectedId = []"
                                 :selectedId="data.selectedId" :title="props.title"/>
                         
@@ -185,12 +185,14 @@ let classbotones = "w-6 h-6"
                             :title="props.title" maintitle="Viaticos" 
                         />
                 </div>
+                <p class="mt-1 text-lg mx-auto">Los viaticos solo se podran eliminar el mismo día que se crearon</p>
+                
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="grid grid-cols-3 justify-between p-2">
                     <div class="flex gap-2 ">
                         <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet"/>
-                        <DangerButton v-if="can(['isSuper'])" @click="data.deleteBulkOpen = true"
+                        <DangerButton v-if="can(['delete viatico'])" @click="data.deleteBulkOpen = true"
                                       v-show="data.selectedId.length !== 0 && can(['delete viatico'])"
                                       class="px-3 py-1.5"
                                       v-tooltip="lang().tooltip.delete_selected">
@@ -300,12 +302,12 @@ let classbotones = "w-6 h-6"
                                             class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.legalizar">
                                             <ShieldExclamationIcon :class="classbotones"/>
                                         </InfoButton>
-                                        <DangerButton v-show="can(['delete viatico'])" type="button"
-                                                      @click="(data.deleteOpen = true), (data.sol_viatico = claseFromController)"
-                                                      class="px-2 py-1.5 rounded-none"
-                                                      v-tooltip="lang().tooltip.delete">
-                                            <TrashIcon :class="classbotones"/>
-                                        </DangerButton>
+<!--                                        <DangerButton v-show="can(['delete viatico'])" type="button"-->
+<!--                                                      @click="(data.deleteOpen = true), (data.sol_viatico = claseFromController)"-->
+<!--                                                      class="px-2 py-1.5 rounded-none"-->
+<!--                                                      v-tooltip="lang().tooltip.delete">-->
+<!--                                            <TrashIcon :class="classbotones"/>-->
+<!--                                        </DangerButton>-->
                                     </div>
                                 </div>
                             </td>

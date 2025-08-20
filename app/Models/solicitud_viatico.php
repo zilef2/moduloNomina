@@ -31,30 +31,33 @@ class solicitud_viatico extends Model {
 		'saldo_sol',
 	];
 	
-	public function user(): BelongsTo {return $this->belongsTo(User::class); }
-	public function consignacion(): \Illuminate\Database\Eloquent\Relations\HasMany {return $this->hasMany(consignarViatico::class); }
-	public function viaticos(): \Illuminate\Database\Eloquent\Relations\HasMany {return $this->hasMany(viatico::class); }
-	
 	public function getTotallegalizadouAttribute(): int {
 		return $this->consignacion()->get()->sum('valor_legalizado');
 	}
 	
+	public function consignacion(): \Illuminate\Database\Eloquent\Relations\HasMany { return $this->hasMany(consignarViatico::class); }
 	
 	public function getLosviaticosAttribute(): array {
-		 $viaticos = $this->viaticos()->get()->toArray();
+		$viaticos = $this->viaticos()->get()->toArray();
 		foreach ($viaticos as $index => $viatico) {
-			$viatico['useri'] = User::find($viatico['user_id'])->name; 
-		 }
-		 return $viaticos;
+			$viatico['useri'] = User::find($viatico['user_id'])->name;
+		}
+		
+		return $viaticos;
 	}
+	
+	public function viaticos(): \Illuminate\Database\Eloquent\Relations\HasMany { return $this->hasMany(viatico::class); }
+	
 	public function getUserinoAttribute(): string {
 		return $this->user()->first()->name ?? 'No hay responsable';
 	}
 	
+	public function user(): BelongsTo { return $this->belongsTo(User::class); }
 	
 	public function getTotalsolicitadoAttribute(): int {
 		return $this->viaticos()->get()->sum('gasto');
 	}
+	
 	public function getTotalConsignadoAttribute(): int {
 		return $this->consignacion()->get()->sum('valor_consig');
 	}
@@ -62,6 +65,7 @@ class solicitud_viatico extends Model {
 	public function getCentrouAttribute(): string //igual que el vector pero con mayus
 	{
 		$viatico1 = $this->viaticos()->first();
+		
 		return $viatico1->centro ? $viatico1->centro->nombre : '';
 	}//tiene que existir la funcion centro
 	
@@ -77,10 +81,10 @@ class solicitud_viatico extends Model {
 					'fecha_legalizacion'       => $item->fecha_legalizado ?? '',
 					'valor_legalizacion'       => $item->valor_legalizado ?? '',
 					'descripcion_legalizacion' => $item->descripcion_legalizacion ?? '',
+					'destinatiariu' => $item->destinatiariu,
 				];
 			})->toArray();
 		}
-		
 		
 		return [];
 	}
