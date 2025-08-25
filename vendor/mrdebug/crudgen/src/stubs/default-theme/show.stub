@@ -1,7 +1,0 @@
-@extends('DummyExtends')
-
-@section('DummySection')
-
-	{{ DummyCreateVariableSing$->id }}
-
-@stop

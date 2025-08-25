@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Traits\Macroable;
 use Spatie\Browsershot\Browsershot;
 use Spatie\LaravelPdf\Enums\Format;
 use Spatie\LaravelPdf\Enums\Orientation;
@@ -15,6 +16,8 @@ use Wnx\SidecarBrowsershot\BrowsershotLambda;
 
 class PdfBuilder implements Responsable
 {
+    use Macroable;
+
     public string $viewName = '';
 
     public array $viewData = [];
@@ -373,11 +376,50 @@ class PdfBuilder implements Responsable
             $browsershot->landscape();
         }
 
+        $this->applyConfigurationDefaults($browsershot);
+
         if ($this->customizeBrowsershot) {
             ($this->customizeBrowsershot)($browsershot);
         }
 
         return $browsershot;
+    }
+
+    protected function applyConfigurationDefaults(Browsershot $browsershot): void
+    {
+        // Apply binary paths
+        if ($nodeBinary = config('laravel-pdf.browsershot.node_binary')) {
+            $browsershot->setNodeBinary($nodeBinary);
+        }
+
+        if ($npmBinary = config('laravel-pdf.browsershot.npm_binary')) {
+            $browsershot->setNpmBinary($npmBinary);
+        }
+
+        if ($includePath = config('laravel-pdf.browsershot.include_path')) {
+            $browsershot->setIncludePath($includePath);
+        }
+
+        if ($chromePath = config('laravel-pdf.browsershot.chrome_path')) {
+            $browsershot->setChromePath($chromePath);
+        }
+
+        if ($nodeModulesPath = config('laravel-pdf.browsershot.node_modules_path')) {
+            $browsershot->setNodeModulePath($nodeModulesPath);
+        }
+
+        if ($binPath = config('laravel-pdf.browsershot.bin_path')) {
+            $browsershot->setBinPath($binPath);
+        }
+
+        if ($tempPath = config('laravel-pdf.browsershot.temp_path')) {
+            $browsershot->setCustomTempPath($tempPath);
+        }
+
+        // Apply additional options
+        if (config('laravel-pdf.browsershot.write_options_to_file')) {
+            $browsershot->writeOptionsToFile();
+        }
     }
 
     public function toResponse($request): Response
