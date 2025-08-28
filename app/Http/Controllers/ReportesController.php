@@ -23,6 +23,46 @@ use Spatie\LaravelPdf\Facades\Pdf;
 class ReportesController extends Controller {
 	
 	//<editor-fold desc="Select y filtros">
+	public function CreateTest(Request $request) {
+		$Authuser = Myhelp::AuthU();
+		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes testcreate| '));
+		
+		$showSelect = $this->losSelect($valoresSelectConsulta, $showUsers, $valoresSelect, $userFiltro, $numberPermissions);
+		$IntegerDefectoSelect = $valoresSelectConsulta->first()->id;
+		$Reportes = Reporte::query();
+		$fnombresT = $this->fNombresTabla($numberPermissions, $Reportes, $Authuser, $request, $titulo);
+		
+		$horasemana = $fnombresT[1];
+		
+		$startDate = Carbon::now()->startOfWeek();
+		$endDate = Carbon::now()->endOfWeek();
+		$startDateMostrar = $startDate->isoFormat('dddd D [de] MMMM');
+		$endDateMostrar = $endDate->isoFormat('dddd D [de] MMMM');
+		
+		//help: $HorasDeCadaSemana en el [0] esta la semana actual, y de resto son numSemana => SumaHorasOrdinarias
+		$HorasDeCadaSemana = CalculoReportes::CalcularHorasDeCadaSemana($Authuser->id);
+		$ArrayOrdinarias = Myhelp::CalcularPendientesQuicena($Authuser);
+		
+		return Inertia::render('Reportes/CreateTest', [ 
+			'title'          => 'reportes test',
+			
+			'valoresSelect'        => $valoresSelect,
+			'showSelect'           => $showSelect,
+			'IntegerDefectoSelect' => $IntegerDefectoSelect,
+			
+			'horasemana'           => $horasemana,
+			'startDateMostrar'     => $startDateMostrar,
+			'endDateMostrar'       => $endDateMostrar,
+			
+			'numberPermissions'    => $numberPermissions,
+			'ArrayOrdinarias'      => $ArrayOrdinarias,
+			
+			'horasTrabajadasHoy'          => $horasTrabajadasHoy2 ?? [],
+			'HorasDeCadaSemana'           => $HorasDeCadaSemana,
+			'ArrayHorasSemanales'         => $this->DoArrayHorasSemanales(),
+			'ArrayCentrosNoFactura'       => $this->DoArrayCentrosNoFactura(),
+		]);
+	}
 	public function index(Request $request) {
 		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes index| '));
 		$Authuser = Myhelp::AuthU();

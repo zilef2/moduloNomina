@@ -128,11 +128,13 @@ Route::middleware('auth', 'verified')->group(function () {
 	Route::resource("/solicitud_viatico", SolicitudViaticoController::class);
     Route::get('/actyindex', [ActivityLogController::class, 'index'])->name('actyindex');
 	
+	Route::resource("/peusuario", \App\Http\Controllers\PeusuarioController::class);
 	//para mi 
 	Route::get('/FuncionPruebas', [ReportesController::class, 'FuncionPruebas'])->name('FuncionPruebas');
 	Route::get('/FuncionPruebas2', [ReportesController::class, 'FuncionPruebas2'])->name('FuncionPruebas2');
-	Route::resource("/peusuario", \App\Http\Controllers\PeusuarioController::class);
+	Route::get('/CreateTest', [ReportesController::class, 'CreateTest'])->name('CreateTest');
 	Route::get('/ProbarJob', [DashboardController::class, 'ProbarJob'])->name('ProbarJob');
+	Route::get('/logeadoshoy', [DashboardController::class, 'logeadoshoy'])->name('logeadoshoy');
 	//aquipues
 }); //fin verified
 

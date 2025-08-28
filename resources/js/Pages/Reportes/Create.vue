@@ -17,6 +17,7 @@ import FestivosColombia from 'festivos-colombia';
 import {TransformTdate, weekNumber} from "@/global";
 import {calcularHoras} from "@/CreateReporte/HelpingCreate";
 import {validacionNoMasDe3Diax} from "@/ValidacionCreateReporte";
+import {calcularSinExtras} from "./ComunCreateReporte";
 
 const props = defineProps({
     show: Boolean,
@@ -157,29 +158,6 @@ if (props.numberPermissions > 9) {
     form.fecha_ini = timedate
     form.fecha_fin = timedate2
 }
-// <!--<editor-fold desc="Calcular">-->
-
-//apunto de ser eliminado
-const Reporte11_59 = () => {
-    let fin = Date.parse(form.fecha_fin);
-    let finDate = new Date(fin);
-    const horafin = finDate.getHours()
-    const minfin = finDate.getMinutes()
-    if (horafin === 23 && minfin === 59) {
-        if (form.extra_nocturnas > 0) form.extra_nocturnas++
-        else {
-            if (form.dominical_nocturnas > 0) form.dominical_nocturnas++
-            else {
-                if (form.dominical_extra_nocturnas > 0) form.dominical_extra_nocturnas++
-                else {
-                    form.nocturnas++
-                }
-            }
-
-        }
-    }
-}
-// <!--</editor-fold>-->
 
 
 watchEffect(() => {
@@ -298,38 +276,6 @@ watchEffect(() => {
     }
 })
 
-//iscallin: watchEffect
-let calcularSinExtras = (Inicio, Fin) => {
-    const horasInicio = new Date(Inicio).getHours();
-    const horasFin = new Date(Fin).getHours();
-
-    let BaseInicial = horasInicio >= 6 ? horasInicio : 6
-    const BaseFinal = horasFin >= 21 ? 21 : horasFin
-
-    let HorasDiurnas = BaseFinal - BaseInicial;
-    HorasDiurnas = HorasDiurnas < 0 ? 0 : HorasDiurnas
-
-    //calcularnocturnas
-    let Madrugada = 0
-    let Tarde = 0
-    let Resta = horasFin - horasInicio;
-    if (horasInicio < 6 && horasFin <= 6) {//solo de noche
-        Madrugada = Resta;
-    } else {
-        if (horasInicio < 6) {
-            Madrugada = (6 - horasInicio);
-        }
-    }
-
-    if (horasInicio >= 21 && horasFin >= 21) {//solo de noche
-        Tarde = Resta;
-    } else {
-        if (horasFin > 21) {//si existan horas nocturnas, si no son 0
-            Tarde = (horasFin - 21);
-        }
-    }
-    return [HorasDiurnas, (Madrugada + Tarde)]
-}
 // <!--<editor-fold desc="Watchers">-->
 
 watch(() => form.centro_costo_id, (newX) => {
@@ -422,7 +368,6 @@ const create = () => {
             else validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini, props.ArrayHorasSemanales['s_Dias_gabela'])
             console.log("=>(Create.vue:302) validacionNoMasDe3Dias", validacionNoMasDe3Dias);
             if (data.respuestaSeguro && validacionNoMasDe3Dias === 'ok') {
-                // Reporte11_59();
 
                 form.almuerzo = data.ValorRealalmuerzo
                 emit("reportFinished")

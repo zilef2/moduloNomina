@@ -286,8 +286,8 @@ const handleCheckboxChange = (values) => {
                         </PrimaryButton>
                         <div v-else
                              v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro"
-                             class="mx-4">
-                            <p class="pt-1 mt-6 font-extrabold">Usted no necesita reportar</p>
+                             class="ml-4 mt-3">
+                            <p class="font-extrabold">Usted no necesita reportar!</p>
                         </div>
                     </div>
 
@@ -365,10 +365,10 @@ const handleCheckboxChange = (values) => {
                                    type="number" min="0" max="31" class="hidden lg:block w-2/3 md:w-full rounded-lg"
                                    :placeholder="lang().placeholder.searchDDay"/>
                     </div>
-                    <div class="grid grid-cols-2 text-center gap-2">
+                    <div v-if="props.numberPermissions > 1" class="grid grid-cols-2 text-center gap-2">
                         <div class="flex">
                             <small v-if="!data.params.search5" class="my-1">Filtrar por Centro</small>
-                            <vSelect v-if="props.numberPermissions > 1" v-model="data.params.search5"
+                            <vSelect  v-model="data.params.search5"
                                      :options="props.losSelect['centros']" label="name"
                                      class="block w-full mx-1 mt-1 rounded-lg"></vSelect>
                         </div>
