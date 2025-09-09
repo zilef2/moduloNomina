@@ -14,6 +14,9 @@ calcularHoras
 
 //FIN INDEX
 
+
+import {consolelog} from "../Pages/Reportes/ComunCreateReporte";
+
 //<editor-fold desc="FESTIVOFUNCTIONS">
 //number_format
 export function estaFechaEsFestivo(
@@ -153,7 +156,7 @@ export function calcularTerminaDomingo(ini,fin,CuandoEmpiezaExtra,ExtrasManana,f
 //<editor-fold desc="CALCULAR">
 
 //# papa = watchEffect
-export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,FestivosColombia,message): void{
+export function calcularHoras(data,form,inicio,final,HORAS_ESTANDAR,FestivosColombia,message): void{
     let ini = new Date(inicio)
     let fin = new Date(final)
     let ExtrasManana = false //
@@ -165,10 +168,9 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
         let horasInicioome:number = parseInt(String(new Date(form.fecha_ini).getHours()))
         let horasFinOme:number = parseInt(String(new Date(form.fecha_fin).getHours()))
         let CuandoEmpiezaExtra:number = horasInicioome
-        let horasTrab:number = horasFinOme - horasInicioome
-        console.log("HelpingCreate -antes - ExtrasPrematuras", ExtrasPrematuras);
         ExtrasPrematuras -= (data.TrabajadasSemana)
-        console.log("ExtrasPrematuras - TrabajadasSemana", ExtrasPrematuras);
+        console.log("🚀 ~ TrabajadasSemana: ", data.TrabajadasSemana);
+        console.log("ExtrasPrematuras", ExtrasPrematuras);
 
 
         if(data.TrabajadasSemana < 40) //todo: 40 porque? deberia venir de db no?
@@ -176,21 +178,27 @@ export function calcularHoras(data,form,props,inicio,final,HORAS_ESTANDAR,Festiv
         // ExtrasPrematuras -= data.TemporalDiaAnterior //23:59
 
         //almuerzo para calcular las extras
-        let LIMITE_ALMUERZO:number = 8
+        // let LIMITE_ALMUERZO:number = 8
         var fechain_i:Date = new Date(form.fecha_ini)
         var diaSemana:number = fechain_i.getDay();
-        if (diaSemana === 6) LIMITE_ALMUERZO -=3
-        // if(horasTrab > LIMITE_ALMUERZO)
-        //     ExtrasPrematuras++
+        // if (diaSemana === 6) LIMITE_ALMUERZO -=3
 
 
         ExtrasPrematuras = ExtrasPrematuras < 0 ? 0 : ExtrasPrematuras
 
         CuandoEmpiezaExtra += ExtrasPrematuras
 
-        CuandoEmpiezaExtra = CuandoEmpiezaExtra < horasInicioome ? horasInicioome : CuandoEmpiezaExtra
 
-        if(data.MostrarConsole.CuandoEiezaExtra){
+        if (diaSemana === 5){ //viernes
+            CuandoEmpiezaExtra -= 1
+        }
+        if (diaSemana === 6){ //sabado
+            CuandoEmpiezaExtra -= 3
+        }
+        
+        CuandoEmpiezaExtra = CuandoEmpiezaExtra < horasInicioome ? horasInicioome : CuandoEmpiezaExtra
+        
+        if(consolelog.CuandoEiezaExtra){
             console.log('%cPRIMERO: CuandoEmpiezaExtra', "color:red;font-family:system-ui;font-size:1rem;-webkit-text-stroke: 0.5px black;font-weight:bold")
             console.log('CuandoEmpiezaExtra',CuandoEmpiezaExtra)
             console.log('ExtrasPrematuras ((debe ser 8 si no hay extras))',ExtrasPrematuras)

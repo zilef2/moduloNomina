@@ -17,6 +17,7 @@ import {TransformTdate, weekNumber} from "@/global";
 import {calcularHoras} from "@/CreateReporte/HelpingCreate";
 import {validacionNoMasDe3Diax} from "@/ValidacionCreateReporte";
 import {calcularSinExtras} from "./ComunCreateReporte";
+import {consolelog} from "./ComunCreateReporte";
 
 const props = defineProps({
     title: String,
@@ -42,8 +43,6 @@ let label_diurnas = ref(null)
 
 const HORAS_ESTANDAR = props.ArrayHorasSemanales.HORAS_ORDINARIAS // 8horitas
 const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - HORAS_ESTANDAR //notes: = 40
-console.log("=>(Create.vue:42) props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES", props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES);
-console.log("=>(Create.vue:42) HORAS_SEMANALES_MENOS_ESTANDAR", HORAS_SEMANALES_MENOS_ESTANDAR);
 const LimiteHorasTrabajadas = 25
 
 const Limite_Horas_Dia_Semana = [HORAS_ESTANDAR, (HORAS_ESTANDAR - 2)] //todo: nexttochange: cuando las semanales cambien de 46 horas a 42, seran 3 en vez de 2
@@ -58,22 +57,6 @@ const data = reactive({
     TrabajadasSemana: 0,
     diaini: 1,
     MensajeError: '',
-    MostrarConsole: {
-        watchEffect: false,
-        CuandoEiezaExtra: false,
-        dia: false,
-        noche: false,
-        extradia: false,
-        extranoche: false,
-        dominicales: false,
-        terminaDomingo: false,
-        terminaLunes: false,
-        EsFestivo: false,
-
-        MostrarTrabajadaSemana: true,
-        MostrarAlmuersini: false,
-        ValorRealalmuerzo: 0,
-    },
     const: {
         //39 =>
         HORAS_SEMANALES_MENOS_ESTANDAR: props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - props.ArrayHorasSemanales.HORAS_ORDINARIAS
@@ -89,7 +72,7 @@ const data = reactive({
 const message = reactive({
     TextFestivo: ''
 })
-// <!--<editor-fold desc="onMounted - useForm">-->
+// <!--<editor-fold desc="onMunted - useFrm">-->
 
 onMounted(() => {
 
@@ -100,8 +83,7 @@ onMounted(() => {
     //explaining: data.TrabajadasSemana son las horas que hay que restarle a Cuandocomienzaextras
     data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
 
-    console.clear()
-    if (data.MostrarConsole.MostrarTrabajadaSemana) {
+    if (consolelog.MostrarTrabajadaSemana) {
         console.log("=>(Create.vue:86) props.HorasDeCadaSemana", props.HorasDeCadaSemana);
         console.log("=>(Create.vue:86) data.TrabajadasSemana", data.TrabajadasSemana);
     }
@@ -114,6 +96,11 @@ onMounted(() => {
         })
         // form.centro_costo_id = localStorage.getItem('centroCostoId')
     }
+    
+    //esto no va en create
+    form.centro_costo_id = props.valoresSelect.find((ele) => {
+        return ele.value === 22
+    })
 });
 
 
@@ -147,11 +134,8 @@ const form = useForm({
 let newdate = (new Date())
 let horahoy = newdate.getHours()
 if (props.numberPermissions > 9) {
-// if (props.numberPermissions > 8) {
-    // form.fecha_ini = '2024-11-15T21:00'
-    // form.fecha_fin = '2024-11-15T23:58'
-    form.fecha_ini = '2025-02-08T07:00'
-    form.fecha_fin = '2025-02-08T14:00'
+    form.fecha_ini = '2025-08-29T07:00'
+    form.fecha_fin = '2025-08-29T17:00'
 } else {
     let timedate = TransformTdate(7)//la hora
     let timedate2 = TransformTdate(16)
@@ -190,7 +174,7 @@ watchEffect(() => {
         let fin = Date.parse(form.fecha_fin);
 
         let WeekN = weekNumber(new Date(form.fecha_ini))
-        if (data.MostrarConsole.MostrarTrabajadaSemana) {
+        if (consolelog.MostrarTrabajadaSemana) {
 
             console.log("=>(Create.vue:190) WeekN", WeekN);
             console.log("=>(data.TrabajadasHooy", data.TrabajadasHooy);
@@ -263,7 +247,7 @@ watchEffect(() => {
                     } else {
                         data.BoolCentroNoFactura = false
                         calcularHoras(
-                            data, form, props,
+                            data, form,
                             ini, fin,
                             HORAS_ESTANDAR
                             , FestivosColombia, message
@@ -317,7 +301,9 @@ function analisarSiFactura() {
 
 watch(() => form.fecha_ini, (newX) => {
     if (newX) {
+      console.log("🚀 ~  ~ newX: ", newX);
         form.fecha_fin = newX
+        nextTick()
         let fechaSelected = new Date(newX.getTime());
         fechaSelected.setDate(fechaSelected.getDate() - 1)
         let year = fechaSelected.getFullYear();
@@ -430,13 +416,10 @@ const formatfin = (date) => {
 
 <template>
     <section class="space-y-6">
-        <form @submit.prevent="create" class="p-6 xs:mb-24 lg:mb-64">
+        <form @submit.prevent="create" class="px-80 py-44 xs:mb-24 lg:mb-64">
             <div class="flex space-x-4">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    <b>
-                        <!-- {{ lang().label.add }} -->
-                        {{ props.title }}
-                    </b>
+                    <b>{{ props.title }}</b>
                 </h2>
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     Horas semana: {{ props?.horasemana }}

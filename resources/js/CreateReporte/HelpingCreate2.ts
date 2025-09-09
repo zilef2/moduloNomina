@@ -7,6 +7,8 @@ calcularNocturnas
 
 //<editor-fold desc="CALCULAR">
 import {calcularTerminaDomingo, calcularTerminaLunes, estaFechaEsFestivo} from "./HelpingCreate";
+import {consolelog} from "../Pages/Reportes/ComunCreateReporte";
+
 
 export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
     const horasInicio = new Date(Inicio).getHours();
@@ -23,7 +25,7 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
         let HorasDiurnas = BaseFinal - BaseInicial;
         HorasDiurnas = HorasDiurnas < 0 ? 0 : HorasDiurnas
 
-        if(data.MostrarConsole.dia){
+        if(consolelog.dia){
             console.log('BaseFinal',BaseFinal)
             console.log('HorasDiurnas',HorasDiurnas)
         }
@@ -33,7 +35,7 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
                 let horasNormales = CuandoEmpiezaExtra - BaseInicial //horas no extra
                 horasNormales = horasNormales < 0 ? 0 : horasNormales
 
-                if(data.MostrarConsole.dia){
+                if(consolelog.dia){
                     console.log('HorasDiurnas',HorasDiurnas)
                     console.log('horasNormales',horasNormales)
                 }
@@ -49,7 +51,7 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
                 }
             }//cuando las horas extra >= 21, no hay horas extra diurnas
         }
-        if(data.MostrarConsole.dia){
+        if(consolelog.dia){
             console.log("HorasExtra & ordinarias, su suma", HorasExtra,HorasDiurnas,(HorasExtra + HorasDiurnas)); //nottemp
             console.log("CuandoEmpiezaExtra", CuandoEmpiezaExtra)
         }
@@ -97,7 +99,7 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
                 }
             }
         }
-        if(data.MostrarConsole.dia){
+        if(consolelog.dia){
             console.log("🧈🧈🧈 DIA HorasExtra & ordinarias", HorasExtra,HorasDiurnasTotal);
         }
         return [HorasExtra, HorasDiurnasTotal]
@@ -165,7 +167,7 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra, HORA
     }
 
     let HorasNoc:number = Madrugada + Tarde;
-    if(data.MostrarConsole.noche) {
+    if(consolelog.noche) {
         // console.clear()
         console.log("PRIMERO NOCHE 🚀");
         console.log("Madrugada & tarde🚀", Madrugada,Tarde,' = ',HorasNoc);
@@ -195,7 +197,7 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra, HORA
                 // ordinarias = CuandoEmpiezaExtra + Tarde
                 extra = Madrugada >= CuandoEmpiezaExtra ? Madrugada - CuandoEmpiezaExtra : 0
 
-                if(data.MostrarConsole.noche)
+                if(consolelog.noche)
                     console.log("‍😶‍🌫️1 : extra & noche", extra,ordinarias);
 
             }else{//empiezan en hora diurna
@@ -203,27 +205,27 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra, HORA
                     extra = Tarde
                     ordinarias = Madrugada
 
-                    if(data.MostrarConsole.noche)
+                    if(consolelog.noche)
                         console.log("😶‍🌫️2  extra  ordinarias", extra,ordinarias);
 
                 }else{
                     if(DiaInicio == DiaFin){
                         extra = 0
                         ordinarias = HorasNoc
-                        if(data.MostrarConsole.noche){
+                        if(consolelog.noche){
                             console.log("😶‍🌫️1  extra  ordinarias", extra,ordinarias);
                         }
                     }else{
                         ordinarias = horasInicio < 6 ? 6 - horasInicio : 0
                         extra = HorasNoc - ordinarias
-                        if(data.MostrarConsole.noche){
+                        if(consolelog.noche){
                             console.log("imposible 😶‍🌫️0  extra  ordinarias", extra,ordinarias);
                         }
                     }
                 }
             }
         }
-        if(data.MostrarConsole.noche) {
+        if(consolelog.noche) {
             console.log("extra🚀", extra);
             console.log("ordinarias🚀", ordinarias);
         }
@@ -336,8 +338,8 @@ function RestarAlmuarzo(form,data){
 
 
 export function setDominical(data,form,ini,fin,CuandoEmpiezaExtra,ExtrasManana,FestivosColombia,message){//date,date,int,bool
-    let esFestivo = estaFechaEsFestivo(new Date(ini),data.MostrarConsole,FestivosColombia);
-    let esFestivo2 = estaFechaEsFestivo(new Date(fin),data.MostrarConsole,FestivosColombia);
+    let esFestivo = estaFechaEsFestivo(new Date(ini),consolelog,FestivosColombia);
+    let esFestivo2 = estaFechaEsFestivo(new Date(fin),consolelog,FestivosColombia);
 
     if(ini.getDay() === 0 || fin.getDay() === 0){
         form.dominicales = 'si'

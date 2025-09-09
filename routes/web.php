@@ -135,6 +135,7 @@ Route::middleware('auth', 'verified')->group(function () {
 	Route::get('/CreateTest', [ReportesController::class, 'CreateTest'])->name('CreateTest');
 	Route::get('/ProbarJob', [DashboardController::class, 'ProbarJob'])->name('ProbarJob');
 	Route::get('/logeadoshoy', [DashboardController::class, 'logeadoshoy'])->name('logeadoshoy');
+	Route::get('/recordarPago', [DashboardController::class, 'recordarPago'])->name('recordarPago');
 	//aquipues
 }); //fin verified
 

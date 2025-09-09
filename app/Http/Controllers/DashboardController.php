@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\helpers\Myhelp;
 use App\Jobs\EnviarViaticoJob;
+use App\Mail\AvisoPagoDesarrollo;
 use App\Mail\UsuariosLogeadosHoy;
+use App\Models\desarrollo;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller {
 	
+	public int $LimiteDiasSinPagar = 25;
 	public function guardarCiudad(Request $r): void {
 		$user = Myhelp::AuthU();
 		if (Schema::hasTable('ubicacion')) {
@@ -38,7 +41,29 @@ class DashboardController extends Controller {
 		])->delay(now()->addSeconds());
 	}
 	
-
+	public function recordarPago() {
+		
+		$QueryPendiente = Desarrollo::Where('estado', 'Esperando pago parcial')
+		                                ->whereDoesntHave('pagos')
+		                                ->whereNotNull('fecha_cotizacion_aceptada')
+		                                ->whereDate('fecha_cotizacion_aceptada', '<=', 
+		                                            Carbon::now()->subDays($this->LimiteDiasSinPagar));
+		$dearrollopendiente = clone $QueryPendiente;
+		$dearrollopendiente = $dearrollopendiente ->first();
+		$cuantosDesarrollosPendientes = $QueryPendiente->count();
+		if ($dearrollopendiente) {
+			$fechacotiza = $dearrollopendiente->fecha_cotizacion_aceptada;
+			$diffforhum = Carbon::parse($fechacotiza)->diffForHumans();
+			$desarrollo = Desarrollo::findOrFail($dearrollopendiente->id);
+			
+			Mail::to('ajelof2@gmail.com')->send(new AvisoPagoDesarrollo($desarrollo,$cuantosDesarrollosPendientes));
+			
+			return "Aviso enviado. Fecha en que se acepto la cotizacion $fechacotiza, $diffforhum";
+		}
+		
+		return "no hay desarrollos pendientes";
+	}
+	
 	public function logeadoshoy() {
 		
 		$path = storage_path('logs/laravel.log');
@@ -46,7 +71,7 @@ class DashboardController extends Controller {
 		$hoy = Carbon::today()->format('Y-m-d'); // Ejemplo: 2025-08-27
 		// $fecha = Carbon::yesterday()->format('Y-m-d');
 		$controller = 'ReportesController';
-
+		
 		if (File::exists($path)) {
 			foreach (File::lines($path) as $line) {
 				// Filtrar por fecha y por controlador
@@ -57,7 +82,7 @@ class DashboardController extends Controller {
 				}
 			}
 		}
-
+		
 		$usuariosLog = array_unique($usuariosLog);
 		
 		// Buscar en BD según nombre (ajusta si tu login es por email/username)
@@ -65,27 +90,27 @@ class DashboardController extends Controller {
 		
 		// Agrupar
 		$agrupados = [
-			'empleado' => [],
+			'empleado'       => [],
 			'administrativo' => [],
-			'otros'    => [],
+			'otros'          => [],
 		];
 		
 		foreach ($usuarios as $user) {
 			if ($user->roles->pluck('name')->contains('empleado')) {
 				$agrupados['empleado'][] = $user->name;
-			} else {
+			}
+			else {
 				if ($user->roles->pluck('name')->contains('administrativo')) {
 					$agrupados['administrativo'][] = $user->name;
-				} else {
+				}
+				else {
 					$agrupados['otros'][] = $user->name;
 				}
 			}
 		}
 		Mail::to('ajelof2@gmail.com')->send(new UsuariosLogeadosHoy($agrupados, Carbon::today()->format('d/m/Y')));
-		return   '<p>Correo enviado correctamente </p>'
-				.'<p>| empleados '.count($agrupados['empleado']).'</p><p>'. implode(', ', $agrupados['empleado']) . '</p>'
-				.'<p>| administrativo '.count($agrupados['administrativo']).'</p><p>'. implode(', ', $agrupados['administrativo']) . '</p>'
-				.'<p>| otros '.count($agrupados['otros']).'</p><p>'. implode(', ', $agrupados['otros']) . '</p>'
-	;
+		
+		return '<p>Correo enviado correctamente </p>' . '<p>| empleados ' . count($agrupados['empleado']) . '</p><p>' . implode(', ', $agrupados['empleado']) . '</p>' . '<p>| administrativo ' . count($agrupados['administrativo']) . '</p><p>' . implode(', ', $agrupados['administrativo']) . '</p>' . '<p>| otros ' . count($agrupados['otros']) . '</p><p>' . implode(', ', $agrupados['otros']) . '</p>';
 	}
+	
 }

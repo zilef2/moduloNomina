@@ -18,6 +18,8 @@ import {TransformTdate, weekNumber} from "@/global";
 import {calcularHoras} from "@/CreateReporte/HelpingCreate";
 import {validacionNoMasDe3Diax} from "@/ValidacionCreateReporte";
 import {calcularSinExtras} from "./ComunCreateReporte";
+import {consolelog} from "./ComunCreateReporte";
+
 
 const props = defineProps({
     show: Boolean,
@@ -58,22 +60,6 @@ const data = reactive({
     TrabajadasSemana: 0,
     diaini: 1,
     MensajeError: '',
-    MostrarConsole: {
-        watchEffect: false,
-        CuandoEiezaExtra: false,
-        dia: false,
-        noche: false,
-        extradia: false,
-        extranoche: false,
-        dominicales: false,
-        terminaDomingo: false,
-        terminaLunes: false,
-        EsFestivo: false,
-
-        MostrarTrabajadaSemana: true,
-        MostrarAlmuersini: false,
-        ValorRealalmuerzo: 0,
-    },
     const: {
         //39 =>
         HORAS_SEMANALES_MENOS_ESTANDAR: props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - props.ArrayHorasSemanales.HORAS_ORDINARIAS
@@ -101,7 +87,7 @@ onMounted(() => {
     data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
 
     console.clear()
-    if (data.MostrarConsole.MostrarTrabajadaSemana) {
+    if (consolelog.MostrarTrabajadaSemana) {
         console.log("=>(Create.vue:86) props.HorasDeCadaSemana", props.HorasDeCadaSemana);
         console.log("=>(Create.vue:86) data.TrabajadasSemana", data.TrabajadasSemana);
     }
@@ -190,7 +176,7 @@ watchEffect(() => {
             let fin = Date.parse(form.fecha_fin);
 
             let WeekN = weekNumber(new Date(form.fecha_ini))
-            if (data.MostrarConsole.MostrarTrabajadaSemana) {
+            if (consolelog.MostrarTrabajadaSemana) {
 
                 console.log("=>(Create.vue:190) WeekN", WeekN);
                 console.log("=>(data.TrabajadasHooy", data.TrabajadasHooy);
@@ -263,7 +249,7 @@ watchEffect(() => {
                         } else {
                             data.BoolCentroNoFactura = false
                             calcularHoras(
-                                data, form, props,
+                                data, form,
                                 ini, fin,
                                 HORAS_ESTANDAR
                                 , FestivosColombia, message

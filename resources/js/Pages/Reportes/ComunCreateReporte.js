@@ -8,6 +8,24 @@ CALCULAR AND RETURN
 FUNCIONES NO USADAS
  */
 
+// ### ###  ### ### variables ### ###  ### ###
+
+export const consolelog  = {
+    watchEffect: false,
+    CuandoEiezaExtra: false,
+    dia: false,
+    noche: false,
+    extradia: false,
+    extranoche: false,
+    dominicales: false,
+    terminaDomingo: false,
+    terminaLunes: false,
+    EsFestivo: false,
+
+    MostrarTrabajadaSemana: false,
+    MostrarAlmuersini: false,
+    ValorRealalmuerzo: 0,
+}
 // ### ###  ### ### CALCULAR AND RETURN ### ###  ### ### 
 export function calcularSinExtras(Inicio, Fin) {
     const horasInicio = new Date(Inicio).getHours();
