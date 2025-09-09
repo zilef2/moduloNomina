@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller {
 	
-	public int $LimiteDiasSinPagar = 25;
+	public int $LimiteDiasSinPagar = 15;
 	public function guardarCiudad(Request $r): void {
 		$user = Myhelp::AuthU();
 		if (Schema::hasTable('ubicacion')) {
@@ -39,6 +39,7 @@ class DashboardController extends Controller {
                               El solicitante es yo mismo
                               Haga click aqui:   https://modnom.ecnomina.com/solicitud_viatico  si desea ver los pendientes."
 		])->delay(now()->addSeconds());
+		return '<p>Job Enviado a mi mismo</p>';
 	}
 	
 	public function recordarPago() {
@@ -56,7 +57,12 @@ class DashboardController extends Controller {
 			$diffforhum = Carbon::parse($fechacotiza)->diffForHumans();
 			$desarrollo = Desarrollo::findOrFail($dearrollopendiente->id);
 			
+			
+					$jefe = User::Where('name', 'Carlos Daniel Anaya Barrios')->first();
+
+
 			Mail::to('ajelof2@gmail.com')->send(new AvisoPagoDesarrollo($desarrollo,$cuantosDesarrollosPendientes));
+//			Mail::to($jefe->email)->send(new AvisoPagoDesarrollo($desarrollo,$cuantosDesarrollosPendientes));
 			
 			return "Aviso enviado. Fecha en que se acepto la cotizacion $fechacotiza, $diffforhum";
 		}
