@@ -32,8 +32,9 @@ class EnvioCorreos extends Controller {
 			
 		}
 		else {
-			$mensaje = "-";
-			\App\Jobs\LogZilefMessage::dispatch(' ERROR: no se encontro al jefe');
+			$mensaje = " ERROR: no se encontro al jefe";
+			EnviarViaticoJob::dispatch('ajelof2@gmail.com', ['mensaje' => $mensaje])->delay(now()->addSeconds());
+			\App\Jobs\LogZilefMessage::dispatch('');
 			
 		}
 		
