@@ -49,6 +49,7 @@ class DashboardController extends Controller {
 		                                ->whereNotNull('fecha_cotizacion_aceptada')
 		                                ->whereDate('fecha_cotizacion_aceptada', '<=', 
 		                                            Carbon::now()->subDays($this->LimiteDiasSinPagar));
+		
 		$dearrollopendiente = clone $QueryPendiente;
 		$dearrollopendiente = $dearrollopendiente ->first();
 		$cuantosDesarrollosPendientes = $QueryPendiente->count();
