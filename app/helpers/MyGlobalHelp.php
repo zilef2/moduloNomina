@@ -30,8 +30,7 @@ class MyGlobalHelp {
 //        return $fecha->format('d-m h:i A');
 //        return $fecha->format('d-m-Y H:i:s');
     }
-    public static function formatFechaColombia($fechaISO8601)
-    {
+    public static function formatFechaColombia($fechaISO8601) {
         $fecha = Carbon::parse($fechaISO8601);
 
         // Establecer el timezone a Colombia
@@ -44,5 +43,19 @@ class MyGlobalHelp {
         return $fecha->translatedFormat('d \\d\\e F h:i A');
 //        return $fecha->translatedFormat('d \\d\\e F \\d\\e Y h:i:s A');
     }
-    
-}?>
+
+	
+//dateFunctions
+    public static function diffCarbonMonthNDays($fecha) : string {
+	    
+	    $start = Carbon::parse($fecha);
+	    $end = Carbon::now();
+	    
+	    $diff = $start->diff($end);
+	    
+	    return $diff->m . ' meses y ' . $diff->d . ' días';
+    }
+//-dateFunctions
+
+}
+?>

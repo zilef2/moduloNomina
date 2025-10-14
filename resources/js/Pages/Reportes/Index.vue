@@ -7,7 +7,6 @@ import SelectInput from '@/Components/SelectInput.vue';
 import {computed, onMounted, reactive, ref, watch} from 'vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import pkg from 'lodash';
-
 import Pagination from '@/Components/Pagination.vue';
 import {
     CheckIcon,
@@ -17,22 +16,15 @@ import {
     TrashIcon,
     XCircleIcon
 } from '@heroicons/vue/24/solid';
-
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
 import SuccessButton from '@/Components/SuccessButton.vue';
-
 import Create from '@/Pages/Reportes/Create.vue';
 import CreateMass from '@/Pages/Reportes/CreateMassive.vue';
 import Edit from '@/Pages/Reportes/Edit.vue';
 import Delete from '@/Pages/Reportes/Delete.vue';
 import DeleteBulk from "@/Pages/Reportes/DeleteBulk.vue";
-
-
 import {formatDate, number_format} from '@/global.ts';
-import {runOnce} from '@/clousures.ts';
-
-import {Bar} from 'vue-chartjs'
 import {BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip} from 'chart.js'
 import InputLabel from "@/Components/InputLabel.vue";
 import FilterButtons from "@/Components/tablecomponents/FilterButtons.vue";
@@ -44,7 +36,6 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 const {_, debounce, pickBy} = pkg
 
-let NoliberarHastaPago = false
 const props = defineProps({
     title: String,
     filters: Object,
@@ -216,13 +207,9 @@ const selectAll = (event) => {
         })
     }
 }
-const select = () => {
-    if (props.fromController?.data.length == data.selectedId.length) {
-        data.multipleSelect = true
-    } else {
-        data.multipleSelect = false
-    }
-}
+
+const select = () => data.multipleSelect = props.fromController?.data.length == data.selectedId.length;
+
 // <!--</editor-fold>-->
 
 //aprobar o no

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\helpers\MyGlobalHelp;
 use App\helpers\Myhelp;
 use App\Jobs\EnviarViaticoJob;
 use App\Mail\AvisoPagoDesarrollo;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Schema;
 class DashboardController extends Controller {
 	
 	public int $LimiteDiasSinPagar = 15;
+	
 	public function guardarCiudad(Request $r): void {
 		$user = Myhelp::AuthU();
 		if (Schema::hasTable('ubicacion')) {
@@ -39,31 +41,32 @@ class DashboardController extends Controller {
                               El solicitante es yo mismo
                               Haga click aqui:   https://modnom.ecnomina.com/solicitud_viatico  si desea ver los pendientes."
 		])->delay(now()->addSeconds());
+		
 		return '<p>Job Enviado a mi mismo</p>';
 	}
 	
 	public function recordarPago() {
 		
-		$QueryPendiente = Desarrollo::Where('estado', 'Esperando pago parcial')
-		                                ->whereDoesntHave('pagos')
-		                                ->whereNotNull('fecha_cotizacion_aceptada')
-		                                ->whereDate('fecha_cotizacion_aceptada', '<=', 
-		                                            Carbon::now()->subDays($this->LimiteDiasSinPagar));
+		$QueryPendiente = Desarrollo::Where('estado', 'Esperando pago parcial')->whereDoesntHave('pagos')->whereNotNull('fecha_cotizacion_aceptada')->whereDate('fecha_cotizacion_aceptada', '<=', Carbon::now()->subDays($this->LimiteDiasSinPagar))
+		;
 		
 		$dearrollopendiente = clone $QueryPendiente;
-		$dearrollopendiente = $dearrollopendiente ->first();
+		$dearrollopendiente = $dearrollopendiente->first();
 		$cuantosDesarrollosPendientes = $QueryPendiente->count();
 		if ($dearrollopendiente) {
 			$fechacotiza = $dearrollopendiente->fecha_cotizacion_aceptada;
-			$diffforhum = Carbon::parse($fechacotiza)->diffForHumans();
+			$diffforhum = MyGlobalHelp::diffCarbonMonthNDays($fechacotiza);
+//			$diffforhum = Carbon::parse($fechacotiza)->diffForHumans();
 			$desarrollo = Desarrollo::findOrFail($dearrollopendiente->id);
 			
 			
-					$jefe = User::Where('name', 'Carlos Daniel Anaya Barrios')->first();
-
-
-			Mail::to('ajelof2@gmail.com')->send(new AvisoPagoDesarrollo($desarrollo,$cuantosDesarrollosPendientes));
-//			Mail::to($jefe->email)->send(new AvisoPagoDesarrollo($desarrollo,$cuantosDesarrollosPendientes));
+			if (app()->environment('test')) {
+				Mail::to(['alejofg2@gmail.com','docmadridtorres@gmail.com'])->send(new AvisoPagoDesarrollo($desarrollo, $cuantosDesarrollosPendientes));
+			}else{
+				$jefe = User::Where('name', 'Carlos Daniel Anaya Barrios')->first();
+				$jefemail = $jefe->email;
+				Mail::to([$jefemail,'ajelof2@gmail.com'])->send(new AvisoPagoDesarrollo($desarrollo,$cuantosDesarrollosPendientes));
+			}
 			
 			return "Aviso enviado. Fecha en que se acepto la cotizacion $fechacotiza, $diffforhum";
 		}
