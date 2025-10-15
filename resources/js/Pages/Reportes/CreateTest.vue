@@ -240,12 +240,12 @@ watchEffect(() => {
                         let dirunasYnocturnas = calcularSinExtras(ini, fin)
                         form.diurnas = dirunasYnocturnas[0];
                         form.nocturnas = dirunasYnocturnas[1];
-                        data.BoolCentroNoFactura = true
+                        data.BoolCentrosNoFactura = true
                         data.mensajeCentroNoFactura = "Este centro no factura"
                         data.BoolCentrosNoFactura = true
 
                     } else {
-                        data.BoolCentroNoFactura = false
+                        data.BoolCentrosNoFactura = false
                         calcularHoras(
                             data, form,
                             ini, fin,
@@ -545,7 +545,7 @@ const formatfin = (date) => {
                 </div>
 
                 <div class="mt-4">
-                        <span v-if="data.BoolCentroNoFactura"
+                        <span v-if="data.BoolCentrosNoFactura"
                               class="mx-2 px-1 text-sky-700 bg-sky-400/10 dark:text-white">
                             {{ data.mensajeCentroNoFactura }}
                         </span>

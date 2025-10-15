@@ -40,14 +40,10 @@ use Illuminate\Support\Facades\DB;
  * @method static Builder|static simplePaginate($perPage = 15, $columns = ['*'], $pageName = 'page')
  * @method BelongsTo belongsTo(string $related, string $foreignKey = null, string $ownerKey = null)
  * @method HasMany hasMany(string $related, string $foreignKey = null, string $localKey = null)
- * @method BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null, string $relatedPivotKey = null)
+ * @method BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null)
  * @method static selectRaw(string $string)
  */
 class CentroCosto extends Model {
-	
-	use HasFactory;
-	
-	protected Collection $supervisCache; // Propiedad para almacenar el valor calculado
 	
 	protected $fillable = [
 		'nombre',
@@ -58,64 +54,53 @@ class CentroCosto extends Model {
 		'ValidoParaFacturar',
 		'zona_id',
 	];
-	
 	protected $appends = [
 		'Zouna',
 		'supervi',
 		'ListaSupervisores',
 	];
 	
-	public function getSuperviAttribute(): string {
-		if ($this->superviCache === null) { // Solo calcula si no está en caché
-			//            $this->superviCache = User::UsersWithRol('supervisor')->get();
-			$this->superviCache = implode(',', $this->ArrayListaSupervisores());
-			
-		}
-		
-		
-		return $this->superviCache ?? '';
-	}
+//	public static function boot() {
+//		parent::boot();
+//		
+//		static::retrieved(function ($model) {
+//			dump('CentroCosto cargado: ' . $model->id);
+//		});
+//	}
 	
-	public function ArrayListaSupervisores(): array {
+	public function getSuperviAttribute(): array {
+		// No llamar a $this->supervisores->... porque puede crear recursión.
 		return $this
-			->users()->whereHas('roles', fn($q) => $q->where('name', 'supervisor')) // Filtra solo supervisores
-			->pluck('name')->toArray()
+			->supervisores()->pluck('users.name')->unique()->values()->toArray()
 		;
 	}
 	
-	//    public function ArrayListaSupervisores(): array {
-	//        $supervisores = $this->supervisCache ?? $this->getSupervisAttribute();
-	//        $centroid = (int)$this->id;
-	//        return $supervisores->map(function (User $user) use ($centroid) {
-	//            if ($user->TieneEsteCentro($centroid)) {
-	//                return $user->name;
-	//            }
-	//            return null;
-	//        })->filter()->toArray();
-	//    }
+	public function supervisores() {
+		return $this->users()->whereHas('roles', fn($q) => $q->where('name', 'supervisor'));
+	}
 	
 	public function users(): belongsToMany {
 		return $this->belongstoMany(User::class, 'centro_user');
 	}
 	
 	public function getListaSupervisoresAttribute(): array {
-		$supervisoresAsociados = $this->users()->select(['users.id', 'name'])->get()->toArray();
-		
-		
-		return $supervisoresAsociados ?? [];
+		// Llamar directo a la tabla pivote sin pasar por el modelo User
+		return DB::table('centro_user')->join('users', 'users.id', '=', 'centro_user.user_id')->where('centro_user.centro_costo_id', $this->id)->select('users.id', 'users.name')->get()->toArray()
+		;
 	}
+	
+	public function ArrayListaSupervisores(): array {
+		
+		return User::where('centro_costo_id', $this->id)->whereHas('roles', fn($q) => $q->where('name', 'supervisor'))->pluck('name')->unique()->values()->toArray();
+	}
+	
 	
 	public function reportes(): HasMany {
 		return $this->hasMany(Reporte::class);
 	}
 	
-	//    public function getSuperviAttribute($supervisores): string {
-	//        $ArrayListaSupervi = $this->ArrayListaSupervisores($supervisores);
-	//        return implode(',', $ArrayListaSupervi);
-	//    }
-	
 	public function zona(): BelongsTo {
-		return $this->BelongsTo(zona::class);
+		return $this->belongsTo(zona::class);
 	}
 	
 	public function getZounaAttribute(): string {
@@ -133,7 +118,6 @@ class CentroCosto extends Model {
 			}
 		}
 		
-		
 		return array_unique($result);
 	}
 	
@@ -145,10 +129,8 @@ class CentroCosto extends Model {
 				return $user->id;
 			}
 			
-			
 			return null;
 		})->filter()->toArray();
-		
 		
 		return $result;
 	}

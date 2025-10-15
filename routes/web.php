@@ -184,4 +184,13 @@ Route::get('/test-email', function () {
         return 'Error al enviar el correo: ' . $e->getMessage();
     }
 });
+
+Route::get('/debug-supervi', function () {
+    $c = \App\Models\CentroCosto::find(1);
+    // solo esto:
+    return response()->json([
+        'toArray' => method_exists($c, 'toArray') ? $c->toArray() : 'no',
+        'ArrayListaSupervisores' => $c->ArrayListaSupervisores()
+    ]);
+});
 //</editor-fold>

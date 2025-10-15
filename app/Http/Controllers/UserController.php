@@ -18,10 +18,12 @@ use App\Models\Reporte;
 use App\Models\Role;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -33,44 +35,56 @@ use ZipStream\OperationMode;
 
 class UserController extends Controller {
 	
+	public Collection $cargos;
+	public Collection $centros;
+	public int $numberPermissions;
+	public int $cacheMapear;
+	public mixed $roles;
+	
 	public function __construct() {
-		$this->middleware('permission:create user', ['only' => ['create', 'store']]);$this->middleware('permission:read user', ['only' => ['index', 'show']]);$this->middleware('permission:update user', ['only' => ['edit', 'update']]);$this->middleware('permission:delete user', ['only' => ['destroy', 'destroyBulk']]);
+//		$this->middleware('permission:create user', ['only' => ['create', 'store']]);
+//		$this->middleware('permission:read user', ['only' => ['index', 'show']]);
+//		$this->middleware('permission:update user', ['only' => ['edit', 'update']]);
+//		$this->middleware('permission:delete user', ['only' => ['destroy', 'destroyBulk']]);
+		
+		$this->cargos = Cargo::all();
+		$this->centros = CentroCosto::all();
+		
+//		$permissions = Myhelp::EscribirEnLog($this, ' users constructor ');
+//		$this->numberPermissions = MyModels::getPermissionToNumber($permissions); //todo: replicar esto en todo
+		$this->numberPermissions = 10;
+		
+		$this->cacheMapear = 5; //minutos
+		
+		$this->roles = Role::all();
+		
 	}
 	
 	public function Dashboard() {
 		$ListaControladoresYnombreClase = (explode('\\', get_class($this)));
 		$nombreC = end($ListaControladoresYnombreClase);
-		Myhelp::EscribirEnLog($this, $nombreC, ' U -> ' . Auth::user()->name . ' Accedio al dashboard ', false);
-		
 		$Authuser = Myhelp::AuthU();
-		$userid = $Authuser->id;
-		$permissions = auth()->user()->roles->pluck('name')[0];
-		$numberPermissions = MyModels::getPermissionToNumber($permissions);
+		Myhelp::EscribirEnLog($this, $nombreC, ' U -> ' . $Authuser->name . ' Accedio al dashboard ', false);
 		
-		$ultimos5dias = null;
-		if ($numberPermissions === 1) {
+		$userid = $Authuser->id;
+		if ($this->numberPermissions === 1) {
 			return redirect()->route('Reportes.index')->with('success', 'Bienvenido');
 			// $reportes = (int) Reporte::Where('user_id', $Authuser->id)->count();
 		}
 		else {
-			$reportes = (int)Reporte::count();
+			$reportes = Reporte::count();
 			
-			if ($numberPermissions === 3) {
+			if ($this->numberPermissions === 3) {
 				$centroMio = $Authuser->ArrayCentrosID();
-				$reportes = (int)Reporte::WhereIn('centro_costo_id', $centroMio)->count();
+				$reportes = Reporte::WhereIn('centro_costo_id', $centroMio)->count();
 				
 				$ultimos5dias = [
-					'Mes pasado' => Reporte::WhereIn('centro_costo_id', $centroMio)
-				                       ->whereValido(1)
-                                       ->where('fecha_ini', '<', Carbon::today()->addMonth(-1)->endOfMonth())
-                                       ->where('fecha_ini', '>=', Carbon::today()->addMonth(- 1)->firstOfMonth())
-                                       ->get()->count(),
+					'Mes pasado' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->where('fecha_ini', '<', Carbon::today()->addMonth(- 1)->endOfMonth())->where('fecha_ini', '>=', Carbon::today()->addMonth(- 1)->firstOfMonth())->get()->count(),
 					
-					'Semana pasada' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)
-                                        ->whereBetween('fecha_ini', [
-											Carbon::now()->addDays(-7)->startOfWeek(),
-											Carbon::now()->addDays(-7)->endOfWeek()
-										])->get()->count(),
+					'Semana pasada' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->whereBetween('fecha_ini', [
+							Carbon::now()->addDays(- 7)->startOfWeek(),
+							Carbon::now()->addDays(- 7)->endOfWeek()
+						])->get()->count(),
 					
 					'Semana actual' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->whereBetween('fecha_ini', [
 						Carbon::now()->startOfWeek(),
@@ -159,7 +173,7 @@ class UserController extends Controller {
 			'diasNovalidos'     => $diasNovalidos ?? [],
 			'trabajadoresHoy'   => $trabajadoresHoy ?? [],
 			'centrosHoy'        => $centrosHoy ?? [],
-			'numberPermissions' => $numberPermissions,
+			'numberPermissions' => $this->numberPermissions,
 			'userid'            => $userid,
 		]);
 	}
@@ -167,23 +181,19 @@ class UserController extends Controller {
 	//empieza el index
 	
 	public function index(UserIndexRequest $request) {
-		$permissions = Myhelp::EscribirEnLog($this, ' users');
-		$numberPermissions = MyModels::getPermissionToNumber($permissions);
 		$users = $this->Busqueda($request);
 		
 		$perPage = $request->has('perPage') ? $request->perPage : 5;
-		$roles = Role::get();
-		if ($numberPermissions != 3 && $numberPermissions < 10) {
+		
+		if ($this->numberPermissions != 3 && $this->numberPermissions < 10) {
 			$users->whereHas('roles', function ($query) {
 				return $query->where('name', '<>', 'superadmin');
 			});
-			$roles = Role::where('name', '<>', 'superadmin')->where('name', '<>', 'admin')->get();
+			$this->roles = Role::where('name', '<>', 'superadmin')->where('name', '<>', 'admin')->get();
 		}
-		$cargos = Cargo::all();
-		$centros = CentroCosto::all();
 		
-		$this->MapearClasePP($users, $numberPermissions);
-		
+//		$this->MapearClasePP($users);
+		$users = $users->get()->filter();
 		$page = request('page', 1); // Current page number
 		$total = $users->count();
 		$paginated = new LengthAwarePaginator($users->forPage($page, $perPage), $total, $perPage, $page, ['path' => request()->url()]);
@@ -197,10 +207,6 @@ class UserController extends Controller {
 			'value' => 1
 		];
 		
-		// 21sept
-		//        $superviNullCentro = User::whereHas('roles', function ($query) {
-		//            return $query->where('name', 'supervisor');
-		//        })->whereDoesntHave('centros')->count();
 		$supervisores = User::whereHas('roles', function ($query) {
 			return $query->where('name', 'supervisor');
 		})->get();
@@ -212,7 +218,6 @@ class UserController extends Controller {
 			}
 		}
 		
-		
 		return Inertia::render('User/Index', [
 			'title'             => __('app.label.user'),
 			'filters'           => $request->all([
@@ -222,12 +227,12 @@ class UserController extends Controller {
 			                                     ]),
 			'perPage'           => (int)$perPage,
 			'users'             => $paginated,
-			'roles'             => $roles,
-			'cargos'            => $cargos,
-			'centros'           => $centros,
+			'roles'             => $this->roles,
+			'cargos'            => $this->cargos,
+			'centros'           => $this->centros,
 			'sexoSelect'        => $sexoSelect,
 			'superviNullCentro' => $superviNullCentro,
-			'numberPermissions' => $numberPermissions,
+			'numberPermissions' => $this->numberPermissions,
 			'breadcrumbs'       => [
 				[
 					'label' => __('app.label.user'),
@@ -267,7 +272,7 @@ class UserController extends Controller {
 				return $query->where('name', 'supervisor');
 			});
 		}
-		if ($request->has(['search1'])) { 
+		if ($request->has(['search1'])) {
 			$users->whereHas('roles', function ($query) {
 				return $query->wherenull('name');
 			});
@@ -276,18 +281,21 @@ class UserController extends Controller {
 			$users = $users->onlyTrashed();
 		}
 		
-		
 		//        MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'users'));
 		return $users;
 	}
 	
-	public function MapearClasePP(&$users, $numberPermissions) {
-		$users = $users->get()->map(function ($user) {
-			$user->cc = is_string($user->ArraycentroName()) ? $user->ArraycentroName() : implode(',', $user->ArraycentroName());
-			
-			
-			return $user;
-		})->filter();
+	public function MapearClasePP(&$users) {
+		// Clave única de caché (puedes personalizarla)
+		$cacheKey = 'mapear_clase_pp_' . md5($users->toSql() . serialize($users->getBindings()));
+		
+		$users = Cache::remember($cacheKey, now()->addMinutes($this->cacheMapear), function () use ($users) {
+			return $users->get()->map(function ($user) {
+				$user->cc = is_string($user->ArraycentroName()) ? $user->ArraycentroName() : implode(',', $user->ArraycentroName());
+				
+				return $user;
+			})->filter();
+		});
 	}
 	
 	public function store(UserStoreRequest $request) {
@@ -314,16 +322,14 @@ class UserController extends Controller {
 			
 			$user->assignRole($request->role);
 			if ($elCentroId) {
-			$user->centros()->sync($elCentroId);
+				$user->centros()->sync($elCentroId);
 			}
 			
 			DB::commit();
 			
-			
 			return back()->with('success', __('app.label.created_successfully', ['name' => $user->name]));
 		} catch (\Throwable $th) {
 			DB::rollback();
-			
 			
 			return back()->with('error', __('app.label.created_error', ['name' => __('app.label.user')]) . $th->getMessage());
 		}
@@ -377,12 +383,10 @@ class UserController extends Controller {
 			
 			zzloggingcrud::zilefLogUpdate($this, $user, $original, 'name');
 			
-			
 			return back()->with('success', __('app.label.updated_successfully', ['name' => $user->name]));
 		} catch (\Throwable $th) {
 			DB::rollback();
 			zzloggingcrud::zilefLogUpdate($this, null, null, 'name', $th);
-			
 			
 			return back()->with('error', __('app.label.updated_error', ['name' => $user->name]) . $th->getMessage());
 		}
@@ -402,7 +406,6 @@ class UserController extends Controller {
 			$mensajeSucces = __('app.label.deleted_successfully', ['name' => $user->name]);
 			Myhelp::EscribirEnLog($this, 'users', $mensajeSucces);
 			
-			
 			return back()->with('success', $mensajeSucces);
 			//            }else{
 			//                $mensajeLog = 'Se intentó eliminar demasiados reportes';
@@ -413,7 +416,6 @@ class UserController extends Controller {
 			$mensajeLog = $th->getMessage() . ' - File:' . $th->getFile() . ' - LINE:' . $th->getLine();
 			Myhelp::EscribirEnLog($this, 'DELETE users', $mensajeLog);
 			
-			
 			return back()->with('error', __('app.label.deleted_error', ['name' => $user->name]) . $mensajeLog);
 		}
 	}
@@ -423,7 +425,6 @@ class UserController extends Controller {
 		Myhelp::EscribirEnLog($this, 'users Recontratar ');
 		try {
 			$user->restore();
-			
 			
 			return back()->with('success', __('app.label.recontratado_successfully', ['name' => $user->name]));
 		} catch (\Throwable $th) {
@@ -436,7 +437,6 @@ class UserController extends Controller {
 		try {
 			$user = User::whereIn('id', $request->id);
 			$user->delete();
-			
 			
 			return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
 		} catch (\Throwable $th) {
@@ -472,7 +472,6 @@ class UserController extends Controller {
 			}
 			session(['datesFest' => $datesFest]);
 		}
-		
 		
 		return Inertia::render('User/uploadFromExcel', [
 			'title'             => __('app.label.user'),
@@ -526,7 +525,6 @@ class UserController extends Controller {
 			$NumReportesSinval += $SinValidar->where('valido', 0)->count();
 			$NumReportes += $query->where('valido', 1)->count();
 		}
-		
 		
 		return [
 			'NumReportes'       => $NumReportes,
@@ -588,7 +586,6 @@ class UserController extends Controller {
 				$StringUsuariosRep = implode(', ', $usuariosActualizados);
 				session(['countCedulaRepetida' => 0]);
 				
-				
 				return back()
 					->with('success', $messageSuccess1)->with('warning', count($usuariosActualizados) . ' Usuarios actualizados: ' . $StringUsuariosRep)
 				;
@@ -610,7 +607,6 @@ class UserController extends Controller {
 			session(['CountFilas' => 0]);
 			session(['countNoleidos' => 0]);
 			session(['usuariosActualizados' => []]);
-			
 			
 			// if (config('app.env') === 'production') {
 			return back()->with('warning', 'Error Excel. ' . $e->getMessage() . '. filas con errores: ' . $StringlasRowMalas);
@@ -643,7 +639,6 @@ class UserController extends Controller {
 		$NumReporteSigo = $this->SeeNumbersOfReporters($request);
 		$ini = $NumReporteSigo['ini'];
 		$fin = $NumReporteSigo['fin'];
-		
 		
 		return Inertia::render('User/uploadFromExcel', [
 			'title'                 => __('app.label.user'),
@@ -719,7 +714,6 @@ class UserController extends Controller {
 		$NumReporteSigo['ini'] = $ini;
 		$NumReporteSigo['fin'] = $fin;
 		
-		
 		return $NumReporteSigo;
 	}
 	
@@ -735,10 +729,8 @@ class UserController extends Controller {
 			$year = $NumReporteSigo['year'];
 			$month = $NumReporteSigo['month'];
 			
-			
 			return Excel::download(new SiigoExport($ini, $fin, $NumeroDiasFestivos), 'Siigo ' . $year . 'Quincena' . $quincena . 'DelMes' . $month . '.xlsx');
 		}
-		
 		
 		return redirect()->route('user.uploadexcel')->with('warning', 'El numero de reportes en esa quincena es 0. ' . 'formato de la fecha: Año - Mes - dia. ' . 'fecha inicial: ' . $ini->format('Y-m-d') . ' - ' . 'fecha final: ' . $fin->format('Y-m-d'));
 	}
@@ -781,62 +773,62 @@ class UserController extends Controller {
 			//     [null,null,null,null,null,null,null,null,null,null,null,null,null,null] //campos ordenables
 			// ];
 			$nombresTabla = [//0: como se ven //1 como es la BD
-			                 
-			                 [
-				                 'Acciones',
-				                 '#',
-				                 'Centro costo',
-				                 'Trabajador',
-				                 'valido',
-				                 'inicio',
-				                 'fin',
-				                 'horas trabajadas',
-				                 'diurnas',
-				                 'nocturnas',
-				                 'extra diurnas',
-				                 'extra nocturnas',
-				                 'dominical diurno',
-				                 'dominical nocturno',
-				                 'dominical extra diurno',
-				                 'dominical extra nocturno',
-				                 'observaciones'
-			                 ],
-			                 [
-				                 'b_valido',
-				                 't_fecha_ini',
-				                 't_fecha_fin',
-				                 'i_horas_trabajadas',
-				                 'i_diurnas',
-				                 'i_nocturnas',
-				                 'i_extra_diurnas',
-				                 'i_extra_nocturnas',
-				                 'i_dominical_diurno',
-				                 'i_dominical_nocturno',
-				                 'i_dominical_extra_diurno',
-				                 'i_dominical_extra_nocturno',
-				                 's_observaciones'
-			                 ],
-			                 //m for money || t for datetime || d date || i for integer || s string || b boolean
-			                 [
-				                 null,
-				                 null,
-				                 null,
-				                 null,
-				                 'b_valido',
-				                 't_fecha_ini',
-				                 't_fecha_fin',
-				                 'i_horas_trabajadas',
-				                 'i_diurnas',
-				                 'i_nocturnas',
-				                 'i_extra_diurnas',
-				                 'i_extra_nocturnas',
-				                 'i_dominical_diurno',
-				                 'i_dominical_nocturno',
-				                 'i_dominical_extra_diurno',
-				                 'i_dominical_extra_nocturno',
-				                 's_observaciones'
-			                 ],
-			                 //m for money || t for datetime || d date || i for integer || s string || b boolean
+				
+				[
+					'Acciones',
+					'#',
+					'Centro costo',
+					'Trabajador',
+					'valido',
+					'inicio',
+					'fin',
+					'horas trabajadas',
+					'diurnas',
+					'nocturnas',
+					'extra diurnas',
+					'extra nocturnas',
+					'dominical diurno',
+					'dominical nocturno',
+					'dominical extra diurno',
+					'dominical extra nocturno',
+					'observaciones'
+				],
+				[
+					'b_valido',
+					't_fecha_ini',
+					't_fecha_fin',
+					'i_horas_trabajadas',
+					'i_diurnas',
+					'i_nocturnas',
+					'i_extra_diurnas',
+					'i_extra_nocturnas',
+					'i_dominical_diurno',
+					'i_dominical_nocturno',
+					'i_dominical_extra_diurno',
+					'i_dominical_extra_nocturno',
+					's_observaciones'
+				],
+				//m for money || t for datetime || d date || i for integer || s string || b boolean
+				[
+					null,
+					null,
+					null,
+					null,
+					'b_valido',
+					't_fecha_ini',
+					't_fecha_fin',
+					'i_horas_trabajadas',
+					'i_diurnas',
+					'i_nocturnas',
+					'i_extra_diurnas',
+					'i_extra_nocturnas',
+					'i_dominical_diurno',
+					'i_dominical_nocturno',
+					'i_dominical_extra_diurno',
+					'i_dominical_extra_nocturno',
+					's_observaciones'
+				],
+				//m for money || t for datetime || d date || i for integer || s string || b boolean
 			];
 			
 			//sin uso1
@@ -877,27 +869,26 @@ class UserController extends Controller {
 		}
 		$sumhoras_trabajadas = $Reportes->sum('horas_trabajadas');
 		
-		
 		return Inertia::render('Reportes/Index', [ //carpeta
-		                                           'title'          => $titulo,
-		                                           'filters'        => null,
-		                                           'perPage'        => (int)$perPage,
-		                                           'fromController' => $Reportes->paginate($perPage),
-		                                           'breadcrumbs'    => [
-			                                           [
-				                                           'label' => __('app.label.Reportes'),
-				                                           'href'  => route('Reportes.index')
-			                                           ]
-		                                           ],
-		                                           'nombresTabla'   => $nombresTabla,
-		                                           
-		                                           'valoresSelect'        => $valoresSelect,
-		                                           'showSelect'           => $showSelect,
-		                                           'IntegerDefectoSelect' => $IntegerDefectoSelect,
-		                                           'showUsers'            => $showUsers,
-		                                           'quincena'             => $quincena,
-		                                           'nombrePersona'        => $nombrePersona,
-		                                           'sumhoras_trabajadas'  => $sumhoras_trabajadas,
+			'title'          => $titulo,
+			'filters'        => null,
+			'perPage'        => (int)$perPage,
+			'fromController' => $Reportes->paginate($perPage),
+			'breadcrumbs'    => [
+				[
+					'label' => __('app.label.Reportes'),
+					'href'  => route('Reportes.index')
+				]
+			],
+			'nombresTabla'   => $nombresTabla,
+			
+			'valoresSelect'        => $valoresSelect,
+			'showSelect'           => $showSelect,
+			'IntegerDefectoSelect' => $IntegerDefectoSelect,
+			'showUsers'            => $showUsers,
+			'quincena'             => $quincena,
+			'nombrePersona'        => $nombrePersona,
+			'sumhoras_trabajadas'  => $sumhoras_trabajadas,
 		]);
 	}
 	
@@ -922,7 +913,6 @@ class UserController extends Controller {
 			}
 		}
 		
-		
 		return 'Horas trabajadas quincena: ' . $horasTrabajadas;
 	}
 	
@@ -942,12 +932,12 @@ class UserController extends Controller {
 		$cargos = Cargo::all();
 		$centros = CentroCosto::all();
 		
-		$this->MapearClasePP($users, $numberPermissions);
+//		$this->MapearClasePP($users);
+		$users = $users->get()->filter();
 		
 		$page = request('page', 1); // Current page number
 		$total = $users->count();
 		$paginated = new LengthAwarePaginator($users->forPage($page, $perPage), $total, $perPage, $page, ['path' => request()->url()]);
-		
 		
 		return Inertia::render('User/IndeDeleted', [
 			'title'       => __('app.label.user'),
@@ -976,7 +966,6 @@ class UserController extends Controller {
 			$user = User::where('id', $request->id);
 			$user->forceDelete();
 			
-			
 			return back()->with('success', __('app.label.deleted_successfully', ['name' => count($request->id) . ' ' . __('app.label.user')]));
 		} catch (\Throwable $th) {
 			return back()->with('error', __('app.label.deleted_error', ['name' => count($request->id) . ' ' . __('app.label.user')]) . $th->getMessage());
@@ -988,7 +977,6 @@ class UserController extends Controller {
 		if (1 === $userauthid) {
 			$user = User::findOrFail($id);
 			$user->resetPasswordToCedula();
-			
 			
 			return response()->json(['message' => 'Contraseña de ' . $user->name . ' restablecida correctamente']);
 		}
@@ -1012,7 +1000,7 @@ class UserController extends Controller {
 			User::select('id', 'name')->Where('name', 'like', '%John Anderson Franco Alvarez%')->first(),
 		];
 		foreach ($arrayReturn as $index => $item) {
-			if($item){
+			if ($item) {
 				
 				$filteredArray[] = $item;
 			}

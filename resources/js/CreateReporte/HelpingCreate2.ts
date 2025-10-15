@@ -239,22 +239,24 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra, HORA
 function RestarAlmuarzo(form,data){
     let LIMITE_ALMUERZO:number = 8
     let HayAlmuerzo:number = 8
-    HayAlmuerzo -= data.TrabajadasHooy
-    // LIMITE_ALMUERZO = LIMITE_ALMUERZO - data.TrabajadasHooy < 0 ? 0 : LIMITE_ALMUERZO - data.TrabajadasHooy
+    HayAlmuerzo -= data.TrabajadasHooy //se restan las que ya trabajo hoy
 
     const fechain_i: Date = new Date(form.fecha_ini);
     const diaSemana:number = fechain_i.getDay();
+    if (diaSemana === 5) {//viernes
+        HayAlmuerzo -= 1
+        LIMITE_ALMUERZO -= 1
+    }
     if (diaSemana === 6) {//sabado
         HayAlmuerzo -= 2
         LIMITE_ALMUERZO -= 2
     }
     let numerador = form.horas_trabajadas + data.TrabajadasHooy
-    // -9
     if(form.horas_trabajadas >= HayAlmuerzo){
         form.almuerzo = Math.floor((numerador) / LIMITE_ALMUERZO)
 
         if(form.almuerzo > 1){
-            form.almuerzo = Math.floor((form.horas_trabajadas + data.TrabajadasHooy) / 8)
+            form.almuerzo = Math.floor((numerador) / 8)
         }
     }
 
@@ -283,7 +285,7 @@ function RestarAlmuarzo(form,data){
             // console.log('se quita noctura')
             return true;
         }
-        if(form.extra_diurnas >= data.ValorRealalmuerzo){ //todo: hay ocasiones donde no se va a poder restar
+        if(form.extra_diurnas >= data.ValorRealalmuerzo){
             form.extra_diurnas -= data.ValorRealalmuerzo
             form.almuerzo += ' diurno'
             // console.log('ED - Almuerzo')

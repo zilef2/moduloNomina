@@ -73,6 +73,7 @@ class Myhelp {
 	
 	public static function EscribirEnLog($thiis, $clase = '', $mensaje = '', $returnPermission = true, $critico = false) {
 		$permissions = $returnPermission ? self::AuthU()->roles->pluck('name')[0] : null;
+			// (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5)) //sirve para ver la linea de codigo que llama
 		$ListaControladoresYnombreClase = (explode('\\', get_class($thiis)));
 		$nombreC = end($ListaControladoresYnombreClase);
 		$esCritico = !$critico;

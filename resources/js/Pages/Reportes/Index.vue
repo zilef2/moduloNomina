@@ -195,7 +195,7 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
         preserveState: true,
         preserveScroll: true
     })
-}, 175))
+}, 800))
 
 
 const selectAll = (event) => {
@@ -357,6 +357,7 @@ const handleCheckboxChange = (values) => {
                             <small v-if="!data.params.search5" class="my-1">Filtrar por Centro</small>
                             <vSelect  v-model="data.params.search5"
                                      :options="props.losSelect['centros']" label="name"
+                                     :filterable="false"
                                      class="block w-full mx-1 mt-1 rounded-lg"></vSelect>
                         </div>
                         <FilterButtons @update:checked="handleCheckboxChange"

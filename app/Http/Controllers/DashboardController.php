@@ -63,9 +63,11 @@ class DashboardController extends Controller {
 			if (app()->environment('test')) {
 				Mail::to(['alejofg2@gmail.com','docmadridtorres@gmail.com'])->send(new AvisoPagoDesarrollo($desarrollo, $cuantosDesarrollosPendientes));
 			}else{
-				$jefe = User::Where('name', 'Carlos Daniel Anaya Barrios')->first();
-				$jefemail = $jefe->email;
-				Mail::to([$jefemail,'ajelof2@gmail.com'])->send(new AvisoPagoDesarrollo($desarrollo,$cuantosDesarrollosPendientes));
+				if (app()->environment('production')) {
+					$jefe = User::Where('name', 'Carlos Daniel Anaya Barrios')->first();
+					$jefemail = $jefe->email;
+					Mail::to([$jefemail,'ajelof2@gmail.com'])->send(new AvisoPagoDesarrollo($desarrollo,$cuantosDesarrollosPendientes));
+				}
 			}
 			
 			return "Aviso enviado. Fecha en que se acepto la cotizacion $fechacotiza, $diffforhum";

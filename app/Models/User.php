@@ -81,6 +81,13 @@ class User extends Authenticatable {
 	protected $hidden = ['password', 'remember_token'];
 	private mixed $salario;
 	
+	protected $appends = ['cc'];
+	
+	public function getccAttribute(): string {
+	    return is_string($this->ArraycentroName()) ? $this->ArraycentroName() : implode(',', $this->ArraycentroName());
+		
+	}
+	
 	public static function UsersWithRol($rol) {
 		return User::whereHas('roles', function ($query) use ($rol) {
 			return $query->where('name', $rol);

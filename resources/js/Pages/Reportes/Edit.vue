@@ -521,6 +521,7 @@ const Reporte11_59 = () => {
 }
 //hijo: watcheffect
 const recuperarHoras = (ReporteRecuperado) => {
+  console.log("🚀🚀recuperarHoras ~ ReporteRecuperado.horas_trabajadas: ", ReporteRecuperado.horas_trabajadas);
 
 
     form.diurnas = ReporteRecuperado.diurnas
@@ -539,7 +540,10 @@ const recuperarHoras = (ReporteRecuperado) => {
     form.fecha_fin = ReporteRecuperado.fecha_fin
     form.observaciones = ReporteRecuperado.observaciones
     form.horas_trabajadas = ReporteRecuperado.horas_trabajadas
+    console.log("🚀🚀recuperarHoras ~ form.horas_trabajadas: ", form.horas_trabajadas);
 }
+
+
 watchEffect(() => {
     if (props.show) {
         let ReporteRecuperado = props.Reporte
@@ -548,21 +552,9 @@ watchEffect(() => {
         nextTick()
 
         recuperarHoras(ReporteRecuperado)
-        Reporte11_59()
+        // Reporte11_59()
 
-        //arreglar los cambios del usuario mientras mueve la interfaz
-        if (Date.parse(form.fecha_ini) > Date.parse(form.fecha_fin)) {
-            form.horas = '0';
-            // form.horas_trabajadas = form.fecha_fin.substr(1,3);
-        } else {
-            form.horas_trabajadas = (parseInt((Date.parse(form.fecha_fin) - Date.parse(form.fecha_ini)) / (3600 * 1000)));
-        }
-
-
-       
-        console.log("🚀 ~ ReporteRecuperado2: ", ReporteRecuperado);
     }
-    
 })
 
 const daynames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
@@ -623,7 +615,6 @@ const daynames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
                                        v-model="form.nocturnas" disabled
                                        :placeholder="lang().placeholder.nocturnas" :error="form.errors.nocturnas"/>
                         </div>
-                        achu3 {{form.diurnas}}
                     </div>
                     <!-- mt-80 -->
                     <div v-if="form.extra_diurnas || form.extra_nocturnas || form.dominicales == 'si'"

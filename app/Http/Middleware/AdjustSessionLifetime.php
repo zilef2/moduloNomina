@@ -16,7 +16,7 @@ class AdjustSessionLifetime
      public function handle($request, Closure $next)
     {
         if (app()->environment('test')) {
-            config(['session.lifetime' => (4 * 24 * 60)]); // 4 dias para pruebas
+            config(['session.lifetime' => (4 * 60)]); // 4 horas
         } else {
             config(['session.lifetime' =>  2 * 60]); // 2 horas para producción
         }

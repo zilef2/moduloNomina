@@ -86,9 +86,8 @@ onMounted(() => {
     //explaining: data.TrabajadasSemana son las horas que hay que restarle a Cuandocomienzaextras
     data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
 
-    console.clear()
     if (consolelog.MostrarTrabajadaSemana) {
-        console.log("=>(Create.vue:86) props.HorasDeCadaSemana", props.HorasDeCadaSemana);
+        console.log("=>(Create.vue:86) props.HorasDeCadaSemana", props.HorasDeCadaSemana); 
         console.log("=>(Create.vue:86) data.TrabajadasSemana", data.TrabajadasSemana);
     }
 
@@ -242,12 +241,14 @@ watchEffect(() => {
                             let dirunasYnocturnas = calcularSinExtras(ini, fin)
                             form.diurnas = dirunasYnocturnas[0];
                             form.nocturnas = dirunasYnocturnas[1];
-                            data.BoolCentroNoFactura = true
+                            data.BoolCentrosNoFactura = true
                             data.mensajeCentroNoFactura = "Este centro no factura"
                             data.BoolCentrosNoFactura = true
 
+                            // form.centro_costo_id = {label: '8071 - Nacional', value: 677}
                         } else {
-                            data.BoolCentroNoFactura = false
+                            
+                            data.BoolCentrosNoFactura = false
                             calcularHoras(
                                 data, form,
                                 ini, fin,
@@ -347,8 +348,6 @@ const create = () => {
             if (props.numberPermissions < 9) {
                 data.respuestaSeguro = confirm("¿Estás seguro de enviar el formulario?");
             }
-            console.log("111) ArrayHorasSemanales['s_Dias_gabela']", props.ArrayHorasSemanales['s_Dias_gabela']);
-            console.log("222) props.ArrayHorasSemanales['s_Dias_gabela']", typeof (props.ArrayHorasSemanales['s_Dias_gabela']));
             let validacionNoMasDe3Dias
             if (props.numberPermissions > 9) validacionNoMasDe3Dias = 'ok'
             else validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini, props.ArrayHorasSemanales['s_Dias_gabela'])
@@ -550,7 +549,7 @@ const formatfin = (date) => {
                     </div>
 
                     <div class="mt-4">
-                        <span v-if="data.BoolCentroNoFactura"
+                        <span v-if="data.BoolCentrosNoFactura"
                               class="mx-2 px-1 text-sky-700 bg-sky-400/10 dark:text-white">
                             {{ data.mensajeCentroNoFactura }}
                         </span>

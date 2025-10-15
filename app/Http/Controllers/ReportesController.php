@@ -187,20 +187,22 @@ class ReportesController extends Controller {
 			];
 			$showSelect[(int)($value->id)] = $value->nombre;
 		}
-		$usuariosSelectConsulta = User::orderBy('name')->get();
+		
+		// Optimizado: solo cargar id y name
+		$usuariosSelectConsulta = User::select('id', 'name')->orderBy('name')->get();
 		foreach ($usuariosSelectConsulta as $value) {
 			$showUsers[(int)($value->id)] = $value->name;
 		}
 		
 		if ($numberPermissions === 3) { //
 			$centrosSupervisor = $elUser->ArrayCentrosID();
-			$userEmpleados = User::UsersWithManyRols(['empleado', 'supervisor'])->orderBy('name')->get();
-			$userEmpleados = $userEmpleados->map(function ($user) use ($centrosSupervisor) {
-				$tieneReportesEnElCentro = $user->reportes()->WhereIn('centro_costo_id', $centrosSupervisor)->count();
-				
-				
-				return $tieneReportesEnElCentro > 0 ? $user : false;
-			})->filter();
+			// Optimizado: usar exists en vez de count
+			$userEmpleados = User::UsersWithManyRols(['empleado', 'supervisor'])
+				->whereHas('reportes', function($query) use ($centrosSupervisor) {
+					$query->whereIn('centro_costo_id', $centrosSupervisor);
+				})
+				->orderBy('name')
+				->get();
 		}
 		else {
 			$userEmpleados = User::UsersWithRol('empleado')->orderBy('name')->get();
@@ -591,13 +593,22 @@ class ReportesController extends Controller {
 	}
 	
 	private function DolosSelect() {
-		$centroSelect = CentroCosto::select('id', 'nombre as name')
-			->WhereHas('reportes')
-			->get()->toArray();
+		$centroSelect = \Cache::remember('centros_con_reportes', 3600, function () {
+			return CentroCosto::select('id', 'nombre as name')
+				->where('activo', 1)
+				->whereExists(function($query) {
+					$query->select(DB::raw(1))
+						->from('reportes')
+						->whereColumn('reportes.centro_costo_id', 'centro_costos.id')
+						->limit(1);
+				})
+				->orderBy('nombre')
+				->get()->toArray();
+		});
+		
 		array_unshift($centroSelect, ["name" => "Seleccione un centro de costo",
 		                              'id'   => 0
 		]);
-		
 		
 		return ['centros' => $centroSelect];
 	}
