@@ -6,8 +6,11 @@ use App\helpers\MyGlobalHelp;
 use App\helpers\Myhelp;
 use App\Jobs\EnviarViaticoJob;
 use App\Mail\AvisoPagoDesarrollo;
+use App\Mail\UsuariosHorasExtrasMail;
 use App\Mail\UsuariosLogeadosHoy;
 use App\Models\desarrollo;
+use App\Models\Parametro;
+use App\Models\Reporte;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -47,8 +50,7 @@ class DashboardController extends Controller {
 	
 	public function recordarPago() {
 		
-		$QueryPendiente = Desarrollo::Where('estado', 'Esperando pago parcial')->whereDoesntHave('pagos')->whereNotNull('fecha_cotizacion_aceptada')->whereDate('fecha_cotizacion_aceptada', '<=', Carbon::now()->subDays($this->LimiteDiasSinPagar))
-		;
+		$QueryPendiente = Desarrollo::Where('estado', 'Esperando pago parcial')->whereDoesntHave('pagos')->whereNotNull('fecha_cotizacion_aceptada')->whereDate('fecha_cotizacion_aceptada', '<=', Carbon::now()->subDays($this->LimiteDiasSinPagar));
 		
 		$dearrollopendiente = clone $QueryPendiente;
 		$dearrollopendiente = $dearrollopendiente->first();
@@ -56,17 +58,23 @@ class DashboardController extends Controller {
 		if ($dearrollopendiente) {
 			$fechacotiza = $dearrollopendiente->fecha_cotizacion_aceptada;
 			$diffforhum = MyGlobalHelp::diffCarbonMonthNDays($fechacotiza);
-//			$diffforhum = Carbon::parse($fechacotiza)->diffForHumans();
+			//			$diffforhum = Carbon::parse($fechacotiza)->diffForHumans();
 			$desarrollo = Desarrollo::findOrFail($dearrollopendiente->id);
 			
-			
 			if (app()->environment('test')) {
-				Mail::to(['alejofg2@gmail.com','docmadridtorres@gmail.com'])->send(new AvisoPagoDesarrollo($desarrollo, $cuantosDesarrollosPendientes));
-			}else{
+				Mail::to([
+					         'alejofg2@gmail.com',
+					         'docmadridtorres@gmail.com'
+				         ])->send(new AvisoPagoDesarrollo($desarrollo, $cuantosDesarrollosPendientes));
+			}
+			else {
 				if (app()->environment('production')) {
 					$jefe = User::Where('name', 'Carlos Daniel Anaya Barrios')->first();
 					$jefemail = $jefe->email;
-					Mail::to([$jefemail,'ajelof2@gmail.com'])->send(new AvisoPagoDesarrollo($desarrollo,$cuantosDesarrollosPendientes));
+					Mail::to([
+						         $jefemail,
+						         'ajelof2@gmail.com'
+					         ])->send(new AvisoPagoDesarrollo($desarrollo, $cuantosDesarrollosPendientes));
 				}
 			}
 			
@@ -123,6 +131,56 @@ class DashboardController extends Controller {
 		Mail::to('ajelof2@gmail.com')->send(new UsuariosLogeadosHoy($agrupados, Carbon::today()->format('d/m/Y')));
 		
 		return '<p>Correo enviado correctamente </p>' . '<p>| empleados ' . count($agrupados['empleado']) . '</p><p>' . implode(', ', $agrupados['empleado']) . '</p>' . '<p>| administrativo ' . count($agrupados['administrativo']) . '</p><p>' . implode(', ', $agrupados['administrativo']) . '</p>' . '<p>| otros ' . count($agrupados['otros']) . '</p><p>' . implode(', ', $agrupados['otros']) . '</p>';
+	}
+	
+	public function PersonasExtra() {
+		$param = Parametro::all()->first()->HORAS_NECESARIAS_SEMANA;
+		$now = Carbon::now('America/Bogota');
+		
+		if ($now->day <= 15) {
+			// Primera quincena del mes actual
+			$from = $now->copy()->startOfMonth();   
+			$to = $now->copy()->day(15)->endOfDay();
+		}
+		else {
+			// Segunda quincena del mes actual
+			$from = $now->copy()->day(16)->startOfDay();
+			$to = $now->copy()->endOfMonth()->endOfDay();
+		}
+		$fechaLabel = $from->locale('es')->isoFormat('D [de] MMMM [de] YYYY')
+           . ' - '
+           . $to->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
+		
+		$usuarios = Reporte::select([
+			                            'users.name as usuario',
+			                            'reportes.user_id',
+			                            DB::raw('WEEK(reportes.fecha_ini, 1) as semana_iso'),
+			                            DB::raw('SUM(reportes.horas_trabajadas) as total_horas')
+		                            ])->join('users', 'users.id', '=', 'reportes.user_id')->whereBetween('reportes.fecha_ini', [
+			'2025-10-01 00:00:00',
+			'2025-10-15 23:59:59'
+		])->whereNull('reportes.deleted_at')
+		  ->groupBy('reportes.user_id', 'users.name', DB::raw('WEEK(reportes.fecha_ini, 1)'))
+		  ->having('total_horas', '>', $param)
+		  ->orderBy('total_horas')
+		  ->orderBy('users.name')
+		  ->orderBy(DB::raw('semana_iso'))
+		  ->get();
+		
+        if (app()->environment('test')) {
+			$destinos = ['alejofg2@gmail.com'];
+        }else{
+			$destinos = [
+				'ajelof2@gmail.com',
+				'perezmezajessica@gmail.com'
+			];
+        }
+		Mail::to($destinos)->send(new UsuariosHorasExtrasMail($usuarios, $fechaLabel,$param));
+		
+		return '
+		<p> Correo enviado a </p>
+		<p> ' . implode(',',$destinos) . '</p>';
+		
 	}
 	
 }
