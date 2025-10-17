@@ -42,16 +42,16 @@ class UserController extends Controller {
 	public mixed $roles;
 	
 	public function __construct() {
-//		$this->middleware('permission:create user', ['only' => ['create', 'store']]);
-//		$this->middleware('permission:read user', ['only' => ['index', 'show']]);
-//		$this->middleware('permission:update user', ['only' => ['edit', 'update']]);
-//		$this->middleware('permission:delete user', ['only' => ['destroy', 'destroyBulk']]);
+		//		$this->middleware('permission:create user', ['only' => ['create', 'store']]);
+		//		$this->middleware('permission:read user', ['only' => ['index', 'show']]);
+		//		$this->middleware('permission:update user', ['only' => ['edit', 'update']]);
+		//		$this->middleware('permission:delete user', ['only' => ['destroy', 'destroyBulk']]);
 		
 		$this->cargos = Cargo::all();
 		$this->centros = CentroCosto::all();
 		
-//		$permissions = Myhelp::EscribirEnLog($this, ' users constructor ');
-//		$this->numberPermissions = MyModels::getPermissionToNumber($permissions); //todo: replicar esto en todo
+		//		$permissions = Myhelp::EscribirEnLog($this, ' users constructor ');
+		//		$this->numberPermissions = MyModels::getPermissionToNumber($permissions); //todo: replicar esto en todo
 		$this->numberPermissions = 10;
 		
 		$this->cacheMapear = 5; //minutos
@@ -71,8 +71,9 @@ class UserController extends Controller {
 			return redirect()->route('Reportes.index')->with('success', 'Bienvenido');
 			// $reportes = (int) Reporte::Where('user_id', $Authuser->id)->count();
 		}
-		else {
+		else { // si no eres empleado
 			$reportes = Reporte::count();
+			$elmespasado = Carbon::now()->startOfWeek()->addMonth(- 1);
 			
 			if ($this->numberPermissions === 3) {
 				$centroMio = $Authuser->ArrayCentrosID();
@@ -82,9 +83,9 @@ class UserController extends Controller {
 					'Mes pasado' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->where('fecha_ini', '<', Carbon::today()->addMonth(- 1)->endOfMonth())->where('fecha_ini', '>=', Carbon::today()->addMonth(- 1)->firstOfMonth())->get()->count(),
 					
 					'Semana pasada' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->whereBetween('fecha_ini', [
-							Carbon::now()->addDays(- 7)->startOfWeek(),
-							Carbon::now()->addDays(- 7)->endOfWeek()
-						])->get()->count(),
+						Carbon::now()->addDays(- 7)->startOfWeek(),
+						Carbon::now()->addDays(- 7)->endOfWeek()
+					])->get()->count(),
 					
 					'Semana actual' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->whereBetween('fecha_ini', [
 						Carbon::now()->startOfWeek(),
@@ -96,7 +97,7 @@ class UserController extends Controller {
 					'Mes pasado' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereIn('valido', [
 						0,
 						2
-					])->where('fecha_ini', '<', Carbon::today()->startOfMonth())->get()->count(),
+					])->where('fecha_ini', '>=', $elmespasado)->where('fecha_ini', '<', Carbon::today()->startOfMonth())->get()->count(),
 					'Mes actual' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereIn('valido', [
 						0,
 						2
@@ -104,7 +105,7 @@ class UserController extends Controller {
 				];
 				
 			}
-			else {
+			else { //si no eres administrativo
 				$ultimos5dias = [
 					'Mes pasado' => Reporte::whereValido(1)->where('fecha_ini', '<', Carbon::today()->addMonth(- 1))->get()->count(),
 					
@@ -122,17 +123,17 @@ class UserController extends Controller {
 					'Mes pasado' => Reporte::whereIn('valido', [
 						0,
 						2
-					])->where('fecha_ini', '<', Carbon::today()->startOfMonth())->get()->count(),
+					])->where('fecha_ini', '<', Carbon::today()->startOfMonth())->where('fecha_ini', '>=', $elmespasado)->get()->count(),
 					'Mes actual' => Reporte::whereIn('valido', [
 						0,
 						2
 					])->where('fecha_ini', '>', Carbon::today()->startOfMonth())->get()->count(),
 				];
-				
 			}
+			
 			$usuariosConRol = User::whereHas('roles', function ($q) {
 				$q->where('name', 'empleado');
-			})->take(5)->get();
+			})->whereHas('reportes')->withSum('reportes as total_horas', 'horas_trabajadas')->orderByDesc('total_horas')->get()->take(5);
 			foreach ($usuariosConRol as $value) {
 				$BooleanreportoHoy = Reporte::where('user_id', $value->id)->whereDate('fecha_fin', Carbon::today())->first();
 				
@@ -154,14 +155,17 @@ class UserController extends Controller {
 					$centrosHoy[$value->nombre] = 0;
 				}
 			}
-		}
-		
-		//#location
-		// if ($position = Location::get()) { // Successfully retrieved position.
-		//     $positio = $position->countryName;
-		//     Log::channel('stevebauman')->info('Vista: welcome. User => '  .Auth::user()->name .' posicion:'. $positio); } else {
-		//     $positio =' Failed retrieving position.';
-		//     Log::channel('stevebauman')->info('Vista: welcome. User => '  .Auth::user()->name .' '. $positio); }
+			$conteoPorRol = User::whereNotIn('cargo_id',[1,2])->with('roles')->get()->flatMap->roles->groupBy('name')->map->count();
+			
+		$topCentros = CentroCosto::select('nombre', 'mano_obra_estimada')
+				    ->where('mano_obra_estimada', '>', 250000)
+				    ->orderByDesc(DB::raw('CAST(mano_obra_estimada AS DECIMAL(15,2))'))
+				    ->limit(25)
+				    ->get()
+				    ->pluck('mano_obra_estimada', 'nombre')
+				    ->sortDesc(); // refuerza el orden en la colección
+			;
+		} //fin, si no eres empleado
 		
 		return Inertia::render('Dashboard', [
 			'versionZilef'      => '25.6.1',
@@ -175,6 +179,8 @@ class UserController extends Controller {
 			'centrosHoy'        => $centrosHoy ?? [],
 			'numberPermissions' => $this->numberPermissions,
 			'userid'            => $userid,
+			'conteoPorRol'     => $conteoPorRol,
+			'topCentros'     => $topCentros,
 		]);
 	}
 	
@@ -192,7 +198,7 @@ class UserController extends Controller {
 			$this->roles = Role::where('name', '<>', 'superadmin')->where('name', '<>', 'admin')->get();
 		}
 		
-//		$this->MapearClasePP($users);
+		//		$this->MapearClasePP($users);
 		$users = $users->get()->filter();
 		$page = request('page', 1); // Current page number
 		$total = $users->count();
@@ -932,7 +938,7 @@ class UserController extends Controller {
 		$cargos = Cargo::all();
 		$centros = CentroCosto::all();
 		
-//		$this->MapearClasePP($users);
+		//		$this->MapearClasePP($users);
 		$users = $users->get()->filter();
 		
 		$page = request('page', 1); // Current page number

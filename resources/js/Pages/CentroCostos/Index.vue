@@ -189,8 +189,8 @@ const nombreMes = fechaActual.toLocaleDateString('es-ES', opciones);
                                 {{ (clasegenerica.Zouna) }}
                             </td>
 
-                            <td v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                <p v-for="(superv, inde) in clasegenerica.supervi.split(',')" :key="inde">
+                            <td v-if="clasegenerica.supervi" v-show="can(['update centroCostos'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                <p v-for="(superv, inde) in clasegenerica.supervi" :key="inde">
                                     <span v-if="superv.trim()">{{ inde + 1 + ') ' + superv }}</span>
                                     <span v-else class="border-b-blue-300 border-2">Sin supervisor</span>
                                 </p>
