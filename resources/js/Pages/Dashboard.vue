@@ -24,9 +24,10 @@ const props = defineProps({
     userid: Number,
     conteoPorRol: Object,
     topCentros: Object,
+    chartLabels: Object,
+    chartValues: Object,
 })
 let width;
-
 
 
 onMounted(async () => {
@@ -48,9 +49,22 @@ const chartOptions = {
     // maintainAspectRatio: false,
     color: "#808080",
 }
+const chartOptions5 = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      ticks: { callback: value => value.toLocaleString() },
+    },
+  },
+};
 
 const chartData = {
-    name: 'Numero de reportes',
+    name: 'Reportes',
     datasets: [{
         label: 'Numero de Reportes',
         data: props.ultimos5dias,
@@ -74,24 +88,25 @@ const chartData4 = { //roles
         backgroundColor: '#814449',
     }]
 };
-const chartData5 = { //
-    name: 'Mayores gastos',
-    datasets: [{
-        label: 'Centros de Costos',
-        data: props.topCentros,
-        backgroundColor: '#811111',
-    }]
+const chartData5 = {
+  labels: props.chartLabels,
+  datasets: [
+    {
+      label: 'Centros con mayor mano de obra estimada',
+      data: props.chartValues,
+      backgroundColor: '#811111',
+    },
+  ],
 };
 const charityArray = [
-  { id: 'my-chart-id4', data: chartData4 },
-  // { id: 'my-chart-id5', data: chartData5 },
-  { id: 'my-chart-id', data: chartData },
-  { id: 'my-chart-id3', data: chartData3 },
-  // { id: 'my-chart-id6', data: chartData6 },
-  // { id: 'my-chart-id7', data: chartData7 },
-  // { id: 'my-chart-id8', data: chartData8 },
-  // { id: 'my-chart-id9', data: chartData9 },
-  // { id: 'my-chart-id10', data: chartData10 },
+    {id: 'my-chart-id4', data: chartData4},
+    {id: 'my-chart-id', data: chartData},
+    {id: 'my-chart-id3', data: chartData3},
+    // { id: 'my-chart-id6', data: chartData6 },
+    // { id: 'my-chart-id7', data: chartData7 },
+    // { id: 'my-chart-id8', data: chartData8 },
+    // { id: 'my-chart-id9', data: chartData9 },
+    // { id: 'my-chart-id10', data: chartData10 },
 ];
 
 // # fin chartts
@@ -103,65 +118,26 @@ const charityArray = [
     <Head title="Dashboard"/>
     <AuthenticatedLayout>
         <Breadcrumb :title="'Panel Principal'" :breadcrumbs="[]"/>
-        <div class="h-screen">
-<!--            <div-->
-<!--                class="text-white dark:text-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6 ">-->
-<!--                <div>-->
-<!--                    <div-->
-<!--                        class="rounded-t-none sm:rounded-t-lg px-4 py-6 flex justify-between bg-sky-600/70 dark:bg-sky-500/80 items-center overflow-hidden">-->
-<!--                        <div class="flex flex-col">-->
-<!--                            <p class="text-4xl font-bold">{{ props.reportes }}</p>-->
-<!--                            <p class="text-md md:text-lg uppercase">{{ lang().label.reporte }}</p>-->
-<!--                        </div>-->
-<!--                        <div>-->
-<!--                            <BanknotesIcon class="w-16 h-auto"/>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div-->
-<!--                        class="bg-blue-600 dark:bg-blue-600/80 rounded-b-none sm:rounded-b-lg p-2 overflow-hidden hover:bg-blue-600/90 dark:hover:bg-blue-600/70">-->
-<!--                        <Link :href="route('Reportes.index')" class="flex justify-between items-center">-->
-<!--                            <p>{{ lang().label.more }}</p>-->
-<!--                            <ChevronRightIcon class="w-5 h-5"/>-->
-<!--                        </Link>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                <div v-show="can(['isAdmin'])">-->
-<!--                    <div-->
-<!--                        class="rounded-t-none sm:rounded-t-lg px-4 py-6 flex justify-between bg-blue-700/70 dark:bg-blue-500/80 items-center overflow-hidden">-->
-<!--                        <div class="flex flex-col">-->
-<!--                            <p class="text-4xl font-bold">{{ props.users }}</p>-->
-<!--                            <p class="text-md md:text-lg uppercase">{{ lang().label.user }}</p>-->
-<!--                        </div>-->
-<!--                        <div>-->
-<!--                            <UserIcon class="w-16 h-auto"/>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div-->
-<!--                        class="bg-blue-600 dark:bg-blue-600/80 rounded-b-none sm:rounded-b-lg p-2 overflow-hidden hover:bg-blue-800/90 dark:hover:bg-blue-800/70">-->
-<!--                        <Link :href="route('user.index')" class="flex justify-between items-center">-->
-<!--                            <p>{{ lang().label.more }}</p>-->
-<!--                            <ChevronRightIcon class="w-5 h-5"/>-->
-<!--                        </Link>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--               -->
-<!--            </div>-->
-            <div v-if="props.numberPermissions > 0"
-                 class="flex mt-26 w-full h-80">
-                <div class="my-2 mx-5 p-1 h-full max-h-80">
+        <div class="min-h-screen w-full space-y-10">
+            <div v-if="props.numberPermissions > 0" class="w-full">
+                <div class="mx-auto p-4 h-96">
                     <Bar
-                        :id="'my-chart-id5'"
-                        :options="chartOptions"
+                        id="chart-top-centros"
+                        :options="chartOptions5"
                         :data="chartData5"
                     />
                 </div>
             </div>
-            <div v-if="props.numberPermissions > 0"
-                 class="grid xs:grid-cols-1 md:grid-cols-2 mt-26 gap-8 max-h-24">
+
+            <!-- 🔹 Gráficos secundarios en grid -->
+            <div
+                v-if="props.numberPermissions > 0"
+                class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 px-4 pb-8 mt-24"
+            >
                 <div
                     v-for="(chart, index) in charityArray"
                     :key="chart.id"
-                    class="my-2 mx-5 p-1 h-full max-h-92"
+                    class="p-4 h-80 bg-white rounded-2xl shadow-sm"
                 >
                     <Bar
                         :id="chart.id"
@@ -171,6 +147,7 @@ const charityArray = [
                 </div>
             </div>
         </div>
+
 
     </AuthenticatedLayout>
 </template>

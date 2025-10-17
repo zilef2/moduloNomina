@@ -312,31 +312,40 @@ watchEffect(() => {
                             <tr class="border border-amber-400 bg-white dark:border-gray-700 hover:bg-gray-300 hover:dark:bg-gray-900/20">
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3 font-bold"> Total</td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{ isNaN(data.thoras_trabajadas) ? 0 : data.thoras_trabajadas }}
+<!--                                    {{ isNaN(data.thoras_trabajadas) ? 0 : data.thoras_trabajadas }}-->
+                                   {{data.thoras_trabajadas}}
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{ isNaN(data.tdiurnas) ? 0 : data.tdiurnas }}
+                                    {{ data.tdiurnas }}
+<!--                                    {{ isNaN(data.tdiurnas) ? 0 : data.tdiurnas }}-->
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{ isNaN(data.tnocturnas) ? 0 : data.tnocturnas }}
+                                    {{data.tnocturnas }}
+<!--                                    {{ isNaN(data.tnocturnas) ? 0 : data.tnocturnas }}-->
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{ isNaN(data.textra_diurnas) ? 0 : data.textra_diurnas }}
+                                    {{data.textra_diurnas }}
+<!--                                    {{ isNaN(data.textra_diurnas) ? 0 : data.textra_diurnas }}-->
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{ isNaN(data.textra_nocturnas) ? 0 : data.textra_nocturnas }}
+                                    {{data.textra_nocturnas }}
+<!--                                    {{ isNaN(data.textra_nocturnas) ? 0 : data.textra_nocturnas }}-->
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{ isNaN(data.tdominical_diurno) ? 0 : data.tdominical_diurno }}
+                                    {{data.tdominical_diurno }}
+<!--                                    {{ isNaN(data.tdominical_diurno) ? 0 : data.tdominical_diurno }}-->
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{ isNaN(data.tdominical_nocturno) ? 0 : data.tdominical_nocturno }}
+                                    {{data.tdominical_nocturno }}
+<!--                                    {{ isNaN(data.tdominical_nocturno) ? 0 : data.tdominical_nocturno }}-->
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{ isNaN(data.tdominical_extra_diurno) ? 0 : data.tdominical_extra_diurno }}
+                                    {{data.tdominical_extra_diurno }}
+<!--                                    {{ isNaN(data.tdominical_extra_diurno) ? 0 : data.tdominical_extra_diurno }}-->
                                 </td>
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{ isNaN(data.tdominical_extra_nocturno) ? 0 : data.tdominical_extra_nocturno }}
+                                    {{data.tdominical_extra_nocturno }}
+<!--                                    {{ isNaN(data.tdominical_extra_nocturno) ? 0 : data.tdominical_extra_nocturno }}-->
                                 </td>
                             </tr>
                             </tbody>

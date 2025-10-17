@@ -155,32 +155,35 @@ class UserController extends Controller {
 					$centrosHoy[$value->nombre] = 0;
 				}
 			}
-			$conteoPorRol = User::whereNotIn('cargo_id',[1,2])->with('roles')->get()->flatMap->roles->groupBy('name')->map->count();
+			$conteoPorRol = User::whereNotIn('cargo_id', [1, 2])
+			                    ->with('roles')->get()->flatMap->roles->groupBy('name')->map->count();
 			
-		$topCentros = CentroCosto::select('nombre', 'mano_obra_estimada')
-				    ->where('mano_obra_estimada', '>', 250000)
-				    ->orderByDesc(DB::raw('CAST(mano_obra_estimada AS DECIMAL(15,2))'))
-				    ->limit(25)
-				    ->get()
-				    ->pluck('mano_obra_estimada', 'nombre')
-				    ->sortDesc(); // refuerza el orden en la colección
+			$topCentros = CentroCosto::select('nombre', 'mano_obra_estimada')
+			                         ->where('mano_obra_estimada', '>', 25000)
+			                         ->orderByDesc('mano_obra_estimada')
+			                         ->limit(10)->get()
 			;
+			
+			$chartLabels = $topCentros->pluck('nombre');
+			$chartValues = $topCentros->pluck('mano_obra_estimada');
 		} //fin, si no eres empleado
 		
 		return Inertia::render('Dashboard', [
 			'versionZilef'      => '25.6.1',
-			'users'             => (int)User::count(),
-			'roles'             => (int)Role::count(),
-			'permissions'       => (int)Permission::count(),
+			'users'             => User::count(),
+			'roles'             => Role::count(),
+			'permissions'       => Permission::count(),
 			'reportes'          => $reportes,
 			'ultimos5dias'      => $ultimos5dias,
-			'diasNovalidos'     => $diasNovalidos ?? [],
+			'diasNovalidos'     => $diasNovalidos,
 			'trabajadoresHoy'   => $trabajadoresHoy ?? [],
 			'centrosHoy'        => $centrosHoy ?? [],
 			'numberPermissions' => $this->numberPermissions,
 			'userid'            => $userid,
-			'conteoPorRol'     => $conteoPorRol,
-			'topCentros'     => $topCentros,
+			'conteoPorRol'      => $conteoPorRol,
+			'topCentros'        => $topCentros,
+			'chartLabels'       => $chartLabels,
+			'chartValues'       => $chartValues,
 		]);
 	}
 	
