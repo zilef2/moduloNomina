@@ -325,22 +325,30 @@ const handleCheckboxChange = (values) => {
             <!-- fold  FILTROS-->
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="flex justify-between p-2">
-                    <div class="hidden sm:flex lg:hidden xl:flex space-x-2 gap-1">
+                    <div class="hidden xl:flex space-x-2 gap-1">
                         <!-- ELFILTRO = horas diurnas-->
                         <TextInput v-model="data.params.searchorasD" v-show="props.numberPermissions > 9"
-                                   type="number" min="0" class="block w-2/3 md:w-full rounded-lg"
-                                   :placeholder="lang().placeholder.searchorasD"/>
+                                   type="number" min="0" 
+                                   :placeholder="lang().placeholder.searchorasD"
+                                   class="hidden 2xl:block w-2/3 md:w-full rounded-lg"
+                        />
                         <TextInput v-model="data.params.HorasNoDiurnas" v-show="props.numberPermissions > 9"
-                                   type="number" min="0" class="block w-2/3 md:w-full rounded-lg"
-                                   placeholder="No diurnas"/>
+                                   type="number" min="0" 
+                                   placeholder="No diurnas"
+                                   class="hidden 2xl:block w-2/3 md:w-full rounded-lg"
+                        />
 
                         <!-- ELFILTRO = numero del mes-->
                         <TextInput v-model="data.params.search1" v-show="props.numberPermissions > 9"
-                                   type="number" min="0" max="31" class="hidden xl:block w-full rounded-lg"
-                                   placeholder="dia ini"/>
+                                   type="number" min="0" max="31" 
+                                   placeholder="dia ini"
+                                   class="hidden 2xl:block w-full rounded-lg"
+                        />
                         <TextInput v-model="data.params.search2" v-show="props.numberPermissions > 9"
-                                   type="number" min="0" max="31" class="hidden xl:block w-full rounded-lg"
-                                   placeholder="dia fin"/>
+                                   type="number" min="0" max="31" 
+                                   placeholder="dia fin"
+                                   class="hidden 2xl:block w-full rounded-lg"
+                        />
                         <TextInput v-model="data.params.search" v-show="props.numberPermissions > 1"
                                    type="text" min="0" max="12"
                                    class="hidden lg:block w-2/3 md:w-full rounded-lg"
@@ -352,17 +360,21 @@ const handleCheckboxChange = (values) => {
                                    type="number" min="0" max="31" class="hidden lg:block w-2/3 md:w-full rounded-lg"
                                    :placeholder="lang().placeholder.searchDDay"/>
                     </div>
-                    <div v-if="props.numberPermissions > 1" class="grid grid-cols-2 text-center gap-2">
-                        <div class="flex">
-                            <small v-if="!data.params.search5" class="my-1">Filtrar por Centro</small>
-                            <vSelect  v-model="data.params.search5"
+                    <div v-if="props.numberPermissions > 1" class="grid grid-cols-1 md:grid-cols-2 items-center gap-1">
+                        <div class="w-full flex flex-nowrap items-center">
+                            <p v-if="!data.params.search5" class="my-1 whitespace-nowrap mx-3 text-xs">Filtrar por Centro</p>
+                            <vSelect v-model="data.params.search5"
                                      :options="props.losSelect['centros']" label="name"
                                      :filterable="false"
-                                     class="block w-full mx-1 mt-1 rounded-lg"></vSelect>
+                                     class="flex-1 mt-1 mx-2 min-w-44 max-w-48"></vSelect>
                         </div>
-                        <FilterButtons @update:checked="handleCheckboxChange"
-                                       :numberPermissions="props.numberPermissions"
-                                       class="text-right"/>
+
+                        <div class="hidden md:flex justify-end text-right">
+
+                            <FilterButtons @update:checked="handleCheckboxChange"
+                                           :numberPermissions="props.numberPermissions"
+                            />
+                        </div>
 
                     </div>
                 </div>
@@ -434,8 +446,8 @@ const handleCheckboxChange = (values) => {
                                 <div class="flex rounded-md overflow-hidden">
                                     <form @submit.prevent="updateThisReporte">
                                         <DangerButton v-if="can(['update reporte'])" type="button"
-                                                    @click="(data.editOpen = true), (data.generico = clasegenerica)"
-                                                    class="px-2 py-1.5 rounded-sm" v-tooltip="'Rechazar'">
+                                                      @click="(data.editOpen = true), (data.generico = clasegenerica)"
+                                                      class="px-2 py-1.5 rounded-sm" v-tooltip="'Rechazar'">
                                             <PencilIcon class="w-6 h-6"/>
                                         </DangerButton>
                                         <SuccessButton v-if="can(['update reporte'])" type="button"
@@ -447,16 +459,18 @@ const handleCheckboxChange = (values) => {
                                             <CheckIcon class="w-6 h-6"/>
                                         </SuccessButton>
                                     </form>
-                                    
+
                                     <!--                                            <InfoButton v-if="(can(['isSuper']))"-->
                                     <!--                                                type="button"-->
                                     <!--                                                @click="(data.editCorregirOpen = true), (data.generico = clasegenerica)"-->
                                     <!--                                                class="px-2 py-1.5 rounded-l-md" v-tooltip="'Corregir'">-->
                                     <!--                                                <DocumentCheckIcon class="w-6 h-6" />-->
                                     <!--                                            </InfoButton>-->
-                                    <InfoButton v-if="can(['isSuper']) || can(['isingeniero','isadmin','isadministrativo','issupervisor'])" type="button"
-                                                @click="(data.Reporte_Super_EditOpen = true), (data.generico = clasegenerica)"
-                                                class="px-2 py-1.5 rounded-sm" v-tooltip="'Editar Horas'">
+                                    <InfoButton
+                                        v-if="can(['isSuper']) || can(['isingeniero','isadmin','isadministrativo','issupervisor'])"
+                                        type="button"
+                                        @click="(data.Reporte_Super_EditOpen = true), (data.generico = clasegenerica)"
+                                        class="px-2 py-1.5 rounded-sm" v-tooltip="'Editar Horas'">
                                         <DocumentCheckIcon class="w-5 h-5"/>
                                     </InfoButton>
                                     <DangerButton v-if="(can(['delete reporte']))" type="button"
@@ -571,7 +585,8 @@ const handleCheckboxChange = (values) => {
             <TextInput v-model="data.params.search4"
                        type="number" min="2019" max="2099" class="hidden sm:block w-22 rounded-lg"
                        placeholder="año"/>
-            <div class="flex justify-betwween items-center p-2 border-t border-gray-200 dark:border-gray-700 overflow-x-auto">
+            <div
+                class="flex justify-betwween items-center p-2 border-t border-gray-200 dark:border-gray-700 overflow-x-auto">
                 <Pagination :links="props.fromController" :filters="data.params"/>
                 <span class="mx-8 my-auto hidden 2xl:block">Registros por página</span>
                 <span class="ml-8 my-auto block 2xl:hidden">Reg/pag</span>

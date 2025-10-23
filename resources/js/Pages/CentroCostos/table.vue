@@ -166,8 +166,8 @@ watchEffect(() => {
     <Head :title="props.title"></Head>
     <AuthenticatedLayout>
         <section class="text-gray-600 body-font text-center mx-auto w-full">
-            <div class="px-5 py-2">
-                <div class="flex flex-col text-center w-full mb-2 mx-auto">
+            <div class="p-2">
+                <div class="flex flex-col text-center w-full mb-2 mx-12">
                     <div class="px-4 sm:px-0 mx-auto">
                         <div class="mb-1 overflow-hidden w-fit justify-center mt-4">
                             <h1 class="sm:text-3xl text-2xl font-medium title-font mb-2 text-gray-900">
@@ -188,13 +188,13 @@ watchEffect(() => {
                 <div v-else class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                     <div class="flex justify-between p-2">
                         <div class="flex text-center rounded-xl justify-center mx-auto">
-                            <div class="grid grid-cols-3 gap-4 px-2 hover:shadow-xl">
+                            <div class="grid grid-cols-3 gap-4 px-2">
                                 <label for="dinero" class="text-lg -mb-2 font-bold">Dinero/Horas</label>
                                 <label for="quincena" class="text-lg -mb-2 font-bold">Quicena</label>
                                 <label for="fecha_ini" class="text-lg -mb-2 font-bold">Mes</label>
                                 <PrimaryButton
                                     @click="AlternarPlata"
-                                    class="mx-auto my-1 w-28 rounded-xl shadow-lg">
+                                    class="mx-auto text-center my-1 rounded-xl shadow-lg">
                                     Alternar
                                 </PrimaryButton>
                                 <!--very usefull-->

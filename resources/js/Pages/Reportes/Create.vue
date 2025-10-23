@@ -87,7 +87,7 @@ onMounted(() => {
     data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
 
     if (consolelog.MostrarTrabajadaSemana) {
-        console.log("=>(Create.vue:86) props.HorasDeCadaSemana", props.HorasDeCadaSemana); 
+        console.log("=>(Create.vue:86) props.HorasDeCadaSemana", props.HorasDeCadaSemana);
         console.log("=>(Create.vue:86) data.TrabajadasSemana", data.TrabajadasSemana);
     }
 
@@ -135,13 +135,19 @@ if (props.numberPermissions > 9) {
 // if (props.numberPermissions > 8) {
     // form.fecha_ini = '2024-11-15T21:00'
     // form.fecha_fin = '2024-11-15T23:58'
-    form.fecha_ini = '2025-02-08T07:00'
-    form.fecha_fin = '2025-02-08T14:00'
+    form.fecha_ini = '2025-10-24T07:00'
+    form.fecha_fin = '2025-10-24T15:00'
+    // form.centro_costo_id = {
+    //     label: '001 - Costa',
+    //     value: 140,
+    // }
+
 } else {
     let timedate = TransformTdate(7)//la hora
     let timedate2 = TransformTdate(16)
     form.fecha_ini = timedate
     form.fecha_fin = timedate2
+
 }
 
 
@@ -152,9 +158,9 @@ watchEffect(() => {
             || form.centro_costo_id.value === 0) {
 
             form.centro_costo_id = props.valoresSelect.find((ele) => {
-                return ele.value == props.IntegerDefectoSelect
+                return ele.value === props.IntegerDefectoSelect
             })
-        }
+        } 
 
 
         // explaining: El dia anterior trabajo? 
@@ -245,9 +251,9 @@ watchEffect(() => {
                             data.mensajeCentroNoFactura = "Este centro no factura"
                             data.BoolCentrosNoFactura = true
 
-                            // form.centro_costo_id = {label: '8071 - Nacional', value: 677}
+                            form.centro_costo_id = {label: '8071 - Nacional', value: 677}
                         } else {
-                            
+
                             data.BoolCentrosNoFactura = false
                             calcularHoras(
                                 data, form,
@@ -590,7 +596,7 @@ const formatfin = (date) => {
                     </PrimaryButton>
                     <p v-else class="ml-4 mt-1">{{ data.StringRestriccionNoFActura }}</p>
                 </div>
-                <div 
+                <div
                     v-if="props.ArrayOrdinarias[props.ArrayOrdinarias.length] > 8 ||
                         props.ArrayOrdinarias[0] > data.const.HORAS_SEMANALES_MENOS_ESTANDAR && form.diurnas + form.nocturnas > 8 ||
                         data.HorasDelDiaAnterior59 ||
@@ -598,11 +604,11 @@ const formatfin = (date) => {
                         data.TrabajadasSemana ||
                         data.TrabajadasHooy ||
                         data.debugHorasSemana"
-                     class="flex justify-end my-3">
+                    class="flex justify-end my-3">
                     <p class="mx-1">Hay pendientes</p>
-                    
+
                     <p v-if="props.ArrayOrdinarias[props.ArrayOrdinarias.length] > 8" class="mx-2">
-                        
+
                         {{ props.ArrayOrdinarias[props.ArrayOrdinarias.length] }} horas (11:59pm)</p>
                     <p v-if="props.ArrayOrdinarias[0] > data.const.HORAS_SEMANALES_MENOS_ESTANDAR &&
                                 form.diurnas + form.nocturnas > 8"

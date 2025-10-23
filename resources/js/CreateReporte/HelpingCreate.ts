@@ -187,9 +187,9 @@ export function calcularHoras(data, form, inicio, final, HORAS_ESTANDAR, Festivo
         CuandoEmpiezaExtra += ExtrasPrematuras
 
 
-        // if (diaSemana === 5) { //viernes
-            // CuandoEmpiezaExtra -= 1
-        // }
+        if (diaSemana === 5) { //viernes
+            CuandoEmpiezaExtra -= 1
+        }
         if (diaSemana === 6) { //sabado
             CuandoEmpiezaExtra -= 3
         }

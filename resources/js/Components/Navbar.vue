@@ -28,10 +28,10 @@ const justcc = async () => {
 }
 
 const page = usePage();
-let colorBar = page.props.env.environment === 'test'
+let IsTest = page.props.env.environment === 'test'
 let colorDelBar = ''
 let colorDelNav = 'bg-gray-900 border-gray-700 text-gray-300 lg:bg-white dark:bg-gray-900 border-b lg:border-gray-100 dark:border-gray-800 lg:text-gray-500 dark:text-gray-300'
-if (colorBar) {
+if (IsTest) {
     colorDelBar = 'bg-blue-900 text-white'
     colorDelNav = 'bg-blue-900 border-blue-700 text-white lg:bg-blue-900 dark:bg-gray-900 border-b lg:border-gray-200 dark:border-gray-800 lg:text-blue-500 dark:text-gray-300'
 }
@@ -56,9 +56,8 @@ if (colorBar) {
                         <Link :href="route('dashboard')" class="flex items-center space-x-2">
                             <ApplicationLogo class="hidden md:block h-5 w-auto fill-current"/>
                             {{ $page.props.app.name }}
-                            <p v-if="colorBar">
+                            <p v-if="IsTest">
                                 {{ $page.props.env.environment }}
-                                AMBIENTE DE PRUEBAS
                             </p>
                         </Link>
                     </div>
@@ -69,7 +68,7 @@ if (colorBar) {
 
                     <!-- <DropdownLink v-if="can(['isAdmin'])" class="text-gray-500 dark:text-white" @click="downloadExcel"> {{ lang().label.downloadUsers }} </DropdownLink> -->
                     <DropdownLink v-if="can(['isAdmin', 'isadministrativo', 'issupervisor'])"
-                                  :class="colorDelNav" @click="justcc"> Centros de Costos
+                                  :class="colorDelNav + ' text-xs'" @click="justcc"> ⬇️ Centros
                     </DropdownLink>
                     <p v-if="can(['isAdmin'])">{{ $page.props.env.environment }}</p>
                     <div class="">
