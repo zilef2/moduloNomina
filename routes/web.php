@@ -137,6 +137,7 @@ Route::middleware('auth', 'verified')->group(function () {
 	Route::get('/logeadoshoy', [DashboardController::class, 'logeadoshoy'])->name('logeadoshoy');
 	Route::get('/recordarPago', [DashboardController::class, 'recordarPago'])->name('recordarPago');
 	Route::get('/PersonasExtra', [DashboardController::class, 'PersonasExtra'])->name('PersonasExtra');
+	Route::get('/nofactura', [ReportesController::class, 'DoArrayCentrosNoFactura'])->name('DoArrayCentrosNoFactura');
 	//aquipues
 }); //fin verified
 

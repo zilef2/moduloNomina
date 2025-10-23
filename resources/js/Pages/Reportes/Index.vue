@@ -99,6 +99,8 @@ const data = reactive({
         searchorasD: props.filters?.searchorasD,
         soloValidos: props.filters?.soloValidos,
         soloValidos2: props.filters?.soloValidos2,
+        sifacturan: props.filters?.sifacturan,
+        nofacturan: props.filters?.nofacturan,
         soloQuincena: props.filters?.soloQuincena,
         FiltroUser: props.filters?.FiltroUser,
         FiltroQuincenita: props.filters?.FiltroQuincenita,
@@ -246,6 +248,8 @@ const handleCheckboxChange = (values) => {
     data.params.searchSiigo = values[3]
     data.params.search3 = values[4]
     data.params.soloValidos2 = values[5]
+    data.params.sifacturan = values[6]
+    data.params.nofacturan = values[7]
 };
 
 // props.userFiltro.unshift({

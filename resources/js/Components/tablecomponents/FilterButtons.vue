@@ -7,9 +7,15 @@ const props = defineProps({
 
 const emit = defineEmits(['update:checked']);
 
-const checkedValues = ref([false, false, false, false]);
+const checkedValues = ref([
+    false, false, false,
+    false, false, false,
+    false, false, false
+]);
 
 const handleChange = () => {
+    // if (checkedValues[6]) checkedValues[7] = false
+    // if (checkedValues[7]) checkedValues[6] = false
     emit('update:checked', checkedValues.value);
 };
 
@@ -31,7 +37,7 @@ const handleChange = () => {
             </label>
             <div class="tooltip">Esta quincena</div>
         </li>
-        <li class="icon-content" v-show="props.numberPermissions > 1">
+        <li class="icon-content" v-show="props.numberPermissions > 9">
             <label class="container">
                 <input type="checkbox" v-model="checkedValues[2]" @change="handleChange" class="bg-red-300">
                 <div class="checkmark"></div>
@@ -59,6 +65,20 @@ const handleChange = () => {
                 <div class="checkmark"></div>
             </label>
             <div class="tooltip">No validos</div>
+        </li>
+        <li class="icon-content" v-show="props.numberPermissions > 8">
+            <label class="container">
+                <input type="checkbox" v-model="checkedValues[6]" @change="handleChange" class="bg-red-300">
+                <div class="checkmark"></div>
+            </label>
+            <div class="tooltip">Facturan</div>
+        </li>
+        <li class="icon-content" v-show="props.numberPermissions > 8">
+            <label class="container">
+                <input type="checkbox" v-model="checkedValues[7]" @change="handleChange" class="bg-red-300">
+                <div class="checkmark"></div>
+            </label>
+            <div class="tooltip">No facturan</div>
         </li>
     </ul>
 </template>

@@ -83,7 +83,8 @@ class ReportesController extends Controller {
 			$perPage = 5; //si es empleado
 		}
 		
-		//  aqui se filtra
+		//  aqui se filtra | filtros
+		$ArrayCentrosNoFac = $this->DoArrayCentrosNoFactura();
 		$fnombresT = $this->fNombresTabla($numberPermissions, $Reportes, $Authuser, $request, $titulo);
 		
 		$nombresTabla = $fnombresT[0];
@@ -128,7 +129,14 @@ class ReportesController extends Controller {
 		
 		return Inertia::render('Reportes/Index', [ //carpeta
 			'title'          => $titulo,
-			'filters'        => $request->all(['search', 'field', 'order', 'soloValidos', 'FiltroUser', 'searchDDay', 'searchorasD', 'soloQuincena', 'searchIncongruencias', 'searchQuincena', 'FiltroQuincenita', 'search1', 'search1', 'HorasNoDiurnas',]),
+			'filters'        => $request->all(['search', 'field', 'order', 
+				                                  'soloValidos',
+				                                  'sifacturan',
+				                                  'nofacturan',
+				                                  'FiltroUser', 'searchDDay',
+				                                  'searchorasD', 'soloQuincena',
+				                                  'searchIncongruencias', 'searchQuincena', 
+				                                  'FiltroQuincenita', 'search1', 'search1', 'HorasNoDiurnas',]),
 			'perPage'        => (int)$perPage,
 			'fromController' => $Reportes->paginate($perPage),
 			'breadcrumbs'    => [['label' => __('app.label.Reportes'), 'href'  => route('Reportes.index')]],
@@ -219,6 +227,7 @@ class ReportesController extends Controller {
 	
 	//</editor-fold>
 	
+	//filtros
 	public function fNombresTabla($numberPermissions, &$Reportes, $Authuser, $request, &$titulo) {
 		$startDate = Carbon::now()->startOfWeek();
 		$endDate = Carbon::now()->endOfWeek();
@@ -375,12 +384,9 @@ class ReportesController extends Controller {
 				], //m for money || t for datetime || d date || i for integer || s string || b boolean
 			];
 			
-			$quincena = ['Primera quincena' => Reporte::whereBetween('fecha_ini', [Carbon::now()->startOfMonth(),
-				Carbon::now()->startOfMonth()->addDays(14)
-			])->count(),
-			             'Segunda quincena' => Reporte::whereBetween('fecha_ini', [Carbon::now()->startOfMonth()->addDays(15),
-				             Carbon::now()->LastOfMonth()
-			             ])->count(),
+			$quincena = [
+				'Primera quincena' => Reporte::whereBetween('fecha_ini', [Carbon::now()->startOfMonth(), Carbon::now()->startOfMonth()->addDays(14)])->count(),
+                'Segunda quincena' => Reporte::whereBetween('fecha_ini', [Carbon::now()->startOfMonth()->addDays(15), Carbon::now()->LastOfMonth()])->count(),
 			];
 			$horasPersonal = Reporte::WhereBetween('fecha_ini', [$startDate, $endDate])->sum('horas_trabajadas');
 			
@@ -526,6 +532,13 @@ class ReportesController extends Controller {
 		}
 		if ($request->has('soloValidos2')) {
 			$Reportes->where('valido', 2);
+		}
+		
+		if ($request->has('sifacturan')) {
+			$Reportes->whereNotIn('centro_costo_id', $this->DoArrayCentrosNoFactura());
+		}
+		if ($request->has('nofacturan')) {
+			$Reportes->whereIn('centro_costo_id', $this->DoArrayCentrosNoFactura());
 		}
 		
 		//30abril 11am
