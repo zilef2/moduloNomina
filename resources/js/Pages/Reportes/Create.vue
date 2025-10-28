@@ -251,7 +251,7 @@ watchEffect(() => {
                             data.mensajeCentroNoFactura = "Este centro no factura"
                             data.BoolCentrosNoFactura = true
 
-                            form.centro_costo_id = {label: '8071 - Nacional', value: 677}
+                            // form.centro_costo_id = {label: '8071 - Nacional', value: 677}
                         } else {
 
                             data.BoolCentrosNoFactura = false
