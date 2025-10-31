@@ -190,9 +190,9 @@ export function calcularHoras(data, form, inicio, final, HORAS_ESTANDAR, Festivo
         if (diaSemana === 5) { //viernes
             CuandoEmpiezaExtra -= 1
         }
-        if (diaSemana === 6) { //sabado
-            CuandoEmpiezaExtra -= 3
-        }
+        // if (diaSemana === 6) { //sabado //esto ya se calcula con las 44 horas semanales
+        //     CuandoEmpiezaExtra -= 3
+        // }
 
         CuandoEmpiezaExtra = CuandoEmpiezaExtra < horasInicioome ? horasInicioome : CuandoEmpiezaExtra
 
