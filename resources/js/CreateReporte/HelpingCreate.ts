@@ -160,33 +160,26 @@ export function calcularHoras(data, form, inicio, final, HORAS_ESTANDAR, Festivo
     let ExtrasManana = false //
 
     data.TemporalDiaAnterior = data.HorasDelDiaAnterior59 ? data.HorasDelDiaAnterior59 : 0 //7jul: esta desactivado
-    let ExtrasPrematuras = HORAS_ESTANDAR //8
     let Dateinii = Date.parse(form.fecha_ini) ?? false;
     if (Dateinii && Date.parse(form.fecha_fin)) {
         let horasInicioome: number = parseInt(String(new Date(form.fecha_ini).getHours()))
         let horasFinOme: number = parseInt(String(new Date(form.fecha_fin).getHours()))
-        let CuandoEmpiezaExtra: number = horasInicioome
-        ExtrasPrematuras -= (data.TrabajadasSemana)
-        console.log("🚀 ~ TrabajadasSemana: ", data.TrabajadasSemana);
-        console.log("ExtrasPrematuras", ExtrasPrematuras);
+        let CuandoEmpiezaExtra: number = horasInicioome + HORAS_ESTANDAR
+        console.log("🚀🚀aqui1 ~ horasInicioome: ", horasInicioome);
+        console.log("🚀🚀aqui1 ~ CuandoEmpiezaExtra: ", CuandoEmpiezaExtra);
 
 
-        if (data.TrabajadasSemana < 40) //todo: 40 porque? deberia venir de db no?
-            ExtrasPrematuras -= data.TrabajadasHooy
-        // ExtrasPrematuras -= data.TemporalDiaAnterior //23:59
-
-        //almuerzo para calcular las extras
-        // let LIMITE_ALMUERZO:number = 8
-        var fechain_i: Date = new Date(form.fecha_ini)
-        var diaSemana: number = fechain_i.getDay();
+        const diaSemana: number = (new Date(form.fecha_ini)).getDay();
         // if (diaSemana === 6) LIMITE_ALMUERZO -=3
 
+        //razon1: semanal
+        if(data.CuantoFaltaParaExtraSemana < HORAS_ESTANDAR){
+            CuandoEmpiezaExtra -= HORAS_ESTANDAR - data.CuantoFaltaParaExtraSemana
+        }
+        //razon2: ya trabajo hoy
+        CuandoEmpiezaExtra -= data.TrabajadasHooy
 
-        ExtrasPrematuras = ExtrasPrematuras < 0 ? 0 : ExtrasPrematuras
-
-        CuandoEmpiezaExtra += ExtrasPrematuras
-
-
+        //razon3: es viernes
         if (diaSemana === 5) { //viernes
             CuandoEmpiezaExtra -= 1
         }
@@ -199,8 +192,7 @@ export function calcularHoras(data, form, inicio, final, HORAS_ESTANDAR, Festivo
         if (consolelog.CuandoEiezaExtra) {
             console.log('%cPRIMERO: CuandoEmpiezaExtra', "color:red;font-family:system-ui;font-size:1rem;-webkit-text-stroke: 0.5px black;font-weight:bold")
             console.log('CuandoEmpiezaExtra', CuandoEmpiezaExtra)
-            console.log('ExtrasPrematuras ((debe ser 8 si no hay extras))', ExtrasPrematuras)
-            console.log('data.TrabajadasSemana', data.TrabajadasSemana) // es mayor a 0 si ya cumplio las horas de semana
+            console.log('data.CuantoFaltaParaExtraSemana', data.CuantoFaltaParaExtraSemana) // es mayor a 0 si ya cumplio las horas de semana
             console.log('data.TrabajadasHooy', data.TrabajadasHooy) //si reporto hoy
             console.log('TemporalDiaAnterior', data.TemporalDiaAnterior) // si reporto ayer
             console.log('%cFIN: CuandoEmpiezaExtra', "color:blue;font-family:system-ui;font-size:15px;-webkit-text-stroke: 0.5px black;font-weight:bold")
@@ -235,7 +227,7 @@ export function calcularHoras(data, form, inicio, final, HORAS_ESTANDAR, Festivo
         //       form.extra_nocturnas++
         // }
 
-
+        //dentro de setdomonical esta RestarAlmuarzo
         setDominical(data, form, ini, fin, CuandoEmpiezaExtra, ExtrasManana, FestivosColombia, message);
 
         if (data.estado2359) {

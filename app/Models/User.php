@@ -43,7 +43,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static Builder|static simplePaginate($perPage = 15, $columns = ['*'], $pageName = 'page')
  * @method BelongsTo belongsTo(string $related, string $foreignKey = null, string $ownerKey = null)
  * @method HasMany hasMany(string $related, string $foreignKey = null, string $localKey = null)
- * @method BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null, string $relatedPivotKey = null)
+ *         $relatedPivotKey = null)
+ *
  * @property mixed $id
  * @property mixed $roles
  * @property mixed $name
@@ -79,14 +80,8 @@ class User extends Authenticatable {
 	 * @var array<int, string>
 	 */
 	protected $hidden = ['password', 'remember_token'];
-	private mixed $salario;
-	
 	protected $appends = ['cc'];
-	
-	public function getccAttribute(): string {
-	    return is_string($this->ArraycentroName()) ? $this->ArraycentroName() : implode(',', $this->ArraycentroName());
-		
-	}
+	private mixed $salario;
 	
 	public static function UsersWithRol($rol) {
 		return User::whereHas('roles', function ($query) use ($rol) {
@@ -102,20 +97,52 @@ class User extends Authenticatable {
 	
 	public static function usuariosConCentros(): array {
 		return self::with('centros:id')->get()->mapWithKeys(function ($user) {
-				return [$user->id => $user->centros->pluck('id')->toArray()];
-			})->toArray()
-		;
+			return [$user->id => $user->centros->pluck('id')->toArray()];
+		})->toArray();
 	}
 	
 	public static function jefe() {
 		return static::where('name', 'Carlos Daniel Anaya Barrios')->first();
 	}
 	
-	public function getFechaIngreso() {
-		return date('d-m-Y', strtotime($this->attributes['fecha_ingreso']));
+	public function getccAttribute(): string {
+		return is_string($this->ArraycentroName()) ? $this->ArraycentroName() : implode(',', $this->ArraycentroName());
+		
+	}
+	
+	public function ArraycentroName($numeroDeCentros = 0): array|string {
+		if (!$this->centros->isEmpty()) {
+			if ($numeroDeCentros != 0) {
+				$arrayNombres = [];
+				for ($i = 0; $i < $numeroDeCentros; $i ++) {
+					$tempCentro = $this->centros->skip($i)->first();
+					if (isset($tempCentro)) {
+						$arrayNombres[] = $this->centros->skip($i)->first()->nombre;
+					}
+					else {
+						break;
+					}
+				}
+			}
+			else {
+				foreach ($this->centros as $index => $centro) {
+					$arrayNombres[] = $centro->nombre;
+				}
+			}
+			$result = $arrayNombres;
+		}
+		else {
+			$result = 'Sin centros';
+		}
+		
+		return $result;
 	}
 	
 	//fin permissions
+	
+	public function getFechaIngreso() {
+		return date('d-m-Y', strtotime($this->attributes['fecha_ingreso']));
+	}
 	
 	public function getCreatedAtAttribute() {
 		return date('d-m-Y H:i', strtotime($this->attributes['created_at']));
@@ -151,7 +178,6 @@ class User extends Authenticatable {
 			}
 		}
 		
-		
 		return $result;
 	}
 	
@@ -161,58 +187,35 @@ class User extends Authenticatable {
 		}
 		$misCentrosIDs = $this->centros->pluck('id')->toArray();
 		
-		
 		return CentroCosto::whereNotIn('id', $misCentrosIDs)->pluck('id')->toArray();
-	}
-	
-	public function ArraycentroName($numeroDeCentros = 0): array|string {
-		if (!$this->centros->isEmpty()) {
-			if ($numeroDeCentros != 0) {
-				$arrayNombres = [];
-				for ($i = 0; $i < $numeroDeCentros; $i ++) {
-					$tempCentro = $this->centros->skip($i)->first();
-					if (isset($tempCentro)) {
-						$arrayNombres[] = $this->centros->skip($i)->first()->nombre;
-					}
-					else {
-						break;
-					}
-				}
-			}
-			else {
-				foreach ($this->centros as $index => $centro) {
-					$arrayNombres[] = $centro->nombre;
-				}
-			}
-			$result = $arrayNombres;
-		}
-		else {
-			$result = 'Sin centros';
-		}
-		
-		
-		return $result;
 	}
 	
 	public function TieneEsteCentro($centroid) {
 		$susCentros = $this->centros()->pluck('centro_costos.id')->toArray();
 		$result = in_array($centroid, $susCentros);
 		
-		
 		return $result;
 	}
 	
-		public function centros(): BelongsToMany {
+	public function centros(): BelongsToMany {
 		return $this->belongsToMany(CentroCosto::class, 'centro_user');
-	}//        public function resetPassword($id) {
+	}
+	
+	//        public function resetPassword($id) {
 	//        $user = User::findOrFail($id);
 	//        $user->resetPasswordToCedula();
 	//
 	//        return response()->json(['message' => 'Contraseña de '.$user->name.' restablecida correctamente']);
 	//    }
 	
-public function resetPasswordToCedula(): void {
+	public function resetPasswordToCedula(): void {
 		$this->password = \Illuminate\Support\Facades\Hash::make($this->cedula . '*');
 		$this->save();
+	}
+	
+	public function preferredLocale(): string {
+		// Esto forzará que TODAS las notificaciones enviadas a este usuario
+		// se rendericen usando la carpeta de traducción 'es'.
+		return 'es';
 	}
 }

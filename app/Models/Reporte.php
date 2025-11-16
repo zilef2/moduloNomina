@@ -61,10 +61,8 @@ class Reporte extends Model
         'dominical_extra_nocturno',
         'valido', //admit null
         'observaciones', //admit null
-
         'centro_costo_id',
         'user_id',
-        
 		'name_aprobo',
 		'id_aprobo',
     ];

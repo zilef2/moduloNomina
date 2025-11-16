@@ -17,7 +17,7 @@ class CalculoReportes {
     public static function CalcularHorasDeCadaSemana(int $AuthuserId): array {
 
         //calcula primer y ultimo dia de las x proximas semanas
-        $vector = self::HorasDeLasSemanasProximas();
+        $vectorSemanas = self::HorasDeLasSemanasProximas();
         $horasemana[0] = Carbon::now()->weekOfYear;
 
         $reportesControler = new ReportesController();
@@ -27,10 +27,10 @@ class CalculoReportes {
             ? implode(',', $Ids_CentrosNoFactura)
             : 'NULL';  // Manejar caso vacío para evitar IN ()
 
-        foreach ($vector as $vec) {
+        foreach ($vectorSemanas as $semana) {
 
-            $horasemana[$vec['numero_semana']] = (int)Reporte::where('user_id', $AuthuserId)
-                ->whereBetween('fecha_ini', [$vec['primer_dia_semana'], $vec['ultimo_dia_semana']])
+            $horasemana[$semana['numero_semana']] = (int)Reporte::where('user_id', $AuthuserId)
+                ->whereBetween('fecha_ini', [$semana['primer_dia_semana'], $semana['ultimo_dia_semana']])
                 ->sum(DB::raw(" CASE 
                 WHEN centro_costo_id IN ($idsString) 
                 THEN LEAST(diurnas + nocturnas, 8)

@@ -26,8 +26,6 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
         HorasDiurnas = HorasDiurnas < 0 ? 0 : HorasDiurnas
 
         if(consolelog.dia){
-            console.log('BaseFinal',BaseFinal)
-            console.log('HorasDiurnas',HorasDiurnas)
         }
 
         if(CuandoEmpiezaExtra !== null){
@@ -36,8 +34,6 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
                 horasNormales = horasNormales < 0 ? 0 : horasNormales
 
                 if(consolelog.dia){
-                    console.log('HorasDiurnas',HorasDiurnas)
-                    console.log('horasNormales',horasNormales)
                 }
 
                 if(HorasDiurnas >= horasNormales){
@@ -45,21 +41,17 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
                     HorasDiurnas = horasNormales
                 }else{
                     //es dominical
-                    // console.log('HorasDiurnas',HorasDiurnas)
-                    // console.log('horasNormales',horasNormales)
 
                 }
             }//cuando las horas extra >= 21, no hay horas extra diurnas
         }
         if(consolelog.dia){
-            console.log("HorasExtra & ordinarias, su suma", HorasExtra,HorasDiurnas,(HorasExtra + HorasDiurnas)); //nottemp
-            console.log("CuandoEmpiezaExtra", CuandoEmpiezaExtra)
         }
         return [HorasExtra,HorasDiurnas];
     }
     else{
         //de un dia a otro
-        let HorasDiurnasTotal = 0
+        let HorasDiurnasTotal : number
         let HorasExtra = 0
 
         if(horasFin <= 6){//termino en madrugada
@@ -100,7 +92,6 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
             }
         }
         if(consolelog.dia){
-            console.log("🧈🧈🧈 DIA HorasExtra & ordinarias", HorasExtra,HorasDiurnasTotal);
         }
         return [HorasExtra, HorasDiurnasTotal]
     }
@@ -169,10 +160,6 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra, HORA
     let HorasNoc:number = Madrugada + Tarde;
     if(consolelog.noche) {
         // console.clear()
-        console.log("PRIMERO NOCHE 🚀");
-        console.log("Madrugada & tarde🚀", Madrugada,Tarde,' = ',HorasNoc);
-        console.log("horasInicio🚀", horasInicio);
-        console.log("horasFin🚀", horasFin);
     }
     let extra:number = 0, ordinarias = 0;
 
@@ -197,37 +184,29 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra, HORA
                 // ordinarias = CuandoEmpiezaExtra + Tarde
                 extra = Madrugada >= CuandoEmpiezaExtra ? Madrugada - CuandoEmpiezaExtra : 0
 
-                if(consolelog.noche)
-                    console.log("‍😶‍🌫️1 : extra & noche", extra,ordinarias);
 
             }else{//empiezan en hora diurna
                 if(horasFin > 21){
                     extra = Tarde
                     ordinarias = Madrugada
 
-                    if(consolelog.noche)
-                        console.log("😶‍🌫️2  extra  ordinarias", extra,ordinarias);
 
                 }else{
                     if(DiaInicio == DiaFin){
                         extra = 0
                         ordinarias = HorasNoc
                         if(consolelog.noche){
-                            console.log("😶‍🌫️1  extra  ordinarias", extra,ordinarias);
                         }
                     }else{
                         ordinarias = horasInicio < 6 ? 6 - horasInicio : 0
                         extra = HorasNoc - ordinarias
                         if(consolelog.noche){
-                            console.log("imposible 😶‍🌫️0  extra  ordinarias", extra,ordinarias);
                         }
                     }
                 }
             }
         }
         if(consolelog.noche) {
-            console.log("extra🚀", extra);
-            console.log("ordinarias🚀", ordinarias);
         }
         return [extra, ordinarias];
     }
@@ -267,41 +246,28 @@ function RestarAlmuarzo(form,data){
         form.horas_trabajadas -= data.ValorRealalmuerzo;
 
         if(data.MostrarAlmuersini){
-            console.log('%cLIMITE_ALMUERZO', "color:red;font-family:system-ui;font-size:1rem;-webkit-text-stroke: 0.5px black;font-weight:bold")
-            console.log("=>(HelpingCreate.ts:209) form.almuerzo", form.almuerzo);
-            console.log("(F=>LIMITE_ALMUERZO) ", LIMITE_ALMUERZO);
-            console.log("achus data.ValorRealalmuerzo) ", data.ValorRealalmuerzo);
-            // console.log("(F=>estarAlmuarzo) nocturnas", form.nocturnas);
-            // console.log("(F=>estarAlmuarzo) diurnas", form.diurnas);
-            // console.log("(F=>estarAlmuarzo) extra_diurnas", form.extra_diurnas);
-            // console.log("(F=>estarAlmuarzo) extra_nocturnas", form.extra_nocturnas);
-            console.log('%cFIN LIMITE_ALMUERZO', "color:blue;font-family:system-ui;font-size:15px;-webkit-text-stroke: 0.5px black;font-weight:bold")
         }
 
         //extras
         if(form.extra_nocturnas >= data.ValorRealalmuerzo){ // && form.extra_nocturnas > form.extra_diurnas
             form.extra_nocturnas -= data.ValorRealalmuerzo
             form.almuerzo += ' nocturno'
-            // console.log('se quita noctura')
             return true;
         }
         if(form.extra_diurnas >= data.ValorRealalmuerzo){
             form.extra_diurnas -= data.ValorRealalmuerzo
             form.almuerzo += ' diurno'
-            // console.log('ED - Almuerzo')
             return true;
         }
 
         if(form.nocturnas >= data.ValorRealalmuerzo){ //&& form.nocturnas > form.diurnas
             form.nocturnas -= data.ValorRealalmuerzo;
             form.almuerzo += ' nocturno';
-            // console.log(" form.nocturnas", form.nocturnas);
             return true;
         }
         if(form.diurnas >= data.ValorRealalmuerzo) {
             form.diurnas -= data.ValorRealalmuerzo;
             form.almuerzo += ' diurno'
-            // console.log(" form.diurnas", form.diurnas);
             return true;
         }
 
@@ -323,13 +289,11 @@ function RestarAlmuarzo(form,data){
         if(form.dominical_nocturnas >= data.ValorRealalmuerzo ) { //&& form.dominical_nocturnas > form.dominical_diurnas
             form.dominical_nocturnas -= data.ValorRealalmuerzo;
             form.almuerzo += ' dominical nocturno';
-            // console.log("=>(HelpingCreate2.ts:277) form.almuerzo", form.almuerzo);
             return true;
         }
         if(form.dominical_diurnas >= data.ValorRealalmuerzo) {
             form.dominical_diurnas -= data.ValorRealalmuerzo;
             form.almuerzo += ' dominical'
-            // console.log("=>(HelpingCreate2.ts:284) form.almuerzo", form.almuerzo);
             return true;
         }
 
@@ -345,7 +309,6 @@ export function setDominical(data,form,ini,fin,CuandoEmpiezaExtra,ExtrasManana,F
 
     if(ini.getDay() === 0 || fin.getDay() === 0){
         form.dominicales = 'si'
-        console.log('%cHelpingCreate2 form.dominicales: '+form.dominicales, "color:yellow;font-family:system-ui;font-size:22px;")
         message.TextFestivo = 'Dominical'
 
         if(esFestivo || esFestivo2) message.TextFestivo += ' y festivo';
@@ -362,13 +325,11 @@ export function setDominical(data,form,ini,fin,CuandoEmpiezaExtra,ExtrasManana,F
         form.dominical_diurnas = form.diurnas;
         form.diurnas = 0
         form.dominical_nocturnas = form.nocturnas;
-        console.log("=>(Create.vue:308) form.nocturnas", form.nocturnas);
         form.nocturnas = 0
         form.dominical_extra_diurnas = form.extra_diurnas;
         form.extra_diurnas = 0
         form.dominical_extra_nocturnas = form.extra_nocturnas;
         form.extra_nocturnas = 0
-            console.log('aquiEntra')
     }else{
         if(ini.getDay() === 0 || esFestivo){//    termina lunes
             calcularTerminaLunes(fin,CuandoEmpiezaExtra,ExtrasManana,form)

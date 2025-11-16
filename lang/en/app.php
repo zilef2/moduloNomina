@@ -31,7 +31,6 @@ return [
         'updated' => 'Updated',
         'verified' => 'Verified',
         'search' => 'Search',
-        'of' => 'of',
         'logout_confirm' => 'Are you sure to logout?',
         'delete_confirm' => 'Are you sure to delete',
         'created_successfully' => '<b>:name</b> created successfully.',

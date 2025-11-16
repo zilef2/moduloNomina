@@ -353,14 +353,14 @@ const handleCheckboxChange = (values) => {
                                    placeholder="dia fin"
                                    class="hidden 2xl:block w-full rounded-lg"
                         />
-                        <TextInput v-model="data.params.search" v-show="props.numberPermissions > 1"
+                        <TextInput v-model="data.params.search" v-show="props.numberPermissions >= 1"
                                    type="text" min="0" max="12"
                                    class="hidden lg:block w-2/3 md:w-full rounded-lg"
                                    placeholder="Mes"/>
                         <!--                        <SelectInput v-model="data.params.search" :dataSet="data.DiasDeLaSemana" />-->
                         <!--                        e1 adminis2 su e ing 3-->
                         <!-- ELFILTRO = numero del dia-->
-                        <TextInput v-model="data.params.searchDDay" v-show="props.numberPermissions > 1"
+                        <TextInput v-model="data.params.searchDDay" v-show="props.numberPermissions >= 1"
                                    type="number" min="0" max="31" class="hidden lg:block w-2/3 md:w-full rounded-lg"
                                    :placeholder="lang().placeholder.searchDDay"/>
                     </div>

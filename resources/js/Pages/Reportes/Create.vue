@@ -57,19 +57,19 @@ const data = reactive({
     startTime: {hours: 7, minutes: 0}, //valor que por defecto, viene la hora inicial cuando se abre el formulario
     estado2359: false,
     TrabajadasHooy: 0,
-    TrabajadasSemana: 0,
+    CuantoFaltaParaExtraSemana: 0,
     diaini: 1,
     MensajeError: '',
     const: {
-        //39 =>
+        // 44(max semanal) - 8 (horas diarias) = 36
         HORAS_SEMANALES_MENOS_ESTANDAR: props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - props.ArrayHorasSemanales.HORAS_ORDINARIAS
     },
     Horas1159: props.ArrayOrdinarias.length > 1,
     diaSelected: 0,
     TemporalDiaAnterior: 0,
-    debugHorasSemana: 0,
     BoolCentrosNoFactura: false, //permite saber si el centro de costos factura o no
     StringRestriccionNoFActura: '',
+    WeekN: 1,
 })
 
 const message = reactive({
@@ -79,19 +79,15 @@ const message = reactive({
 
 onMounted(() => {
 
-    //explaining: data.TrabajadasSemana solo se usa cuando se pasa de las horas que debe trabajar por semana 
-    data.TrabajadasSemana = props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] > HORAS_SEMANALES_MENOS_ESTANDAR ?
-        props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
+    //explaining: data.CuantoFaltaParaExtraSemana solo se usa cuando se pasa de las horas que debe trabajar por semana 
+    //ex: 
+    data.CuantoFaltaParaExtraSemana = props.HorasDeCadaSemana[data.WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
+        props.HorasDeCadaSemana[data.WeekN] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
 
-    //explaining: data.TrabajadasSemana son las horas que hay que restarle a Cuandocomienzaextras
-    data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
+    //explaining: data.CuantoFaltaParaExtraSemana son las horas que hay que restarle a Cuandocomienzaextras
+    data.CuantoFaltaParaExtraSemana = data.CuantoFaltaParaExtraSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.CuantoFaltaParaExtraSemana
 
-    if (consolelog.MostrarTrabajadaSemana) {
-        console.log("=>(Create.vue:86) props.HorasDeCadaSemana", props.HorasDeCadaSemana);
-        console.log("=>(Create.vue:86) data.TrabajadasSemana", data.TrabajadasSemana);
-    }
-
-    //todo: tosync all repositories
+    //tosync: all repositories
     //explaining: recuperamos el centro de costo que habiamos selecciopnado previamente
     if (localStorage.getItem('centroCostoId')) {
         form.centro_costo_id = props.valoresSelect.find((ele) => {
@@ -103,7 +99,8 @@ onMounted(() => {
 
 
 const form = useForm({
-    fecha_ini: '', fecha_fin: '',
+    fecha_ini: '',
+    fecha_fin: '',
     // fecha_ini: '2023-04-0'+diaoDominicla+'T'+horas[0]+':00', fecha_fin: '2023-04-0'+(diaoDominicla)+'T'+horas[1]+':00', //temp
     // fecha_ini: '2023-06-01T23:00', fecha_fin: '2023-06-01T23:59', //temp
 
@@ -144,10 +141,9 @@ if (props.numberPermissions > 9) {
 
 } else {
     let timedate = TransformTdate(7)//la hora
-    let timedate2 = TransformTdate(16)
+    // let timedate2 = TransformTdate(16)
     form.fecha_ini = timedate
-    form.fecha_fin = timedate2
-
+    form.fecha_fin = timedate
 }
 
 
@@ -160,15 +156,13 @@ watchEffect(() => {
             form.centro_costo_id = props.valoresSelect.find((ele) => {
                 return ele.value === props.IntegerDefectoSelect
             })
-        } 
+        }
 
 
         // explaining: El dia anterior trabajo? 
         if (data.diaSelected) {
             data.HorasDelDiaAnterior59 = props.ArrayOrdinarias[data.diaSelected];
 
-            // console.log("=>(Create.vue:171) data anterior", data.diaSelected);
-            // console.log("=>(Create.vue:664) props.ArrayOrdinarias", props.ArrayOrdinarias);
         }
         form.errors = {}
         let Dateinii = Date.parse(form.fecha_ini);
@@ -180,18 +174,18 @@ watchEffect(() => {
             let ini = Date.parse(form.fecha_ini);
             let fin = Date.parse(form.fecha_fin);
 
-            let WeekN = weekNumber(new Date(form.fecha_ini))
+            data.WeekN = weekNumber(new Date(form.fecha_ini))
             if (consolelog.MostrarTrabajadaSemana) {
 
-                console.log("=>(Create.vue:190) WeekN", WeekN);
                 console.log("=>(data.TrabajadasHooy", data.TrabajadasHooy);
             }
 
-            // 38 => 46 - 8
-            data.TrabajadasSemana = props.HorasDeCadaSemana[WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
-                props.HorasDeCadaSemana[WeekN] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
+            //data.CuantoFaltaParaExtraSemana = 44 - 39 
+            data.CuantoFaltaParaExtraSemana = props.HorasDeCadaSemana[data.WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
+                props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - props.HorasDeCadaSemana[data.WeekN] : 8
 
-            data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
+            //el maximo valor de data.CuantoFaltaParaExtraSemana = 8 (HORAS_ESTANDAR)
+            data.CuantoFaltaParaExtraSemana = data.CuantoFaltaParaExtraSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.CuantoFaltaParaExtraSemana
 
             form.horas_trabajadas = 0
             form.almuerzo = 0
@@ -361,6 +355,9 @@ const create = () => {
 
                 form.almuerzo = data.ValorRealalmuerzo
                 emit("reportFinished")
+
+                fechafinBackend()
+
                 form.post(route('Reportes.store'), {
                     preserveScroll: true,
                     onSuccess: () => {
@@ -368,7 +365,7 @@ const create = () => {
                         form.reset()
                         setTimeout(() => {
                             location.reload();
-                        }, 2500);
+                        }, 1800);
                     },
                     onError: () => {
                         alert(JSON.stringify(form.errors, null, 4));
@@ -417,12 +414,39 @@ const formatfin = (date) => {
 }
 // <!--</editor-fold>-->
 
+
+watch(() => form.fecha_fin, (val) => {
+    if (val?.minutes !== 0 && val?.minutes !== 59) {
+        form.fecha_fin.minutes = 0;
+    }
+}, {deep: true});
+
+const fechafinBackend = () => {
+    const fechaInicial = new Date(form.fecha_ini);
+    const fechaFinalOriginal = new Date(form.fecha_fin);
+
+    // Construimos la fecha_fin final:
+    const fechaFinalProcesada = new Date(
+        fechaInicial.getFullYear(),
+        fechaInicial.getMonth(),
+        fechaInicial.getDate(),
+        fechaFinalOriginal.getHours(),
+        fechaFinalOriginal.getMinutes(),
+        0 // segundos fijos
+    );
+
+    const fechaFormateadaFinal =
+        `${fechaFinalProcesada.getFullYear()}-${String(fechaFinalProcesada.getMonth() + 1).padStart(2, '0')}-${String(fechaFinalProcesada.getDate()).padStart(2, '0')} ` +
+        `${String(fechaFinalProcesada.getHours()).padStart(2, '0')}:${String(fechaFinalProcesada.getMinutes()).padStart(2, '0')}:00`;
+
+    form.fecha_fin = fechaFormateadaFinal;
+}
 </script>
 
 <template>
     <section class="space-y-6">
-        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl4'">
-            <form @submit.prevent="create" class="p-6 xs:mb-24 lg:mb-64">
+        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl5'">
+            <form @submit.prevent="create" class="p-6 xs:mb-4 lg:mb-8">
                 <div class="flex space-x-4">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                         <b>
@@ -430,9 +454,9 @@ const formatfin = (date) => {
                             {{ props.title }}
                         </b>
                     </h2>
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                        Horas semana: {{ props?.horasemana }}
-                    </h2>
+                    <!--                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">-->
+                    <!--                        Horas semana: {{ props?.horasemana }}-->
+                    <!--                    </h2>-->
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                         {{ props?.startDateMostrar }} -
                         {{ props?.endDateMostrar }}
@@ -453,7 +477,6 @@ const formatfin = (date) => {
                         <VueDatePicker :format="formatfin" :is-24="false"
                                        :day-names="daynames" auto-apply :flow="['time']" :enable-time-picker="true"
                                        :teleport="true"
-                                       time-picker-inline
                                        id="fecha_fin" type="date" class="mt-1 block w-full" v-model="form.fecha_fin"
                                        required
                                        :placeholder="lang().placeholder.fecha_fin" :error="form.errors.fecha_fin"/>
@@ -562,7 +585,7 @@ const formatfin = (date) => {
 
                         <!--                        <SelectInput v-model="form.centro_costo_id" :dataSet="props.valoresSelect"-->
                         <!--                                     class="mt-1 block w-full"/>-->
-                        <vSelect v-model="form.centro_costo_id" :options="props.valoresSelect"
+                        <vSelect v-model="form.centro_costo_id" :options="props.valoresSelect" append-to-body
                                  label="label" class="mt-2"></vSelect>
                         <InputError class="mt-2" :message="form.errors.centro_costo_id"/>
                     </div>
@@ -595,43 +618,35 @@ const formatfin = (date) => {
                     </PrimaryButton>
                     <p v-else class="ml-4 mt-1">{{ data.StringRestriccionNoFActura }}</p>
                 </div>
-                <div
-                    v-if="props.ArrayOrdinarias[props.ArrayOrdinarias.length] > 8 ||
-                        props.ArrayOrdinarias[0] > data.const.HORAS_SEMANALES_MENOS_ESTANDAR && form.diurnas + form.nocturnas > 8 ||
-                        data.HorasDelDiaAnterior59 ||
+                <!--                        props.ArrayOrdinarias[0] > data.const.HORAS_SEMANALES_MENOS_ESTANDAR && form.diurnas + form.nocturnas > 8 ||-->
+<!--                        data.HorasDelDiaAnterior59 ||-->
+                <div v-if="props.ArrayOrdinarias[props.ArrayOrdinarias.length] > 8 ||
                         data.MensajeError !== '' ||
-                        data.TrabajadasSemana ||
-                        data.TrabajadasHooy ||
-                        data.debugHorasSemana"
+                        data.CuantoFaltaParaExtraSemana < 8 ||
+                        data.TrabajadasHooy"
                     class="flex justify-end my-3">
-                    <p class="mx-1">Hay pendientes</p>
+                    <!--                    <p class="mx-1 w-full">Hay pendientes</p>-->
 
                     <p v-if="props.ArrayOrdinarias[props.ArrayOrdinarias.length] > 8" class="mx-2">
 
                         {{ props.ArrayOrdinarias[props.ArrayOrdinarias.length] }} horas (11:59pm)</p>
-                    <p v-if="props.ArrayOrdinarias[0] > data.const.HORAS_SEMANALES_MENOS_ESTANDAR &&
-                                form.diurnas + form.nocturnas > 8"
-                       class="mx-2">Horas extra de la semana</p>
 
-                    <p v-if="data.HorasDelDiaAnterior59" class="mx-2">Dia anterior (11:59 p.m.)</p>
+<!--                    <p v-if="data.HorasDelDiaAnterior59" class="mx-2">Ayer finalizó a las 11:59 p.m.</p>-->
                     <p v-if="data.MensajeError !== ''" class="mx-2 text-red-600 text-lg">
                         {{ data.MensajeError }}
                     </p>
-
-                    <p v-if="data.TrabajadasSemana" class="mx-2 px-1 text-sky-700 bg-sky-400/10 dark:text-white">
-                        <small>{{ data.TrabajadasSemana }} </small> horas de la semana
+                    <p v-if="data.CuantoFaltaParaExtraSemana < 8"
+                       class="mx-2 px-1 text-sky-700 bg-sky-400/10 dark:text-white">
+                        Faltan <small>{{ data.CuantoFaltaParaExtraSemana }} </small> horas, para las extras semanales
                     </p>
                     <p v-if="data.TrabajadasHooy" class="mx-2 px-1 text-sky-700 bg-sky-400/10 dark:text-white">
-                        <small>{{ data.TrabajadasHooy }} </small> horas de hoy
-                    </p>
-                    <!--                    <p v-if="data.TemporalDiaAnterior" class="mx-2 text-amber-700 bg-amber-400/10 rounded-2xl">-->
-                    <!--                        <small v-if="numberPermissions > 8">{{ data.TemporalDiaAnterior }}</small>-->
-                    <!--                    </p>-->
-                    <p v-if="data.debugHorasSemana" class="mx-2 text-amber-700 bg-amber-400/10 rounded-2xl">
-                        <small v-if="numberPermissions > 8">{{ data.debugHorasSemana }}</small>
+                        Ya se reportaron <small>{{ data.TrabajadasHooy }} </small> horas de hoy
                     </p>
 
                 </div>
+                <p class="mt-4 px-1 dark:text-white text-sm">
+                    Has trabajado {{ props.HorasDeCadaSemana[data.WeekN] }} horas en la semana
+                </p>
             </form>
         </Modal>
     </section>
