@@ -218,4 +218,13 @@ class User extends Authenticatable {
 		// se rendericen usando la carpeta de traducción 'es'.
 		return 'es';
 	}
+	
+	public function scopeUsersWithRol($query, $roles) {
+		$roles = (array)$roles;
+		
+		return $query->whereHas('roles', function ($q) use ($roles) {
+			$q->whereIn('name', $roles)->where('guard_name', 'web'); // 👈 clave
+		});
+	}
+	
 }

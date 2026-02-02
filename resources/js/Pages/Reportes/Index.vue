@@ -210,7 +210,7 @@ const selectAll = (event) => {
     }
 }
 
-const select = () => data.multipleSelect = props.fromController?.data.length == data.selectedId.length;
+const select = () => data.multipleSelect = props.fromController?.data.length === data.selectedId.length;
 
 // <!--</editor-fold>-->
 
@@ -252,10 +252,6 @@ const handleCheckboxChange = (values) => {
     data.params.nofacturan = values[7]
 };
 
-// props.userFiltro.unshift({
-//     id:0,
-//     name:' - '
-// })
 </script>
 
 <template>
@@ -271,9 +267,9 @@ const handleCheckboxChange = (values) => {
                                        @click="data.createOpen = true">
                             {{ lang().button.add }}
                         </PrimaryButton>
-                        <PrimaryButton v-if="can(['isAdmin'])" class="rounded-md mx-2 h-8 mt-2"
+                        <PrimaryButton v-if="can(['isadmin', 'isadministrativo'])" class="rounded-md mx-2 h-8 mt-2"
                                        @click="data.createMassOpen = true">
-                            {{ lang().button.add }} Masivamente
+                            {{ lang().button.add }} MASIVAMENTE
                         </PrimaryButton>
                         <div v-else
                              v-show="can(['isingeniero','isadmin','isadministrativo','issupervisor']) && props.userFiltro"

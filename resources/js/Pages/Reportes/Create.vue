@@ -57,6 +57,7 @@ const data = reactive({
     startTime: {hours: 7, minutes: 0}, //valor que por defecto, viene la hora inicial cuando se abre el formulario
     estado2359: false,
     TrabajadasHooy: 0,
+    almorzadasHooy: 0,
     CuantoFaltaParaExtraSemana: 0,
     diaini: 1,
     MensajeError: '',
@@ -93,7 +94,6 @@ onMounted(() => {
         form.centro_costo_id = props.valoresSelect.find((ele) => {
             return ele.value === localStorage.getItem('centroCostoId')
         })
-        // form.centro_costo_id = localStorage.getItem('centroCostoId')
     }
 });
 
@@ -169,6 +169,8 @@ watchEffect(() => {
         if (Dateinii && Date.parse(form.fecha_fin)) { // son fechas?
             data.diaini = parseInt(new Date(form.fecha_ini).getDate())
             data.TrabajadasHooy = (props.horasTrabajadasHoy[data.diaini]) ?? 0
+            // data.almorzadasHooy = (props.horasTrabajadasHoy[0][data.diaini])
+            console.log("🚀🚀 ~ props.horasTrabajadasHoy: ", props.horasTrabajadasHoy[0]);
             data.TrabajadasHooy = parseInt(data.TrabajadasHooy)
 
             let ini = Date.parse(form.fecha_ini);
@@ -184,6 +186,9 @@ watchEffect(() => {
             data.CuantoFaltaParaExtraSemana = props.HorasDeCadaSemana[data.WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
                 props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - props.HorasDeCadaSemana[data.WeekN] : 8
 
+            //no puede ser negativo
+            data.CuantoFaltaParaExtraSemana = data.CuantoFaltaParaExtraSemana < 0 ? 0 : data.CuantoFaltaParaExtraSemana
+            
             //el maximo valor de data.CuantoFaltaParaExtraSemana = 8 (HORAS_ESTANDAR)
             data.CuantoFaltaParaExtraSemana = data.CuantoFaltaParaExtraSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.CuantoFaltaParaExtraSemana
 
@@ -199,6 +204,7 @@ watchEffect(() => {
             form.dominical_extra_diurnas = 0
             form.dominical_extra_nocturnas = 0
             form.horas_trabajadas = parseInt((fin - ini) / (3600 * 1000));
+            
 
 
             //si es 11:59 minutos -> agrega una hora
@@ -361,11 +367,11 @@ const create = () => {
                 form.post(route('Reportes.store'), {
                     preserveScroll: true,
                     onSuccess: () => {
-                        emit("close")
                         form.reset()
+                        emit("close")
                         setTimeout(() => {
                             location.reload();
-                        }, 1800);
+                        }, 800);
                     },
                     onError: () => {
                         alert(JSON.stringify(form.errors, null, 4));
@@ -612,6 +618,7 @@ const fechafinBackend = () => {
                         }}
                     </SecondaryButton>
                     <PrimaryButton v-if="data.StringRestriccionNoFActura === ''"
+                                   type="button"
                                    class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                                    @mouseup="create" @keyup.enter="create">
                         {{ form.processing ? lang().button.add + '...' : lang().button.add }}

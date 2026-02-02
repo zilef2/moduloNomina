@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\helpers\MyGlobalHelp;
 use App\helpers\Myhelp;
+use App\helpers\MyModels;
 use App\Jobs\EnviarViaticoJob;
 use App\Mail\AvisoPagoDesarrollo;
 use App\Mail\UsuariosHorasExtrasMail;
 use App\Mail\UsuariosLogeadosHoy;
+use App\Models\CentroCosto;
 use App\Models\desarrollo;
 use App\Models\Parametro;
+use App\Models\Permission;
 use App\Models\Reporte;
+use App\Models\Role;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -18,10 +22,155 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
+use Inertia\Inertia;
 
 class DashboardController extends Controller {
 	
 	public int $LimiteDiasSinPagar = 15;
+	public int $numberPermissions = 15;
+	
+	public function __construct() {
+		
+		$this->middleware(function ($request, $next) {
+		
+//			$permissions = Myhelp::AuthU()->roles->pluck('name')[0];
+//			$this->numberPermissions = MyModels::getPermissionToNumber($permissions);
+			
+//			$nombre = str_replace('Controller', '', class_basename(static::class)); // Obtener el nombre del controlador sin "Controller"
+			$this->numberPermissions = MyModels::getPermissionToNumber(
+			    Myhelp::EscribirEnLog($this, class_basename(static::class))
+			);
+			return $next($request);
+		});
+		
+	}
+	
+	public function Dashboard() {
+		$ListaControladoresYnombreClase = (explode('\\', get_class($this)));
+		$nombreC = end($ListaControladoresYnombreClase);
+		$Authuser = Myhelp::AuthU();
+		Myhelp::EscribirEnLog($this, $nombreC, ' U -> ' . $Authuser->name . ' Accedio al dashboard ', false);
+		
+		$userid = $Authuser->id;
+		if ($this->numberPermissions === 1) {
+			return redirect()->route('Reportes.index')->with('success', 'Bienvenido');
+			// $reportes = (int) Reporte::Where('user_id', $Authuser->id)->count();
+		}
+		else { // si no eres empleado
+			$reportes = Reporte::count();
+			$elmespasado = Carbon::now()->startOfWeek()->addMonth(- 1);
+			
+			if ($this->numberPermissions === 3) {
+				$centroMio = $Authuser->ArrayCentrosID();
+				$reportes = Reporte::WhereIn('centro_costo_id', $centroMio)->count();
+				
+				$ultimos5dias = [
+					'Mes pasado' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->where('fecha_ini', '<', Carbon::today()->addMonth(- 1)->endOfMonth())->where('fecha_ini', '>=', Carbon::today()->addMonth(- 1)->firstOfMonth())->get()->count(),
+					
+					'Semana pasada' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->whereBetween('fecha_ini', [
+						Carbon::now()->addDays(- 7)->startOfWeek(),
+						Carbon::now()->addDays(- 7)->endOfWeek()
+					])->get()->count(),
+					
+					'Semana actual' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->whereBetween('fecha_ini', [
+						Carbon::now()->startOfWeek(),
+						Carbon::now()->endOfWeek()
+					])->get()->count(),
+				];
+				
+				$diasNovalidos = [
+					'Mes pasado' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereIn('valido', [
+						0,
+						2
+					])->where('fecha_ini', '>=', $elmespasado)->where('fecha_ini', '<', Carbon::today()->startOfMonth())->get()->count(),
+					'Mes actual' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereIn('valido', [
+						0,
+						2
+					])->where('fecha_ini', '>', Carbon::today()->startOfMonth())->get()->count(),
+				];
+				
+			}
+			else { //si no eres administrativo
+				$ultimos5dias = [
+					'Mes pasado' => Reporte::whereValido(1)->where('fecha_ini', '<', Carbon::today()->addMonth(- 1))->get()->count(),
+					
+					'Semana pasada' => Reporte::whereValido(1)->whereBetween('fecha_ini', [
+						Carbon::now()->addDays(- 7)->startOfWeek(),
+						Carbon::now()->addDays(- 7)->endOfWeek()
+					])->get()->count(),
+					
+					'Semana actual' => Reporte::whereValido(1)->whereBetween('fecha_ini', [
+						Carbon::now()->startOfWeek(),
+						Carbon::now()->endOfWeek()
+					])->get()->count(),
+				];
+				$diasNovalidos = [
+					'Mes pasado' => Reporte::whereIn('valido', [
+						0,
+						2
+					])->where('fecha_ini', '<', Carbon::today()->startOfMonth())->where('fecha_ini', '>=', $elmespasado)->get()->count(),
+					'Mes actual' => Reporte::whereIn('valido', [
+						0,
+						2
+					])->where('fecha_ini', '>', Carbon::today()->startOfMonth())->get()->count(),
+				];
+			}
+			
+			$usuariosConRol = User::whereHas('roles', function ($q) {
+				$q->where('name', 'empleado');
+			})->whereHas('reportes')->withSum('reportes as total_horas', 'horas_trabajadas')->orderByDesc('total_horas')->get()->take(5);
+			foreach ($usuariosConRol as $value) {
+				$BooleanreportoHoy = Reporte::where('user_id', $value->id)->whereDate('fecha_fin', Carbon::today())->first();
+				
+				if ($BooleanreportoHoy !== null) {
+					$trabajadoresHoy[$value->name] = $BooleanreportoHoy->horas_trabajadas;
+				}
+				else {
+					$trabajadoresHoy[$value->name] = 0;
+				}
+			}
+			
+			$centros = CentroCosto::all();
+			foreach ($centros as $value) {
+				$BooleanReporteCentro = Reporte::where('centro_costo_id', $value->id)->whereDate('fecha_fin', Carbon::today())->sum('horas_trabajadas');
+				if ($BooleanReporteCentro !== null) {
+					$centrosHoy[$value->nombre] = $BooleanReporteCentro;
+				}
+				else {
+					$centrosHoy[$value->nombre] = 0;
+				}
+			}
+			$conteoPorRol = User::whereNotIn('cargo_id', [1, 2])
+			                    ->with('roles')->get()->flatMap->roles->groupBy('name')->map->count();
+			
+			$topCentros = CentroCosto::select('nombre', 'mano_obra_estimada')
+			                         ->where('mano_obra_estimada', '>', 25000)
+			                         ->orderByDesc('mano_obra_estimada')
+			                         ->limit(10)->get()
+			;
+			
+			$chartLabels = $topCentros->pluck('nombre');
+			$chartValues = $topCentros->pluck('mano_obra_estimada');
+		} //fin, si no eres empleado
+		
+		return Inertia::render('Dashboard', [
+			'versionZilef'      => '25.6.1',
+			'users'             => User::count(),
+			'roles'             => Role::count(),
+			'permissions'       => Permission::count(),
+			'reportes'          => $reportes,
+			'ultimos5dias'      => $ultimos5dias,
+			'diasNovalidos'     => $diasNovalidos,
+			'trabajadoresHoy'   => $trabajadoresHoy ?? [],
+			'centrosHoy'        => $centrosHoy ?? [],
+			'numberPermissions' => $this->numberPermissions,
+			'userid'            => $userid,
+			'conteoPorRol'      => $conteoPorRol,
+			'topCentros'        => $topCentros,
+			'chartLabels'       => $chartLabels,
+			'chartValues'       => $chartValues,
+		]);
+	}
 	
 	public function guardarCiudad(Request $r): void {
 		$user = Myhelp::AuthU();
@@ -182,5 +331,7 @@ class DashboardController extends Controller {
 		<p> ' . implode(',',$destinos) . '</p>';
 		
 	}
+	
+	
 	
 }

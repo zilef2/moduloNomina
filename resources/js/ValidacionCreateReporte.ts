@@ -19,7 +19,7 @@ export function validacionNoMasDe3Diax(DiaForm:string,DiasPermitidoPasado:number
     // console.log("=>(ValidacionCreateReporte.ts:14) formDate.getDate() ", formDate.getDate() );
     // console.log("=>(ValidacionCreateReporte.ts:14) today.getDate()", today.getDate());
     //no futuros
-    if (differenceInDays > 0) {
+    if (differenceInDays > 1) {
         return "El Reporte no puede ser futuro al día de hoy.";
     }
 

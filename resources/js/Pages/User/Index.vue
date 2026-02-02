@@ -37,6 +37,7 @@ const props = defineProps({
     onlySupervis: Number,
     superviNullCentro: Number,
     numberPermissions: Number,
+    centrosForUser: Object,
 })
 const data = reactive({
     params: {
@@ -109,7 +110,7 @@ const toggleColumn = (index) =>
             }
         }
         const select = () => {
-            if (props.users?.data.length == data.selectedId.length) {
+            if (props.users?.data.length === data.selectedId.length) {
                 data.multipleSelect = true
             } else {
                 data.multipleSelect = false
@@ -153,7 +154,9 @@ data.params.onlySupervis = data.params.onlySupervis === null ? false : data.para
                     <Edit :show="data.editOpen" @close="data.editOpen = false" :user="data.user" :roles="props.roles"
                         :cargos="props.cargos" :centros="props.centros" :sexoSelect="props.sexoSelect" :title="props.title" />
                     <EdiCentro :show="data.EdiCentroOpen" @close="data.EdiCentroOpen = false" :user="data.user"
-                               :centros="props.centros" :title="props.title" />
+                               :centros="props.centros"
+                               :centrosForUser="props.centrosForUser"
+                               :title="props.title" />
                     <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :user="data.user"
                         :title="props.title" />
                     <DeleteBulk :show="data.deleteBulkOpen"
@@ -322,7 +325,8 @@ data.params.onlySupervis = data.params.onlySupervis === null ? false : data.para
                                                 class="px-2 py-1.5 rounded-sm mx-0.5" v-tooltip="lang().tooltip.edit">
                                                 <PencilIcon class="w-4 h-4" />
                                             </InfoButton>
-                                            <InfoButton v-if="user.roles[0]" v-show="can(['update user']) && user.roles[0]?.name === 'supervisor'" type="button"
+                                            <InfoButton v-if="user.roles[0]" v-show="can(['update user']) 
+                                                && (user.roles[0]?.name === 'supervisor')" type="button"
                                                 @click="(data.EdiCentroOpen = true), (data.user = user)"
                                                 class="px-2 py-1.5 rounded-sm mx-0.5" v-tooltip="'Asignar'">
                                                 <LinkIcon class="w-4 h-4" />

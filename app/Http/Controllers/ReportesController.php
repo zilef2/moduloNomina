@@ -23,46 +23,134 @@ use Spatie\LaravelPdf\Facades\Pdf;
 
 class ReportesController extends Controller {
 	
-	//<editor-fold desc="Select y filtros">
-	public function CreateTest(Request $request) {
-		$Authuser = Myhelp::AuthU();
-		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes testcreate| '));
+	public int $cacheseconds = 60;
+	public function index(Request $request) {
 		
+		Cache::increment('reportes_version');
+		
+		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes index| '));
+		$Authuser = Myhelp::AuthU();
+		Carbon::setLocale('es');
+		$titulo = __('app.label.Reportes');
+		
+		$Reportes = Reporte::query();
 		$showSelect = $this->losSelect($valoresSelectConsulta, $showUsers, $valoresSelect, $userFiltro, $numberPermissions);
 		$IntegerDefectoSelect = $valoresSelectConsulta->first()->id;
-		$Reportes = Reporte::query();
-		$fnombresT = $this->fNombresTabla($numberPermissions, $Reportes, $Authuser, $request, $titulo);
-		
-		$horasemana = $fnombresT[1];
 		
 		$startDate = Carbon::now()->startOfWeek();
 		$endDate = Carbon::now()->endOfWeek();
 		$startDateMostrar = $startDate->isoFormat('dddd D [de] MMMM');
 		$endDateMostrar = $endDate->isoFormat('dddd D [de] MMMM');
 		
+		$perPage = $request->has('perPage') ? $request->perPage : 50;
+		if (!$request->has('perPage') && $numberPermissions < 2) {
+			$perPage = 5; //si es empleado
+		}
+		
+		//  aqui se filtra
+		$version = Cache::get('reportes_version', 1);
+		$key = 'reportes_' . $version . '_' . md5(json_encode($request->all()));
+		[$fnombresT,$reportes] = Cache::remember($key, $this->cacheseconds, function()use($perPage,$numberPermissions,$Authuser, $request,$Reportes) {
+			
+			[$fnombresT,$Reportes] = $this->fNombresTabla($numberPermissions, $Reportes, $Authuser, $request, $titulo);
+            return [$fnombresT,$Reportes->paginate($perPage)];
+		});
+		
+		
+		$nombresTabla = $fnombresT[0];
+		$horasemana = $fnombresT[1];
+		$quincena = $fnombresT[2];
+		$horasPersonal = $fnombresT[3];
+		
+		//para mostrar la suma de las horas extras
+		$keyMes = 'reportesMes';
+		$ReportesMes = Cache::remember($keyMes, $this->cacheseconds, function () use ($numberPermissions, $Authuser) {
+			return $this->ReportesFunQuicena($numberPermissions, $Authuser)->get();
+		});
+		
+		// garantizar que sea Collection cuando sale del cache
+		$ReportesMes = collect($ReportesMes);
+		
+		$sumhoras_trabajadas = $ReportesMes->sum('horas_trabajadas');
+		$sumdiurnas = $ReportesMes->sum('diurnas');
+		$sumnocturnas = $ReportesMes->sum('nocturnas');
+		$sumextra_diurnas = $ReportesMes->sum('extra_diurnas');
+		$sumextra_nocturnas = $ReportesMes->sum('extra_nocturnas');
+		$sumdominical_diurno = $ReportesMes->sum('dominical_diurno');
+		$sumdominical_nocturno = $ReportesMes->sum('dominical_nocturno');
+		$sumdominical_extra_diurno = $ReportesMes->sum('dominical_extra_diurno');
+		$sumdominical_extra_nocturno = $ReportesMes->sum('dominical_extra_nocturno');
+		
+		//suma de horas ordinarias[0] &
 		$ArrayOrdinarias = Myhelp::CalcularPendientesQuicena($Authuser);
 		
-		return Inertia::render('Reportes/CreateTest', [
-			'title' => 'reportes test',
+		//help: $HorasDeCadaSemana en el [0] esta la semana actual, y de resto son numSemana => SumaHorasOrdinarias
+		$HorasDeCadaSemana = CalculoReportes::CalcularHorasDeCadaSemana($Authuser->id);
+		
+		//20ene2024
+		$esteMes = Carbon::now()->format('m');
+		$esteAnio = Carbon::now()->format('Y');
+		$horasTrabajadasHoy = Reporte::WhereMonth('fecha_ini', $esteMes)->WhereYear('fecha_ini', $esteAnio)->Where('user_id', $Authuser->id)->pluck('horas_trabajadas', 'fecha_ini')->toArray();
+		$horasTrabajadasHoy[0] = Reporte::WhereMonth('fecha_ini', $esteMes)->WhereYear('fecha_ini', $esteAnio)->Where('user_id', $Authuser->id)->pluck('almuerzo', 'fecha_ini')->toArray();
+		
+		foreach ($horasTrabajadasHoy as $index => $item) {
+			if (is_array($item)) {
+				continue;
+			}
+			
+			$elIndex = (int)Carbon::parse($index)->format('d');
+			if (isset($horasTrabajadasHoy2[$elIndex])) {
+				$horasTrabajadasHoy2[$elIndex] += $item;
+				$horasTrabajadasHoy2[0][$elIndex] += $horasTrabajadasHoy[0][$index];
+			}
+			else {
+				$horasTrabajadasHoy2[$elIndex] = $item;
+				
+				$horasTrabajadasHoy2[0][$elIndex] = $horasTrabajadasHoy[0][$index];
+			}
+		}
+		
+		return Inertia::render('Reportes/Index', [ //carpeta
+			'title'          => $titulo,
+			'filters'        => $request->all(['search', 'field', 'order', 'soloValidos', 'sifacturan', 'nofacturan', 'FiltroUser', 'searchDDay', 'searchorasD', 'soloQuincena', 'searchIncongruencias', 'searchQuincena', 'FiltroQuincenita', 'search1', 'search2', 'HorasNoDiurnas',]),
+			'perPage'        => (int)$perPage,
+			'fromController' => $reportes,
+			'breadcrumbs'    => [['label' => __('app.label.Reportes'), 'href' => route('Reportes.index')]],
+			'nombresTabla'   => $nombresTabla,
 			
 			'valoresSelect'        => $valoresSelect,
 			'showSelect'           => $showSelect,
 			'IntegerDefectoSelect' => $IntegerDefectoSelect,
+			'showUsers'            => $showUsers,
+			'quincena'             => $quincena,
+			'horasemana'           => $horasemana,
+			'horasPersonal'        => $horasPersonal,
+			'startDateMostrar'     => $startDateMostrar,
+			'endDateMostrar'       => $endDateMostrar,
+			'numberPermissions'    => $numberPermissions,
+			'ArrayOrdinarias'      => $ArrayOrdinarias,
+			'userFiltro'           => $userFiltro,
 			
-			'horasemana'       => $horasemana,
-			'startDateMostrar' => $startDateMostrar,
-			'endDateMostrar'   => $endDateMostrar,
-			
-			'numberPermissions' => $numberPermissions,
-			'ArrayOrdinarias'   => $ArrayOrdinarias,
-			
-			'horasTrabajadasHoy'    => $horasTrabajadasHoy2 ?? [],
-			'HorasDeCadaSemana'     => CalculoReportes::CalcularHorasDeCadaSemana($Authuser->id),
-			'ArrayHorasSemanales'   => $this->DoArrayHorasSemanales(),
-			'ArrayCentrosNoFactura' => $this->DoArrayCentrosNoFactura(),
+			'sumhoras_trabajadas'         => (int)($sumhoras_trabajadas),
+			'sumdiurnas'                  => $sumdiurnas,
+			'sumnocturnas'                => $sumnocturnas,
+			'sumextra_diurnas'            => $sumextra_diurnas,
+			'sumextra_nocturnas'          => $sumextra_nocturnas,
+			'sumdominical_diurno'         => $sumdominical_diurno,
+			'sumdominical_nocturno'       => $sumdominical_nocturno,
+			'sumdominical_extra_diurno'   => $sumdominical_extra_diurno,
+			'sumdominical_extra_nocturno' => $sumdominical_extra_nocturno,
+			'horasTrabajadasHoy'          => $horasTrabajadasHoy2 ?? [],
+			'HorasDeCadaSemana'           => $HorasDeCadaSemana,
+			'ArrayHorasSemanales'         => $this->DoArrayHorasSemanales(),
+			'ArrayCentrosNoFactura'       => $this->DoArrayCentrosNoFactura(),
+			'losSelect'                   => $this->DolosSelect(),
+		
 		]);
-	}
+	}//fin index
 	
+	//<editor-fold desc="Select y filtros">
+
 	public function losSelect(&$valoresSelectConsulta, &$showUsers, &$valoresSelect, &$userFiltro, $numberPermissions): array {
 		$elUser = Myhelp::AuthU();
 		$showSelect = [];
@@ -70,15 +158,10 @@ class ReportesController extends Controller {
 		$DateEstandar = Carbon::now()->subYears(2);
 		
 		$valoresSelectConsulta = CentroCosto::Where('activo', 1)->WhereHas('reportes', function ($query) use ($DateEstandar) {
-			$query
-				->orderBy('created_at', 'asc')->take(1)->where('created_at', '<=', $DateEstandar)
-			;
-		})->orWhere('created_at', '>=', $DateEstandar)->orWhere('updated_at', '>=', $DateEstandar)->orderBy(DB::raw('CAST(nombre AS UNSIGNED) IS NULL, CAST(nombre AS UNSIGNED), nombre'))->get();
+			$query->orderBy('created_at', 'asc')->take(1)->where('created_at', '<=', $DateEstandar);
+		})->orWhere('created_at', '>=', $DateEstandar)->orWhere('updated_at', '>=', $DateEstandar)
+		  ->orderBy(DB::raw('CAST(nombre AS UNSIGNED) IS NULL, CAST(nombre AS UNSIGNED), nombre'))->get();
 		
-		//        $valoresSelectConsulta = CentroCosto::Where('activo', 1)
-		//            ->Where('updated_at', '>=', Carbon::now()->addMonths(-8)->toDateString()) //todo: subir un parametro que controle esto
-		//            ->orderBy('nombre')->get();
-		$userFiltro[0] = ['label' => 'Sin empleado', 'value' => 0];
 		foreach ($valoresSelectConsulta as $value) {
 			$valoresSelect[] = [
 				'label' => $value->nombre . ' - ' . $value->Zouna, //centro de costos
@@ -93,20 +176,16 @@ class ReportesController extends Controller {
 			$showUsers[(int)($value->id)] = $value->name;
 		}
 		
-		if ($numberPermissions === 3) { //
+		if ($numberPermissions === 3) { //ing y supervisor
 			$centrosSupervisor = $elUser->ArrayCentrosID();
-			// Optimizado: usar exists en vez de count
-			$userEmpleados = User::UsersWithManyRols([
-				                                         'empleado',
-				                                         'supervisor'
-			                                         ])->whereHas('reportes', function ($query) use ($centrosSupervisor) {
-					$query->whereIn('centro_costo_id', $centrosSupervisor);
-				})->orderBy('name')->get()
-			;
+			$userEmpleados = User::UsersWithManyRols(['empleado', 'supervisor'])
+			                     ->whereHas('reportes', function ($query) use ($centrosSupervisor) {$query->whereIn('centro_costo_id', $centrosSupervisor); })
+			                     ->orderBy('name')->get();
 		}
-		else {
-			$userEmpleados = User::UsersWithRol('empleado')->orderBy('name')->get();
+		else { //empleado administrativo admin superadmin
+			$userEmpleados = User::UsersWithManyRols(['supervisor','empleado'])->orderBy('name')->get();
 		}
+		$userFiltro[0] = ['label' => 'Sin empleado', 'value' => 0];
 		foreach ($userEmpleados as $value) {
 			$userFiltro[] = [
 				'label' => $value->name,
@@ -117,7 +196,7 @@ class ReportesController extends Controller {
 		return $showSelect;
 	}
 	
-	public function fNombresTabla($numberPermissions, &$Reportes, $Authuser, $request, &$titulo) {
+	public function fNombresTabla($numberPermissions, $Reportes, $Authuser, $request, &$titulo) {
 		$startDate = Carbon::now()->startOfWeek();
 		$endDate = Carbon::now()->endOfWeek();
 		$quincena = [];
@@ -134,6 +213,7 @@ class ReportesController extends Controller {
 			$startDate,
 			$endDate
 		])->sum('horas_trabajadas');
+		
 		if ($numberPermissions === 1) { //1 = empleado | 2 administrativo | 3 supervisor | 4 ingeniero
 			$Reportes->whereUser_id($Authuser->id);
 			$this->Filtros($request, $Reportes);
@@ -196,9 +276,8 @@ class ReportesController extends Controller {
 				], //m for money || t for datetime || d date || i for integer || s string || b boolean
 			];
 			
-			
 		}
-		else { //administrativo, supervisor y admin
+		else { //2 administrativo | 3 supervisor | 4 ingeniero y admin
 			$this->Filtros($request, $Reportes);
 			
 			$nombresTabla = [//0: como se ven //1 como es la BD
@@ -302,16 +381,11 @@ class ReportesController extends Controller {
 			$titulo = 'Mis Horas (esta quincena): ' . $horasPersonal;
 		}
 		
-		return [$nombresTabla, $horasemana, $quincena, $horasPersonal];
+		return [[$nombresTabla, $horasemana, $quincena, $horasPersonal],$Reportes];
 	}
 	
-	//</editor-fold>
-	
-	//filtros
-
 	public function Filtros(&$request, &$Reportes): void {
 		$esteAnio = Carbon::now()->format('Y');
-		
 		if ($request->has('search5')) { //el anio
 			$Reportes->WhereHas('centro', function ($query) use ($request) {
 				return $query->Where('id', $request->search5['id']);
@@ -383,8 +457,7 @@ class ReportesController extends Controller {
 			$elquince = $elquince->startOfMonth()->addDays(14);
 			if ($request->FiltroQuincenita['value'] === '1') {
 				$Reportes->whereDay('fecha_ini', '<=', 15);
-			}
-			else {
+			}else {
 				$Reportes->whereDay('fecha_ini', '>', 15);
 			}
 		}
@@ -466,139 +539,15 @@ class ReportesController extends Controller {
 		}
 	}
 	
-	//  aqui se filtra tambien
+	//</editor-fold>
+	
+	//filtros
 	
 	public function DoArrayCentrosNoFactura() {
 		return CentroCosto:: OrWhere('ValidoParaFacturar', 0)->OrWhere('ValidoParaFacturar')->pluck('id')->toArray();
 	}
 	
-private function DoArrayHorasSemanales() {
-		$parametros = Parametro::first();
-		if ($parametros) {
-			return [
-				'HORAS_ORDINARIAS'       => $parametros['HORAS_ORDINARIAS'],
-				'MAXIMO_HORAS_SEMANALES' => $parametros['HORAS_NECESARIAS_SEMANA'],
-				's_Dias_gabela'          => $parametros['s_Dias_gabela'],
-			];
-		}
-		
-		return [0, 0];
-	}
-	
-		public function index(Request $request) {
-		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes index| '));
-		$Authuser = Myhelp::AuthU();
-		Carbon::setLocale('es');
-		$titulo = __('app.label.Reportes');
-		
-//		$key = 'reportes_' . md5(json_encode($request->all()));Cache::forget($key);
-		
-		$Reportes = Reporte::query();
-		$showSelect = $this->losSelect($valoresSelectConsulta, $showUsers, $valoresSelect, $userFiltro, $numberPermissions);
-		$IntegerDefectoSelect = $valoresSelectConsulta->first()->id;
-		
-		$startDate = Carbon::now()->startOfWeek();
-		$endDate = Carbon::now()->endOfWeek();
-		$startDateMostrar = $startDate->isoFormat('dddd D [de] MMMM');
-		$endDateMostrar = $endDate->isoFormat('dddd D [de] MMMM');
-		
-		$perPage = $request->has('perPage') ? $request->perPage : 50;
-		if (!$request->has('perPage') && $numberPermissions < 2) {
-			$perPage = 5; //si es empleado
-		}
-		
-		//  aqui se filtra | public function Filtros(&$request, &$Reportes): void {
-		$fnombresT = $this->fNombresTabla($numberPermissions, $Reportes, $Authuser, $request, $titulo);
-		
-		$nombresTabla = $fnombresT[0];
-		$horasemana = $fnombresT[1];
-		$quincena = $fnombresT[2];
-		$horasPersonal = $fnombresT[3];
-		
-		//para mostrar la suma de las horas extras
-		$keyMes = 'reportesMes';
-		$ReportesMes = Cache::remember($keyMes, 10, function () use ($numberPermissions, $Authuser) {
-		    return $this->ReportesFunQuicena($numberPermissions, $Authuser)->get();
-		});
-
-		// garantizar que sea Collection cuando sale del cache
-		$ReportesMes = collect($ReportesMes);
-		
-		$sumhoras_trabajadas = $ReportesMes->sum('horas_trabajadas');
-		$sumdiurnas = $ReportesMes->sum('diurnas');
-		$sumnocturnas = $ReportesMes->sum('nocturnas');
-		$sumextra_diurnas = $ReportesMes->sum('extra_diurnas');
-		$sumextra_nocturnas = $ReportesMes->sum('extra_nocturnas');
-		$sumdominical_diurno = $ReportesMes->sum('dominical_diurno');
-		$sumdominical_nocturno = $ReportesMes->sum('dominical_nocturno');
-		$sumdominical_extra_diurno = $ReportesMes->sum('dominical_extra_diurno');
-		$sumdominical_extra_nocturno = $ReportesMes->sum('dominical_extra_nocturno');
-		
-		//suma de horas ordinarias[0] &
-		$ArrayOrdinarias = Myhelp::CalcularPendientesQuicena($Authuser);
-		
-		//help: $HorasDeCadaSemana en el [0] esta la semana actual, y de resto son numSemana => SumaHorasOrdinarias
-		$HorasDeCadaSemana = CalculoReportes::CalcularHorasDeCadaSemana($Authuser->id);
-		
-		//20ene2024
-		$esteMes = Carbon::now()->format('m');
-		$esteAnio = Carbon::now()->format('Y');
-		$horasTrabajadasHoy = Reporte::WhereMonth('fecha_ini', $esteMes)->WhereYear('fecha_ini', $esteAnio)->Where('user_id', $Authuser->id)->pluck('horas_trabajadas', 'fecha_ini')->toArray();
-		//        dd($horasTrabajadasHoy);
-		foreach ($horasTrabajadasHoy as $index => $item) {
-			$elIndex = (int)Carbon::parse($index)->format('d');
-			if (isset($horasTrabajadasHoy2[$elIndex])) {
-				$horasTrabajadasHoy2[$elIndex] += $item;
-			}
-			else {
-				$horasTrabajadasHoy2[$elIndex] = $item;
-			}
-		}
-		
-		$version = Cache::get('reportes_version', 1);
-		$key = 'reportes_'.$version.'_'.md5(json_encode($request->all()));
-		$reportes = Cache::remember($key, 600, fn() => $Reportes->paginate($perPage));
-		
-
-		
-		return Inertia::render('Reportes/Index', [ //carpeta
-			'title'          => $titulo,
-			'filters'        => $request->all(['search', 'field', 'order', 'soloValidos', 'sifacturan', 'nofacturan', 'FiltroUser', 'searchDDay', 'searchorasD', 'soloQuincena', 'searchIncongruencias', 'searchQuincena', 'FiltroQuincenita', 'search1', 'search2', 'HorasNoDiurnas',]),
-			'perPage'        => (int)$perPage,
-			'fromController' => $reportes,
-			'breadcrumbs'    => [['label' => __('app.label.Reportes'), 'href' => route('Reportes.index')]],
-			'nombresTabla'   => $nombresTabla,
-			
-			'valoresSelect'        => $valoresSelect,
-			'showSelect'           => $showSelect,
-			'IntegerDefectoSelect' => $IntegerDefectoSelect,
-			'showUsers'            => $showUsers,
-			'quincena'             => $quincena,
-			'horasemana'           => $horasemana,
-			'horasPersonal'        => $horasPersonal,
-			'startDateMostrar'     => $startDateMostrar,
-			'endDateMostrar'       => $endDateMostrar,
-			'numberPermissions'    => $numberPermissions,
-			'ArrayOrdinarias'      => $ArrayOrdinarias,
-			'userFiltro'           => $userFiltro,
-			
-			'sumhoras_trabajadas'         => (int)($sumhoras_trabajadas),
-			'sumdiurnas'                  => $sumdiurnas,
-			'sumnocturnas'                => $sumnocturnas,
-			'sumextra_diurnas'            => $sumextra_diurnas,
-			'sumextra_nocturnas'          => $sumextra_nocturnas,
-			'sumdominical_diurno'         => $sumdominical_diurno,
-			'sumdominical_nocturno'       => $sumdominical_nocturno,
-			'sumdominical_extra_diurno'   => $sumdominical_extra_diurno,
-			'sumdominical_extra_nocturno' => $sumdominical_extra_nocturno,
-			'horasTrabajadasHoy'          => $horasTrabajadasHoy2 ?? [],
-			'HorasDeCadaSemana'           => $HorasDeCadaSemana,
-			'ArrayHorasSemanales'         => $this->DoArrayHorasSemanales(),
-			'ArrayCentrosNoFactura'       => $this->DoArrayCentrosNoFactura(),
-			'losSelect'                   => $this->DolosSelect(),
-		
-		]);
-	}//fin index
+	//  aqui se filtra tambien
 	
 	private function ReportesFunQuicena($numberPermissions, $Authuser) {
 		$esteQuicena_ini = Carbon::now()->firstOfMonth();
@@ -616,14 +565,26 @@ private function DoArrayHorasSemanales() {
 		return $ReportesQuicenaActual;
 	}
 	
+	private function DoArrayHorasSemanales() {
+		$parametros = Parametro::first();
+		if ($parametros) {
+			return [
+				'HORAS_ORDINARIAS'       => $parametros['HORAS_ORDINARIAS'],
+				'MAXIMO_HORAS_SEMANALES' => $parametros['HORAS_NECESARIAS_SEMANA'],
+				's_Dias_gabela'          => $parametros['s_Dias_gabela'],
+			];
+		}
+		
+		return [0, 0];
+	}
+	
 	private function DolosSelect() {
 		$centroSelect = \Cache::remember('centros_con_reportes', 3600, function () {
 			return CentroCosto::select('id', 'nombre as name')->where('activo', 1)->whereExists(function ($query) {
-					$query
-						->select(DB::raw(1))->from('reportes')->whereColumn('reportes.centro_costo_id', 'centro_costos.id')->limit(1)
-					;
-				})->orderBy('nombre')->get()->toArray()
-			;
+				$query
+					->select(DB::raw(1))->from('reportes')->whereColumn('reportes.centro_costo_id', 'centro_costos.id')->limit(1)
+				;
+			})->orderBy('nombre')->get()->toArray();
 		});
 		
 		array_unshift($centroSelect, [
@@ -634,6 +595,45 @@ private function DoArrayHorasSemanales() {
 		return ['centros' => $centroSelect];
 	}
 	
+	public function CreateTest(Request $request) {
+		$Authuser = Myhelp::AuthU();
+		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes testcreate| '));
+		
+		$showSelect = $this->losSelect($valoresSelectConsulta, $showUsers, $valoresSelect, $userFiltro, $numberPermissions);
+		$IntegerDefectoSelect = $valoresSelectConsulta->first()->id;
+		$Reportes = Reporte::query();
+		$fnombresT = $this->fNombresTabla($numberPermissions, $Reportes, $Authuser, $request, $titulo);
+		
+		$horasemana = $fnombresT[1];
+		
+		$startDate = Carbon::now()->startOfWeek();
+		$endDate = Carbon::now()->endOfWeek();
+		$startDateMostrar = $startDate->isoFormat('dddd D [de] MMMM');
+		$endDateMostrar = $endDate->isoFormat('dddd D [de] MMMM');
+		
+		$ArrayOrdinarias = Myhelp::CalcularPendientesQuicena($Authuser);
+		
+		return Inertia::render('Reportes/CreateTest', [
+			'title' => 'reportes test',
+			
+			'valoresSelect'        => $valoresSelect,
+			'showSelect'           => $showSelect,
+			'IntegerDefectoSelect' => $IntegerDefectoSelect,
+			
+			'horasemana'       => $horasemana,
+			'startDateMostrar' => $startDateMostrar,
+			'endDateMostrar'   => $endDateMostrar,
+			
+			'numberPermissions' => $numberPermissions,
+			'ArrayOrdinarias'   => $ArrayOrdinarias,
+			
+			'horasTrabajadasHoy'    => $horasTrabajadasHoy2 ?? [],
+			'HorasDeCadaSemana'     => CalculoReportes::CalcularHorasDeCadaSemana($Authuser->id),
+			'ArrayHorasSemanales'   => $this->DoArrayHorasSemanales(),
+			'ArrayCentrosNoFactura' => $this->DoArrayCentrosNoFactura(),
+		]);
+	}
+	
 	public function create() {}
 	
 	//fin store
@@ -641,9 +641,8 @@ private function DoArrayHorasSemanales() {
 	public function store(ReporteRequest $request): \Illuminate\Http\RedirectResponse {
 		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes store| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 		
-		
-		 // Incrementa la versión global
-        Cache::increment('reportes_version');
+		// Incrementa la versión global
+		Cache::increment('reportes_version');
 		DB::beginTransaction();
 		$authUser = Myhelp::AuthU();
 		try {
@@ -686,7 +685,6 @@ private function DoArrayHorasSemanales() {
 			
 			$Reportes->save();
 			DB::commit();
-			Cache::tags('reportes')->flush(); //libera el cache de los reportes
 			
 			return back()->with('success', __('app.label.created_successfully', ['name' => 'Reporte']));
 			
@@ -762,7 +760,7 @@ private function DoArrayHorasSemanales() {
 		
 		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes update| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
 		
-        Cache::increment('reportes_version');
+		Cache::increment('reportes_version');
 		$theuserAprobo = Myhelp::AuthU();
 		DB::beginTransaction();
 		try {
@@ -818,31 +816,55 @@ private function DoArrayHorasSemanales() {
 	 * @param int $id
 	 * @return \Illuminate\Http\RedirectResponse
 	 */
-	public function destroy(Request $request,$id) {
-		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes destroy| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
-	    Cache::increment('reportes_version');
-
-		
+	public function destroy(Request $request, $id) {
+		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes destroy| '));
+		Cache::increment('reportes_version');
 		DB::beginTransaction();
 		
 		try {
-			// si se la rechazaron, tendra que hacer uno nuevo
+			// si se la rechazaron, tendra que hacer reportar de nuevo
 			$Reportes = Reporte::findOrFail($id);
+			$PersoReporte = $Reportes->user->name;
+			$mensajeDeErase = 'Se borro un reporte ';
+			$mensajeDeErase .= " \nPersona que borro: " . Myhelp::AuthU()->name;
+			$mensajeDeErase .= " \nPersona del reporte: " . $PersoReporte;
+			
+			$reportesFuturo = Reporte::WhereDate('fecha_ini', '>', $Reportes->fecha_ini)->Where('user_id', $Reportes->user_id)
+			;
+			$numBorrados = $reportesFuturo->count();
+			$seBorraron = "";
+			if ($numBorrados === 0) {
+				$seBorraron = " No se borraron reportes futuros";
+			}
+			if ($numBorrados > 0) {
+				$seBorraron = " Se borraron $numBorrados reportes futuros";
+			}
+			if ($numBorrados > 8) { //constante importante
+				return back()->with('error', "Se borrarian demasiados reportes, hable con su supervisor");
+			}
+			
+			$mensajeDeErase .= $seBorraron;
+			
+			$reportesFuturo->delete();
+			
 			if ($numberPermissions > 8) {
 				$Reportes->delete();
 				DB::commit();
+				Myhelp::EscribirEnLog($this, $mensajeDeErase);
 				
-				return back()->with('success', __('app.label.deleted_successfully', ['name' => 'Reporte']));
+				return back()->with('success', __('app.label.deleted_successfully', ['name' => 'Reporte']) . ' ' . $seBorraron);
 			}
 			if ($Reportes->valido == 0 || $Reportes->valido == 2) {
 				$Reportes->delete();
 				DB::commit();
+				Myhelp::EscribirEnLog($this, $mensajeDeErase); //deberia ser el mismo
 				
-				return back()->with('success', __('app.label.deleted_successfully', ['name' => 'Reporte']));
+				return back()->with('success', __('app.label.deleted_successfully', ['name' => 'Reporte']) . $seBorraron);
 			}
 			DB::commit();
+			Myhelp::EscribirEnLog($this, 'Se intento, pero no se permitio borrar, ya estaba aprobado:::: ' . $mensajeDeErase);
 			
-			return back()->with('warning', __('app.label.not_deleted', ['name' => 'Reporte']) . '. Ya esta aprobado');
+			return back()->with('error', __('app.label.not_deleted', ['name' => 'Reporte']) . '. Ya esta aprobado');
 			
 		} catch (\Throwable $th) {
 			DB::rollback();
@@ -853,17 +875,27 @@ private function DoArrayHorasSemanales() {
 	}
 	
 	public function MassiveReportes(Request $request) {
-		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes MassiveReportes| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+		
+		MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes MassiveReportes| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+		Cache::increment('reportes_version');
 		
 		DB::beginTransaction();
 		try {
-			//            $thisUserId = myhelp::AuthU()->id;
-			$fecha_ini = Carbon::parse($request->fecha_ini[0], 'America/Bogota')->setHour(7);
-			$fecha_fin = Carbon::parse($request->fecha_ini[1], 'America/Bogota')->setHour(16);
-			$diff = $fecha_ini->diffinDays($fecha_fin) + 1;
-			$valorQuemado_HorasTrabajadas = 8;
+			$fecha_ini = Carbon::parse($request->fecha_ini[0])->setTimezone('America/Bogota');
+			$fecha_fin = Carbon::parse($request->fecha_ini[1])->setTimezone('America/Bogota');
 			
-			if ($request->user_id) {
+			//			$fecha_ini = Carbon::parse($request->fecha_ini[0], 'America/Bogota')->setHour(7);
+			//			$fecha_fin = Carbon::parse($request->fecha_ini[1], 'America/Bogota')->setHour(16);
+			$diff = $fecha_ini->diffinDays($fecha_fin) + 1;
+			$horai = $fecha_ini->hour;
+			$horaf = $fecha_fin->hour;
+			$HorasTrabajadas = $horaf - $horai;
+			if ($HorasTrabajadas > 9) {
+				return back()->with('warning', __('app.label.horas_trabajadas_error', ['name' => 'Reporte']));
+			}
+			$UltimoUser = Myhelp::AuthU()->id;
+			
+			if ($UltimoUser === 1) {
 				$userExiste = User::find($request->user_id);
 				
 				if ($userExiste) {
@@ -872,29 +904,25 @@ private function DoArrayHorasSemanales() {
 				else {
 					return back()->with('error', 'Persona inexistente');
 				}
-				
-			}
-			else {
-				$UltimoUser = Myhelp::AuthU()->id;
 			}
 			for ($i = 0; $i < $diff; $i ++) {
+				if ($fecha_ini->isSunday()) {
+					$fecha_ini->addDays();
+					continue;
+				}
 				$Reportes = new Reporte;
 				$fecha_in2 = clone $fecha_ini;
 				$Reportes->fecha_ini = $fecha_in2;
 				$fecha_fin = clone $fecha_ini;
-				$fecha_fin->addHours($valorQuemado_HorasTrabajadas);
-				if ($fecha_ini->isSunday()) {
-					$fecha_ini->addDays();
-					
-					continue;
-				}
+				$fecha_fin->addHours($HorasTrabajadas);
+				
 				$fecha_ini->addDays();
 				$Reportes->fecha_fin = $fecha_fin;
 				
-				$Reportes->horas_trabajadas = $valorQuemado_HorasTrabajadas;
+				$Reportes->horas_trabajadas = $HorasTrabajadas;
 				
-				$Reportes->almuerzo = 1;
-				$Reportes->diurnas = $valorQuemado_HorasTrabajadas;
+				$Reportes->almuerzo = $request->almuerzo;
+				$Reportes->diurnas = $HorasTrabajadas;
 				$Reportes->nocturnas = 0;
 				$Reportes->extra_diurnas = 0;
 				$Reportes->extra_nocturnas = 0;
@@ -903,8 +931,8 @@ private function DoArrayHorasSemanales() {
 				$Reportes->dominical_extra_diurno = 0;
 				$Reportes->dominical_extra_nocturno = 0;
 				
-				$Reportes->valido = 1;
-				$Reportes->observaciones = $request->observaciones;
+				$Reportes->valido = 0;
+				$Reportes->observaciones = 'Generado masivamente';
 				$Reportes->centro_costo_id = $request->centro_costo_id;
 				
 				$Reportes->user_id = $UltimoUser;
@@ -913,7 +941,7 @@ private function DoArrayHorasSemanales() {
 			
 			DB::commit();
 			
-			return back()->with('success', __('app.label.created_successfully', ['name' => $Reportes->nombre]));
+			return back()->with('success', "$diff dias registrados");
 			
 		} catch (\Throwable $th) {
 			DB::rollback();
@@ -925,7 +953,13 @@ private function DoArrayHorasSemanales() {
 	}
 	
 	public function destroyBulk(Request $request) {
+		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes bulkdestroy| '));
+		
 		try {
+			if ($numberPermissions < 9) {
+				return back()->with('error', "No tiene suficientes permisos");
+			}
+			
 			Cache::increment('reportes_version');
 			$reportes = Reporte::whereIn('id', $request->id);
 			$reportes->delete();
@@ -997,10 +1031,10 @@ private function DoArrayHorasSemanales() {
 			$year = Carbon::now()->format('Y');
 			$url = "https://modnom.ecnomina.com/Reportes?FiltroUser=" . $user->id . "&perPage=20&search4=$year";
 			EnviarReporteActualizadoJob::dispatch($user->email, [
-				                                                  'empleado'   => $reporteUser,
-				                                                  'supervisor' => $user->name,
-				                                                  'url'        => $url,
-			                                                  ])->delay(now()->addSeconds());
+				'empleado'   => $reporteUser,
+				'supervisor' => $user->name,
+				'url'        => $url,
+			])->delay(now()->addSeconds());
 			
 			$Reporte->horas_trabajadas = $request->horas_trabajadas;
 			$Reporte->almuerzo = $request->almuerzo;

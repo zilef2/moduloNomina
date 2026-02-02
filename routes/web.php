@@ -42,7 +42,7 @@ Route::get('/', function () {
 });
 
 Route::get('/CentroObsoleto', [EstadisticasController::class, 'CentroObsoleto'])->name('CentroObsoleto');
-Route::get('/dashboard', [UserController::class, 'Dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'Dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/setLang/{locale}', function ($locale) {
     Session::put('locale', $locale);
@@ -74,6 +74,7 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::post('/userUploadExcelPost', [UserController::class, 'FunctionUploadFromExPost'])->name('user.uploadexcelpost');
     Route::get('/userReportes/{id}', [UserController::class, 'showReporte'])->name('user.showReporte');
     Route::post('/userdestroyDefinitive/{id}', [UserController::class, 'userdestroyDefinitive'])->name('userdestroyDefinitive');
+    Route::get('/user/{user}/centros', [UserController::class, 'getCentrosForUser'])->name('user.getCentros');
     //</editor-fold>
 
     Route::resource('/CentroCostos', CentroCostosController::class); //show -> reportes del centro

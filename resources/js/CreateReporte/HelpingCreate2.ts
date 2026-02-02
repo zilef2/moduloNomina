@@ -10,7 +10,7 @@ import {calcularTerminaDomingo, calcularTerminaLunes, estaFechaEsFestivo} from "
 import {consolelog} from "../Pages/Reportes/ComunCreateReporte";
 
 
-export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
+export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra, empiezanNocturnas){
     const horasInicio = new Date(Inicio).getHours();
     const horasFin = new Date(Fin).getHours();
 
@@ -21,7 +21,7 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
 
     if(DiaInicio === DiaFin){
         let HorasExtra = 0
-        const BaseFinal = horasFin >= 21 ? 21 : horasFin
+        const BaseFinal = horasFin >= empiezanNocturnas ? empiezanNocturnas : horasFin
         let HorasDiurnas = BaseFinal - BaseInicial;
         HorasDiurnas = HorasDiurnas < 0 ? 0 : HorasDiurnas
 
@@ -29,7 +29,7 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
         }
 
         if(CuandoEmpiezaExtra !== null){
-            if(CuandoEmpiezaExtra < 21){
+            if(CuandoEmpiezaExtra < empiezanNocturnas){
                 let horasNormales = CuandoEmpiezaExtra - BaseInicial //horas no extra
                 horasNormales = horasNormales < 0 ? 0 : horasNormales
 
@@ -43,7 +43,7 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
                     //es dominical
 
                 }
-            }//cuando las horas extra >= 21, no hay horas extra diurnas
+            }//cuando las horas extra >= empiezanNocturnas, no hay horas extra diurnas
         }
         if(consolelog.dia){
         }
@@ -55,21 +55,21 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
         let HorasExtra = 0
 
         if(horasFin <= 6){//termino en madrugada
-            HorasDiurnasTotal = BaseInicial <= 21 ? 21 - BaseInicial : 0;
+            HorasDiurnasTotal = BaseInicial <= empiezanNocturnas ? empiezanNocturnas - BaseInicial : 0;
 
             if(CuandoEmpiezaExtra !== null){
-                if(CuandoEmpiezaExtra < 21 && CuandoEmpiezaExtra > 6){
+                if(CuandoEmpiezaExtra < empiezanNocturnas && CuandoEmpiezaExtra > 6){
                     if(BaseInicial <= CuandoEmpiezaExtra){
                         HorasDiurnasTotal = CuandoEmpiezaExtra - BaseInicial;
                     }else{
                         HorasDiurnasTotal = CuandoEmpiezaExtra - BaseInicial;
-                    }//falla en el caso de 21pm -> 6am
-                    HorasExtra = 21 - CuandoEmpiezaExtra
+                    }//falla en el caso de empiezanNocturnaspm -> 6am
+                    HorasExtra = empiezanNocturnas - CuandoEmpiezaExtra
                 }
             }
         }else{
-            if(horasInicio <= 21){
-                HorasDiurnasTotal = 21 - horasInicio
+            if(horasInicio <= empiezanNocturnas){
+                HorasDiurnasTotal = empiezanNocturnas - horasInicio
             }else{
                 if(CuandoEmpiezaExtra !== null ){
                     HorasDiurnasTotal = CuandoEmpiezaExtra - 6
@@ -85,7 +85,7 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
                     if (horasFin >= CuandoEmpiezaExtra) {
                         HorasExtra = horasFin - CuandoEmpiezaExtra
                     } else {
-                        HorasExtra = CuandoEmpiezaExtra <= 21 ? 21 - CuandoEmpiezaExtra : 0
+                        HorasExtra = CuandoEmpiezaExtra <= empiezanNocturnas ? empiezanNocturnas - CuandoEmpiezaExtra : 0
                         HorasExtra += horasFin >= 6 ? horasFin - 6 : 0
                     }
                 }
@@ -97,12 +97,14 @@ export function calcularDiurnas(data,form,Inicio, Fin,CuandoEmpiezaExtra){
     }
 }
 
-export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra, HORAS_ESTANDAR){
+export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra, HORAS_ESTANDAR, empiezanNocturnas){
     const horasInicio: number = new Date(Inicio).getHours();
     let horasFin: number = new Date(Fin).getHours();
 
     const DiaInicio: number = new Date(Inicio).getDate();
     const DiaFin: number = new Date(Fin).getDate();
+    
+    
 
 
     let Madrugada:number = 0
@@ -117,11 +119,11 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra, HORA
             }
         }
 
-        if(horasInicio >= 21 && horasFin >= 21){//solo de noche
+        if(horasInicio >= empiezanNocturnas && horasFin >= empiezanNocturnas){//solo de noche
             Tarde = Resta;
         }else{
-            if(horasFin > 21){//si existan horas nocturnas, si no son 0
-                Tarde = (horasFin - 21);
+            if(horasFin > empiezanNocturnas){//si existan horas nocturnas, si no son 0
+                Tarde = (horasFin - empiezanNocturnas);
             }
         }
     }
@@ -141,18 +143,18 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra, HORA
         }
 
         // calcular Tarde
-        if(horasInicio >= 21 && horasFin >= 21){//solo de noche
+        if(horasInicio >= empiezanNocturnas && horasFin >= empiezanNocturnas){//solo de noche
             Tarde = horasFin - horasInicio;
             //if(Tarde < 0) !mucho voleo
         }else{
-            if(horasFin > 21){//si existan horas nocturnas, si no son 0
-                Tarde += (horasFin - 21);
+            if(horasFin > empiezanNocturnas){//si existan horas nocturnas, si no son 0
+                Tarde += (horasFin - empiezanNocturnas);
             }
 
-            if(horasInicio > 21){
+            if(horasInicio > empiezanNocturnas){
                 Tarde += (24 - horasInicio);
             }else{
-                Tarde += (24 - 21);
+                Tarde += (24 - empiezanNocturnas);
             }
         }
     }
@@ -167,8 +169,8 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra, HORA
     if (Resta < HORAS_ESTANDAR || CuandoEmpiezaExtra === null || typeof CuandoEmpiezaExtra === 'undefined' || CuandoEmpiezaExtra > 23) {
         return [0,HorasNoc]
     }else{
-        if(CuandoEmpiezaExtra >= 21){
-            if(horasFin >= 21){
+        if(CuandoEmpiezaExtra >= empiezanNocturnas){
+            if(horasFin >= empiezanNocturnas){
                 extra = horasFin >= CuandoEmpiezaExtra? horasFin - CuandoEmpiezaExtra : 0
                 ordinarias = HorasNoc - extra
             }else{
@@ -186,7 +188,7 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra, HORA
 
 
             }else{//empiezan en hora diurna
-                if(horasFin > 21){
+                if(horasFin > empiezanNocturnas){
                     extra = Tarde
                     ordinarias = Madrugada
 
@@ -218,20 +220,25 @@ export function calcularNocturnas(data,form,Inicio, Fin,CuandoEmpiezaExtra, HORA
 function RestarAlmuarzo(form,data){
     let LIMITE_ALMUERZO:number = 8
     let HayAlmuerzo:number = 8
-    HayAlmuerzo -= data.TrabajadasHooy //se restan las que ya trabajo hoy
-
+    if(data.almorzadasHooy){
+        HayAlmuerzo -= data.TrabajadasHooy //se restan las que ya trabajo hoy
+        HayAlmuerzo = HayAlmuerzo < 0 ? 0 : HayAlmuerzo
+    }//todo: falta tener encuenta las horas que pasaron luego que almorzó
+    
     const fechain_i: Date = new Date(form.fecha_ini);
     const diaSemana:number = fechain_i.getDay();
     if (diaSemana === 5) {//viernes
         HayAlmuerzo -= 1
-        LIMITE_ALMUERZO -= 1
     }
-    if (diaSemana === 6) {//sabado
-        HayAlmuerzo -= 2
-        LIMITE_ALMUERZO -= 2
-    }
+    // if (diaSemana === 6) {//sabado
+    //     HayAlmuerzo -= 2
+    //     LIMITE_ALMUERZO -= 2
+    // }
     let numerador = form.horas_trabajadas + data.TrabajadasHooy
     if(form.horas_trabajadas >= HayAlmuerzo){
+         if (diaSemana === 5) {//viernes
+            numerador += 1
+        }
         form.almuerzo = Math.floor((numerador) / LIMITE_ALMUERZO)
 
         if(form.almuerzo > 1){
@@ -242,11 +249,11 @@ function RestarAlmuarzo(form,data){
     data.ValorRealalmuerzo = form.almuerzo
     form.almuerzo += ' horas'
 
-    if(numerador > LIMITE_ALMUERZO) {
+    console.log("🚀🚀RestarAlmuarzo ~ data.ValorRealalmuerzo: ", data.ValorRealalmuerzo);
+        console.log("🚀🚀RestarAlmuarzo ~ LIMITE_ALMUERZO: ", LIMITE_ALMUERZO);
+        console.log("🚀🚀RestarAlmuarzo ~ numerador: ", numerador);
+    if(numerador > LIMITE_ALMUERZO && form.horas_trabajadas > 0) {
         form.horas_trabajadas -= data.ValorRealalmuerzo;
-
-        if(data.MostrarAlmuersini){
-        }
 
         //extras
         if(form.extra_nocturnas >= data.ValorRealalmuerzo){ // && form.extra_nocturnas > form.extra_diurnas
@@ -304,8 +311,8 @@ function RestarAlmuarzo(form,data){
 
 
 export function setDominical(data,form,ini,fin,CuandoEmpiezaExtra,ExtrasManana,FestivosColombia,message){//date,date,int,bool
-    let esFestivo = estaFechaEsFestivo(new Date(ini),consolelog,FestivosColombia);
-    let esFestivo2 = estaFechaEsFestivo(new Date(fin),consolelog,FestivosColombia);
+    let esFestivo = estaFechaEsFestivo(new Date(ini),FestivosColombia);
+    let esFestivo2 = estaFechaEsFestivo(new Date(fin),FestivosColombia);
 
     if(ini.getDay() === 0 || fin.getDay() === 0){
         form.dominicales = 'si'

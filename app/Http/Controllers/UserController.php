@@ -37,218 +37,72 @@ class UserController extends Controller {
 	
 	public Collection $cargos;
 	public Collection $centros;
-	public int $numberPermissions;
+	public int $numberPermissions = 1;
 	public int $cacheMapear;
 	public mixed $roles;
 	
 	public function __construct() {
-		//		$this->middleware('permission:create user', ['only' => ['create', 'store']]);
-		//		$this->middleware('permission:read user', ['only' => ['index', 'show']]);
-		//		$this->middleware('permission:update user', ['only' => ['edit', 'update']]);
-		//		$this->middleware('permission:delete user', ['only' => ['destroy', 'destroyBulk']]);
-		
 		$this->cargos = Cargo::all();
 		$this->centros = CentroCosto::all();
-		
-		//		$permissions = Myhelp::EscribirEnLog($this, ' users constructor ');
-		//		$this->numberPermissions = MyModels::getPermissionToNumber($permissions); //todo: replicar esto en todo
-		$this->numberPermissions = 10;
 		
 		$this->cacheMapear = 5; //minutos
 		
 		$this->roles = Role::all();
-		
-	}
-	
-	public function Dashboard() {
-		$ListaControladoresYnombreClase = (explode('\\', get_class($this)));
-		$nombreC = end($ListaControladoresYnombreClase);
-		$Authuser = Myhelp::AuthU();
-		Myhelp::EscribirEnLog($this, $nombreC, ' U -> ' . $Authuser->name . ' Accedio al dashboard ', false);
-		
-		$userid = $Authuser->id;
-		if ($this->numberPermissions === 1) {
-			return redirect()->route('Reportes.index')->with('success', 'Bienvenido');
-			// $reportes = (int) Reporte::Where('user_id', $Authuser->id)->count();
-		}
-		else { // si no eres empleado
-			$reportes = Reporte::count();
-			$elmespasado = Carbon::now()->startOfWeek()->addMonth(- 1);
+		$this->middleware(function ($request, $next) {
+			$permissions = Myhelp::AuthU()->roles->pluck('name')[0];
+			$this->numberPermissions = MyModels::getPermissionToNumber($permissions);
 			
-			if ($this->numberPermissions === 3) {
-				$centroMio = $Authuser->ArrayCentrosID();
-				$reportes = Reporte::WhereIn('centro_costo_id', $centroMio)->count();
-				
-				$ultimos5dias = [
-					'Mes pasado' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->where('fecha_ini', '<', Carbon::today()->addMonth(- 1)->endOfMonth())->where('fecha_ini', '>=', Carbon::today()->addMonth(- 1)->firstOfMonth())->get()->count(),
-					
-					'Semana pasada' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->whereBetween('fecha_ini', [
-						Carbon::now()->addDays(- 7)->startOfWeek(),
-						Carbon::now()->addDays(- 7)->endOfWeek()
-					])->get()->count(),
-					
-					'Semana actual' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->whereBetween('fecha_ini', [
-						Carbon::now()->startOfWeek(),
-						Carbon::now()->endOfWeek()
-					])->get()->count(),
-				];
-				
-				$diasNovalidos = [
-					'Mes pasado' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereIn('valido', [
-						0,
-						2
-					])->where('fecha_ini', '>=', $elmespasado)->where('fecha_ini', '<', Carbon::today()->startOfMonth())->get()->count(),
-					'Mes actual' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereIn('valido', [
-						0,
-						2
-					])->where('fecha_ini', '>', Carbon::today()->startOfMonth())->get()->count(),
-				];
-				
-			}
-			else { //si no eres administrativo
-				$ultimos5dias = [
-					'Mes pasado' => Reporte::whereValido(1)->where('fecha_ini', '<', Carbon::today()->addMonth(- 1))->get()->count(),
-					
-					'Semana pasada' => Reporte::whereValido(1)->whereBetween('fecha_ini', [
-						Carbon::now()->addDays(- 7)->startOfWeek(),
-						Carbon::now()->addDays(- 7)->endOfWeek()
-					])->get()->count(),
-					
-					'Semana actual' => Reporte::whereValido(1)->whereBetween('fecha_ini', [
-						Carbon::now()->startOfWeek(),
-						Carbon::now()->endOfWeek()
-					])->get()->count(),
-				];
-				$diasNovalidos = [
-					'Mes pasado' => Reporte::whereIn('valido', [
-						0,
-						2
-					])->where('fecha_ini', '<', Carbon::today()->startOfMonth())->where('fecha_ini', '>=', $elmespasado)->get()->count(),
-					'Mes actual' => Reporte::whereIn('valido', [
-						0,
-						2
-					])->where('fecha_ini', '>', Carbon::today()->startOfMonth())->get()->count(),
-				];
-			}
-			
-			$usuariosConRol = User::whereHas('roles', function ($q) {
-				$q->where('name', 'empleado');
-			})->whereHas('reportes')->withSum('reportes as total_horas', 'horas_trabajadas')->orderByDesc('total_horas')->get()->take(5);
-			foreach ($usuariosConRol as $value) {
-				$BooleanreportoHoy = Reporte::where('user_id', $value->id)->whereDate('fecha_fin', Carbon::today())->first();
-				
-				if ($BooleanreportoHoy !== null) {
-					$trabajadoresHoy[$value->name] = $BooleanreportoHoy->horas_trabajadas;
-				}
-				else {
-					$trabajadoresHoy[$value->name] = 0;
-				}
-			}
-			
-			$centros = CentroCosto::all();
-			foreach ($centros as $value) {
-				$BooleanReporteCentro = Reporte::where('centro_costo_id', $value->id)->whereDate('fecha_fin', Carbon::today())->sum('horas_trabajadas');
-				if ($BooleanReporteCentro !== null) {
-					$centrosHoy[$value->nombre] = $BooleanReporteCentro;
-				}
-				else {
-					$centrosHoy[$value->nombre] = 0;
-				}
-			}
-			$conteoPorRol = User::whereNotIn('cargo_id', [1, 2])
-			                    ->with('roles')->get()->flatMap->roles->groupBy('name')->map->count();
-			
-			$topCentros = CentroCosto::select('nombre', 'mano_obra_estimada')
-			                         ->where('mano_obra_estimada', '>', 25000)
-			                         ->orderByDesc('mano_obra_estimada')
-			                         ->limit(10)->get()
-			;
-			
-			$chartLabels = $topCentros->pluck('nombre');
-			$chartValues = $topCentros->pluck('mano_obra_estimada');
-		} //fin, si no eres empleado
-		
-		return Inertia::render('Dashboard', [
-			'versionZilef'      => '25.6.1',
-			'users'             => User::count(),
-			'roles'             => Role::count(),
-			'permissions'       => Permission::count(),
-			'reportes'          => $reportes,
-			'ultimos5dias'      => $ultimos5dias,
-			'diasNovalidos'     => $diasNovalidos,
-			'trabajadoresHoy'   => $trabajadoresHoy ?? [],
-			'centrosHoy'        => $centrosHoy ?? [],
-			'numberPermissions' => $this->numberPermissions,
-			'userid'            => $userid,
-			'conteoPorRol'      => $conteoPorRol,
-			'topCentros'        => $topCentros,
-			'chartLabels'       => $chartLabels,
-			'chartValues'       => $chartValues,
-		]);
+			return $next($request);
+		});
 	}
 	
 	//empieza el index
-	
 	public function index(UserIndexRequest $request) {
 		$users = $this->Busqueda($request);
 		
 		$perPage = $request->has('perPage') ? $request->perPage : 5;
-		
 		if ($this->numberPermissions != 3 && $this->numberPermissions < 10) {
 			$users->whereHas('roles', function ($query) {
 				return $query->where('name', '<>', 'superadmin');
 			});
+			
 			$this->roles = Role::where('name', '<>', 'superadmin')->where('name', '<>', 'admin')->get();
 		}
 		
-		//		$this->MapearClasePP($users);
 		$users = $users->get()->filter();
 		$page = request('page', 1); // Current page number
 		$total = $users->count();
 		$paginated = new LengthAwarePaginator($users->forPage($page, $perPage), $total, $perPage, $page, ['path' => request()->url()]);
 		
-		$sexoSelect[] = [
-			'label' => 'masculino',
-			'value' => 0
-		];
-		$sexoSelect[] = [
-			'label' => 'femenino',
-			'value' => 1
-		];
+		$sexoSelect[] = ['label' => 'masculino', 'value' => 0];
+		$sexoSelect[] = ['label' => 'femenino', 'value' => 1];
 		
 		$supervisores = User::whereHas('roles', function ($query) {
 			return $query->where('name', 'supervisor');
 		})->get();
-		$superviNullCentro = true;
-		foreach ($supervisores as $index => $supervisor) {
-			if (count($supervisor->ArrayCentrosID()) == 0) {
-				$superviNullCentro = false;
-				break;
-			}
-		}
 		
-		return Inertia::render('User/Index', [
+		$props = [
 			'title'             => __('app.label.user'),
-			'filters'           => $request->all([
-				                                     'search',
-				                                     'field',
-				                                     'order'
-			                                     ]),
+			'filters'           => $request->all(['search', 'field', 'order', 'forUserId']),
 			'perPage'           => (int)$perPage,
 			'users'             => $paginated,
 			'roles'             => $this->roles,
 			'cargos'            => $this->cargos,
 			'centros'           => $this->centros,
 			'sexoSelect'        => $sexoSelect,
-			'superviNullCentro' => $superviNullCentro,
+			'superviNullCentro' => $this->isCentroOrNot($supervisores),
 			'numberPermissions' => $this->numberPermissions,
-			'breadcrumbs'       => [
-				[
-					'label' => __('app.label.user'),
-					'href'  => route('user.index')
-				]
-			],
-		]);
+			'breadcrumbs'       => [['label' => __('app.label.user'), 'href' => route('user.index')]],
+		];
+		
+		if ($request->has('forUserId')) {
+			$user = User::find($request->forUserId);
+			if ($user) {
+				$props['centrosForUser'] = $user->centros()->pluck('centro_costos.id');
+			}
+		}
+		
+		return Inertia::render('User/Index', $props);
 	}
 	
 	public function Busqueda(UserIndexRequest $request, $isTrashed = false) {
@@ -294,17 +148,20 @@ class UserController extends Controller {
 		return $users;
 	}
 	
-	public function MapearClasePP(&$users) {
-		// Clave única de caché (puedes personalizarla)
-		$cacheKey = 'mapear_clase_pp_' . md5($users->toSql() . serialize($users->getBindings()));
+	/**
+	 * @param \Illuminate\Database\Eloquent\Collection|array|\Illuminate\Database\Eloquent\Builder|\App\Models\User|\LaravelIdea\Helper\App\Models\_IH_User_C $supervisores
+	 * @return bool
+	 */
+	public function isCentroOrNot(Collection|array|\Illuminate\Database\Eloquent\Builder|User|\LaravelIdea\Helper\App\Models\_IH_User_C $supervisores): bool {
+		$superviNullCentro = true;
+		foreach ($supervisores as $index => $supervisor) {
+			if (count($supervisor->ArrayCentrosID()) == 0) {
+				$superviNullCentro = false;
+				break;
+			}
+		}
 		
-		$users = Cache::remember($cacheKey, now()->addMinutes($this->cacheMapear), function () use ($users) {
-			return $users->get()->map(function ($user) {
-				$user->cc = is_string($user->ArraycentroName()) ? $user->ArraycentroName() : implode(',', $user->ArraycentroName());
-				
-				return $user;
-			})->filter();
-		});
+		return $superviNullCentro;
 	}
 	
 	public function store(UserStoreRequest $request) {
@@ -318,7 +175,6 @@ class UserController extends Controller {
 				                     'name'             => $request->name,
 				                     'email'            => $request->email,
 				                     'password'         => Hash::make($request->cedula . '*'),
-				                     // 'password' => Hash::make($request->password),
 				                     'cargo_id'         => $request->cargo,
 				                     'cedula'           => $request->cedula,
 				                     'telefono'         => $request->telefono,
@@ -500,6 +356,8 @@ class UserController extends Controller {
 		]);
 	}
 	
+	//exportar el formato unico de ECnomina
+	
 	private function CalcularIniFinQuincena($quincena, $month, $year) {
 		$ini = Carbon::createFromFormat('d/m/Y', '1/' . $month . '/' . $year)->setHour(0)->setminutes(0);
 		$fin = Carbon::createFromFormat('d/m/Y', '1/' . $month . '/' . $year)->setHour(23)->setminutes(0);
@@ -543,8 +401,6 @@ class UserController extends Controller {
 			'NumReportesSinval' => $NumReportesSinval,
 		];
 	}
-	
-	//exportar el formato unico de ECnomina
 	
 	public function FunctionUploadFromExPost(Request $request) //import
 	{
@@ -941,7 +797,6 @@ class UserController extends Controller {
 		$cargos = Cargo::all();
 		$centros = CentroCosto::all();
 		
-		//		$this->MapearClasePP($users);
 		$users = $users->get()->filter();
 		
 		$page = request('page', 1); // Current page number
@@ -992,7 +847,6 @@ class UserController extends Controller {
 		else {
 			return response()->json(['message' => 'Contraseña restablecida correctamente']);
 		}
-		
 	}
 	
 	public function AutorizadosParaGenerarViaticos(): array {
@@ -1008,13 +862,13 @@ class UserController extends Controller {
 			User::select('id', 'name')->Where('name', 'like', '%Kevin Solano Ortiz%')->first(),
 			User::select('id', 'name')->Where('name', 'like', '%John Anderson Franco Alvarez%')->first(),
 		];
+		
 		foreach ($arrayReturn as $index => $item) {
 			if ($item) {
-				
 				$filteredArray[] = $item;
 			}
 		}
-		
 		return $filteredArray ?? [];
 	}
+	
 }
