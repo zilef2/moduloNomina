@@ -100,8 +100,9 @@ class ParametrosController extends Controller
             $parametro = Parametro::findOrFail($id);
             $parametro->subsidio_de_transporte_dia = $request->input('subsidio_de_transporte_dia');
             $parametro->salario_minimo = $request->input('salario_minimo');
-            $parametro->s_Dias_gabela = $request->input('s_Dias_gabela');
+			
             $parametro->valor_maximo_subsidio_de_transporte = 2*(int)$request->input('salario_minimo');
+            $parametro->s_Dias_gabela = $request->input('s_Dias_gabela');
             $today = Carbon::now();
 
             $last_update = Carbon::parse($parametro->updated_at);

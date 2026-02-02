@@ -568,13 +568,13 @@ class ReportesController extends Controller {
 	private function DoArrayHorasSemanales() {
 		$parametros = Parametro::first();
 		if ($parametros) {
+		
 			return [
 				'HORAS_ORDINARIAS'       => $parametros['HORAS_ORDINARIAS'],
 				'MAXIMO_HORAS_SEMANALES' => $parametros['HORAS_NECESARIAS_SEMANA'],
 				's_Dias_gabela'          => $parametros['s_Dias_gabela'],
 			];
 		}
-		
 		return [0, 0];
 	}
 	
@@ -752,13 +752,12 @@ class ReportesController extends Controller {
 	/**
 	 * Update the specified resource in storage.
 	 *
-	 * @param ReportesRequest $request
+	 * @param Request $request
 	 * @param int $id
 	 * @return \Illuminate\Http\RedirectResponse
 	 */
 	public function update(Request $request, $id) {
-		
-		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, ' |reportes update| ')); //0:error, 1:estudiante,  2: profesor, 3:++ )
+		Myhelp::EscribirEnLog($this, ' | parametros update| ');
 		
 		Cache::increment('reportes_version');
 		$theuserAprobo = Myhelp::AuthU();

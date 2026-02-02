@@ -27,12 +27,12 @@ export const consolelog  = {
     ValorRealalmuerzo: 0,
 }
 // ### ###  ### ### CALCULAR AND RETURN ### ###  ### ### 
-export function calcularSinExtras(Inicio, Fin) {
+export function calcularSinExtras(Inicio, Fin, empiezanNocturnas) {
     const horasInicio = new Date(Inicio).getHours();
     const horasFin = new Date(Fin).getHours();
 
     let BaseInicial = horasInicio >= 6 ? horasInicio : 6
-    const BaseFinal = horasFin >= 21 ? 21 : horasFin
+    const BaseFinal = horasFin >= empiezanNocturnas ? empiezanNocturnas : horasFin
 
     let HorasDiurnas = BaseFinal - BaseInicial;
     HorasDiurnas = HorasDiurnas < 0 ? 0 : HorasDiurnas
@@ -49,11 +49,11 @@ export function calcularSinExtras(Inicio, Fin) {
         }
     }
 
-    if (horasInicio >= 21 && horasFin >= 21) {//solo de noche
+    if (horasInicio >= empiezanNocturnas && horasFin >= empiezanNocturnas) {//solo de noche
         Tarde = Resta;
     } else {
-        if (horasFin > 21) {//si existan horas nocturnas, si no son 0
-            Tarde = (horasFin - 21);
+        if (horasFin > empiezanNocturnas) {//si existan horas nocturnas, si no son 0
+            Tarde = (horasFin - empiezanNocturnas);
         }
     }
     return [HorasDiurnas, (Madrugada + Tarde)]

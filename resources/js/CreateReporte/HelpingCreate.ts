@@ -15,6 +15,7 @@ calcularHoras
 //FIN INDEX
 
 import {consolelog} from "../Pages/Reportes/ComunCreateReporte";
+import {RestarAlmuarzo} from "./HelpingCreate2";
 
 //<editor-fold desc="FESTIVOFUNCTIONS">
 //number_format
@@ -89,7 +90,7 @@ export function calcularTerminaLunes(fin, CuandoEmpiezaExtra, ExtrasManana, form
     }
 }
 
-export function calcularTerminaDomingo(ini, fin, CuandoEmpiezaExtra, ExtrasManana, form) {
+export function calcularTerminaDomingo(ini, fin, CuandoEmpiezaExtra, ExtrasManana, form, empiezanNocturnas) {
     let Madrugada, Tarde
     const HoraIni = parseInt(ini.getHours())
     const HoraTermino = parseInt(fin.getHours())
@@ -134,11 +135,11 @@ export function calcularTerminaDomingo(ini, fin, CuandoEmpiezaExtra, ExtrasManan
         form.dominical_nocturnas = Madrugada
         form.nocturnas -= Madrugada
 
-        if (HoraIni >= 21) {
+        if (HoraIni >= empiezanNocturnas) {
             form.dominical_diurnas = parseInt(form.diurnas)
             form.diurnas = 0;
         } else {
-            form.diurnas = 21 - HoraIni;
+            form.diurnas = empiezanNocturnas - HoraIni;
             form.dominical_diurnas = HoraTermino > 6 ? HoraTermino - 6 : 0
         }
     }
@@ -149,7 +150,7 @@ export function calcularTerminaDomingo(ini, fin, CuandoEmpiezaExtra, ExtrasManan
 //<editor-fold desc="CALCULAR">
 
 //# papa = watchEffect
-export function calcularHoras(data, form, inicio, final, HORAS_ESTANDAR, FestivosColombia, message): void {
+export function calcularHoras(data, form, inicio, final, HORAS_ESTANDAR, FestivosColombia, message,empiezanNocturnas): void {
     let ini = new Date(inicio)
     let fin = new Date(final)
     let ExtrasManana = false //
@@ -191,39 +192,34 @@ export function calcularHoras(data, form, inicio, final, HORAS_ESTANDAR, Festivo
             console.log('TemporalDiaAnterior', data.TemporalDiaAnterior) // si reporto ayer
             console.log('%cFIN: CuandoEmpiezaExtra', "color:blue;font-family:system-ui;font-size:15px;-webkit-text-stroke: 0.5px black;font-weight:bold")
         }
-        const empiezanNocturnnnas = 19; //nocturnas empiezan a las 7pm
+        const empiezanNocturnas = 19; //nocturnas empiezan a las 7pm
+        
 
         if (CuandoEmpiezaExtra >= horasFinOme) {
-            form.diurnas = Math.abs(calcularDiurnas(data, form, form.fecha_ini, form.fecha_fin, CuandoEmpiezaExtra,empiezanNocturnnnas)[1]);
-            form.nocturnas = Math.abs(calcularNocturnas(data, form, form.fecha_ini, form.fecha_fin, CuandoEmpiezaExtra, HORAS_ESTANDAR,empiezanNocturnnnas)[1]);
+            form.diurnas = Math.abs(calcularDiurnas(form.fecha_ini, form.fecha_fin, CuandoEmpiezaExtra,empiezanNocturnas)[1]);
+            form.nocturnas = Math.abs(calcularNocturnas(form.fecha_ini, form.fecha_fin, CuandoEmpiezaExtra, HORAS_ESTANDAR,empiezanNocturnas)[1]);
         } else { //extras
-            // form.almuerzo = form.horas_trabajadas > 16 ? 2 : form.almuerzo;
-            // form.almuerzo = form.horas_trabajadas + data.TemporalDiaAnterior > 8 ?  1 : 0;
-            // form.almuerzo = form.horas_trabajadas + data.TemporalDiaAnterior > 16 ? 2 : form.almuerzo;
-
 
             if (CuandoEmpiezaExtra >= 24) {
                 CuandoEmpiezaExtra = 24 //version horasmismodia
                 ExtrasManana = true
             }
-
-            let horasExtrasDiurnas = (calcularDiurnas(data, form, form.fecha_ini, form.fecha_fin, CuandoEmpiezaExtra,empiezanNocturnnnas));
+            
+            
+            let horasExtrasDiurnas = (calcularDiurnas(form.fecha_ini, form.fecha_fin, CuandoEmpiezaExtra,empiezanNocturnas));
+            console.log("🚀🚀calcularHoras ~ horasExtrasDiurnas: ", horasExtrasDiurnas);
             form.extra_diurnas = horasExtrasDiurnas[0];
             form.diurnas = horasExtrasDiurnas[1];
 
-            let horasExtrasNocturnas = (calcularNocturnas(data, form, form.fecha_ini, form.fecha_fin, CuandoEmpiezaExtra, HORAS_ESTANDAR,empiezanNocturnnnas));
+            let horasExtrasNocturnas = (calcularNocturnas(form.fecha_ini, form.fecha_fin, CuandoEmpiezaExtra, HORAS_ESTANDAR,empiezanNocturnas));
+            console.log("🚀🚀calcularHoras ~ horasExtrasNocturnas: ", horasExtrasNocturnas);
             form.extra_nocturnas = horasExtrasNocturnas[0];
             form.nocturnas = horasExtrasNocturnas[1];
         }
-        // if(data.estado2359){
-        //     if (form.nocturnas < 8 && form.nocturnas >= 0) {
-        //         form.nocturnas++
-        //     } else
-        //       form.extra_nocturnas++
-        // }
+        RestarAlmuarzo(form,data)
 
         //dentro de setdomonical esta RestarAlmuarzo
-        setDominical(data, form, ini, fin, CuandoEmpiezaExtra, ExtrasManana, FestivosColombia, message);
+        setDominical(data, form, ini, fin, CuandoEmpiezaExtra, ExtrasManana, FestivosColombia, message, empiezanNocturnas);
 
         if (data.estado2359) {
             if (CuandoEmpiezaExtra >= horasFinOme) {

@@ -7,7 +7,7 @@
         </h2>
       </div>
       <div class="flex flex-wrap mx-4 my-8">
-        <div class="py-8 px-4 lg:w-1/3">
+        <div class="py-8 px-4 lg:w-full">
           <div class="h-full flex items-start">
             <div class="w-12 flex-shrink-0 flex flex-col text-center leading-none">
               <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">24 mayo</span>

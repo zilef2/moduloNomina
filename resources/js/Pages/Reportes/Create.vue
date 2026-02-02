@@ -42,10 +42,10 @@ const props = defineProps({
 //theconfig
 let label_diurnas = ref(null)
 
-const HORAS_ESTANDAR = props.ArrayHorasSemanales.HORAS_ORDINARIAS // 8horitas
+const HORAS_ESTANDAR = props.ArrayHorasSemanales.HORAS_ORDINARIAS // 8 horitas
 const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - HORAS_ESTANDAR //notes: = 40
-console.log("=>(Create.vue:42) props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES", props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES);
-console.log("=>(Create.vue:42) HORAS_SEMANALES_MENOS_ESTANDAR", HORAS_SEMANALES_MENOS_ESTANDAR);
+// console.log("=>(Create.vue:42) props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES", props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES);
+// console.log("=>(Create.vue:42) HORAS_SEMANALES_MENOS_ESTANDAR", HORAS_SEMANALES_MENOS_ESTANDAR);
 const LimiteHorasTrabajadas = 25
 
 const Limite_Horas_Dia_Semana = [HORAS_ESTANDAR, (HORAS_ESTANDAR - 2)] //todo: nexttochange: cuando las semanales cambien de 46 horas a 42, seran 3 en vez de 2
@@ -132,8 +132,10 @@ if (props.numberPermissions > 9) {
 // if (props.numberPermissions > 8) {
     // form.fecha_ini = '2024-11-15T21:00'
     // form.fecha_fin = '2024-11-15T23:58'
-    form.fecha_ini = '2025-10-24T07:00'
-    form.fecha_fin = '2025-10-24T15:00'
+    // form.fecha_ini = '2025-10-24T07:00'
+    // form.fecha_fin = '2025-10-24T15:00'
+    form.fecha_ini = '2026-02-02T07:00'
+    form.fecha_fin = '2026-02-02T16:00'
     // form.centro_costo_id = {
     //     label: '001 - Costa',
     //     value: 140,
@@ -170,7 +172,7 @@ watchEffect(() => {
             data.diaini = parseInt(new Date(form.fecha_ini).getDate())
             data.TrabajadasHooy = (props.horasTrabajadasHoy[data.diaini]) ?? 0
             // data.almorzadasHooy = (props.horasTrabajadasHoy[0][data.diaini])
-            console.log("🚀🚀 ~ props.horasTrabajadasHoy: ", props.horasTrabajadasHoy[0]);
+            // console.log("🚀🚀 ~ props.horasTrabajadasHoy: ", props.horasTrabajadasHoy[0]);
             data.TrabajadasHooy = parseInt(data.TrabajadasHooy)
 
             let ini = Date.parse(form.fecha_ini);
@@ -178,7 +180,6 @@ watchEffect(() => {
 
             data.WeekN = weekNumber(new Date(form.fecha_ini))
             if (consolelog.MostrarTrabajadaSemana) {
-
                 console.log("=>(data.TrabajadasHooy", data.TrabajadasHooy);
             }
 
@@ -254,11 +255,12 @@ watchEffect(() => {
                         } else {
 
                             data.BoolCentrosNoFactura = false
+                            let empiezanNocturnas = 19; //las 7pm
                             calcularHoras(
                                 data, form,
                                 ini, fin,
                                 HORAS_ESTANDAR
-                                , FestivosColombia, message
+                                , FestivosColombia, message,empiezanNocturnas
                             );
                         }
                     }
@@ -356,7 +358,6 @@ const create = () => {
             let validacionNoMasDe3Dias
             if (props.numberPermissions > 9) validacionNoMasDe3Dias = 'ok'
             else validacionNoMasDe3Dias = validacionNoMasDe3Diax(form.fecha_ini, props.ArrayHorasSemanales['s_Dias_gabela'])
-            console.log("=>(Create.vue:302) validacionNoMasDe3Dias", validacionNoMasDe3Dias);
             if (data.respuestaSeguro && validacionNoMasDe3Dias === 'ok') {
 
                 form.almuerzo = data.ValorRealalmuerzo
