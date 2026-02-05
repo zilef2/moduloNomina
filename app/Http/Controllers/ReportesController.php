@@ -98,6 +98,7 @@ class ReportesController extends Controller {
 				continue;
 			}
 			
+			//se suma tod lo que trabajo en el dia $elIndex
 			$elIndex = (int)Carbon::parse($index)->format('d');
 			if (isset($horasTrabajadasHoy2[$elIndex])) {
 				$horasTrabajadasHoy2[$elIndex] += $item;

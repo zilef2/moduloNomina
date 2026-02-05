@@ -150,26 +150,24 @@ export function calcularTerminaDomingo(ini, fin, CuandoEmpiezaExtra, ExtrasManan
 //<editor-fold desc="CALCULAR">
 
 //# papa = watchEffect
-export function calcularHoras(data, form, inicio, final, HORAS_ESTANDAR, FestivosColombia, message,empiezanNocturnas): void {
+export function calcularHoras(data, form, inicio, final, HORAS_PARA_EXTRAS_DIA, FestivosColombia, message): void {
     let ini = new Date(inicio)
     let fin = new Date(final)
     let ExtrasManana = false //
 
-    data.TemporalDiaAnterior = data.HorasDelDiaAnterior59 ? data.HorasDelDiaAnterior59 : 0 //7jul: esta desactivado
+    data.TemporalDiaAnterior = data.HorasDelDiaAnterior59 ? data.HorasDelDiaAnterior59 : 0 //7jul2023: esta desactivado
     let Dateinii = Date.parse(form.fecha_ini) ?? false;
     if (Dateinii && Date.parse(form.fecha_fin)) {
         let horasInicioome: number = parseInt(String(new Date(form.fecha_ini).getHours()))
         let horasFinOme: number = parseInt(String(new Date(form.fecha_fin).getHours()))
-        let CuandoEmpiezaExtra: number = horasInicioome + HORAS_ESTANDAR
-        console.log("🚀🚀aqui1 ~ CuandoEmpiezaExtra: ", CuandoEmpiezaExtra);
-
+        let CuandoEmpiezaExtra: number = horasInicioome + HORAS_PARA_EXTRAS_DIA
 
         const diaSemana: number = (new Date(form.fecha_ini)).getDay();
         // if (diaSemana === 6) LIMITE_ALMUERZO -=3
 
         //razon1: semanal
-        if(data.CuantoFaltaParaExtraSemana < HORAS_ESTANDAR){
-            CuandoEmpiezaExtra -= HORAS_ESTANDAR - data.CuantoFaltaParaExtraSemana
+        if(data.CuantoFaltaParaExtraSemana < HORAS_PARA_EXTRAS_DIA){
+            CuandoEmpiezaExtra -= HORAS_PARA_EXTRAS_DIA - data.CuantoFaltaParaExtraSemana
         }
         //razon2: ya trabajo hoy
         CuandoEmpiezaExtra -= data.TrabajadasHooy
@@ -178,6 +176,7 @@ export function calcularHoras(data, form, inicio, final, HORAS_ESTANDAR, Festivo
         if (diaSemana === 5) { //viernes
             CuandoEmpiezaExtra -= 1
         }
+        
         // if (diaSemana === 6) { //sabado //esto ya se calcula con las 44 horas semanales
         //     CuandoEmpiezaExtra -= 3
         // }
@@ -197,7 +196,7 @@ export function calcularHoras(data, form, inicio, final, HORAS_ESTANDAR, Festivo
 
         if (CuandoEmpiezaExtra >= horasFinOme) {
             form.diurnas = Math.abs(calcularDiurnas(form.fecha_ini, form.fecha_fin, CuandoEmpiezaExtra,empiezanNocturnas)[1]);
-            form.nocturnas = Math.abs(calcularNocturnas(form.fecha_ini, form.fecha_fin, CuandoEmpiezaExtra, HORAS_ESTANDAR,empiezanNocturnas)[1]);
+            form.nocturnas = Math.abs(calcularNocturnas(form.fecha_ini, form.fecha_fin, CuandoEmpiezaExtra, HORAS_PARA_EXTRAS_DIA,empiezanNocturnas)[1]);
         } else { //extras
 
             if (CuandoEmpiezaExtra >= 24) {
@@ -207,12 +206,10 @@ export function calcularHoras(data, form, inicio, final, HORAS_ESTANDAR, Festivo
             
             
             let horasExtrasDiurnas = (calcularDiurnas(form.fecha_ini, form.fecha_fin, CuandoEmpiezaExtra,empiezanNocturnas));
-            console.log("🚀🚀calcularHoras ~ horasExtrasDiurnas: ", horasExtrasDiurnas);
             form.extra_diurnas = horasExtrasDiurnas[0];
             form.diurnas = horasExtrasDiurnas[1];
 
-            let horasExtrasNocturnas = (calcularNocturnas(form.fecha_ini, form.fecha_fin, CuandoEmpiezaExtra, HORAS_ESTANDAR,empiezanNocturnas));
-            console.log("🚀🚀calcularHoras ~ horasExtrasNocturnas: ", horasExtrasNocturnas);
+            let horasExtrasNocturnas = (calcularNocturnas(form.fecha_ini, form.fecha_fin, CuandoEmpiezaExtra, HORAS_PARA_EXTRAS_DIA,empiezanNocturnas));
             form.extra_nocturnas = horasExtrasNocturnas[0];
             form.nocturnas = horasExtrasNocturnas[1];
         }

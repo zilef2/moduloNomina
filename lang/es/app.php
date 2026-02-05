@@ -232,7 +232,7 @@ return [
         'email_verification' => 'Email Verification',
         'password_forgot' => 'Forgotten password?',
         'of' => 'de',
-        'HORAS_ORDINARIAS' => 'Horas ordinarias del día',
+        'HORAS_ORDINARIAS' => 'Horas necesarias para extras/día',
     ],
     'side' => [
         'user' => 'Persona',
@@ -333,7 +333,7 @@ return [
         'searchDDay' => 'Dia',
         'searchDDay2' => 'Dia',
 
-        'subsidio_de_transporte_dia' => 'subsidio de transporte por dia',
+        'subsidio_de_transporte_dia' => 'subsidio de transporte por dia (subsidio transporte/30)',
         'salario_minimo' => 'salario minimo',
 
         'search' => 'Buscar...',

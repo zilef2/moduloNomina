@@ -92,7 +92,7 @@ const titulos = [
     { order: 'cantidad', label: 'cantidad', type: 'number' },
     { order: 'precio_unitario', label: 'precio_unitario', type: 'number' },
     { order: 'fecha_adquisicion', label: 'fecha_adquisicion', type: 'date' },
-    { order: 'miniatura', label: 'miniatura', type: 'text' },
+    // { order: 'miniatura', label: 'miniatura', type: 'text' },
     { order: 'stock_minimo', label: 'stock_minimo', type: 'number' },
     { order: 'ubicacion', label: 'ubicacion', type: 'text' },
 ];

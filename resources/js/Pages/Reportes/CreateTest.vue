@@ -41,11 +41,11 @@ const props = defineProps({
 //theconfig
 let label_diurnas = ref(null)
 
-const HORAS_ESTANDAR = props.ArrayHorasSemanales.HORAS_ORDINARIAS // 8horitas
-const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - HORAS_ESTANDAR //notes: = 40
+const HORAS_PARA_EXTRAS_DIA = props.ArrayHorasSemanales.HORAS_ORDINARIAS // 8horitas
+const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - HORAS_PARA_EXTRAS_DIA //notes: = 40
 const LimiteHorasTrabajadas = 25
 
-const Limite_Horas_Dia_Semana = [HORAS_ESTANDAR, (HORAS_ESTANDAR - 2)] //todo: nexttochange: cuando las semanales cambien de 46 horas a 42, seran 3 en vez de 2
+const Limite_Horas_Dia_Semana = [HORAS_PARA_EXTRAS_DIA, (HORAS_PARA_EXTRAS_DIA - 2)] //todo: nexttochange: cuando las semanales cambien de 46 horas a 42, seran 3 en vez de 2
 
 
 const emit = defineEmits(["close", "reportFinished"]);
@@ -81,7 +81,7 @@ onMounted(() => {
         props.HorasDeCadaSemana[props.HorasDeCadaSemana[0]] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
 
     //explaining: data.TrabajadasSemana son las horas que hay que restarle a Cuandocomienzaextras
-    data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
+    data.TrabajadasSemana = data.TrabajadasSemana > HORAS_PARA_EXTRAS_DIA ? HORAS_PARA_EXTRAS_DIA : data.TrabajadasSemana
 
     if (consolelog.MostrarTrabajadaSemana) {
         console.log("=>(Create.vue:86) props.HorasDeCadaSemana", props.HorasDeCadaSemana);
@@ -184,7 +184,7 @@ watchEffect(() => {
         data.TrabajadasSemana = props.HorasDeCadaSemana[WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
             props.HorasDeCadaSemana[WeekN] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
 
-        data.TrabajadasSemana = data.TrabajadasSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.TrabajadasSemana
+        data.TrabajadasSemana = data.TrabajadasSemana > HORAS_PARA_EXTRAS_DIA ? HORAS_PARA_EXTRAS_DIA : data.TrabajadasSemana
 
         form.horas_trabajadas = 0
         form.almuerzo = 0
@@ -249,7 +249,7 @@ watchEffect(() => {
                         calcularHoras(
                             data, form,
                             ini, fin,
-                            HORAS_ESTANDAR
+                            HORAS_PARA_EXTRAS_DIA
                             , FestivosColombia, message
                         );
                     }

@@ -38,17 +38,20 @@ const props = defineProps({
     ArrayHorasSemanales: Object,//[]
     ArrayCentrosNoFactura: Object,//[]
 })
+console.log("🚀🚀 ~ horasTrabajadasHoy: ", props.horasTrabajadasHoy);
 
 //theconfig
 let label_diurnas = ref(null)
 
-const HORAS_ESTANDAR = props.ArrayHorasSemanales.HORAS_ORDINARIAS // 8 horitas
-const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - HORAS_ESTANDAR //notes: = 40
-// console.log("=>(Create.vue:42) props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES", props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES);
-// console.log("=>(Create.vue:42) HORAS_SEMANALES_MENOS_ESTANDAR", HORAS_SEMANALES_MENOS_ESTANDAR);
+const HORAS_PARA_EXTRAS_DIA = props.ArrayHorasSemanales.HORAS_ORDINARIAS
+console.log("🚀🚀 ~ HORAS_PARA_EXTRAS_DIA: ", HORAS_PARA_EXTRAS_DIA); //10 - 3feb2025
+const HORAS_SEMANALES_MENOS_ESTANDAR = props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - HORAS_PARA_EXTRAS_DIA
 const LimiteHorasTrabajadas = 25
+const idealDiario = 8 //se trabajaban 8 horas, 9 es la del almuerzo, 10 las extras
 
-const Limite_Horas_Dia_Semana = [HORAS_ESTANDAR, (HORAS_ESTANDAR - 2)] //todo: nexttochange: cuando las semanales cambien de 46 horas a 42, seran 3 en vez de 2
+
+//que es ese 2
+const Limite_Horas_Dia_Semana = [HORAS_PARA_EXTRAS_DIA, (HORAS_PARA_EXTRAS_DIA - 2)] //todo: nexttochange: cuando las semanales cambien de 46 horas a 42, seran 3 en vez de 2
 
 
 const emit = defineEmits(["close", "reportFinished"]);
@@ -62,8 +65,9 @@ const data = reactive({
     diaini: 1,
     MensajeError: '',
     const: {
-        // 44(max semanal) - 8 (horas diarias) = 36
-        HORAS_SEMANALES_MENOS_ESTANDAR: props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - props.ArrayHorasSemanales.HORAS_ORDINARIAS
+        // 44(max semanal) - 8 (idealDiario) = 36  
+        //props.ArrayHorasSemanales.HORAS_ORDINARIAS no se puede usar porque es para calcular extras
+        HORAS_SEMANALES_MENOS_ESTANDAR: props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - idealDiario 
     },
     Horas1159: props.ArrayOrdinarias.length > 1,
     diaSelected: 0,
@@ -72,6 +76,7 @@ const data = reactive({
     StringRestriccionNoFActura: '',
     WeekN: 1,
 })
+console.log("🚀🚀 ~ HORAS_SEMANALES_MENOS_ESTANDAR: ",data.const.HORAS_SEMANALES_MENOS_ESTANDAR);
 
 const message = reactive({
     TextFestivo: ''
@@ -81,12 +86,11 @@ const message = reactive({
 onMounted(() => {
 
     //explaining: data.CuantoFaltaParaExtraSemana solo se usa cuando se pasa de las horas que debe trabajar por semana 
-    //ex: 
     data.CuantoFaltaParaExtraSemana = props.HorasDeCadaSemana[data.WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
         props.HorasDeCadaSemana[data.WeekN] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
 
     //explaining: data.CuantoFaltaParaExtraSemana son las horas que hay que restarle a Cuandocomienzaextras
-    data.CuantoFaltaParaExtraSemana = data.CuantoFaltaParaExtraSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.CuantoFaltaParaExtraSemana
+    data.CuantoFaltaParaExtraSemana = data.CuantoFaltaParaExtraSemana > HORAS_PARA_EXTRAS_DIA ? HORAS_PARA_EXTRAS_DIA : data.CuantoFaltaParaExtraSemana
 
     //tosync: all repositories
     //explaining: recuperamos el centro de costo que habiamos selecciopnado previamente
@@ -134,8 +138,15 @@ if (props.numberPermissions > 9) {
     // form.fecha_fin = '2024-11-15T23:58'
     // form.fecha_ini = '2025-10-24T07:00'
     // form.fecha_fin = '2025-10-24T15:00'
-    form.fecha_ini = '2026-02-02T07:00'
-    form.fecha_fin = '2026-02-02T16:00'
+    
+    
+    // (2) LAS NOCTURNAS COICIDEN CON EL ALMUERZO
+    // form.fecha_ini = '2026-02-03T15:00'
+    // form.fecha_fin = '2026-02-03T21:00'
+    
+    // (2) SE ESTA SUMANDO 2 HORAS DIRUNAS (NO DEBERIA PASAR DE 1)
+    form.fecha_ini = '2026-02-03T10:00'
+    form.fecha_fin = '2026-02-03T15:00'
     // form.centro_costo_id = {
     //     label: '001 - Costa',
     //     value: 140,
@@ -171,8 +182,7 @@ watchEffect(() => {
         if (Dateinii && Date.parse(form.fecha_fin)) { // son fechas?
             data.diaini = parseInt(new Date(form.fecha_ini).getDate())
             data.TrabajadasHooy = (props.horasTrabajadasHoy[data.diaini]) ?? 0
-            // data.almorzadasHooy = (props.horasTrabajadasHoy[0][data.diaini])
-            // console.log("🚀🚀 ~ props.horasTrabajadasHoy: ", props.horasTrabajadasHoy[0]);
+            data.almorzadasHooy = props.horasTrabajadasHoy?.[0]?.[data.diaini] ?? 0
             data.TrabajadasHooy = parseInt(data.TrabajadasHooy)
 
             let ini = Date.parse(form.fecha_ini);
@@ -184,14 +194,16 @@ watchEffect(() => {
             }
 
             //data.CuantoFaltaParaExtraSemana = 44 - 39 
+            //explaining: data.CuantoFaltaParaExtraSemana solo se usa cuando se pasa de las horas que debe trabajar por semana
             data.CuantoFaltaParaExtraSemana = props.HorasDeCadaSemana[data.WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
-                props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - props.HorasDeCadaSemana[data.WeekN] : 8
+            props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - props.HorasDeCadaSemana[data.WeekN] : 9
+            
 
             //no puede ser negativo
             data.CuantoFaltaParaExtraSemana = data.CuantoFaltaParaExtraSemana < 0 ? 0 : data.CuantoFaltaParaExtraSemana
             
-            //el maximo valor de data.CuantoFaltaParaExtraSemana = 8 (HORAS_ESTANDAR)
-            data.CuantoFaltaParaExtraSemana = data.CuantoFaltaParaExtraSemana > HORAS_ESTANDAR ? HORAS_ESTANDAR : data.CuantoFaltaParaExtraSemana
+            //el maximo valor de data.CuantoFaltaParaExtraSemana = 8 (HORAS_PARA_EXTRAS_DIA)
+            data.CuantoFaltaParaExtraSemana = data.CuantoFaltaParaExtraSemana > HORAS_PARA_EXTRAS_DIA ? HORAS_PARA_EXTRAS_DIA : data.CuantoFaltaParaExtraSemana
 
             form.horas_trabajadas = 0
             form.almuerzo = 0
@@ -255,12 +267,11 @@ watchEffect(() => {
                         } else {
 
                             data.BoolCentrosNoFactura = false
-                            let empiezanNocturnas = 19; //las 7pm
                             calcularHoras(
                                 data, form,
                                 ini, fin,
-                                HORAS_ESTANDAR
-                                , FestivosColombia, message,empiezanNocturnas
+                                HORAS_PARA_EXTRAS_DIA
+                                , FestivosColombia, message
                             );
                         }
                     }
@@ -630,7 +641,7 @@ const fechafinBackend = () => {
 <!--                        data.HorasDelDiaAnterior59 ||-->
                 <div v-if="props.ArrayOrdinarias[props.ArrayOrdinarias.length] > 8 ||
                         data.MensajeError !== '' ||
-                        data.CuantoFaltaParaExtraSemana < 8 ||
+                        data.CuantoFaltaParaExtraSemana < 9 ||
                         data.TrabajadasHooy"
                     class="flex justify-end my-3">
                     <!--                    <p class="mx-1 w-full">Hay pendientes</p>-->
