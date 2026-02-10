@@ -15,21 +15,14 @@
             </div>
             <div class="flex-grow pl-6">
               <div class="flex">
-                <h2 class="tracking-widest text-xl title-font font-medium text-blue-500 mb-1">
-                  Reporte de centro de costo
-                </h2>
                 <div class="flex-grow pl-6">
                     <div class="inline-flex">
                         <h2 class="tracking-widest text-xl title-font font-medium text-amber-600 mb-1">
-                            Coste aproximado de la mano de obra de cada Centro de costo
+                            Proxima reunion
                         </h2>
                     </div>
                     <p class="leading-relaxed text-lg mb-5">
-                      Coste aproximado de la mano de obra de cada Centro de costo
-                    "1. Agregar item de descripción
-                    2. Que se puedan poner activos e inactivos
-                    3. Que se pueda seleccionar del centro de costos el supervisor
-                    4. que se pueda filtrar ya sea por supervisor o por centro de costo"
+                      Reporte de centro de costo y solicitud viaticos
                     </p>
                 </div>
               </div>

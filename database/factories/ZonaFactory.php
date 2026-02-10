@@ -17,7 +17,9 @@ class ZonaFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'nombre' => $this->faker->city(),
+            'nombre2' => $this->faker->city(),
+            'codigo' => $this->faker->unique()->numerify('###'),
         ];
     }
 }

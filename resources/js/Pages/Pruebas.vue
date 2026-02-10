@@ -1,120 +1,101 @@
-<script setup>
-// import Breadcrumb from '@/Components/Breadcrumb.vue';
-// import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-// import {ChevronRightIcon, KeyIcon, ShieldCheckIcon, UserIcon, BanknotesIcon} from '@heroicons/vue/24/solid';
-// import {Head, Link} from '@inertiajs/vue3';
-//
-// import {Bar} from 'vue-chartjs'
-// import {Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale} from 'chart.js'
-// import {watchEffect, onMounted, defineAsyncComponent, Suspense, reactive, ref} from "vue";
-
-
-</script>
-
+<!-- NewsSection.vue -->
 <template>
+  <section class="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100 py-14 px-6">
+    <!-- Decorative blobs -->
+    <div class="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-indigo-200/40 blur-3xl"></div>
+    <div class="absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-emerald-200/40 blur-3xl"></div>
 
-    <header class="p-6 flex justify-between items-center w-full max-w-7xl mx-auto">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-indigo-600 rounded-md"></div> <span class="font-bold text-xl text-indigo-900">Proton Mail</span>
+    <div class="relative mx-auto max-w-6xl">
+      <!-- Header -->
+      <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold tracking-tight text-slate-900">
+            ¡Hola, Carlos!
+          </h1>
+          <p class="mt-2 text-slate-600">
+            Esto es lo nuevo que ha pasado en <span class="font-semibold text-indigo-600">Modulo nomina</span>
+          </p>
         </div>
-        <button class="text-sm font-medium flex items-center gap-2 text-gray-600">
-            <i class="fa-solid fa-globe"></i> Español (España) <i class="fa-solid fa-chevron-down text-xs"></i>
-        </button>
-    </header>
 
-    <main class="flex-grow flex flex-col items-center px-4 pt-10">
-        <h1 class="text-4xl font-bold text-center text-indigo-950 mb-4">
-            Un servicio de correo electrónico cifrado <br> que pone tu privacidad de primero
-        </h1>
-
-        <div class="mt-12 w-full max-w-4xl flex flex-col md:flex-row gap-12">
-            
-            <div class="flex-1">
-                <h2 class="text-xl font-bold mb-6">Crea tu cuenta de Proton</h2>
-                
-                <form class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">Nombre de usuario</label>
-                        <div class="relative">
-                            <input type="text" placeholder="nombre" class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <span class="absolute right-10 top-2 text-gray-500">@proton.me</span>
-                            <i class="fa-solid fa-circle-check absolute right-3 top-3 text-green-500"></i>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">Contraseña</label>
-                        <div class="relative">
-                            <input type="password" value="12345678" class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <i class="fa-regular fa-eye absolute right-3 top-3 text-gray-400 cursor-pointer"></i>
-                        </div>
-                    </div>
-
-                    <div class="relative">
-                        <input type="password" value="12345678" class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <i class="fa-regular fa-eye absolute right-3 top-3 text-gray-400 cursor-pointer"></i>
-                    </div>
-
-                    <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full transition-colors flex justify-center items-center gap-2">
-                        Comenzar a utilizar Proton Mail 
-                        <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    </button>
-
-                    <p class="text-center text-sm text-gray-600">
-                        ¿Ya tienes una cuenta? <a href="#" class="text-indigo-600 hover:underline">Iniciar sesión</a>
-                    </p>
-
-                    <p class="text-[10px] text-center text-gray-400 mt-4 px-10">
-                        Al continuar, aceptas nuestros <a href="#" class="underline">términos y condiciones</a> y <a href="#" class="underline">política de privacidad</a>.
-                    </p>
-                </form>
-            </div>
-
-            <div class="flex-1 bg-blue-50/50 border border-blue-100 rounded-2xl p-6 text-sm">
-                <h3 class="font-bold text-gray-800 mb-4">El único servicio de correo electrónico con:</h3>
-                
-                <ul class="space-y-4 text-gray-600">
-                    <li class="flex gap-3">
-                        <i class="fa-solid fa-lock mt-1 text-gray-400"></i>
-                        <span>Cifrado de serie</span>
-                    </li>
-                    <li class="flex gap-3">
-                        <i class="fa-solid fa-shield-halved mt-1 text-gray-400"></i>
-                        <span>Bajo la protección de las leyes de privacidad suizas</span>
-                    </li>
-                    <li class="flex gap-3">
-                        <i class="fa-solid fa-envelope-open-text mt-1 text-gray-400"></i>
-                        <span>Alias de correo</span>
-                    </li>
-                    <li class="flex gap-3">
-                        <i class="fa-solid fa-sliders mt-1 text-gray-400"></i>
-                        <span>Características de seguridad avanzadas</span>
-                    </li>
-                    <li class="flex gap-3">
-                        <i class="fa-solid fa-table-cells-large mt-1 text-gray-400"></i>
-                        <span>Incluye calendario, gestor de contraseñas, almacenamiento de archivos y VPN</span>
-                    </li>
-                </ul>
-
-                <p class="mt-8 font-medium text-gray-700 leading-tight">
-                    Únete a más de 100 millones de personas que han elegido Proton para tu seguridad online
-                </p>
-            </div>
+        <!-- Avatars -->
+        <div class="flex -space-x-3">
+          <img class="h-12 w-12 rounded-full ring-2 ring-white" src="https://i.pravatar.cc/180?img=12" />
+          <img class="h-12 w-12 rounded-full ring-2 ring-white" src="https://i.pravatar.cc/180?img=22" />
+          <img class="h-12 w-12 rounded-full ring-2 ring-white" src="https://i.pravatar.cc/180?img=38" />
         </div>
-    </main>
+      </div>
 
-    <footer class="p-8 w-full max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-4">
-        <div class="flex gap-4">
-            <i class="fa-solid fa-envelope"></i>
-            <i class="fa-solid fa-calendar"></i>
-            <i class="fa-solid fa-cloud"></i>
-            <i class="fa-solid fa-key"></i>
-            <i class="fa-solid fa-shield"></i>
-        </div>
-        <div class="flex gap-4">
-            <span>Proton, Privacy by default.</span>
-            <a href="#" class="text-indigo-600 underline">¿Necesitas ayuda?</a>
-        </div>
-    </footer>
+      <!-- Highlight -->
+      <div
+        :class="[
+          'mt-10 rounded-2xl border p-8 backdrop-blur transition-all',
+          highlight
+            ? 'border-indigo-400 bg-indigo-50/70 shadow-xl shadow-indigo-200/50 scale-[1.01]'
+            : 'border-slate-200 bg-white/70'
+        ]"
+      >
+        <h2 class="text-xl font-semibold text-slate-900">
+          🔥 Punto clave en desarrollo
+        </h2>
+        <p class="mt-2 text-slate-700">
+          Medición del <strong>gasto acumulado de un proyecto</strong> en porcentaje, en tiempo real.
+        </p>
+        <p class="mt-1 text-sm text-slate-500">
+          Esta funcionalidad conectará tiempos, cotizaciones y centros de trabajo.
+        </p>
+      </div>
 
+      <!-- News grid -->
+      <div class="mt-10 grid gap-6 md:grid-cols-2">
+        <article class="group rounded-xl border border-slate-200 bg-white/80 p-6 backdrop-blur transition hover:-translate-y-1 hover:shadow-lg">
+          <h3 class="font-semibold text-slate-900 group-hover:text-indigo-600">
+            ⏱️ Cálculo de tiempos de empleados
+          </h3>
+          <p class="mt-2 text-sm text-slate-600">
+            Mejoras en precisión, validaciones y consistencia por centro de trabajo.
+          </p>
+        </article>
+
+        <article class="group rounded-xl border border-slate-200 bg-white/80 p-6 backdrop-blur transition hover:-translate-y-1 hover:shadow-lg">
+          <h3 class="font-semibold text-slate-900 group-hover:text-indigo-600">
+            💼 Cotizaciones más estructuradas
+          </h3>
+          <p class="mt-2 text-sm text-slate-600">
+            Base sólida para enlazar costos estimados vs costos reales.
+          </p>
+        </article>
+
+        <a href="CentroCostos" class="group rounded-xl border border-slate-200 bg-white/80 p-6 backdrop-blur transition hover:-translate-y-1 hover:shadow-lg">
+          <h3 class="font-semibold text-slate-900 group-hover:text-indigo-600">
+            🏗️ Centros de trabajo
+          </h3>
+          <p class="mt-2 text-sm text-slate-600">
+            Organización clara para imputar horas y gastos por proyecto.
+          </p>
+        </a>
+
+        <a href="CentroCostos" class="group rounded-xl border border-dashed border-indigo-300 bg-indigo-50/60 p-6 backdrop-blur transition hover:shadow-lg">
+          <h3 class="font-semibold text-indigo-700">
+            📊 Control de gasto (próximamente)
+          </h3>
+          <p class="mt-2 text-sm text-indigo-700">
+            Visualización porcentual de ejecución presupuestal.
+          </p>
+        </a>
+      </div>
+    </div>
+  </section>
 </template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+
+const highlight = ref(false)
+
+onMounted(() => {
+  // Resalta automáticamente la sección más importante
+  setTimeout(() => {
+    highlight.value = true
+  }, 600)
+})
+</script>

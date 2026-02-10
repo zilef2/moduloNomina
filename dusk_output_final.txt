@@ -1,0 +1,86 @@
+Warning: TTY mode is not supported on Windows platform.
+PHPUnit 9.6.25 by Sebastian Bergmann and contributors.
+
+  Warning - The configuration file did not pass validation!
+  The following problems have been detected:
+
+  Line 9:
+  - Element 'phpunit', attribute 'cacheDirectory': The attribute 'cacheDirectory' is not allowed.
+  - Element 'phpunit', attribute 'backupStaticProperties': The attribute 'backupStaticProperties' is not allowed.
+
+  Test results may not be as expected.
+
+
+E                                                                   1 / 1 (100%)
+
+Time: 00:02.125, Memory: 28.00 MB
+
+There was 1 error:
+
+1) Tests\Browser\CreateReporteTest::test_create_reporte_submission
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1364 Field 'nombre' doesn't have a default value (Connection: mysql, SQL: insert into `zonas` (`updated_at`, `created_at`) values (2026-02-10 16:02:15, 2026-02-10 16:02:15))
+
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Connection.php:783
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:34
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:3549
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:1982
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1334
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1299
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1138
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:338
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:240
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:333
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:287
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:483
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Collections\Arr.php:600
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Collections\Collection.php:778
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:480
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:433
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:417
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Concerns\GuardsAttributes.php:155
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:416
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:390
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:284
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:281
+C:\laragon\www\moduloNomina\tests\Browser\CreateReporteTest.php:30
+C:\laragon\www\moduloNomina\vendor\laravel\dusk\src\Concerns\ProvidesBrowser.php:70
+C:\laragon\www\moduloNomina\tests\Browser\CreateReporteTest.php:21
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Foundation\Testing\TestCase.php:61
+
+Caused by
+PDOException: SQLSTATE[HY000]: General error: 1364 Field 'nombre' doesn't have a default value
+
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:45
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Connection.php:816
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Connection.php:783
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:34
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:3549
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:1982
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1334
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1299
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1138
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:338
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:240
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:333
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:287
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:483
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Collections\Arr.php:600
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Collections\Collection.php:778
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:480
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:433
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:417
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Concerns\GuardsAttributes.php:155
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:416
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:390
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:284
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:281
+C:\laragon\www\moduloNomina\tests\Browser\CreateReporteTest.php:30
+C:\laragon\www\moduloNomina\vendor\laravel\dusk\src\Concerns\ProvidesBrowser.php:70
+C:\laragon\www\moduloNomina\tests\Browser\CreateReporteTest.php:21
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Foundation\Testing\TestCase.php:61
+
+ERRORS!
+Tests: 1, Assertions: 0, Errors: 1.

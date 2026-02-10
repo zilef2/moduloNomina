@@ -7594,6 +7594,7 @@ return array(
     'Termwind\\ValueObjects\\Node' => $vendorDir . '/nunomaduro/termwind/src/ValueObjects/Node.php',
     'Termwind\\ValueObjects\\Style' => $vendorDir . '/nunomaduro/termwind/src/ValueObjects/Style.php',
     'Termwind\\ValueObjects\\Styles' => $vendorDir . '/nunomaduro/termwind/src/ValueObjects/Styles.php',
+    'Tests\\Browser\\CreateReporteTest' => $baseDir . '/tests/Browser/CreateReporteTest.php',
     'Tests\\CreatesApplication' => $baseDir . '/tests/CreatesApplication.php',
     'Tests\\Feature\\Auth\\AuthenticationTest' => $baseDir . '/tests/Feature/Auth/AuthenticationTest.php',
     'Tests\\Feature\\Auth\\EmailVerificationTest' => $baseDir . '/tests/Feature/Auth/EmailVerificationTest.php',

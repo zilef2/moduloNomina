@@ -1,0 +1,33 @@
+Warning: TTY mode is not supported on Windows platform.
+PHPUnit 9.6.25 by Sebastian Bergmann and contributors.
+
+  Warning - The configuration file did not pass validation!
+  The following problems have been detected:
+
+  Line 9:
+  - Element 'phpunit', attribute 'cacheDirectory': The attribute 'cacheDirectory' is not allowed.
+  - Element 'phpunit', attribute 'backupStaticProperties': The attribute 'backupStaticProperties' is not allowed.
+
+  Test results may not be as expected.
+
+
+E                                                                   1 / 1 (100%)
+
+Time: 00:11.487, Memory: 26.00 MB
+
+There was 1 error:
+
+1) Tests\Browser\CreateReporteTest::test_create_reporte_submission
+BadMethodCallException: Call to undefined method App\Models\CentroCosto::factory()
+
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:67
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:36
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:2335
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:2347
+C:\laragon\www\moduloNomina\tests\Browser\CreateReporteTest.php:30
+C:\laragon\www\moduloNomina\vendor\laravel\dusk\src\Concerns\ProvidesBrowser.php:70
+C:\laragon\www\moduloNomina\tests\Browser\CreateReporteTest.php:21
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Foundation\Testing\TestCase.php:61
+
+ERRORS!
+Tests: 1, Assertions: 0, Errors: 1.

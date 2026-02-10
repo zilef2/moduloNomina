@@ -1,0 +1,32 @@
+Warning: TTY mode is not supported on Windows platform.
+PHPUnit 9.6.25 by Sebastian Bergmann and contributors.
+
+  Warning - The configuration file did not pass validation!
+  The following problems have been detected:
+
+  Line 9:
+  - Element 'phpunit', attribute 'cacheDirectory': The attribute 'cacheDirectory' is not allowed.
+  - Element 'phpunit', attribute 'backupStaticProperties': The attribute 'backupStaticProperties' is not allowed.
+
+  Test results may not be as expected.
+
+
+E                                                                   1 / 1 (100%)
+
+Time: 00:11.693, Memory: 28.00 MB
+
+There was 1 error:
+
+1) Tests\Browser\CreateReporteTest::test_create_reporte_submission
+Symfony\Component\Routing\Exception\RouteNotFoundException: Route [dusk.login] not defined.
+
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Routing\UrlGenerator.php:477
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Foundation\helpers.php:811
+C:\laragon\www\moduloNomina\vendor\laravel\dusk\src\Concerns\InteractsWithAuthentication.php:31
+C:\laragon\www\moduloNomina\tests\Browser\CreateReporteTest.php:42
+C:\laragon\www\moduloNomina\vendor\laravel\dusk\src\Concerns\ProvidesBrowser.php:70
+C:\laragon\www\moduloNomina\tests\Browser\CreateReporteTest.php:21
+C:\laragon\www\moduloNomina\vendor\laravel\framework\src\Illuminate\Foundation\Testing\TestCase.php:61
+
+ERRORS!
+Tests: 1, Assertions: 0, Errors: 1.

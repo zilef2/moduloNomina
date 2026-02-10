@@ -43,8 +43,10 @@ use Illuminate\Support\Facades\DB;
  * @method BelongsToMany belongsToMany(string $related, string $table = null, string $foreignPivotKey = null)
  * @method static selectRaw(string $string)
  */
-class CentroCosto extends Model {
-	
+class CentroCosto extends Model
+{
+	use HasFactory;
+
 	protected $fillable = [
 		'nombre',
 		'mano_obra_estimada',
@@ -59,6 +61,7 @@ class CentroCosto extends Model {
 		'supervi',
 		'ListaSupervisores',
 	];
+
 	
 //	public static function boot() {
 //		parent::boot();
@@ -67,76 +70,87 @@ class CentroCosto extends Model {
 //			dump('CentroCosto cargado: ' . $model->id);
 //		});
 //	}
-	
-	public function getSuperviAttribute(): array {
+
+	public function getSuperviAttribute(): array
+	{
 		// No llamar a $this->supervisores->... porque puede crear recursión.
 		return $this
 			->supervisores()->pluck('users.name')->unique()->values()->toArray()
-		;
+			;
 	}
-	
-	public function supervisores() {
+
+	public function supervisores()
+	{
 		return $this->users()->whereHas('roles', fn($q) => $q->where('name', 'supervisor'));
 	}
-	
-	public function users(): belongsToMany {
-		return $this->belongstoMany(User::class, 'centro_user');
+
+	public function users(): belongsToMany
+	{
+		return $this->belongstoMany(User::class , 'centro_user');
 	}
-	
-	public function getListaSupervisoresAttribute(): array {
+
+	public function getListaSupervisoresAttribute(): array
+	{
 		// Llamar directo a la tabla pivote sin pasar por el modelo User
 		return DB::table('centro_user')->join('users', 'users.id', '=', 'centro_user.user_id')->where('centro_user.centro_costo_id', $this->id)->select('users.id', 'users.name')->get()->toArray()
-		;
+			;
 	}
-	
-	public function ArrayListaSupervisores(): array {
-		
+
+	public function ArrayListaSupervisores(): array
+	{
+
 		return User::where('centro_costo_id', $this->id)->whereHas('roles', fn($q) => $q->where('name', 'supervisor'))->pluck('name')->unique()->values()->toArray();
 	}
-	
-	
-	public function reportes(): HasMany {
+
+
+	public function reportes(): HasMany
+	{
 		return $this->hasMany(Reporte::class);
 	}
-	
-	public function zona(): BelongsTo {
+
+	public function zona(): BelongsTo
+	{
 		return $this->belongsTo(zona::class);
 	}
-	
-	public function getZounaAttribute(): string {
+
+	public function getZounaAttribute(): string
+	{
 		return $this->zona ? $this->zona->nombre : 'Sin zona';
 	}
-	
+
 	/**
 	 * @param Collection<int, User> $PosiblesSupervisores
 	 */
-	public function ArraySupervisores($centroid, Collection $PosiblesSupervisores): array {
+	public function ArraySupervisores($centroid, Collection $PosiblesSupervisores): array
+	{
 		$result = [];
 		if ($PosiblesSupervisores->count()) {
 			foreach ($PosiblesSupervisores as $supervisor) {
 				$result[] = $supervisor->ArrayCentrosID();
 			}
 		}
-		
+
 		return array_unique($result);
 	}
-	
-	public function ArraySupervIDs(): array {
+
+	public function ArraySupervIDs(): array
+	{
 		$centroid = $this->id;
 		$supervisores = User::UsersWithRol('supervisor')->get();
 		$result = $supervisores->map(function ($user) use ($centroid) {
 			if ($user->TieneEsteCentro($centroid)) {
 				return $user->id;
 			}
-			
+
 			return null;
 		})->filter()->toArray();
-		
+
 		return $result;
 	}
-	
+
 	//deep2 |
-	public function actualizarEstimado($anio, $mes, $parametros): void {
+	public function actualizarEstimado($anio, $mes, $parametros): void
+	{
 		$elSelect = [
 			'user_id',
 			DB::raw('COUNT(*) as total'),
@@ -151,12 +165,12 @@ class CentroCosto extends Model {
 			DB::raw('SUM(dominical_extra_diurno) as dominical_extra_diurno'),
 			DB::raw('SUM(dominical_extra_nocturno) as dominical_extra_nocturno'),
 		];
-		
+
 		$Reportes = Reporte::Select($elSelect)->Where('centro_costo_id', $this->id)->WhereYear('fecha_ini', $anio)->WhereMonth('fecha_ini', $mes)->Where('valido', 1)->groupBy('user_id')->get();
-		
+
 		$CTC = new CentroTableController();
 		[$Reportes, $mano_obra_estimada] = $CTC->MultiplicarPorSalario($Reportes, $this->id);
-		
-		$this->update(['mano_obra_estimada' => $mano_obra_estimada,]);
+
+		$this->update(['mano_obra_estimada' => $mano_obra_estimada, ]);
 	}
 }
