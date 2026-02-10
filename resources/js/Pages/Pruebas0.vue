@@ -13,108 +13,55 @@
 
 <template>
 
-    <header class="p-6 flex justify-between items-center w-full max-w-7xl mx-auto">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-indigo-600 rounded-md"></div> <span class="font-bold text-xl text-indigo-900">Proton Mail</span>
+   <div class="min-h-screen bg-black text-white flex flex-col items-center justify-center p-8 space-y-12 font-sans">
+  
+  <!-- Título con Fade-in suave -->
+  <h1 class="text-5xl font-medium animate-in fade-in slide-in-from-top-4 duration-1000">
+    How would you like to start?
+  </h1>
+
+  <!-- Contenedor de Cards con Stagger (efecto cascada) -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-7xl">
+    
+    <!-- Card Template -->
+    <!-- Repite este bloque 4 veces cambiando el contenido -->
+    <div class="group relative p-[1px] rounded-2xl bg-neutral-800 transition-all duration-500 hover:scale-[1.02] active:scale-95 animate-in fade-in slide-in-from-bottom-8 fill-mode-both" 
+         style="animation-delay: 150ms;">
+      
+      <!-- Efecto de Brillo en el Borde (Glow) al hacer hover -->
+      <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-neutral-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      
+      <!-- Contenido de la Card -->
+      <div class="relative bg-neutral-900 rounded-[15px] p-8 h-full flex flex-col justify-between min-h-[300px] cursor-pointer">
+        <div class="space-y-4">
+          <h2 class="text-xl font-semibold group-hover:text-white transition-colors">Trace an Application</h2>
+          <p class="text-neutral-400 text-sm leading-relaxed group-hover:text-neutral-300 transition-colors">
+            Analyze and debug applications using traces.
+          </p>
         </div>
-        <button class="text-sm font-medium flex items-center gap-2 text-gray-600">
-            <i class="fa-solid fa-globe"></i> Español (España) <i class="fa-solid fa-chevron-down text-xs"></i>
-        </button>
-    </header>
-
-    <main class="flex-grow flex flex-col items-center px-4 pt-10">
-        <h1 class="text-4xl font-bold text-center text-indigo-950 mb-4">
-            Un servicio de correo electrónico cifrado <br> que pone tu privacidad de primero
-        </h1>
-
-        <div class="mt-12 w-full max-w-4xl flex flex-col md:flex-row gap-12">
-            
-            <div class="flex-1">
-                <h2 class="text-xl font-bold mb-6">Crea tu cuenta de Proton</h2>
-                
-                <form class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">Nombre de usuario</label>
-                        <div class="relative">
-                            <input type="text" placeholder="nombre" class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <span class="absolute right-10 top-2 text-gray-500">@proton.me</span>
-                            <i class="fa-solid fa-circle-check absolute right-3 top-3 text-green-500"></i>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">Contraseña</label>
-                        <div class="relative">
-                            <input type="password" value="12345678" class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <i class="fa-regular fa-eye absolute right-3 top-3 text-gray-400 cursor-pointer"></i>
-                        </div>
-                    </div>
-
-                    <div class="relative">
-                        <input type="password" value="12345678" class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <i class="fa-regular fa-eye absolute right-3 top-3 text-gray-400 cursor-pointer"></i>
-                    </div>
-
-                    <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full transition-colors flex justify-center items-center gap-2">
-                        Comenzar a utilizar Proton Mail 
-                        <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    </button>
-
-                    <p class="text-center text-sm text-gray-600">
-                        ¿Ya tienes una cuenta? <a href="#" class="text-indigo-600 hover:underline">Iniciar sesión</a>
-                    </p>
-
-                    <p class="text-[10px] text-center text-gray-400 mt-4 px-10">
-                        Al continuar, aceptas nuestros <a href="#" class="underline">términos y condiciones</a> y <a href="#" class="underline">política de privacidad</a>.
-                    </p>
-                </form>
-            </div>
-
-            <div class="flex-1 bg-blue-50/50 border border-blue-100 rounded-2xl p-6 text-sm">
-                <h3 class="font-bold text-gray-800 mb-4">El único servicio de correo electrónico con:</h3>
-                
-                <ul class="space-y-4 text-gray-600">
-                    <li class="flex gap-3">
-                        <i class="fa-solid fa-lock mt-1 text-gray-400"></i>
-                        <span>Cifrado de serie</span>
-                    </li>
-                    <li class="flex gap-3">
-                        <i class="fa-solid fa-shield-halved mt-1 text-gray-400"></i>
-                        <span>Bajo la protección de las leyes de privacidad suizas</span>
-                    </li>
-                    <li class="flex gap-3">
-                        <i class="fa-solid fa-envelope-open-text mt-1 text-gray-400"></i>
-                        <span>Alias de correo</span>
-                    </li>
-                    <li class="flex gap-3">
-                        <i class="fa-solid fa-sliders mt-1 text-gray-400"></i>
-                        <span>Características de seguridad avanzadas</span>
-                    </li>
-                    <li class="flex gap-3">
-                        <i class="fa-solid fa-table-cells-large mt-1 text-gray-400"></i>
-                        <span>Incluye calendario, gestor de contraseñas, almacenamiento de archivos y VPN</span>
-                    </li>
-                </ul>
-
-                <p class="mt-8 font-medium text-gray-700 leading-tight">
-                    Únete a más de 100 millones de personas que han elegido Proton para tu seguridad online
-                </p>
-            </div>
+        
+        <!-- Flecha con animación de desplazamiento -->
+        <div class="flex justify-end overflow-hidden">
+          <svg class="w-6 h-6 text-neutral-500 transform translate-x-[-10px] translate-y-[10px] opacity-0 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out" 
+               fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
         </div>
-    </main>
+      </div>
+    </div>
 
-    <footer class="p-8 w-full max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-4">
-        <div class="flex gap-4">
-            <i class="fa-solid fa-envelope"></i>
-            <i class="fa-solid fa-calendar"></i>
-            <i class="fa-solid fa-cloud"></i>
-            <i class="fa-solid fa-key"></i>
-            <i class="fa-solid fa-shield"></i>
-        </div>
-        <div class="flex gap-4">
-            <span>Proton, Privacy by default.</span>
-            <a href="#" class="text-indigo-600 underline">¿Necesitas ayuda?</a>
-        </div>
-    </footer>
+    <!-- Card 2 (Cambiar delay para efecto escalonado) -->
+    <div class="group relative p-[1px] rounded-2xl bg-neutral-800 transition-all duration-500 hover:scale-[1.02] active:scale-95 animate-in fade-in slide-in-from-bottom-8 fill-mode-both" style="animation-delay: 300ms;">
+      <!-- ... mismo contenido ... -->
+    </div>
+
+  </div>
+
+  <!-- Botón Skip con animación de pulso sutil -->
+  <button class="text-neutral-500 hover:text-white transition-colors flex items-center gap-2 group">
+    Skip 
+    <span class="group-hover:translate-x-1 transition-transform">→</span>
+  </button>
+</div>
 
 </template>

@@ -41,6 +41,9 @@ Route::get('/', function () {
     return redirect('/login');
 });
 
+Route::get('/Pruebas', [DashboardController::class, 'Pruebas'])->name('Pruebas');
+Route::get('/Pruebas0', [DashboardController::class, 'Pruebas0'])->name('Pruebas0');
+Route::get('/Pruebas1', [DashboardController::class, 'Pruebas1'])->name('Pruebas1');
 Route::get('/CentroObsoleto', [EstadisticasController::class, 'CentroObsoleto'])->name('CentroObsoleto');
 Route::get('/dashboard', [DashboardController::class, 'Dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 

@@ -171,6 +171,9 @@ class DashboardController extends Controller {
 			'chartValues'       => $chartValues,
 		]);
 	}
+	public function Pruebas(): \Inertia\Response {return Inertia::render('Pruebas'); }
+	public function Pruebas0(): \Inertia\Response {return Inertia::render('Pruebas0'); }
+	public function Pruebas1(): \Inertia\Response {return Inertia::render('Pruebas1'); }
 	
 	public function guardarCiudad(Request $r): void {
 		$user = Myhelp::AuthU();

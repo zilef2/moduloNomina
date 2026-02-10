@@ -6,34 +6,28 @@ import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SelectInput from '@/Components/SelectInput.vue';
 import {reactive, watch} from 'vue';
-
 import DangerButton from '@/Components/DangerButton.vue';
 import pkg from 'lodash';
-
 import Pagination from '@/Components/Pagination.vue';
-import {ChevronUpDownIcon, PencilIcon, TrashIcon} from '@heroicons/vue/24/solid';
-// import { CursorArrowRippleIcon, ChevronUpDownIcon,QuestionMarkCircleIcon, EyeIcon, PencilIcon, TrashIcon, UserGroupIcon } from '@heroicons/vue/24/solid';
+import {ChevronUpDownIcon, PencilIcon, TrashIcon,ArrowPathIcon} from '@heroicons/vue/24/solid';
 import Create from '@/Pages/material/Create.vue';
 import Edit from '@/Pages/material/Edit.vue';
 import Delete from '@/Pages/material/Delete.vue';
-
 import Checkbox from '@/Components/Checkbox.vue';
 import InfoButton from '@/Components/InfoButton.vue';
-
 import {formatDate, number_format} from '@/global.ts';
 
-const { _, debounce, pickBy } = pkg
+
+const {_, debounce, pickBy} = pkg
 const props = defineProps({
     fromController: Object,
     total: Number,
     filters: Object,
     breadcrumbs: Object,
     perPage: Number,
-
     title: String,
-
     numberPermissions: Number,
-    losSelect:Object,//normally used by headlessui
+    losSelect: Object,//normally used by headlessui
 })
 
 const data = reactive({
@@ -42,6 +36,18 @@ const data = reactive({
         field: props.filters.field,
         order: props.filters.order,
         perPage: props.perPage,
+        // Filtros por columna
+        filter_nombre: props.filters.filter_nombre,
+        filter_unidad_de_medida: props.filters.filter_unidad_de_medida,
+        filter_cantidad_min: props.filters.filter_cantidad_min,
+        filter_cantidad_max: props.filters.filter_cantidad_max,
+        filter_precio_unitario_min: props.filters.filter_precio_unitario_min,
+        filter_precio_unitario_max: props.filters.filter_precio_unitario_max,
+        filter_fecha_adquisicion_from: props.filters.filter_fecha_adquisicion_from,
+        filter_fecha_adquisicion_to: props.filters.filter_fecha_adquisicion_to,
+        filter_stock_minimo_min: props.filters.filter_stock_minimo_min,
+        filter_stock_minimo_max: props.filters.filter_stock_minimo_max,
+        filter_ubicacion: props.filters.filter_ubicacion,
     },
     materialo: null,
     selectedId: [],
@@ -79,6 +85,22 @@ const selectAll = (event) => {
 }
 const select = () => data.multipleSelect = props.fromController?.data.length === data.selectedId.length;
 
+// Función para limpiar todos los filtros
+const clearFilters = () => {
+    data.params.search = '';
+    data.params.filter_nombre = '';
+    data.params.filter_unidad_de_medida = '';
+    data.params.filter_cantidad_min = '';
+    data.params.filter_cantidad_max = '';
+    data.params.filter_precio_unitario_min = '';
+    data.params.filter_precio_unitario_max = '';
+    data.params.filter_fecha_adquisicion_from = '';
+    data.params.filter_fecha_adquisicion_to = '';
+    data.params.filter_stock_minimo_min = '';
+    data.params.filter_stock_minimo_max = '';
+    data.params.filter_ubicacion = '';
+}
+
 // <!--</editor-fold>-->
 
 
@@ -87,14 +109,14 @@ const select = () => data.multipleSelect = props.fromController?.data.length ===
 
 // text, string // number // dinero // date // datetime // foreign
 const titulos = [
-    { order: 'nombre', label: 'nombre', type: 'text' },
-    { order: 'unidad_de_medida', label: 'unidad_de_medida', type: 'text' },
-    { order: 'cantidad', label: 'cantidad', type: 'number' },
-    { order: 'precio_unitario', label: 'precio_unitario', type: 'number' },
-    { order: 'fecha_adquisicion', label: 'fecha_adquisicion', type: 'date' },
+    {order: 'nombre', label: 'nombre', type: 'text'},
+    {order: 'unidad_de_medida', label: 'unidad_de_medida', type: 'text'},
+    {order: 'cantidad', label: 'cantidad', type: 'number'},
+    {order: 'precio_unitario', label: 'precio_unitario', type: 'number'},
+    {order: 'fecha_adquisicion', label: 'fecha_adquisicion', type: 'date'},
     // { order: 'miniatura', label: 'miniatura', type: 'text' },
-    { order: 'stock_minimo', label: 'stock_minimo', type: 'number' },
-    { order: 'ubicacion', label: 'ubicacion', type: 'text' },
+    {order: 'stock_minimo', label: 'stock_minimo', type: 'number'},
+    {order: 'ubicacion', label: 'ubicacion', type: 'text'},
 ];
 
 </script>
@@ -103,121 +125,207 @@ const titulos = [
     <Head :title="props.title" />
 
     <AuthenticatedLayout>
-        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" class="capitalize text-xl font-bold"/>
+        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" class="capitalize text-xl font-bold" />
         <div class="space-y-4">
             <!-- {{ props.fromController.data[2] }} -->
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">
                     <PrimaryButton class="rounded-none" @click="data.createOpen = true"
-                        v-if="can(['create material'])">
+                                   v-if="can(['create material'])">
                         {{ lang().button.new }}
                     </PrimaryButton>
 
                     <Create v-if="can(['create material'])" :numberPermissions="props.numberPermissions"
-                        :titulos="titulos" :show="data.createOpen" @close="data.createOpen = false" :title="props.title"
-                        :losSelect=props.losSelect />
+                            :titulos="titulos" :show="data.createOpen" @close="data.createOpen = false"
+                            :title="props.title"
+                            :losSelect=props.losSelect />
 
                     <Edit v-if="can(['update material'])" :titulos="titulos"
-                        :numberPermissions="props.numberPermissions" :show="data.editOpen" @close="data.editOpen = false"
-                        :materiala="data.materialo" :title="props.title" :losSelect=props.losSelect />
+                          :numberPermissions="props.numberPermissions" :show="data.editOpen"
+                          @close="data.editOpen = false"
+                          :materiala="data.materialo" :title="props.title" :losSelect=props.losSelect />
 
                     <Delete v-if="can(['delete material'])" :numberPermissions="props.numberPermissions"
-                        :show="data.deleteOpen" @close="data.deleteOpen = false" :materiala="data.materialo"
-                        :title="props.title" />
+                            :show="data.deleteOpen" @close="data.deleteOpen = false" :materiala="data.materialo"
+                            :title="props.title" />
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="flex justify-between p-2">
+                <div class="flex justify-between items-center p-2">
                     <div class="flex space-x-2">
                         <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet" />
+                        <PrimaryButton @click="clearFilters" class="px-3 py-1.5 text-sm"
+                                       v-tooltip="'Limpiar todos los filtros'">
+                                    <ArrowPathIcon class="w-4 h-4" />
+                            
+                        </PrimaryButton>
                         <!-- <DangerButton @click="data.deleteBulkOpen = true"
                             v-show="data.selectedId.length != 0 && can(['delete material'])" class="px-3 py-1.5"
                             v-tooltip="lang().tooltip.delete_selected">
-                            <TrashIcon class="w-5 h-5" />
+                            <TrashIcon class="w-5 h-5"  />
                         </DangerButton> -->
                     </div>
                     <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"
-                        class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg" placeholder="Nombre, codigo" />
+                               class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg" placeholder="Búsqueda general..." />
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
-                    <table v-if="props.total > 0" class="w-full">
+                    <table  class="w-full">
                         <thead class="uppercase text-sm border-t border-gray-200 dark:border-gray-700">
-                            <tr class="dark:bg-gray-900/50 text-left">
-                                <th class="px-2 py-4 text-center">
-                                    <Checkbox v-model:checked="data.multipleSelect" @change="selectAll" />
-                                </th>
-                                <th v-if="numberPermissions > 1" class="px-2 py-4">Accion</th>
+                        <!-- Fila de filtros -->
+                        <tr class="bg-gray-50 dark:bg-gray-800/50">
+                            <th class="px-2 py-2 text-center">
+                                <Checkbox v-model:checked="data.multipleSelect" @change="selectAll" />
+                            </th>
+                            <th v-if="numberPermissions > 1" class="px-2 py-2">Acción</th>
+                            <th class="px-2 py-2 text-center">#</th>
 
-                                <th class="px-2 py-4 text-center">#</th>
-                                <th v-for="titulo in titulos" class="px-2 py-4 cursor-pointer"
-                                    v-on:click="order(titulo['order'])">
-                                    <div class="flex justify-between items-center">
-                                        <span>{{ lang().label[titulo['label']] }}</span>
-                                        <ChevronUpDownIcon class="w-4 h-4" />
-                                    </div>
-                                </th>
-                                <!-- <th class="px-2 py-4 cursor-pointer" v-on:click="order('fecha_nacimiento')">
-                                    <div class="flex justify-between items-center"> <span>{{ lang().label.edad }}</span>
-                                        <ChevronUpDownIcon class="w-4 h-4" />
-                                    </div>
-                                </th> -->
+                            <!-- Filtro nombre -->
+                            <th class="px-2 py-2">
+                                <TextInput v-model="data.params.filter_nombre" type="text"
+                                           placeholder="Filtrar nombre..." class="w-full text-xs" />
+                            </th>
 
-                            </tr>
+                            <!-- Filtro unidad_de_medida -->
+                            <th class="px-2 py-2">
+                                <TextInput v-model="data.params.filter_unidad_de_medida" type="text"
+                                           placeholder="Filtrar unidad..." class="w-full text-xs" />
+                            </th>
+
+                            <!-- Filtro cantidad (rango) -->
+                            <th class="px-2 py-2">
+                                <div class="flex space-x-1">
+                                    <TextInput v-model="data.params.filter_cantidad_min" type="number"
+                                               placeholder="Min" class="w-full text-xs" />
+                                    <TextInput v-model="data.params.filter_cantidad_max" type="number"
+                                               placeholder="Max" class="w-full text-xs" />
+                                </div>
+                            </th>
+
+                            <!-- Filtro precio_unitario (rango) -->
+                            <th class="px-2 py-2">
+                                <div class="flex space-x-1">
+                                    <TextInput v-model="data.params.filter_precio_unitario_min" type="number"
+                                               placeholder="Min" class="w-full text-xs" />
+                                    <TextInput v-model="data.params.filter_precio_unitario_max" type="number"
+                                               placeholder="Max" class="w-full text-xs" />
+                                </div>
+                            </th>
+
+                            <!-- Filtro fecha_adquisicion (rango) -->
+                            <th class="px-2 py-2">
+                                <div class="flex flex-col space-y-1">
+                                    <TextInput v-model="data.params.filter_fecha_adquisicion_from" type="date"
+                                               class="w-full text-xs" />
+                                    <TextInput v-model="data.params.filter_fecha_adquisicion_to" type="date"
+                                               class="w-full text-xs" />
+                                </div>
+                            </th>
+
+                            <!-- Filtro stock_minimo (rango) -->
+                            <th class="px-2 py-2">
+                                <div class="flex space-x-1">
+                                    <TextInput v-model="data.params.filter_stock_minimo_min" type="number"
+                                               placeholder="Min" class="w-full text-xs" />
+                                    <TextInput v-model="data.params.filter_stock_minimo_max" type="number"
+                                               placeholder="Max" class="w-full text-xs" />
+                                </div>
+                            </th>
+
+                            <!-- Filtro ubicacion -->
+                            <th class="px-2 py-2">
+                                <TextInput v-model="data.params.filter_ubicacion" type="text"
+                                           placeholder="Filtrar ubicación..." class="w-full text-xs" />
+                            </th>
+                        </tr>
+
+                        <!-- Fila de encabezados -->
+                        <tr class="dark:bg-gray-900/50 text-left">
+                            <th class="px-2 py-4 text-center">
+                                <Checkbox v-model:checked="data.multipleSelect" @change="selectAll" />
+                            </th>
+                            <th v-if="numberPermissions > 1" class="px-2 py-4">Accion</th>
+
+                            <th class="px-2 py-4 text-center">#</th>
+                            <th v-for="titulo in titulos" class="px-2 py-4 cursor-pointer"
+                                v-on:click="order(titulo['order'])">
+                                <div class="flex justify-between items-center">
+                                    <span>{{ lang().label[titulo['label']] }}</span>
+                                    <ChevronUpDownIcon class="w-4 h-4" />
+                                </div>
+                            </th>
+                            <!-- <th class="px-2 py-4 cursor-pointer" v-on:click="order('fecha_nacimiento')">
+                                <div class="flex justify-between items-center"> <span>{{ lang().label.edad }}</span>
+                                    <ChevronUpDownIcon class="w-4 h-4"  />
+                                </div>
+                            </th> -->
+
+                        </tr>
                         </thead>
-                        <tbody>
-                            <tr v-for="(claseFromController, indexu) in props.fromController.data" :key="indexu"
-                                class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
+                        <tbody v-if="props.total > 0">
+                        <tr v-for="(claseFromController, indexu) in props.fromController.data" :key="indexu"
+                            class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
 
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
-                                    <input
-                                        class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary dark:text-primary shadow-sm focus:ring-primary/80 dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-primary dark:checked:border-primary"
-                                        type="checkbox" @change="select" :value="claseFromController.id"
-                                        v-model="data.selectedId" />
-                                </td>
-                                <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 w-12 px-2 sm:py-3">
-                                    <div class="flex justify-center items-center">
-                                        <div class="rounded-md overflow-hidden">
-                                            <InfoButton v-show="can(['update material'])" type="button"
-                                                @click="(data.editOpen = true), (data.materialo = claseFromController)"
-                                                class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </InfoButton>
-                                            <DangerButton v-show="can(['delete material'])" type="button"
-                                                @click="(data.deleteOpen = true), (data.materialo = claseFromController)"
-                                                class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.delete">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </DangerButton>
-                                        </div>
+                            <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
+                                <input
+                                    class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary dark:text-primary shadow-sm focus:ring-primary/80 dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-primary dark:checked:border-primary"
+                                    type="checkbox" @change="select" :value="claseFromController.id"
+                                    v-model="data.selectedId" />
+                            </td>
+                            <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 w-12 px-2 sm:py-3">
+                                <div class="flex justify-center items-center">
+                                    <div class="rounded-md overflow-hidden">
+                                        <InfoButton v-show="can(['update material'])" type="button"
+                                                    @click="(data.editOpen = true), (data.materialo = claseFromController)"
+                                                    class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
+                                            <PencilIcon class="w-4 h-4" />
+                                        </InfoButton>
+                                        <DangerButton v-show="can(['delete material'])" type="button"
+                                                      @click="(data.deleteOpen = true), (data.materialo = claseFromController)"
+                                                      class="px-2 py-1.5 rounded-none"
+                                                      v-tooltip="lang().tooltip.delete">
+                                            <TrashIcon class="w-4 h-4" />
+                                        </DangerButton>
                                     </div>
-                                </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++indexu }}</td>
-                                <td v-for="titulo in titulos" class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    <span v-if="titulo['type'] === 'text' || titulo['type'] === 'string'"> {{ claseFromController[titulo['order']] }} </span>
-                                    <span v-if="titulo['type'] === 'number'"> {{ number_format(claseFromController[titulo['order']], 0, false) }} </span>
-                                    <span v-if="titulo['type'] === 'dinero'"> {{ number_format(claseFromController[titulo['order']], 0, true) }} </span>
-                                    <span v-if="titulo['type'] === 'date'"> {{ formatDate(claseFromController[titulo['order']], false) }} </span>
-                                    <span v-if="titulo['type'] === 'datetime'"> {{ formatDate(claseFromController[titulo['order']], true) }} </span>
-                                     <span v-if="titulo['type'] === 'foreign'">
+                                </div>
+                            </td>
+                            <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++indexu }}</td>
+                            <td v-for="titulo in titulos" class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                <span v-if="titulo['type'] === 'text' || titulo['type'] === 'string'"> {{
+                                        claseFromController[titulo['order']]
+                                    }} </span>
+                                <span v-if="titulo['type'] === 'number'"> {{
+                                        number_format(claseFromController[titulo['order']], 0, false)
+                                    }} </span>
+                                <span v-if="titulo['type'] === 'dinero'"> {{
+                                        number_format(claseFromController[titulo['order']], 0, true)
+                                    }} </span>
+                                <span v-if="titulo['type'] === 'date'"> {{
+                                        formatDate(claseFromController[titulo['order']], false)
+                                    }} </span>
+                                <span v-if="titulo['type'] === 'datetime'"> {{
+                                        formatDate(claseFromController[titulo['order']], true)
+                                    }} </span>
+                                <span v-if="titulo['type'] === 'foreign'">
                                         {{ claseFromController?.[titulo?.['nameid']] ?? '' }}
                                     </span>
-                                </td>
+                            </td>
 
-                            </tr>
-                            <tr class="border-t border-gray-600">
-                                <td v-if="numberPermissions > 1"
-                                    class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> -
-                                </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center"> Total: </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
-                                    {{ props.total }}
-                                </td>
-                            </tr>
+                        </tr>
+                        <tr class="border-t border-gray-600">
+                            <td v-if="numberPermissions > 1"
+                                class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> -
+                            </td>
+                            <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center"> Total:</td>
+                            <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
+                                {{ props.total }}
+                            </td>
+                        </tr>
                         </tbody>
+                        <h2 v-else class="text-center text-xl my-8">Sin Registros</h2>
                     </table>
-                    <h2 v-else class="text-center text-xl my-8">Sin Registros</h2>
                 </div>
                 <div v-if="props.total > 0"
-                    class="flex justify-between items-center p-2 border-t border-gray-200 dark:border-gray-700">
+                     class="flex justify-between items-center p-2 border-t border-gray-200 dark:border-gray-700">
                     <Pagination :links="props.fromController" :filters="data.params" />
                 </div>
             </div>
