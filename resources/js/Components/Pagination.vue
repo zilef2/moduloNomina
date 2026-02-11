@@ -29,6 +29,7 @@ const data = reactive({
         search4: props.filters?.search4,
         search5: props.filters?.search5,
         search6: props.filters?.search6,
+        columnFilters: props?.filters?.columnFilters,
 
     },
 })

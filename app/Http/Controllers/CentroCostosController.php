@@ -75,7 +75,8 @@ class CentroCostosController extends Controller {
 				                                     'field',
 				                                     'order',
 				                                     'search2',
-				                                     'searchSCC'
+				                                     'searchSCC',
+				                                     'columnFilters'
 			                                     ]),
 			'nombresTabla'      => $this->getNombresTabla(),
 			'listaSupervisores' => $listaSupervisores,
@@ -103,7 +104,6 @@ class CentroCostosController extends Controller {
 	
 	public function MapearClasePP($numberPermissions, $request) {
 		$centroCostos = centroCosto::query();
-		$AUuser = Myhelp::AuthU();
 		$this->limitadorCentrosParaVer = 50;
 		$busqueda = false;
 		$searchSCC = $request->has('searchSCC');
@@ -112,6 +112,7 @@ class CentroCostosController extends Controller {
 			|| $searchSCC //nombre supervisor
 			|| $request->search2  //ver_todos
 			|| $request->search3  //zona
+			// || $request->columnFilters  //proximamente se agregaran filtros adicionales
 		) {
 			
 			$busqueda = true;
@@ -124,11 +125,7 @@ class CentroCostosController extends Controller {
 		else {
 			Cache::forget('centro_costos_busqueda'); // Olvide que hay una búsqueda activa
 			
-			if ($request->has([
-				                  'field',
-				                  'order'
-			                  ])
-			) {
+			if ($request->has([ 'field', 'order' ]) ) {
 				$this->limitadorCentrosParaVer = 500;
 				
 				if ($request->field === 'Zouna') {
@@ -143,16 +140,12 @@ class CentroCostosController extends Controller {
 					}
 				}
 				$this->actualizarcache();
-				
 			}
 			else {
 				$centroCostos->orderBy('activo', 'DESC')->orderBy('mano_obra_estimada', 'DESC');
 			}
 		}
 		
-		//        $supervisores = User::UsersWithRol('supervisor')->get();
-		//        $NotMyCentros = $AUuser->NotMyCentros($numberPermissions);
-		//        $centroCostos = $centroCostos->WhereNotIn('id', $NotMyCentros);
 		if ($request->has(['searchSCC']) || $request->has(['search2']) || $request->has(['search'])) {
 			$this->actualizarcache();
 		}
@@ -160,19 +153,6 @@ class CentroCostosController extends Controller {
 		if ($busqueda) {
 			$centroCostos = $this->getFilter($searchSCC, $request, $centroCostos);
 		}
-		//        dd($centroCostos->get());
-		//        $centroCostos = Cache::remember('centro_costos', $this->segundosActuSupervisores,
-		//            function () use ($centroCostos) {
-		//
-		//                Log::info('Cache miss: recalculating centro_costos');
-		//                return $centroCostos->limit($this->limitadorCentrosParaVer)->get()
-		//                    ->map(callback: function (CentroCosto $centroCosto) {
-		//                        
-		//                    $centroCosto->supervi = implode(',', $centroCosto->ArrayListaSupervisores());
-		//                    return $centroCosto;
-		//                })->filter();
-		//            });
-		
 		return $centroCostos;
 	}
 	
@@ -207,8 +187,6 @@ class CentroCostosController extends Controller {
 						return true;
 					}
 				}
-				
-				
 				return false;
 			});
 		}

@@ -44,6 +44,7 @@ const data = reactive({
         field: props.filters?.field,
         order: props.filters?.order,
         perPage: props.perPage,
+        columnFilters: props.filters?.columnFilters || {},
     },
     selectedId: [],
     multipleSelect: false,
@@ -80,9 +81,9 @@ const nombreMes = fechaActual.toLocaleDateString('es-ES', opciones);
     <Head :title="props.title"></Head>
     <AuthenticatedLayout>
         <!--        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />-->
-        <h2 class="text-lg mb-1">Esta vista se recarga cada 5 minutos</h2>
-        <h2 class="mb-1">Mano de obra estimada de este mes ({{nombreMes}}). Se tiene en cuenta el salario de la persona.
-            <div v-if="can(['isSuper'])" class="mt-1 block w-full">
+        <!-- <h2 class="text-lg mb-1">Esta vista se recarga cada 5 minutos</h2> -->
+        <!-- <h2 class="text-xs mb-1">Mano de obra estimada de este mes ({{nombreMes}}). Se tiene en cuenta el salario de la persona. -->
+            <!-- <div v-if="can(['isSuper'])" class="mt-1 block w-full">
                 <label :for="'search2'">
                     <input
                         type="checkbox"
@@ -92,15 +93,15 @@ const nombreMes = fechaActual.toLocaleDateString('es-ES', opciones);
                     />
                     Ver mas de 50
                 </label>
-            </div>
-        </h2>
-        <div class="space-y-4">
-            <div class="px-4 sm:px-0">
+            </div> -->
+        <!-- </h2> -->
+        <div class="-mx-2 text-xs">
+            <div class="">
                 <div class="rounded-lg overflow-hidden w-fit">
-                    <PrimaryButton v-if="can(['isSuper'])" class="rounded-none"
+                    <!-- <PrimaryButton v-if="can(['isSuper'])" class="rounded-none"
                                    @click="data.createOpen = true">
                         {{ lang().button.add }}
-                    </PrimaryButton>
+                    </PrimaryButton> -->
                     <Create :show="data.createOpen" @close="data.createOpen = false"
                             :listaSupervisores="props.listaSupervisores" :title="props.title"/>
                     <Edit :show="data.editOpen" @close="data.editOpen=false"
@@ -116,20 +117,21 @@ const nombreMes = fechaActual.toLocaleDateString('es-ES', opciones);
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="flex justify-between p-2">
                     <div class="flex space-x-2">
-                        <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet"/>
+                        <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet"/> 
+                        <small class="my-auto">Reg/página</small>
                         <DangerButton @click="data.deleteBulkOpen = true" v-show="data.selectedId.length !== 0"
                                       class="px-3 py-1.5" v-tooltip="lang().tooltip.delete_selected">
                             <TrashIcon class="w-5 h-5"/>
                         </DangerButton>
                     </div>
                     <div class="flex gap-2">
-                        <TextInput v-model="data.params.search" type="text" class="block w-1/2 rounded-lg"
+                        <TextInput v-model="data.params.search" type="text" class="block w-full rounded-lg"
                                    :placeholder="lang().placeholder.searchCC"/>
                         <!--                        <TextInput v-model="data.params.search3" type="text" class="block w-1/2 rounded-lg"-->
                         <!--                                   placeholder="Zona"/>-->
                         <v-select v-model="data.params.search3" :options="props.losSelect['zona']" label="label"
                                   class="w-full"></v-select>
-                        <TextInput v-model="data.params.searchSCC" type="text" class="block w-1/2 rounded-lg"
+                        <TextInput v-model="data.params.searchSCC" type="text" class="block w-full rounded-lg"
                                    :placeholder="lang().placeholder.searchSupervisorCC"/>
                     </div>
                 </div>
@@ -147,6 +149,42 @@ const nombreMes = fechaActual.toLocaleDateString('es-ES', opciones);
                             </th>
                             <!-- <th class="px-2 py-4 sr-only">Action</th> -->
                         </tr>
+                        <!-- <tr class="dark:bg-gray-900 text-left">
+                            <th v-if="can(['update centroCostos'])" class="px-1 py-2">
+                                 
+                            </th>
+                            <th class="px-1 py-2"> </th>
+                            <th class="px-1 py-2">
+                                <TextInput v-model="data.params.columnFilters.nombre" type="text" 
+                                           class="w-full text-xs" placeholder="Filtrar nombre"/>
+                            </th>
+                            <th v-show="can(['update centroCostos'])" class="px-1 py-2">
+                                <TextInput v-model="data.params.columnFilters.mano_obra_estimada" type="number" 
+                                           class="w-full text-xs" placeholder="Mín."/>
+                            </th>
+                            <th v-show="can(['update centroCostos'])" class="px-1 py-2">
+                            </th> 
+                            <th v-show="can(['update centroCostos'])" class="px-1 py-2">
+                            </th>
+                            <th v-show="can(['update centroCostos'])" class="px-1 py-2">
+                                <SelectInput v-model="data.params.columnFilters.activo" 
+                                             :dataSet="[{label: 'Todos', value: ''}, {label: '✅', value: '1'}, {label: '❌', value: '0'}]"
+                                             class="w-full text-xs"/>
+                            </th>
+                            <th v-show="can(['update centroCostos'])" class="px-1 py-2">
+                                <SelectInput v-model="data.params.columnFilters.ValidoParaFacturar" 
+                                             :dataSet="[{label: 'Todos', value: ''}, {label: '✅', value: '1'}, {label: '❌', value: '0'}]"
+                                             class="w-full text-xs"/>
+                            </th>
+                            <th v-show="can(['update centroCostos'])" class="px-1 py-2">
+                                <TextInput v-model="data.params.columnFilters.descripcion" type="text" 
+                                           class="w-full text-xs" placeholder="Filtrar desc."/>
+                            </th>
+                            <th v-show="can(['update centroCostos'])" class="px-1 py-2">
+                                <TextInput v-model="data.params.columnFilters.clasificacion" type="text" 
+                                           class="w-full text-xs" placeholder="Filtrar clasif."/>
+                            </th>
+                        </tr> -->
                         </thead>
                         <tbody>
                         <tr v-for="(clasegenerica, index) in fromController.data" :key="index"

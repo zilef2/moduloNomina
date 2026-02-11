@@ -282,8 +282,6 @@ export function RestarAlmuarzo(form, data) {
             return true;
         }
 
-        console.log("🚀🚀hay nocturnas ~ form.nocturnas >= data.ValorRealalmuerzo: ", form.nocturnas >= data.ValorRealalmuerzo);
-        console.log("🚀🚀RestarAlmuarzo ~ form.nocturnas > (form.diurnas - 1): ", form.nocturnas > (form.diurnas - 1));
         if (form.nocturnas >= data.ValorRealalmuerzo && form.nocturnas > (form.diurnas - 1)) {
             //&& form.nocturnas > form.diurnas
             form.nocturnas -= data.ValorRealalmuerzo;
