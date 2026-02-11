@@ -463,11 +463,11 @@ const fechafinBackend = () => {
 
 <template>
     <section class="space-y-6">
-        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl5'">
-            <form @submit.prevent="create" class="p-6 xs:mb-4 lg:mb-8">
-                <div class="flex space-x-4">
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                        <b>
+        <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl3'">
+            <form @submit.prevent="create" class="p-6 xs:mb-4 lg:mb-8 animate-fade-in">
+                <div class="flex space-x-4 mb-4">
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 transition-all duration-300 hover:scale-105">
+                        <b class="bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
                             <!-- {{ lang().label.add }} -->
                             {{ props.title }}
                         </b>
@@ -475,58 +475,62 @@ const fechafinBackend = () => {
                     <!--                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">-->
                     <!--                        Horas semana: {{ props?.horasemana }}-->
                     <!--                    </h2>-->
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                        {{ props?.startDateMostrar }} -
-                        {{ props?.endDateMostrar }}
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 transition-all duration-300">
+                        <span class="inline-block hover:scale-110 transition-transform duration-200">{{ props?.startDateMostrar }}</span> -
+                        <span class="inline-block hover:scale-110 transition-transform duration-200">{{ props?.endDateMostrar }}</span>
                     </h2>
                 </div>
-                <div class="my-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <InputLabel for="fecha_ini" :value="lang().label.fecha_ini"/>
+                <div class="my-6 grid grid-cols-1 md:grid-cols-2 gap-6 animate-slide-up">
+                    <div class="">
+                        <InputLabel for="fecha_ini" :value="lang().label.fecha_ini" class=""/>
                         <VueDatePicker :format="formatini" :start-time="data.startTime" :is-24="false"
                                        :day-names="daynames" auto-apply :enable-time-picker="true"
-                                       id="fecha_ini" type="date" class="mt-1 block w-full" v-model="form.fecha_ini"
+                                       id="fecha_ini" type="date" class="mt-1 block w-full transition-all duration-200 hover:shadow-lg" v-model="form.fecha_ini"
                                        required
                                        :placeholder="lang().placeholder.fecha_ini" :error="form.errors.fecha_ini"/>
-                        <InputError class="mt-2" :message="form.errors.fecha_ini"/>
+                        <InputError class="mt-2 animate-shake" :message="form.errors.fecha_ini"/>
                     </div>
-                    <div>
-                        <InputLabel for="fecha_fin" :value="lang().label.fecha_fin"/>
+                    <div class="">
+                        <InputLabel for="fecha_fin" :value="lang().label.fecha_fin" class=""/>
                         <VueDatePicker :format="formatfin" :is-24="false"
                                        :day-names="daynames" auto-apply :flow="['time']" :enable-time-picker="true"
                                        :teleport="true"
-                                       id="fecha_fin" type="date" class="mt-1 block w-full" v-model="form.fecha_fin"
+                                       id="fecha_fin" type="date" class="mt-1 block w-full transition-all duration-200 hover:shadow-lg" v-model="form.fecha_fin"
                                        required
                                        :placeholder="lang().placeholder.fecha_fin" :error="form.errors.fecha_fin"/>
-                        <InputError class="mt-2" :message="form.errors.fecha_fin"/>
+                        <InputError class="mt-2 animate-shake" :message="form.errors.fecha_fin"/>
                     </div>
-                    <div>
-                        <InputLabel for="horas_trabajadas" :value="lang().label.horas_trabajadas"/>
+                    <div class="group relative">
+                        <InputLabel for="horas_trabajadas" :value="lang().label.horas_trabajadas" class="group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-200"/>
                         <TextInput id="horas_trabajadas" type="number"
-                                   class="bg-gray-100 dark:bg-gray-700 mt-1 block w-full"
+                                   class="bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 mt-1 block w-full transition-all duration-300 hover:shadow-md"
+                                   :class="form.horas_trabajadas > 0 ? 'ring-2 ring-green-500 dark:ring-green-400 animate-pulse-slow' : ''"
                                    v-model="form.horas_trabajadas" disabled
                                    :placeholder="lang().placeholder.horas_trabajadas"
                                    :error="form.errors.horas_trabajadas"/>
-                        <InputError class="bg-gray-100 dark:bg-gray-700 mt-2" :message="form.errors.horas_trabajadas"/>
+                        <InputError class="bg-gray-100 dark:bg-gray-700 mt-2 animate-shake" :message="form.errors.horas_trabajadas"/>
                     </div>
 
-                    <div>
-                        <InputLabel for="almuerzo" :value="lang().label.horacomida + ' (+9 horas)'"/>
-                        <TextInput id="almuerzo" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
+                    <div class="group">
+                        <InputLabel for="almuerzo" :value="lang().label.horacomida + ' (+9 horas)'" class="group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-200"/>
+                        <TextInput id="almuerzo" type="text" class="bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 mt-1 w-full transition-all duration-300 hover:shadow-md"
+                                   :class="form.almuerzo > 0 ? 'ring-2 ring-orange-500 dark:ring-orange-400' : ''"
                                    v-model="form.almuerzo" disabled
                                    :placeholder="lang().placeholder.almuerzo" :error="form.errors.almuerzo"/>
                     </div>
                     <!-- mt-80 -->
-                    <div class="mt-4 grid grid-cols-2 gap-6">
-                        <div>
-                            <InputLabel ref="label_diurnas" for="diurnas" :value="lang().label.diurnas"/>
-                            <TextInput id="diurnas" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
+                    <div class="mt-4 grid grid-cols-2 gap-6 animate-slide-in-left">
+                        <div class="group transform transition-all duration-300 hover:scale-105">
+                            <InputLabel ref="label_diurnas" for="diurnas" :value="lang().label.diurnas" class="group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors duration-200"/>
+                            <TextInput id="diurnas" type="number" class="bg-gradient-to-br from-yellow-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 mt-1 w-full transition-all duration-300 hover:shadow-lg"
+                                       :class="form.diurnas > 0 ? 'ring-2 ring-yellow-500 dark:ring-yellow-400 animate-pulse-slow' : ''"
                                        v-model="form.diurnas" disabled
                                        :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas"/>
                         </div>
-                        <div>
-                            <InputLabel ref="label_nocturnas" for="nocturnas" :value="lang().label.nocturnas"/>
-                            <TextInput id="nocturnas" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
+                        <div class="group transform transition-all duration-300 hover:scale-105">
+                            <InputLabel ref="label_nocturnas" for="nocturnas" :value="lang().label.nocturnas" class="group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200"/>
+                            <TextInput id="nocturnas" type="number" class="bg-gradient-to-br from-indigo-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 mt-1 w-full transition-all duration-300 hover:shadow-lg"
+                                       :class="form.nocturnas > 0 ? 'ring-2 ring-indigo-500 dark:ring-indigo-400 animate-pulse-slow' : ''"
                                        v-model="form.nocturnas" disabled
                                        :placeholder="lang().placeholder.nocturnas" :error="form.errors.nocturnas"/>
                         </div>
@@ -624,47 +628,43 @@ const fechafinBackend = () => {
                     <InputError class="mt-2" :message="form.errors.observaciones" />
                 </div> -->
 
-                <div class="flex justify-end mx-2 mt-1">
-                    <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{
+                <div class="flex justify-end mx-2 mt-1 animate-fade-in-up">
+                    <SecondaryButton :disabled="form.processing" @click="emit('close')" class="transition-all duration-300 hover:scale-105 hover:shadow-lg"> {{
                             lang().button.close
                         }}
                     </SecondaryButton>
                     <PrimaryButton v-if="data.StringRestriccionNoFActura === ''"
                                    type="button"
-                                   class="ml-3" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
+                                   class="ml-3 transition-all duration-300 hover:scale-110 hover:shadow-xl active:scale-95" :class="{ 'opacity-25': form.processing, 'animate-pulse': form.processing }" :disabled="form.processing"
                                    @mouseup="create" @keyup.enter="create">
                         {{ form.processing ? lang().button.add + '...' : lang().button.add }}
                     </PrimaryButton>
-                    <p v-else class="ml-4 mt-1">{{ data.StringRestriccionNoFActura }}</p>
+                    <p v-else class="ml-4 mt-1 text-red-600 dark:text-red-400 animate-bounce">{{ data.StringRestriccionNoFActura }}</p>
                 </div>
                 <!--                        props.ArrayOrdinarias[0] > data.const.HORAS_SEMANALES_MENOS_ESTANDAR && form.diurnas + form.nocturnas > 8 ||-->
 <!--                        data.HorasDelDiaAnterior59 ||-->
                 <div v-if="props.ArrayOrdinarias[props.ArrayOrdinarias.length] > 8 ||
                         data.MensajeError !== '' ||
-                        data.CuantoFaltaParaExtraSemana < 9 ||
-                        data.TrabajadasHooy"
+                        data.CuantoFaltaParaExtraSemana < 9"
                     class="flex justify-end my-3">
                     <!--                    <p class="mx-1 w-full">Hay pendientes</p>-->
 
                     <p v-if="props.ArrayOrdinarias[props.ArrayOrdinarias.length] > 8" class="mx-2">
-
                         {{ props.ArrayOrdinarias[props.ArrayOrdinarias.length] }} horas (11:59pm)</p>
-
-<!--                    <p v-if="data.HorasDelDiaAnterior59" class="mx-2">Ayer finalizó a las 11:59 p.m.</p>-->
-                    <p v-if="data.MensajeError !== ''" class="mx-2 text-red-600 text-lg">
+                    <p v-if="data.MensajeError !== ''" class="mx-2 text-red-600 text-lg animate-shake font-semibold">
                         {{ data.MensajeError }}
                     </p>
                     <p v-if="data.CuantoFaltaParaExtraSemana < 8"
-                       class="mx-2 px-1 text-sky-700 bg-sky-400/10 dark:text-white">
-                        Faltan <small>{{ data.CuantoFaltaParaExtraSemana }} </small> horas, para las extras semanales
-                    </p>
-                    <p v-if="data.TrabajadasHooy" class="mx-2 px-1 text-sky-700 bg-sky-400/10 dark:text-white">
-                        Ya se reportaron <small>{{ data.TrabajadasHooy }} </small> horas de hoy
+                       class="mx-2 px-3 py-2 text-sky-700 bg-gradient-to-r from-sky-400/10 to-blue-400/10 dark:text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md border border-sky-300/30">
+                        Faltan <small class="font-bold text-sky-900 dark:text-sky-300">{{ data.CuantoFaltaParaExtraSemana }} </small> horas, para las extras semanales
                     </p>
 
                 </div>
-                <p class="mt-4 px-1 dark:text-white text-sm">
-                    Has trabajado {{ props.HorasDeCadaSemana[data.WeekN] }} horas en la semana
+                <p v-if="data.TrabajadasHooy" class="mt-4 px-3 py-2 dark:text-white text-sm bg-gradient-to-r from-blue-100/50 to-pink-100/50 dark:from-blue-900/20 dark:to-pink-900/20 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md border border-blue-300/30 dark:border-blue-700/30">
+                    Ya se reportaron <small class="font-bold text-sky-900 dark:text-sky-300">{{ data.TrabajadasHooy }} </small> horas de hoy
+                </p>
+                <p class="mt-4 px-3 py-2 dark:text-white text-sm bg-gradient-to-r from-blue-100/50 to-pink-100/50 dark:from-blue-900/20 dark:to-pink-900/20 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md border border-blue-300/30 dark:border-blue-700/30">
+                    Has trabajado <span class="font-bold text-blue-700 dark:text-blue-300">{{ props.HorasDeCadaSemana[data.WeekN] }}</span> horas en la semana
                 </p>
             </form>
         </Modal>

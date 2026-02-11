@@ -6,8 +6,8 @@ calcularNocturnas
 //FIN INDEX
 
 //<editor-fold desc="CALCULAR">
-import {calcularTerminaDomingo, calcularTerminaLunes, estaFechaEsFestivo} from "./HelpingCreate";
-import {consolelog} from "../Pages/Reportes/ComunCreateReporte";
+import { calcularTerminaDomingo, calcularTerminaLunes, estaFechaEsFestivo } from "./HelpingCreate";
+import { consolelog } from "../Pages/Reportes/ComunCreateReporte";
 
 
 export function calcularDiurnas(Inicio, Fin, CuandoEmpiezaExtra, empiezanNocturnas) {
@@ -258,68 +258,53 @@ export function RestarAlmuarzo(form, data) {
         console.log("🚀🚀RestarAlmuarzo ~ CadaCuantoAlmuerzo: ", CadaCuantoAlmuerzo);
         console.log("🚀🚀RestarAlmuarzo ~ numerador: ", numerador);
     }
+    console.log("🔍 ~ RestarAlmuarzo ~ resources/js/CreateReporte/HelpingCreate2.ts:261 ~ numerador:", numerador);
     if (numerador > CadaCuantoAlmuerzo && form.horas_trabajadas > 0) {
         form.horas_trabajadas -= data.ValorRealalmuerzo;
 
-        //extras
-        //primero verifica si hay extras nocturnas, y luego mira si son mayores a todo
-        const HayEn = form.extra_nocturnas >= data.ValorRealalmuerzo
-        if (HayEn) {
-            const HayMasEn_D = form.extra_nocturnas > form.diurnas - 1
-            const HayMasEn_N = form.extra_nocturnas > form.nocturnas - 1
-            const HayMasEn_Ed = form.extra_nocturnas > form.extra_diurnas - 1
+        type CampoHoras =
+            | 'diurnas'
+            | 'nocturnas'
+            | 'extra_diurnas'
+            | 'extra_nocturnas'
+            | 'dominical_diurnas'
+            | 'dominical_nocturnas'
+            | 'dominical_extra_diurnas'
+            | 'dominical_extra_nocturnas';
 
-            if (HayMasEn_D && HayMasEn_N && HayMasEn_Ed) {
-                form.extra_nocturnas -= data.ValorRealalmuerzo
-                form.almuerzo += ' nocturno'
-                return true;
+        const jerarquia: CampoHoras[] = [
+            'diurnas',
+            'nocturnas',
+            'extra_diurnas',
+            'extra_nocturnas',
+            'dominical_diurnas',
+            'dominical_nocturnas',
+            'dominical_extra_diurnas',
+            'dominical_extra_nocturnas',
+        ];
+
+        let pendiente = data.ValorRealalmuerzo;
+        const descontados: CampoHoras[] = [];
+
+        for (const campo of jerarquia) {
+            if (pendiente === 0) break;
+
+            const disponible = form[campo];
+
+            console.log("🔍 ~ RestarAlmuarzo ~  disponible:", disponible);
+            if (disponible > 0) {
+                const descuento = Math.min(disponible, pendiente);
+
+                form[campo] -= descuento;
+                pendiente -= descuento;
+
+                descontados.push(campo);
             }
         }
-        
-        if (form.extra_diurnas >= data.ValorRealalmuerzo && form.extra_diurnas > form.nocturnas && form.extra_diurnas > form.diurnas) {
-            form.extra_diurnas -= data.ValorRealalmuerzo
-            form.almuerzo += ' diurno'
-            return true;
-        }
 
-        if (form.nocturnas >= data.ValorRealalmuerzo && form.nocturnas > (form.diurnas - 1)) {
-            //&& form.nocturnas > form.diurnas
-            form.nocturnas -= data.ValorRealalmuerzo;
-            form.almuerzo += ' nocturno';
-            return true;
+        if (descontados.length) {
+            form.almuerzo += ' ' + descontados.join(' ');
         }
-        if (form.diurnas >= data.ValorRealalmuerzo) {
-            form.diurnas -= data.ValorRealalmuerzo;
-            form.almuerzo += ' diurno'
-            return true;
-        }
-
-
-        //domini
-        //extra dominical
-        if (form.dominical_extra_nocturnas >= data.ValorRealalmuerzo && form.dominical_extra_nocturnas > form.dominical_extra_diurnas - 1) {
-            form.dominical_extra_nocturnas -= data.ValorRealalmuerzo;
-            form.almuerzo += ' dominical extra nocturno';
-            return true;
-        }
-        if (form.dominical_extra_diurnas >= data.ValorRealalmuerzo && form.dominical_extra_diurnas > form.nocturnas && form.dominical_extra_diurnas > form.diurnas) {
-            form.dominical_extra_diurnas -= data.ValorRealalmuerzo;
-            form.almuerzo += ' dominical extra diurno'
-            return true;
-        }
-
-        if (form.dominical_nocturnas >= data.ValorRealalmuerzo && form.dominical_nocturnas > (form.dominical_diurnas - 1)) { //&& form.dominical_nocturnas > form.dominical_diurnas
-            form.dominical_nocturnas -= data.ValorRealalmuerzo;
-            form.almuerzo += ' dominical nocturno';
-            return true;
-        }
-        if (form.dominical_diurnas >= data.ValorRealalmuerzo) {
-            form.dominical_diurnas -= data.ValorRealalmuerzo;
-            form.almuerzo += ' dominical'
-            return true;
-        }
-
-
     }
     form.almuerzo = 'No'
 }
