@@ -43,6 +43,7 @@
     "mockery/mockery": "^1.4.4",
     "mrdebug/crudgen": "^1.9",
     "nunomaduro/collision": "^6.1",
+    "pestphp/pest-plugin-laravel": "^1.4",
     "phpunit/phpunit": "^9.5.10"
   },
   "autoload": {

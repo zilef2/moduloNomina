@@ -11,7 +11,7 @@
           <div class="h-full flex items-start">
             <div class="w-12 flex-shrink-0 flex flex-col text-center leading-none">
               <span class="text-gray-500 pb-2 mb-2 border-b-2 border-gray-200">24 mayo</span>
-              <span class="font-medium text-lg text-gray-800 title-font leading-none">2024</span>
+              <span class="font-medium text-lg text-gray-800 title-font leading-none">2025</span>
             </div>
             <div class="flex-grow pl-6">
               <div class="flex">

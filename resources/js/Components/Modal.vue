@@ -58,12 +58,12 @@ const maxWidthClass = computed(() => {
         xl2:  'max-w-2xl',
         xl3:  'max-w-3xl',
         xl4:  'sm:max-w-4xl 2xl:max-w-[1200px]',
-        xl5:  'sm:max-w-4xl 2xl:max-w-5xl',
-        xl6:  'sm:max-w-4xl 2xl:max-w-[900px]',
-        xl7:  'sm:max-w-4xl 2xl:max-w-[1200px]',
+        xl5:  'sm:max-w-4xl 2xl:max-w-[1400px]',
+        xl6:  'sm:max-w-4xl 2xl:max-w-[1600px]',
+        xl7:  'sm:max-w-4xl 2xl:max-w-[1800px]',
         xl8:  'sm:max-w-[800px] xl:min-w-[1360px] 2xl:max-w-[1900px]',
         xl9:  'sm:max-w-[2100px] 2xl:max-w-[2200px]',
-        xl10: 'sm:max-w-[2200px] 2xl:max-w-[2400px]',
+        xl10: 'sm:max-w-[2200px] 2xl:max-w-[2600px]',
     }[props.maxWidth];
 });
 </script>

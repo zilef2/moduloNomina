@@ -91,6 +91,13 @@
       0 => 'Opcodes\\LogViewer\\LogViewerServiceProvider',
     ),
   ),
+  'pestphp/pest' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Pest\\Laravel\\PestServiceProvider',
+    ),
+  ),
   'spatie/laravel-backup' => 
   array (
     'providers' => 

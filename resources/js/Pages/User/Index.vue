@@ -312,23 +312,23 @@ data.params.onlySupervis = data.params.onlySupervis === null ? false : data.para
                                 <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ user.updated_at }}</td>
                                 <td class="whitespace-nowrap p-4 sm:p-3">
                                     <div class="flex justify-center">
-                                        <Link :href="route('user.showReporte',user.id)"
+                                        <!-- <Link :href="route('user.showReporte',user.id)"
                                             v-show="can(['update centroCostos'])" type="button"
                                             class="inline-flex  items-center p-1.5 bg-gray-600 border border-transparent rounded-l-lg font-semibold text-xs text-white uppercase tracking-widest
                                              hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-250"
                                             v-tooltip="lang().tooltip.seeReport">
                                             <EyeIcon class="w-4 h-4" />
-                                        </Link>
+                                        </Link> -->
                                         <div class="rounded-md overflow-hidden">
                                             <InfoButton v-show="can(['update user'])" type="button"
                                                 @click="(data.editOpen = true), (data.user = user)"
-                                                class="px-2 py-1.5 rounded-sm mx-0.5" v-tooltip="lang().tooltip.edit">
+                                                class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
                                                 <PencilIcon class="w-4 h-4" />
                                             </InfoButton>
                                             <InfoButton v-if="user.roles[0]" v-show="can(['update user']) 
                                                 && (user.roles[0]?.name === 'supervisor')" type="button"
                                                 @click="(data.EdiCentroOpen = true), (data.user = user)"
-                                                class="px-2 py-1.5 rounded-sm mx-0.5" v-tooltip="'Asignar'">
+                                                class="px-2 py-1.5 rounded-none text-amber-500" v-tooltip="'Asignar'">
                                                 <LinkIcon class="w-4 h-4" />
                                             </InfoButton>
                                             <DangerButton v-show="can(['delete user'])" type="button"

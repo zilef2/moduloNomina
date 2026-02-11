@@ -62,7 +62,7 @@ const data = reactive({
     ],
     estado: [
       {value: 'Por ejecutar', label: 'Por ejecutar'},
-      {value: 'En ejecucion', label: 'En ejecución'},
+      {value: 'En ejecución', label: 'En ejecución'},
       {value: 'Ejecutado', label: 'Ejecutado'},
     ],
     tipo: [

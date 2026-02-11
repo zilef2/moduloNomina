@@ -17,7 +17,12 @@ module.exports = {
             },
             colors: {
                 primary: "rgb(var(--color-primary) / <alpha-value>)",
-            }
+            },
+            screens: {
+                '4xl': '1920px',
+                '6xl': '2560px',
+                '8xl': '3840px',
+            },
         },
     },
 

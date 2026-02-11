@@ -18,11 +18,11 @@
         </div>
 
         <!-- Avatars -->
-        <div class="flex -space-x-3">
+        <!-- <div class="flex -space-x-3">
           <img class="h-12 w-12 rounded-full ring-2 ring-white" src="https://i.pravatar.cc/180?img=12" />
           <img class="h-12 w-12 rounded-full ring-2 ring-white" src="https://i.pravatar.cc/180?img=22" />
           <img class="h-12 w-12 rounded-full ring-2 ring-white" src="https://i.pravatar.cc/180?img=38" />
-        </div>
+        </div> -->
       </div>
 
       <!-- Highlight -->
