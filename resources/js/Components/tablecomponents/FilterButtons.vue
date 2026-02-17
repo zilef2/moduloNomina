@@ -37,7 +37,7 @@ const handleChange = () => {
             </label>
             <div class="tooltip">Esta quincena</div>
         </li>
-        <li class="icon-content" v-show="props.numberPermissions > 9">
+        <li class="icon-content" v-show="props.numberPermissions > 10">
             <label class="container">
                 <input type="checkbox" v-model="checkedValues[2]" @change="handleChange" class="bg-red-300">
                 <div class="checkmark"></div>
@@ -52,7 +52,7 @@ const handleChange = () => {
             </label>
             <div class="tooltip">Solo extras</div>
         </li>
-        <li class="icon-content" v-show="props.numberPermissions > 9">
+        <li class="icon-content" v-show="props.numberPermissions > 10">
             <label class="container">
                 <input type="checkbox" v-model="checkedValues[4]" @change="handleChange" class="bg-red-300">
                 <div class="checkmark"></div>
@@ -141,7 +141,7 @@ const handleChange = () => {
     width: 0.25em;
     height: 0.5em;
     border: solid #E0E0E2;
-    border-width: 0 0.15em 0.15em 0;
+    border-width: 0 0.2em 0.2em 0;
     transform: rotate(45deg);
 }
 
@@ -165,7 +165,6 @@ const handleChange = () => {
     }
 }
 
-//divisionn
 ul {
     list-style: none;
 }
@@ -177,7 +176,7 @@ ul {
 }
 
 .example-2 .icon-content {
-    margin: 0 10px;
+    margin: 4px 5px;
     position: relative;
 }
 

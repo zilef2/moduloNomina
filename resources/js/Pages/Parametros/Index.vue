@@ -133,7 +133,6 @@ const form = useForm({
 
 <!--            <Condicionales/>-->
 
-            <Requerimientos/>
             <RequerimientosPendientes/>
         </section>
     </AuthenticatedLayout>

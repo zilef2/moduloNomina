@@ -140,7 +140,45 @@ const data = reactive({
     ],
     Reporte_Super_EditOpen: false,
     disableCreate: false,
+    showRangeFilter: false, // Toggle entre día único (false) o rango de días (true)
+    hideColumns: false, // Toggle para ocultar Acciones, #, Centro de costo y Válido
 })
+
+const displayTitles = ref([...props.nombresTabla[0]])
+
+watch(() => data.hideColumns, (val) => {
+    if (val) {
+        const compactMap = {
+            'diurnas': 'HD',
+            'nocturnas': 'HN',
+            'extra diurnas': 'HED',
+            'extra nocturnas': 'HEN',
+            'dominical diurno': 'HDD',
+            'dominical nocturno': 'H DN',
+            'dominical extra diurno': 'HDED',
+            'dominical extra nocturno': 'HDEN',
+            'Horas trabajadas': 'HT',
+            'Inicio': 'Ini',
+            'Fin': 'Fin'
+        };
+        /*
+        "Horas trabajadas",
+         "🍗",
+         "diurnas",
+         "nocturnas",
+         "extra diurnas",
+         "extra nocturnas",
+         "dominical diurno",
+         "dominical nocturno",
+         "dominical extra diurno",
+         "dominical extra nocturno", "observaciones" 
+        */
+        displayTitles.value = props.nombresTabla[0].map(t => compactMap[t] || t);
+    } else {
+        displayTitles.value = [...props.nombresTabla[0]];
+    }
+});
+
 onMounted(() => {
     let hoy = new Date()
     //todo: props.Procedencia => cc generar otra vista para el cc show
@@ -245,6 +283,7 @@ const handleCheckboxChange = (values) => {
     data.params.nofacturan = values[7]
 };
 
+
 </script>
 
 <template>
@@ -310,85 +349,94 @@ const handleCheckboxChange = (values) => {
                 </div>
             </div>
 
-            <!-- fold  FILTROS-->
+            <!-- fold  FILTROS Y CONTROLES EN UNA FILA -->
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="flex justify-between p-2">
-                    <div class="hidden xl:flex space-x-2 gap-1">
-                        <!-- ELFILTRO = horas diurnas-->
-                        <TextInput v-model="data.params.searchorasD" v-show="props.numberPermissions > 9" type="number"
-                            min="0" :placeholder="lang().placeholder.searchorasD"
-                            class="hidden 2xl:block w-2/3 md:w-full rounded-lg" />
-                        <TextInput v-model="data.params.HorasNoDiurnas" v-show="props.numberPermissions > 9"
-                            type="number" min="0" placeholder="No diurnas"
-                            class="hidden 2xl:block w-2/3 md:w-full rounded-lg" />
+                <div class="flex flex-wrap items-center gap-2 p-3">
+                    <!-- Botón de eliminación masiva -->
+                    <div
+                        v-if="data.selectedId.length !== 0 && can(['isingeniero', 'isadmin', 'isadministrativo', 'issupervisor'])">
+                        <DangerButton @click="data.deleteBulkOpen = true" class="px-3 py-2 h-10"
+                            v-tooltip="lang().tooltip.delete_selected">
+                            <TrashIcon class="w-5 h-5" />
+                        </DangerButton>
+                    </div>
 
-                        <!-- ELFILTRO = numero del mes-->
-                        <TextInput v-model="data.params.search1" v-show="props.numberPermissions > 9" type="number"
-                            min="0" max="31" placeholder="dia ini" class="hidden 2xl:block w-full rounded-lg" />
-                        <TextInput v-model="data.params.search2" v-show="props.numberPermissions > 9" type="number"
-                            min="0" max="31" placeholder="dia fin" class="hidden 2xl:block w-full rounded-lg" />
+                    <!-- Filtros de fechas y horas -->
+                    <div class="flex flex-wrap items-center gap-2">
                         <TextInput v-model="data.params.search" v-show="props.numberPermissions >= 1" type="text"
-                            min="0" max="12" class="hidden lg:block w-2/3 md:w-full rounded-lg" placeholder="Mes" />
-                        <!--                        <SelectInput v-model="data.params.search" :dataSet="data.DiasDeLaSemana" />-->
-                        <!--                        e1 adminis2 su e ing 3-->
-                        <!-- ELFILTRO = numero del dia-->
-                        <TextInput v-model="data.params.searchDDay" v-show="props.numberPermissions >= 1" type="number"
-                            min="0" max="31" class="hidden lg:block w-2/3 md:w-full rounded-lg"
-                            :placeholder="lang().placeholder.searchDDay" />
+                            min="0" max="12" class="w-28 h-10 rounded-lg" placeholder="Mes" />
+
+
+                        <!-- Toggle Compacto -->
+                        <div class="flex items-center gap-1 mx-2 bg-gray-100 dark:bg-gray-700 p-1 px-2 rounded-lg h-10">
+                            <Checkbox v-model:checked="data.hideColumns" id="compact-toggle" />
+                            <InputLabel for="compact-toggle" value="Compacto" class="text-xs cursor-pointer" />
+                        </div>
+
+                        <!-- Toggle de Rango -->
+                        <div class="flex items-center gap-1 mx-2 bg-gray-100 dark:bg-gray-700 p-1 px-2 rounded-lg h-10">
+                            <Checkbox v-model:checked="data.showRangeFilter" id="range-toggle" />
+                            <InputLabel for="range-toggle" value="Rango" class="text-xs cursor-pointer" />
+                        </div>
+
+                        <!-- Día Único -->
+                        <TextInput v-model="data.params.searchDDay" v-show="!data.showRangeFilter" type="number" min="0"
+                            max="31" class="w-24 h-10 rounded-lg" :placeholder="lang().placeholder.searchDDay" />
+
+                        <!-- Rango de Días -->
+                        <TextInput v-model="data.params.search1" v-show="data.showRangeFilter" type="number" min="0" max="31"
+                            placeholder="Desde" class="w-24 h-10 rounded-lg" />
+                        <TextInput v-model="data.params.search2" v-show="data.showRangeFilter" type="number" min="0" max="31"
+                            placeholder="Hasta" class="w-24 h-10 rounded-lg" />
+
+                        <TextInput v-model="data.params.searchorasD" v-show="props.numberPermissions > 10" type="number"
+                            min="0" :placeholder="lang().placeholder.searchorasD" class="w-28 h-10 rounded-lg" />
+                        <TextInput v-model="data.params.HorasNoDiurnas" v-show="props.numberPermissions > 10"
+                            type="number" min="0" placeholder="No diurnas" class="w-28 h-10 rounded-lg" />
                     </div>
-                    <div v-if="props.numberPermissions > 1" class="grid grid-cols-1 md:grid-cols-2 items-center gap-1">
-                        <div class="w-full flex flex-nowrap items-center">
-                            <p v-if="!data.params.search5" class="my-1 whitespace-nowrap mx-3 text-xs">Filtrar por
-                                Centro</p>
-                            <vSelect v-model="data.params.search5" :options="props.losSelect['centros']" label="name"
-                                :filterable="false" class="flex-1 mt-1 mx-2 min-w-44 max-w-48"></vSelect>
-                        </div>
 
-                        <div class="hidden md:flex justify-end text-right">
+                    <!-- Selector de Centro -->
+                    <div v-if="props.numberPermissions > 1" class="flex items-center gap-2">
+                        <vSelect v-model="data.params.search5" :options="props.losSelect['centros']" label="name"
+                            :filterable="false" placeholder="Centro" class="min-w-[180px] h-10"></vSelect>
+                    </div>
 
-                            <FilterButtons @update:checked="handleCheckboxChange"
-                                :numberPermissions="props.numberPermissions" />
-                        </div>
+                    <!-- Filtro por trabajador -->
+                    <div v-if="props.userFiltro && props.userFiltro.length > 0"
+                        v-show="can(['isingeniero', 'isadmin', 'isadministrativo', 'issupervisor']) && props.userFiltro"
+                        class="flex items-center gap-2">
+                        <v-select v-model="data.params.FiltroUser" :options="props.userFiltro"
+                            :reduce="element => element.value" label="label" placeholder="Trabajador"
+                            class="dark:bg-gray-400 min-w-[200px] h-10"></v-select>
+                    </div>
 
+                    <!-- Filtro de Quincena -->
+                    <div v-show="can(['isingeniero', 'isadmin', 'isadministrativo', 'issupervisor'])"
+                        class="flex items-center gap-2">
+                        <v-select v-model="data.params.FiltroQuincenita" label="texto"
+                            :options="[{ value: 1, texto: 'Primera Quincena' }, { value: 2, texto: 'Segunda quincena' }]"
+                            placeholder="Quincena" class="dark:bg-gray-400 min-w-[180px] h-10"></v-select>
+                    </div>
+
+                    <!-- Botones de filtro -->
+                    <div v-if="props.numberPermissions > 1" class="ml-auto">
+                        <FilterButtons @update:checked="handleCheckboxChange"
+                            :numberPermissions="props.numberPermissions" />
                     </div>
                 </div>
             </div>
-            <div class="flex justify-between p-4">
-                <div v-if="data.selectedId.length !== 0 && can(['isingeniero', 'isadmin', 'isadministrativo', 'issupervisor'])"
-                    class="flex space-x-2">
-                    <!--                        los empleados pueden borrar reportes, pero no actualizarlos (ni borrarlos en masa-->
-                    <DangerButton @click="data.deleteBulkOpen = true" class="px-3 py-1.5"
-                        v-tooltip="lang().tooltip.delete_selected">
-                        <TrashIcon class="w-5 h-5" />
-                    </DangerButton>
-                </div>
-                <div v-if="props.userFiltro && props.userFiltro.length > 0"
-                    v-show="can(['isingeniero', 'isadmin', 'isadministrativo', 'issupervisor']) && props.userFiltro"
-                    class="block mx-4">
-                    <InputLabel for="trabajador" value="Filtrar por trabajador" class="block" />
-                    <v-select v-model="data.params.FiltroUser" :options="props.userFiltro"
-                        :reduce="element => element.value" label="label" required
-                        class="dark:bg-gray-400 xs:hidden lg:min-w-[240px]"></v-select>
-                </div>
-                <div v-show="can(['isingeniero', 'isadmin', 'isadministrativo', 'issupervisor'])" class="block mx-4">
-                    <InputLabel for="Quincena" value="Quincena" class="block" />
-                    <v-select v-model="data.params.FiltroQuincenita" label="texto"
-                        :options="[{ value: 1, texto: 'Primera Quincena' }, { value: 2, texto: 'Segunda quincena' }]"
-                        required class="dark:bg-gray-400 xs:hidden lg:min-w-[240px]"></v-select>
-                </div>
-            </div>
-
-
             <!--            empieza la tabla-->
-            <div class="overflow-x-auto scrollbar-table">
+            <div class="overflow-x-auto scrollbar-table max-h-[70vh]">
                 <table class="w-full">
-                    <thead class="uppercase sticky text-sm border-t border-gray-200 dark:border-gray-700">
+                    <thead
+                        class="uppercase sticky top-0 z-10 text-sm border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
                         <tr class="dark:bg-gray-900 text-left">
-                            <th class="px-2 py-4 text-center">
+                            <th v-show="!(data.hideColumns)" class="px-2 py-4 text-center">
                                 <Checkbox v-model:checked="data.multipleSelect" @change="selectAll" />
                             </th>
-                            <th v-for="(titulos, indiceN) in nombresTabla[0]" :key="indiceN"
+                            <th v-for="(titulos, indiceN) in displayTitles" :key="indiceN"
                                 v-on:click="order(nombresTabla[2][indiceN])"
+                                v-show="!(data.hideColumns && (titulos === 'Acciones' || titulos === '#' || titulos === 'Centro costo' || titulos === 'Valido' || titulos === 'Validada'))"
                                 class="px-2 py-4 cursor-pointer hover:bg-sky-50 dark:hover:bg-gray-800">
                                 <div class="flex justify-between items-center">
                                     <span>{{ titulos }}</span>
@@ -401,13 +449,13 @@ const handleCheckboxChange = (values) => {
                         <tr v-for="(clasegenerica, index) in fromController.data" :key="index"
                             class="border-t border-gray-200 dark:border-gray-800 hover:bg-indigo-300/30 hover:dark:bg-indigo-600"
                             :class="{ 'bg-gray-300 dark:bg-gray-600': index % 2 === 0 }">
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
+                            <td v-show="!(data.hideColumns)" class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
                                 <input type="checkbox" @change="select" :value="clasegenerica.id"
                                     v-model="data.selectedId"
                                     class="rounded dark:bg-gray-900 border-gray-300 shadow-sm focus:ring-primary/80
                                          dark:border-gray-700 text-primary dark:text-primary dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-amber-500 dark:checked:border-amber-500" />
                             </td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">
+                            <td v-show="!data.hideColumns" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                 <div class="flex justify-start items-center">
                                     <div class="flex rounded-md overflow-hidden">
                                         <form @submit.prevent="updateThisReporte">
@@ -446,9 +494,11 @@ const handleCheckboxChange = (values) => {
                                     </div>
                                 </div>
                             </td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (index + 1) }}</td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3">{{ showSelect[clasegenerica.centro_costo_id]
-                            }}
+                            <td v-show="!data.hideColumns" class="whitespace-nowrap py-4 px-2 sm:py-3">{{ (index + 1) }}
+                            </td>
+                            <td v-show="!data.hideColumns" class="whitespace-nowrap py-4 px-2 sm:py-3">{{
+                                showSelect[clasegenerica.centro_costo_id]
+                                }}
                             </td>
                             <td v-show="can(['updateCorregido reporte'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                 {{ showUsers[clasegenerica.user_id] }}
@@ -458,10 +508,11 @@ const handleCheckboxChange = (values) => {
                             </td>
 
                             <td v-for="(titulo_slug, indi) in nombresTabla[1]" :key="indi"
+                                v-show="!(data.hideColumns && titulo_slug.substr(0, 1) === 'b')"
                                 class="whitespace-nowrap py-4 px-2 sm:py-3">
                                 <div v-if="titulo_slug.substr(0, 1) === 's'">{{
                                     (clasegenerica[titulo_slug.substr(2)])
-                                }}
+                                    }}
                                 </div>
                                 <div v-else-if="titulo_slug.substr(0, 1) === 'd'">
                                     {{ formatDate(clasegenerica[titulo_slug.substr(2)]) }}
@@ -502,15 +553,15 @@ const handleCheckboxChange = (values) => {
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3"></td>
                             <td v-show="can(['updateCorregido reporte'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
                             </td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3"></td>
+                            <td v-show="!(data.hideColumns)" class="whitespace-nowrap py-4 px-2 sm:py-3"></td>
                             <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 px-2 sm:py-3"></td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3"></td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3"></td>
-                            <td class="whitespace-nowrap py-4 px-2 sm:py-3"></td>
+                            <td v-show="!(data.hideColumns)" class="whitespace-nowrap py-4 px-2 sm:py-3"></td>
+                            <td v-show="!(data.hideColumns)" class="whitespace-nowrap py-4 px-2 sm:py-3"></td>
+                            <td v-show="!(data.hideColumns)" class="whitespace-nowrap py-4 px-2 sm:py-3"></td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3"> Total Mes</td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3"> Trabajadas: {{
                                 props.sumhoras_trabajadas
-                            }}
+                                }}
                             </td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3"> -</td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3">
@@ -551,14 +602,14 @@ const handleCheckboxChange = (values) => {
                     </tbody>
                 </table>
             </div>
-            <TextInput v-model="data.params.search4" type="number" min="2019" max="2099"
-                class="hidden sm:block w-22 rounded-lg" placeholder="año" />
             <div
                 class="flex justify-betwween items-center p-2 border-t border-gray-200 dark:border-gray-700 overflow-x-auto">
                 <Pagination :links="props.fromController" :filters="data.params" />
                 <span class="mx-8 my-auto hidden 2xl:block">Registros por página</span>
                 <span class="ml-8 my-auto block 2xl:hidden">Reg/pag</span>
                 <SelectInput v-if="filters !== null" v-model="data.params.perPage" :dataSet="data.dataSet" />
+                <TextInput v-model="data.params.search4" type="number" min="2019" max="2099"
+                    class="w-24 h-10 rounded-lg" placeholder="Año" />
             </div>
         </div>
         <section v-if="props.quincena != null"
