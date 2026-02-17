@@ -1,10 +1,10 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import {onMounted, reactive, watch, watchEffect} from 'vue';
+import { onMounted, reactive, watch, watchEffect } from 'vue';
 import pkg from 'lodash';
-import {Head, router, usePage, Link} from '@inertiajs/vue3';
-import {ChevronUpDownIcon, XMarkIcon, EyeIcon, DocumentIcon, TrashIcon} from '@heroicons/vue/24/solid';
-import {formatPesosCol, number_format} from '@/global.ts';
+import { Head, router, usePage, Link } from '@inertiajs/vue3';
+import { ChevronUpDownIcon, XMarkIcon, EyeIcon, DocumentIcon, TrashIcon } from '@heroicons/vue/24/solid';
+import { formatPesosCol, number_format } from '@/global.ts';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 import vSelect from "vue-select";
@@ -12,7 +12,7 @@ import "vue-select/dist/vue-select.css";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 
 
-const {_, debounce, pickBy} = pkg
+const { _, debounce, pickBy } = pkg
 const props = defineProps({
     elIDD: Number,
     title: String,
@@ -163,204 +163,244 @@ watchEffect(() => {
 })
 </script>
 <template>
+
     <Head :title="props.title"></Head>
     <AuthenticatedLayout>
-        <section class="text-gray-600 body-font text-center mx-auto w-full">
-            <div class="p-2">
-                <div class="flex flex-col text-center w-full mb-2 mx-12">
-                    <div class="px-4 sm:px-0 mx-auto">
-                        <div class="mb-1 overflow-hidden w-fit justify-center mt-4">
-                            <h1 class="sm:text-3xl text-2xl font-medium title-font mb-2 text-gray-900">
-                                Reporte de {{ props.title }}
-                            </h1>
-                            <p class="text-center">{{ props.UltimoReporteRealizado }}</p>
-
-                            <h3 v-if="data.hayUltimoreporte" v-show="data.params.quincena"> Seleccione quincena y
-                                mes </h3>
-
-                        </div>
+        <div class="py-4 px-2 sm:px-4 lg:px-6 h-[calc(100vh-64px)] flex flex-col">
+            <!-- Header & Action Bar -->
+            <div
+                class="mb-4 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <Link :href="route('CentroCostos.index')"
+                            class="text-amber-600 hover:text-amber-700 transition-colors">
+                            <span class="text-xs font-bold uppercase tracking-widest flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Volver
+                            </span>
+                        </Link>
                     </div>
+                    <h1 class="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+                        Reporte: <span
+                            class="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">{{
+                                props.title }}</span>
+                    </h1>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 font-medium italic mt-0.5">
+                        {{ props.UltimoReporteRealizado }}
+                    </p>
                 </div>
-                <div v-if="!data.hayUltimoreporte" class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                    <h1 class="text-2xl">No se encontró un reporte para este centro de costo</h1>
 
-                </div>
-                <div v-else class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                    <div class="flex justify-between p-2">
-                        <div class="flex text-center rounded-xl justify-center mx-auto">
-                            <div class="grid grid-cols-3 gap-4 px-2">
-                                <label for="dinero" class="text-lg -mb-2 font-bold">Dinero/Horas</label>
-                                <label for="quincena" class="text-lg -mb-2 font-bold">Quicena</label>
-                                <label for="fecha_ini" class="text-lg -mb-2 font-bold">Mes</label>
-                                <PrimaryButton
-                                    @click="AlternarPlata"
-                                    class="mx-auto text-center my-1 rounded-xl shadow-lg">
-                                    Alternar
-                                </PrimaryButton>
-                                <!--very usefull-->
-                                <v-select v-model="data.params.quincena"
-                                          label="texto"
-                                          :options="[
-                                              {value:1,texto:'Primera Quincena'},
-                                              {value:2,texto:'Segunda quincena'},
-                                              {value:3,texto:'Mes'}
-                                          ]"
-                                          class="text-lg"></v-select>
-
-                                <VueDatePicker month-picker auto-apply :teleport="true" id="fecha_ini"
-                                               type="date" v-model="data.params.fecha_ini" required
-                                               :placeholder="lang().placeholder.fecha_ini"
-                                               class="block w-full border-0 bg-transparent -mt-2"/>
-                            </div>
-                            <!--                        <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet" />-->
-                            <!--                        <DangerButton @click="data.deleteBulkOpen = true" v-show="data.selectedId.length != 0"-->
-                            <!--                            class="px-3 py-1.5" v-tooltip="lang().tooltip.delete_selected">-->
-                            <!--                            <TrashIcon class="w-5 h-5" />-->
-                            <!--                        </DangerButton>-->
-                        </div>
-                        <div class="flex gap-2">
-                            <!--                        <TextInput v-model="data.params.search" type="text" class="block w-1/2 rounded-lg"-->
-                            <!--                            :placeholder="lang().placeholder.search" />-->
-                        </div>
+                <!-- Unified Filter Bar -->
+                <div v-if="data.hayUltimoreporte"
+                    class="flex flex-wrap items-center gap-3 bg-gray-50 dark:bg-gray-900/50 p-2 rounded-xl border border-gray-100 dark:border-gray-700">
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 mb-1">Visualización</label>
+                        <PrimaryButton @click="AlternarPlata" class="h-9 px-4 rounded-lg text-xs shadow-none">
+                            <span v-if="data.params.plata" class="flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                                    <path fill-rule="evenodd"
+                                        d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                Modo Dinero
+                            </span>
+                            <span v-else class="flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                Modo Horas
+                            </span>
+                        </PrimaryButton>
                     </div>
-                    <div class="overflow-x-auto scrollbar-table">
-                        <table class="w-full">
-                            <thead class="text-sm border-t border-gray-200 dark:border-gray-700">
-                            <!-- <th class="px-2 py-4 sr-only">Action</th> -->
-                            <tr class="dark:bg-gray-900 text-left">
-                                <!--                                    v-on:click="order()"-->
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center col-span-4">
-                                    Empleado
-                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
-                                </th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
-                                    Horas Trabajadas
-                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
-                                </th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
-                                    Diurnas
-                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
-                                </th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
-                                    Nocturnas
-                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
-                                </th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
-                                    Extra diurnas
-                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
-                                </th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
-                                    Extra nocturnas
-                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
-                                </th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
-                                    Dominical diurno
-                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
-                                </th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
-                                    Dominical nocturno
-                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
-                                </th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
-                                    Dominical extra diurno
-                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
-                                </th>
-                                <th class="px-2 py-4 cursor-pointer hover:bg-sky-200 dark:hover:bg-sky-800 items-center">
-                                    Dominical extra nocturno
-                                    <ChevronUpDownIcon class="w-4 h-4 inline-flex"/>
-                                </th>
-                            </tr>
-                            <!--                            <tr class="dark:bg-gray-900 text-left">-->
-                            <!--                            </tr>-->
-                            </thead>
-                            <tbody>
-                            <tr v-for="(clasegenerica, index) in fromController.data" :key="index"
-                                class="border-t border-gray-200 dark:border-black hover:bg-indigo-100"
-                                :class="{ 'bg-gray-200 dark:bg-bg-gray-600': index % 2 === 0 }">
 
-                                <td class="whitespace-nowrap -py-4 px-2">{{ clasegenerica.usera }}</td>
-                                <td class="whitespace-nowrap -py-4 px-2">
-                                    {{ number_format(clasegenerica.horas_trabajadas, 0, 0) }}
-                                </td>
-                                <td class="whitespace-nowrap -py-4 px-2">{{
-                                        number_format(clasegenerica.diurnas, 0, 0)
-                                    }}
-                                </td>
-                                <td class="whitespace-nowrap -py-4 px-2">{{
-                                        number_format(clasegenerica.nocturnas, 0, 0)
-                                    }}
-                                </td>
-                                <td class="whitespace-nowrap -py-4 px-2">
-                                    {{ number_format(clasegenerica.extra_diurnas, 0, 0) }}
-                                </td>
-                                <td class="whitespace-nowrap -py-4 px-2">
-                                    {{ number_format(clasegenerica.extra_nocturnas, 0, 0) }}
-                                </td>
-                                <td class="whitespace-nowrap -py-4 px-2">
-                                    {{ number_format(clasegenerica.dominical_diurno, 0, 0) }}
-                                </td>
-                                <td class="whitespace-nowrap -py-4 px-2">
-                                    {{ number_format(clasegenerica.dominical_nocturno, 0, 0) }}
-                                </td>
-                                <td class="whitespace-nowrap -py-4 px-2">
-                                    {{ number_format(clasegenerica.dominical_extra_diurno, 0, 0) }}
-                                </td>
-                                <td class="whitespace-nowrap -py-4 px-2">
-                                    {{ number_format(clasegenerica.dominical_extra_nocturno, 0, 0) }}
-                                </td>
-                            </tr>
-                            <tr class="border border-amber-400 bg-white dark:border-gray-700 hover:bg-gray-300 hover:dark:bg-gray-900/20">
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3 font-bold"> Total</td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-<!--                                    {{ isNaN(data.thoras_trabajadas) ? 0 : data.thoras_trabajadas }}-->
-                                   {{data.thoras_trabajadas}}
-                                </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{ data.tdiurnas }}
-<!--                                    {{ isNaN(data.tdiurnas) ? 0 : data.tdiurnas }}-->
-                                </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{data.tnocturnas }}
-<!--                                    {{ isNaN(data.tnocturnas) ? 0 : data.tnocturnas }}-->
-                                </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{data.textra_diurnas }}
-<!--                                    {{ isNaN(data.textra_diurnas) ? 0 : data.textra_diurnas }}-->
-                                </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{data.textra_nocturnas }}
-<!--                                    {{ isNaN(data.textra_nocturnas) ? 0 : data.textra_nocturnas }}-->
-                                </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{data.tdominical_diurno }}
-<!--                                    {{ isNaN(data.tdominical_diurno) ? 0 : data.tdominical_diurno }}-->
-                                </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{data.tdominical_nocturno }}
-<!--                                    {{ isNaN(data.tdominical_nocturno) ? 0 : data.tdominical_nocturno }}-->
-                                </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{data.tdominical_extra_diurno }}
-<!--                                    {{ isNaN(data.tdominical_extra_diurno) ? 0 : data.tdominical_extra_diurno }}-->
-                                </td>
-                                <td class="whitespace-nowrap py-4 px-2 sm:py-3">
-                                    {{data.tdominical_extra_nocturno }}
-<!--                                    {{ isNaN(data.tdominical_extra_nocturno) ? 0 : data.tdominical_extra_nocturno }}-->
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                    <div class="h-8 w-px bg-gray-200 dark:bg-gray-700 hidden md:block self-end mb-1"></div>
+
+                    <div class="flex flex-col min-w-[140px]">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 mb-1">Quincena</label>
+                        <v-select v-model="data.params.quincena" :clearable="false"
+                            :options="[{ value: 1, label: '1ra Quincena' }, { value: 2, label: '2da Quincena' }, { value: 3, label: 'Todo el Mes' }]"
+                            class="custom-table-select"></v-select>
                     </div>
-                    <!--                <div class="flex justify-betwween items-center p-2 border-t border-gray-200 dark:border-gray-700">-->
-                    <!--                    <Pagination :links="props.fromController" :filters="data.params" />-->
-                    <!--                </div>-->
+
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 mb-1">Mes Seleccionado</label>
+                        <VueDatePicker month-picker auto-apply :teleport="true" v-model="data.params.fecha_ini"
+                            class="custom-datepicker-table" />
+                    </div>
                 </div>
             </div>
-            <Link :href="route('CentroCostos.index')" class="block self-center items-center mx-auto my-6">
-                <PrimaryButton class="rounded-xl">
-                    {{ lang().button.back }}
-                </PrimaryButton>
-            </Link>
-        </section>
+
+            <!-- Table Container -->
+            <div v-if="!data.hayUltimoreporte"
+                class="flex-1 flex flex-col items-center justify-center bg-white dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                <div class="p-8 text-center">
+                    <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-full inline-block mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9.172 17.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">No se encontró información</h2>
+                    <p class="text-gray-500 max-w-xs mx-auto mt-2">No hay reportes generados para este centro de costo
+                        en el periodo seleccionado.</p>
+                </div>
+            </div>
+
+            <div v-else
+                class="flex-1 bg-white dark:bg-gray-800 rounded-2xl shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 flex flex-col overflow-hidden">
+                <div class="flex-1 overflow-auto scrollbar-table relative">
+                    <table class="w-full text-left border-collapse min-w-[1200px]">
+                        <thead class="sticky top-0 z-20 bg-gray-50 dark:bg-gray-900 shadow-sm">
+                            <tr
+                                class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-gray-700">
+                                <th
+                                    class="px-4 py-4 sticky left-0 z-30 bg-gray-50 dark:bg-gray-900 min-w-[200px] border-r border-gray-100 dark:border-gray-700">
+                                    Empleado</th>
+                                <th class="px-4 py-4 text-center">Total</th>
+                                <th class="px-4 py-4">Diurnas</th>
+                                <th class="px-4 py-4">Nocturnas</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Ext. Diurnas</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Ext. Nocturnas</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Dom. Diurno</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Dom. Nocturno</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Dom. Ext. D.</th>
+                                <th class="px-4 py-4 whitespace-nowrap">Dom. Ext. N.</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
+                            <tr v-for="(clasegenerica, index) in fromController.data" :key="index"
+                                class="hover:bg-amber-50/20 dark:hover:bg-amber-900/5 transition-colors group">
+                                <td
+                                    class="px-4 py-3 sticky left-0 z-10 bg-white dark:bg-gray-800 border-r border-gray-50 dark:border-gray-700 shadow-[2px_0_5px_rgba(0,0,0,0.02)]">
+                                    <span
+                                        class="text-xs font-bold text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors uppercase">
+                                        {{ clasegenerica.usera }}
+                                    </span>
+                                </td>
+                                <td
+                                    class="px-4 py-3 text-center text-xs font-black text-amber-600 dark:text-amber-400 bg-amber-50/10">
+                                    {{ number_format(clasegenerica.horas_trabajadas, 0, 0) }}
+                                </td>
+                                <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300">{{
+                                    number_format(clasegenerica.diurnas, 0, 0) }}</td>
+                                <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300">{{
+                                    number_format(clasegenerica.nocturnas, 0, 0) }}</td>
+                                <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300">{{
+                                    number_format(clasegenerica.extra_diurnas, 0, 0) }}</td>
+                                <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300">{{
+                                    number_format(clasegenerica.extra_nocturnas, 0, 0) }}</td>
+                                <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300">{{
+                                    number_format(clasegenerica.dominical_diurno, 0, 0) }}</td>
+                                <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300">{{
+                                    number_format(clasegenerica.dominical_nocturno, 0, 0) }}</td>
+                                <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300">{{
+                                    number_format(clasegenerica.dominical_extra_diurno, 0, 0) }}</td>
+                                <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300">{{
+                                    number_format(clasegenerica.dominical_extra_nocturno, 0, 0) }}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="sticky bottom-0 z-20">
+                            <tr
+                                class="bg-amber-100 dark:bg-amber-900 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] border-t border-amber-200 dark:border-amber-800">
+                                <td
+                                    class="px-4 py-4 sticky left-0 z-30 bg-amber-100 dark:bg-amber-900 text-xs font-black text-amber-900 dark:text-amber-100 border-r border-amber-200 dark:border-amber-800 uppercase">
+                                    TOTALES DEL PERIODO
+                                </td>
+                                <td
+                                    class="px-4 py-4 text-center text-xs font-black text-amber-900 dark:text-amber-100 border-r border-amber-200 dark:border-amber-800">
+                                    {{ data.thoras_trabajadas }}</td>
+                                <td
+                                    class="px-4 py-4 text-xs font-black text-amber-900 dark:text-amber-100 border-r border-amber-100 dark:border-amber-800">
+                                    {{ data.tdiurnas }}</td>
+                                <td
+                                    class="px-4 py-4 text-xs font-black text-amber-900 dark:text-amber-100 border-r border-amber-100 dark:border-amber-800">
+                                    {{ data.tnocturnas }}</td>
+                                <td
+                                    class="px-4 py-4 text-xs font-black text-amber-900 dark:text-amber-100 border-r border-amber-100 dark:border-amber-800">
+                                    {{ data.textra_diurnas }}</td>
+                                <td
+                                    class="px-4 py-4 text-xs font-black text-amber-900 dark:text-amber-100 border-r border-amber-100 dark:border-amber-800">
+                                    {{ data.textra_nocturnas }}</td>
+                                <td
+                                    class="px-4 py-4 text-xs font-black text-amber-900 dark:text-amber-100 border-r border-amber-100 dark:border-amber-800">
+                                    {{ data.tdominical_diurno }}</td>
+                                <td
+                                    class="px-4 py-4 text-xs font-black text-amber-900 dark:text-amber-100 border-r border-amber-100 dark:border-amber-800">
+                                    {{ data.tdominical_nocturno }}</td>
+                                <td
+                                    class="px-4 py-4 text-xs font-black text-amber-900 dark:text-amber-100 border-r border-amber-100 dark:border-amber-800">
+                                    {{ data.tdominical_extra_diurno }}</td>
+                                <td class="px-4 py-4 text-xs font-black text-amber-900 dark:text-amber-100">{{
+                                    data.tdominical_extra_nocturno }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
     </AuthenticatedLayout>
 </template>
+
+<style>
+.scrollbar-table::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+.scrollbar-table::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-table::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+.dark .scrollbar-table::-webkit-scrollbar-thumb {
+    background: #334155;
+}
+
+.custom-table-select .vs__dropdown-toggle {
+    border-radius: 0.5rem;
+    height: 2.25rem;
+    border-color: #e5e7eb;
+    background: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.dark .custom-table-select .vs__dropdown-toggle {
+    background: #111827;
+    border-color: #374151;
+}
+
+.dark .custom-table-select .vs__selected {
+    color: #f9fafb;
+}
+
+.dark .custom-table-select .vs__actions svg {
+    fill: #9ca3af;
+}
+
+.custom-datepicker-table {
+    --dp-font-size: 0.75rem;
+    --dp-border-radius: 0.5rem;
+    --dp-input-padding: 6px 12px;
+}
+
+.dark .custom-datepicker-table {
+    --dp-background-color: #111827;
+    --dp-text-color: #f9fafb;
+    --dp-border-color: #374151;
+}
+</style>
