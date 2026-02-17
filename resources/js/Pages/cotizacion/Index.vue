@@ -56,6 +56,7 @@ const data = reactive({
         field: props.filters.field,
         order: props.filters.order,
         perPage: props.perPage,
+        columnFilters: props.filters.columnFilters || {},
     },
     ocultar1: false,
     cotizaciono: null,
@@ -228,17 +229,17 @@ watch(() => data.ocultar1, (newX) => {
 })
 
 const tipoSelectable = [
-    {label: 'Matenimiento', value: 'Preventivo'},
-    {label: 'Servicio', value: 'Correctivo'},
-    {label: 'Proyecto', value: 'Predictivo'},
+    {label: 'Mantenimiento', value: 'Mantenimiento'},
+    {label: 'Servicio', value: 'Servicio'},
+    {label: 'Proyecto', value: 'Proyecto'},
 ]
 </script>
 
 <template>
     <Head :title="props.title"/>
     <AuthenticatedLayout>
-        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" class="capitalize text-xl font-bold"/>
-        <div class="space-y-4">
+        <!-- <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" class="capitalize text-xl font-bold"/> -->
+        <div class="space-y-2 my-2">
             <!-- {{ props.fromController.data[2] }} -->
             <div class="px-4 sm:px-0">
                 <div class="rounded-lg overflow-hidden w-fit">
@@ -249,7 +250,7 @@ const tipoSelectable = [
                     <Link :href="route('peusuario.index')" class="inline-flex">
                         <PrimaryButton class="rounded-none"
                                        v-if="can(['create cotizacion'])">
-                                Empresas y Clientes a
+                                Empresas y Clientes
                         </PrimaryButton>
                     </Link>
 
@@ -304,20 +305,14 @@ const tipoSelectable = [
                             <TrashIcon class="w-5 h-5" />
                         </DangerButton>
                     </div>
-                    <div class="flex space-x-3">
+                    <div class="flex">
                         <p class="hidden 2xl:flex text-xs 2xl:text-sm mt-1 px-1 w-48">Solo Números</p>
                         <checkbox v-if="props.numberPermissions > 1" v-model="data.params.search4"
-                                  class="hidden 2xl:flex p-2 mx-12 mt-3"/>
-                        <p class="hidden 2xl:flex text-sm mt-1 px-1">Ocultar porcentajes</p>
-                        <checkbox v-if="props.numberPermissions > 9" v-model="data.ocultar1"
-                                  class="hidden 2xl:flex p-2 mx-12 mt-3"/>
-                        
-                        <v-select v-model="data.params.search2" :options="props.losSelect['zonas']" label="label"
-                                  class="w-full mt-1 h-8">
-                        </v-select>
-                        
-                        <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"
-                                   class="hidden xl:flex xs:w-32 md:w-44 rounded-xl h-9 mt-1" placeholder="Número"/>
+                                  class="hidden 2xl:flex p-2 mr-6 ml-2 mt-3"/>
+                        <p class="hidden 2xl:flex text-sm mt-1 ml-6 px-1">Ocultar porcentajes</p>
+                        <checkbox v-model="data.ocultar1"
+                                  class="hidden 2xl:flex p-2 mr-4 ml-6 mt-3"/>
+                        <p class="text-sm mt-3 ml-5 mr-0 px-2">Tipo</p>
                         <v-select v-model="data.params.search6" :options="tipoSelectable" label="label"
                                   class="min-w-44 mt-1 h-8">
                         </v-select>
@@ -329,16 +324,16 @@ const tipoSelectable = [
                     </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
-                    <table v-if="props.total > 0" class="w-full">
-                        <thead class="uppercase text-sm border-t border-gray-200 dark:border-gray-700">
+                    <table class="w-full">
+                        <thead class="uppercase text-[14px] border-t border-gray-200 dark:border-gray-700 sticky top-0 z-10 bg-white dark:bg-gray-800">
                         <tr class="dark:bg-gray-900/50 text-left">
-                            <th class="px-2 py-4 text-center">
+                            <th class="px-2 py-4 text-center bg-white dark:bg-gray-800">
                                 <Checkbox v-model:checked="data.multipleSelect" @change="selectAll"/>
                             </th>
-                            <th v-if="numberPermissions > 1" class="px-2 py-4">Accion</th>
+                            <th v-if="numberPermissions > 1" class="px-2 py-4 bg-white dark:bg-gray-800">Accion</th>
 
-                            <th class="px-2 py-4 text-center">#</th>
-                            <th v-for="titulo in titulos" class="px-2 py-4 cursor-pointer"
+                            <th class="px-2 py-4 text-center bg-white dark:bg-gray-800">#</th>
+                            <th v-for="titulo in titulos" class="px-2 py-4 cursor-pointer bg-white dark:bg-gray-800"
                                 v-on:click="order(titulo['order'])">
                                 <div class="flex justify-between items-center">
                                     <span>{{ lang().label[titulo['label']] }}</span>
@@ -347,7 +342,7 @@ const tipoSelectable = [
                             </th>
                             <th
                                 v-on:click="order('centro_costo_id')"
-                                class="px-2 py-4 cursor-pointer"
+                                class="px-2 py-4 cursor-pointer bg-white dark:bg-gray-800"
                             >
                                 <div class="flex justify-between items-center">
                                     <span>Tiene Centro de costo</span>
@@ -361,8 +356,30 @@ const tipoSelectable = [
                             </th> -->
 
                         </tr>
+                        <!-- Filter Row -->
+                        <tr class="bg-gray-50 dark:bg-gray-900/30 border-t border-gray-200 dark:border-gray-700">
+                            <th class="px-2 py-2 bg-gray-50 dark:bg-gray-900/30"></th> <!-- checkbox column -->
+                            <th v-if="numberPermissions > 1" class="px-2 py-2 bg-gray-50 dark:bg-gray-900/30"></th> <!-- action column -->
+                            <th class="px-2 py-2 bg-gray-50 dark:bg-gray-900/30"></th> <!-- # column -->
+                            <th v-for="titulo in titulos" :key="'filter-' + titulo.order" class="px-2 py-2 bg-gray-50 dark:bg-gray-900/30">
+                                <TextInput 
+                                    v-model="data.params.columnFilters[titulo.order]"
+                                    type="text"
+                                    class="w-full text-xs h-8"
+                                    :placeholder="`Filtrar...`"
+                                />
+                            </th>
+                            <th class="px-2 py-2 bg-gray-50 dark:bg-gray-900/30">
+                                <!-- <TextInput 
+                                    v-model="data.params.columnFilters['centro_costo_id']"
+                                    type="text"
+                                    class="w-full text-xs h-8"
+                                    placeholder="Filtrar..."
+                                /> -->
+                            </th>
+                        </tr>
                         </thead>
-                        <tbody>
+                        <tbody v-if="props.total > 0">
                         <tr v-for="(claseFromController, indexu) in props.fromController.data" :key="indexu"
                             class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">
@@ -405,7 +422,11 @@ const tipoSelectable = [
                                     {{ claseFromController['tipo'] }} 
                                     {{ claseFromController['tipo_de_mantenimiento'] }} 
                                 </span>
-                                <span v-if="titulo['type'] === 'text'" class="whitespace-nowrap min-w-72"> {{
+                                <span v-if="titulo['type'] === 'text' && titulo['order'] === 'descripcion_cot'" 
+                                      class="text-xs max-w-sm bg-gray-200 block break-words whitespace-normal leading-tight">
+                                    {{ claseFromController[titulo['order']] }}
+                                </span>
+                                <span v-else-if="titulo['type'] === 'text'" class="whitespace-nowrap min-w-72"> {{
                                         claseFromController[titulo['order']]
                                     }} </span>
                                 <span v-if="titulo['type'] === 'string'" class="whitespace-nowrap"> {{
@@ -415,7 +436,7 @@ const tipoSelectable = [
                                         number_format(claseFromController[titulo['order']], 0, false)
                                     }} </span>
                                 <span v-if="titulo['type'] === 'porcentaje'" class="whitespace-nowrap"> {{
-                                        number_format(claseFromController[titulo['order']], 2, false)
+                                        number_format(claseFromController[titulo['order']]*100, 2, false)
                                     }} %</span>
                                 <span v-if="titulo['type'] === 'dinero'" class="whitespace-nowrap"> {{
                                         number_format(claseFromController[titulo['order']], 0, true)
@@ -443,8 +464,11 @@ const tipoSelectable = [
                             </td>
                         </tr>
                         </tbody>
+                        <div v-else class="flex justify-center items-center">
+                            <h2 class="text-2xl pl-20 my-8">Sin Registros</h2>
+                        </div>
                     </table>
-                    <h2 v-else class="text-center text-xl my-8">Sin Registros</h2>
+                    
                 </div>
                 <div v-if="props.total > 0"
                      class="flex justify-between items-center p-2 border-t border-gray-200 dark:border-gray-700">

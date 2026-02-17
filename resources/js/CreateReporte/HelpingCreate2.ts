@@ -302,11 +302,15 @@ export function RestarAlmuarzo(form, data) {
             }
         }
 
+        const fueNocturno = descontados.some(c => c.includes('nocturna'));
+
         if (descontados.length) {
-            form.almuerzo += ' ' + descontados.join(' ');
+            form.almuerzo += fueNocturno ? ' nocturnas' : ' diurnas';
         }
+    }else{
+
+        form.almuerzo = 'No'
     }
-    form.almuerzo = 'No'
 }
 
 

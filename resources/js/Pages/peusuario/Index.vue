@@ -100,10 +100,9 @@ const titulos = [
     <Head :title="props.title" />
 
     <AuthenticatedLayout>
-        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" class="capitalize text-xl font-bold"/>
         <div class="space-y-4">
             <!-- {{ props.fromController.data[2] }} -->
-            <div class="px-4 sm:px-0">
+            <div class="px-4 sm:px-0 mt-4">
                 <div class="rounded-lg overflow-hidden w-fit">
                     <PrimaryButton class="rounded-none" @click="data.createOpen = true"
                         v-if="can(['create peusuario','isadministrativo'])">

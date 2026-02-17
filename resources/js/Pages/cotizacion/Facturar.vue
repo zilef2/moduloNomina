@@ -39,7 +39,9 @@ onMounted(() => {
 
 watchEffect(() => {
     if (props.show) {
+        let hoy = new Date()
         form.errors = {}
+        form.fecha_factura = hoy.toISOString().split('T')[0]
     }
 })
 
@@ -54,7 +56,6 @@ const update3 = () => {
         onFinish: () => null,
     })
 }
-// const sexos = [ { label: 'Masculino', value: 'Masculino' }, { label: 'Femenino', value: 'Femenino' } ];
 
 </script>
 
@@ -63,7 +64,8 @@ const update3 = () => {
         <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl2'">
             <form class="p-6" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    Facturar {{ props.title }} : {{cotizaciona.numero_cot}}
+                    Facturar {{ props.title }} : 
+                    <span class="text-blue-600 text-lg">{{cotizaciona.numero_cot}}</span>
                 </h2>
                 <h3 class="text my-4 font-medium text-gray-900 dark:text-gray-100">
                     Recuerde que al facturar, el centro de costo quedará inactivo.

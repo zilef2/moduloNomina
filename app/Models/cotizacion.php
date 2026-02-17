@@ -41,7 +41,7 @@ class cotizacion extends Model {
         'iva',
         'total',
         
-        'persona_que_realiza_la_pe',
+        'persona_que_realiza_la_pe', //Prealiza
         'cliente',
         'persona_que_solicita_la_propuesta_economica',
         'orden_de_compra',
@@ -66,6 +66,9 @@ class cotizacion extends Model {
 
     public function zona(): BelongsTo {
         return $this->belongsTo(zona::class, 'zona_id');
+    }
+    public function prealiza(): BelongsTo {
+        return $this->belongsTo(user::class, 'persona_que_realiza_la_pe');
     }
 
 
