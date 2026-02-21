@@ -48,6 +48,7 @@ class SolicitudViaticoController extends Controller
 		$solicitud_viaticos = $this->Filtros($request)
 			->withSum('viaticos', 'gasto') // Totalsolicitado
 			->withSum('consignacion', 'valor_consig') // TotalConsignado
+			->withSum('consignacion', 'valor_legalizado') // TotalLegalizado
 			->with(['user:id,name']) // Userino
 			->paginate($perPage)
 			->withQueryString();
@@ -120,6 +121,15 @@ class SolicitudViaticoController extends Controller
 		if ($request->filled('col_fecha')) {
 			$solicitud_viaticos->whereDate('Fechasol', $request->col_fecha);
 		}
+		if ($request->filled('col_centro')) {
+			$centro = $request->col_centro;
+			$centroId = is_array($centro) ? ($centro['id'] ?? null) : (is_numeric($centro) ? $centro : null);
+			if ($centroId) {
+				$solicitud_viaticos->whereHas('viaticos', function ($query) use ($centroId) {
+					$query->where('centro_costo_id', $centroId);
+				});
+			}
+		}
 		// ──────────────────────────────────────────────────────────────────────
 
 		if ($request->filled('field') && $request->filled('order')) {
@@ -147,7 +157,7 @@ class SolicitudViaticoController extends Controller
 			'empleado'
 			]);
 		})->get()->toArray();
-		$centroSelect = CentroCosto::all('id', 'nombre as name')->toArray();
+		$centroSelect = CentroCosto::all('id', 'nombre as name', 'descripcion')->toArray();
 		array_unshift($Empleados, [
 			"name" => "Seleccione una persona",
 			'id' => 0
@@ -257,23 +267,31 @@ class SolicitudViaticoController extends Controller
 	{
 	} //fin store
 
-	//! STORE - UPDATE - DELETE
-	//! STORE functions
-
 	public function update(Request $request, $id): RedirectResponse
 	{
 		zzloggingcrud::zilefLogTrace();
 
-		DB::beginTransaction();
-		$viatico = solicitud_viatico::findOrFail($id);
-		$original = $viatico->getOriginal(); // Valores antes de la actualización
-		$viatico->update($request->all());
+		$solicitud = solicitud_viatico::findOrFail($id);
 
-		zzloggingcrud::zilefLogUpdate($this, $viatico, $original);
+		// Validación: No permitir edición si ya tiene consignaciones
+		if ($solicitud->consignacion()->exists()) {
+			return back()->with('error', 'No se puede editar una solicitud que ya tiene consignaciones realizadas.');
+		}
+
+		// Validación: No permitir edición si el saldo es 0
+		if ($solicitud->saldo_sol <= 0) {
+			return back()->with('error', 'No se puede editar una solicitud cuyo saldo ya está en cero.');
+		}
+
+		DB::beginTransaction();
+		$original = $solicitud->getOriginal(); // Valores antes de la actualización
+		$solicitud->update($request->all());
+
+		zzloggingcrud::zilefLogUpdate($this, $solicitud, $original);
 
 		DB::commit();
 
-		return back()->with('success', __('app.label.updated_successfully2', ['nombre' => $viatico->nombre]));
+		return back()->with('success', __('app.label.updated_successfully2', ['nombre' => $solicitud->Solicitante]));
 	}
 
 	public function EnviaralJefe(Request $request, ?User $myuser, $cuantosViaticos, $total): string
@@ -363,6 +381,7 @@ class SolicitudViaticoController extends Controller
 			if ($valorconsig === 0) {
 				continue;
 			}
+
 
 			$consignarViatico = consignarViatico::create([
 				'valor_consig' => $valorconsig,

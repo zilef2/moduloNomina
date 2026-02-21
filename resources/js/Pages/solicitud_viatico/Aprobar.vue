@@ -5,10 +5,10 @@ import Modal from '@/Components/Modal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import {useForm} from '@inertiajs/vue3';
-import {computed, watch, ref, nextTick, onMounted, reactive, watchEffect} from 'vue';
+import { useForm, router } from '@inertiajs/vue3';
+import { computed, watch, ref, nextTick, onMounted, reactive, watchEffect } from 'vue';
 import "vue-select/dist/vue-select.css";
-import {formatPesosCol, dd} from '@/global.ts';
+import { formatPesosCol, dd } from '@/global.ts';
 
 
 const props = defineProps({
@@ -59,7 +59,7 @@ watchEffect(() => {
         if (data.AutoActualizarse) data.AutoActualizarse = false
 
         nextTick()
-        if(props.solicitud_viaticoa){
+        if (props.solicitud_viaticoa) {
             props.solicitud_viaticoa?.Losviaticos.forEach(() => {
                 data.mensaje_saldo_individual.push('');
             })
@@ -99,6 +99,23 @@ const onValorConsignadoChange = (index, value, saldo) => {
     else data.mensaje_saldo_individual[index] = ''
 }
 
+const consignarTodo = (index, saldo) => {
+    if (!Array.isArray(form.valor_consig)) {
+        form.valor_consig = [];
+    }
+    form.valor_consig[index] = String(saldo);
+    onValorConsignadoChange(index, String(saldo), saldo);
+    calcularTotalConsignado();
+};
+
+const consignarGlobal = () => {
+    props.solicitud_viaticoa?.Losviaticos.forEach((viaticu, index) => {
+        if (viaticu.saldo > 0) {
+            consignarTodo(index, viaticu.saldo);
+        }
+    });
+};
+
 
 // <!--<editor-fold desc="Validaciones y update">-->
 const consigEstaMal = (newVal) => {
@@ -113,7 +130,7 @@ watch(() => form.valor_consig, (newVal) => {
     if (newVal) {
         consigEstaMal(newVal)
     }
-}, {immediate: true, deep: true});
+}, { immediate: true, deep: true });
 
 
 const update = () => {
@@ -127,6 +144,7 @@ const update = () => {
             onSuccess: () => {
                 emit("close")
                 form.reset()
+                window.location.reload()
             },
             onError: () => {
                 alert('Hay campos incompletos o erroneos')
@@ -166,36 +184,45 @@ const formattedValor = {
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     Aprobar {{ props.title }}
                 </h2>
-                <p class="xs:text-sm md:text-md mb-8">
-                    Al proceder con la acción de "Guardar", el monto consignado no deberia superar el siguiente monto:
-                    <b
-                        class="text-blue-700">{{ formatPesosCol(props.solicitud_viaticoa.saldo_sol) }} </b>
-                </p>
+                <div class="flex justify-between items-center mb-4">
+                    <p class="xs:text-sm md:text-md">
+                        Monto máximo a consignar:
+                        <b class="text-blue-700">{{ formatPesosCol(props.solicitud_viaticoa.saldo_sol) }} </b>
+                    </p>
+                    <button type="button" @click="consignarGlobal"
+                        class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 rounded-lg border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 transition-colors">
+                        Consignar todos los saldos
+                    </button>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div v-for="(viaticu, index) in props.solicitud_viaticoa?.Losviaticos" :key="index">
-                        <InputLabel for="valor_consigid"
-                                    :value="viaticu.userino 
-                                    + '. Descripción: ' + viaticu.descripcion "
-                        />
-                        <InputLabel for="valor_consigid2"
-                                    :value="'Saldo: ' + formatPesosCol(viaticu.saldo)"/>
-                        
+                    <div v-for="(viaticu, index) in props.solicitud_viaticoa?.Losviaticos" :key="index"
+                        class="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/20">
+                        <InputLabel :value="viaticu.userino" class="text-indigo-600 dark:text-indigo-400 font-bold" />
+                        <p class="text-[10px] text-gray-500 uppercase font-medium mb-2">{{ viaticu.descripcion }}</p>
+
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-bold text-gray-400 uppercase">Saldo disponible:</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-black text-gray-700 dark:text-gray-300 italic">{{
+                                    formatPesosCol(viaticu.saldo) }}</span>
+                                <button v-if="viaticu.saldo > 0" type="button"
+                                    @click="consignarTodo(index, viaticu.saldo)"
+                                    class="text-[9px] font-black uppercase text-blue-600 hover:underline">
+                                    Consignar todo
+                                </button>
+                            </div>
+                        </div>
+
                         <TextInput :id="`valor_consig_${index}`"
-                                   :class="{'bg-gray-300' : viaticu.saldo === 0 }"
-                                   :disabled="viaticu.saldo === 0"
-                                   :modelValue="formattedValor.get(index)"
-                                   @update:modelValue="(value) => {
-                                        formattedValor.set(index, value);
-                                        onValorConsignadoChange(index, value,viaticu.saldo); // tu función
-                                    }"
-                                   placeholder="valor a consignar" type="text"
-                                   class="my-2 block w-full"
-                                   required
-                        />
-                        
-                        <InputError :message="data.mensaje_saldo_individual[index]" class="mt-2"/>
-                        <InputError :message="form.errors.valor_consig" class="mt-2"/>
-                        <InputError :message="data.mensajeError_saldo" class="mt-2"/>
+                            :class="{ 'bg-gray-200 opacity-50': viaticu.saldo === 0 }" :disabled="viaticu.saldo === 0"
+                            :modelValue="formattedValor.get(index)" @update:modelValue="(value) => {
+                                formattedValor.set(index, value);
+                                onValorConsignadoChange(index, value, viaticu.saldo);
+                            }" placeholder="0" type="text" class="my-1 block w-full text-right font-black" required />
+                        <InputError :message="data.mensaje_saldo_individual[index]" class="mt-2" />
+                        <InputError :message="form.errors.valor_consig" class="mt-2" />
+                        <InputError :message="data.mensajeError_saldo" class="mt-2" />
                     </div>
 
                 </div>
@@ -210,7 +237,7 @@ const formattedValor = {
                         {{ lang().button.close }}
                     </SecondaryButton>
                     <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="ml-3"
-                                   @click="update">
+                        @click="update">
                         {{ form.processing ? lang().button.save + '...' : lang().button.save }}
                     </PrimaryButton>
                 </div>

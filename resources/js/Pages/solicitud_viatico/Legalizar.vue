@@ -5,10 +5,10 @@ import Modal from '@/Components/Modal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import {useForm} from '@inertiajs/vue3';
-import {watch, ref, nextTick, onMounted, reactive, watchEffect} from 'vue';
+import { useForm, router } from '@inertiajs/vue3';
+import { watch, ref, nextTick, onMounted, reactive, watchEffect } from 'vue';
 import "vue-select/dist/vue-select.css";
-import {formatPesosCol, DateTime_to_html} from '@/global.ts';
+import { formatPesosCol, DateTime_to_html } from '@/global.ts';
 
 
 const props = defineProps({
@@ -60,13 +60,13 @@ const validarValor = () => {
 
 // watch(() => form.valor_legalizacion, (newVal) => {});
 watch(() => props.show, () => {
-        if (props.show) {
-            ensureArraySize();
-        } else {
-            data.AutoActualizarse = true //avisa que hay que se muestra otro viatico, por tanto, hay que actualizar el form
-        }
-    },
-    {immediate: true, deep: true}
+    if (props.show) {
+        ensureArraySize();
+    } else {
+        data.AutoActualizarse = true //avisa que hay que se muestra otro viatico, por tanto, hay que actualizar el form
+    }
+},
+    { immediate: true, deep: true }
 );
 
 watchEffect(() => {
@@ -84,10 +84,10 @@ watchEffect(() => {
 })
 
 watch(() => props.show, (newVal) => {
-        if (newVal) {
-            form.valor_legalizacion = props.cotizaciona?.valor_legalizacion ?? 0
-        }
+    if (newVal) {
+        form.valor_legalizacion = props.cotizaciona?.valor_legalizacion ?? 0
     }
+}
 );
 
 
@@ -241,6 +241,7 @@ const update = () => {
             onSuccess: () => {
                 emit("close")
                 form.reset()
+                window.location.reload()
             },
             onError: () => {
                 alert('Hay campos incompletos o erroneos')
@@ -256,81 +257,64 @@ const update = () => {
 
 <template>
     <section class="space-y-6">
-        <Modal :maxWidth="'xl8'" :show="props.show" @close="emit('close')">
+        <Modal :maxWidth="'xl7'" :show="props.show" @close="emit('close')">
             <form class="px-4 py-6" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Legalizar {{ props.title }}</h2>
                 <p class="texto-legal">Por favor, digite el valor que se ha legalizado con documentos u otras
                     pruebas</p>
                 <div v-for="(valor, index) in data.consignaciones" :key="index"
-                     class="grid xs:grid-cols-1 lg:grid-cols-6 xs:gap-2 lg:gap-2 2xl:gap-16 my-6">
+                    class="grid xs:grid-cols-1 lg:grid-cols-6 xs:gap-2 lg:gap-2 2xl:gap-16 my-6">
 
                     <div class="lg:col-span-2 mt-2">
                         <InputLabel for="valor_legalizacionid"
-                                    :value="lang().label['valor_legalizacion'] + valoconsignacion(valor)"
-                                    class=""
-                        />
+                            :value="lang().label['valor_legalizacion'] + valoconsignacion(valor)" class="" />
                         <!--                        a {{valor.valor_legalizacion === valor.valor}}-->
                         <!--                        b {{ valor.valor}}-->
                         <!--                        c {{valor.valor_legalizacion }}-->
-                        <TextInput
-                            v-if="valor.valor_legalizacion === valor.valor"
-                            :id="`valor_legalizacion_${index}`"
-                            v-model="valor.valor_legalizacion"
-                            placeholder="Valor legalización" type="text"
-                            class="my-2 block w-full bg-gray-300" disabled
-                        />
-                        <TextInput v-else
-                                   :id="`valor_legalizacion_${index}`"
-                                   :modelValue="formattedValor.get(index)"
-                                   @update:modelValue="(value) => formattedValor.set(index, value)"
-                                   :error="form.errors[`valor_legalizacion.${index}`]"
-                                   placeholder="Valor legalización" type="text"
-                                   class="my-2 block w-full"
-                        />
+                        <TextInput v-if="valor.valor_legalizacion === valor.valor" :id="`valor_legalizacion_${index}`"
+                            v-model="valor.valor_legalizacion" placeholder="Valor legalización" type="text"
+                            class="my-2 block w-full bg-gray-300" disabled />
+                        <TextInput v-else :id="`valor_legalizacion_${index}`" :modelValue="formattedValor.get(index)"
+                            @update:modelValue="(value) => formattedValor.set(index, value)"
+                            :error="form.errors[`valor_legalizacion.${index}`]" placeholder="Valor legalización"
+                            type="text" class="my-2 block w-full" />
 
-                        <InputError :message="form.errors.valor_legalizacion" class="mt-2"/>
+                        <InputError :message="form.errors.valor_legalizacion" class="mt-2" />
                     </div>
                     <div class="lg:col-span-2 mt-2">
                         <InputLabel for="descripcion_legalizacionid"
-                                    :value="lang().label['descripcion_legalizacion'] + ' (opcional)'"/>
+                            :value="lang().label['descripcion_legalizacion'] + ' (opcional)'" />
                         <!--                        <TextInput -->
                         <!--                                :id="`descripcion_legalizacionid_${index}`"-->
                         <!--                            v-model="form.descripcion_legalizacion['index']"-->
                         <!--                                   placeholder="descripcion_legalizacion" type="text" required-->
                         <!--                                   class="my-2 block w-full"-->
 
-                        <input :disabled="!!valor.valor_legalizacion"
-                               type="text"
-                               :id="`descripcion_legalizacionid_${index}`"
-                               :value="getDescripcion(index)"
-                               @input="(event) => setDescripcion(index, event.target.value)"
-                               class="my-2 w-full rounded-md shadow-sm placeholder:text-gray-400 placeholder:dark:text-gray-400/50 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary dark:focus:border-primary focus:ring-primary dark:focus:ring-primary"
-                        />
+                        <input :disabled="!!valor.valor_legalizacion" type="text"
+                            :id="`descripcion_legalizacionid_${index}`" :value="getDescripcion(index)"
+                            @input="(event) => setDescripcion(index, event.target.value)"
+                            class="my-2 w-full rounded-md shadow-sm placeholder:text-gray-400 placeholder:dark:text-gray-400/50 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary dark:focus:border-primary focus:ring-primary dark:focus:ring-primary" />
                     </div>
                     <div class="lg:col-span-2 mt-2">
-                        <InputLabel for="fecha_legalizacion"
-                                    :value="lang().label['fecha_legalizacion']"/>
+                        <InputLabel for="fecha_legalizacion" :value="lang().label['fecha_legalizacion']" />
 
-                        <input :disabled="!!valor.valor_legalizacion"
-                               type="datetime-local"
-                               :id="`fecha_legalizacionid_${index}`"
-                               :value="getFecha(index)"
-                               @input="(event) => setFecha(index, event.target.value)"
-                               class="my-2 w-full rounded-md shadow-sm placeholder:text-gray-400 placeholder:dark:text-gray-400/50 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary dark:focus:border-primary focus:ring-primary dark:focus:ring-primary"
-                        />
+                        <input :disabled="!!valor.valor_legalizacion" type="datetime-local"
+                            :id="`fecha_legalizacionid_${index}`" :value="getFecha(index)"
+                            @input="(event) => setFecha(index, event.target.value)"
+                            class="my-2 w-full rounded-md shadow-sm placeholder:text-gray-400 placeholder:dark:text-gray-400/50 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary dark:focus:border-primary focus:ring-primary dark:focus:ring-primary" />
                     </div>
 
                 </div>
-                <InputError :message="data.Mensaje_consignacion_legalizacion" class="mt-2"/>
-                <InputError :message="data.Mensaje_fecha_legalizacion" class="mt-2"/>
+                <InputError :message="data.Mensaje_consignacion_legalizacion" class="mt-2" />
+                <InputError :message="data.Mensaje_fecha_legalizacion" class="mt-2" />
 
                 <div class=" my-8 flex justify-end">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{
-                            lang().button.close
+                        lang().button.close
                         }}
                     </SecondaryButton>
                     <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="ml-3"
-                                   @click="update">
+                        @click="update">
                         {{ form.processing ? lang().button.save + '...' : lang().button.save }}
                     </PrimaryButton>
                 </div>

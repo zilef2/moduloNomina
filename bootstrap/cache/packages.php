@@ -163,4 +163,15 @@
       0 => 'Tightenco\\Ziggy\\ZiggyServiceProvider',
     ),
   ),
+  'torann/geoip' => 
+  array (
+    'aliases' => 
+    array (
+      'GeoIP' => 'Torann\\GeoIP\\Facades\\GeoIP',
+    ),
+    'providers' => 
+    array (
+      0 => 'Torann\\GeoIP\\GeoIPServiceProvider',
+    ),
+  ),
 );

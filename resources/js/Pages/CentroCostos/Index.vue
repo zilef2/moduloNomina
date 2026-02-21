@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SelectInput from '@/Components/SelectInput.vue';
-import { reactive, watch } from 'vue';
+import { reactive, watch, computed, ref } from 'vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import pkg from 'lodash';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
@@ -12,7 +12,6 @@ import Create from '@/Pages/CentroCostos/Create.vue';
 import Edit from '@/Pages/CentroCostos/Edit.vue';
 import Delete from '@/Pages/CentroCostos/Delete.vue';
 
-import Pagination from '@/Components/Pagination.vue';
 import { ChevronUpDownIcon, DocumentIcon, EyeIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/solid';
 import { formatPesosCol } from '@/global.ts';
 
@@ -53,8 +52,123 @@ const data = reactive({
     deleteOpen: false,
     deleteBulkOpen: false,
     generico: null,
-    dataSet: usePage().props.app.perpage,
+dataSet: usePage().props.app.perpage,
 })
+
+// Todos los datos cargados del servidor
+const allData = ref(props.fromController.data || [])
+
+// Página actual para paginación frontend
+const currentPage = ref(1)
+
+// Datos filtrados localmente
+const filteredData = computed(() => {
+    let result = [...allData.value];
+    
+    // Filtro por nombre o descripción
+    if (data.params.search) {
+        const search = data.params.search.toLowerCase();
+        result = result.filter(item => 
+            (item.nombre || '').toLowerCase().includes(search) ||
+            (item.descripcion || '').toLowerCase().includes(search)
+        );
+    }
+    
+    // Filtro por supervisor
+    if (data.params.searchSCC) {
+        const searchSCC = data.params.searchSCC.toLowerCase();
+        result = result.filter(item => {
+            if (item.supervi && item.supervi.length) {
+                return item.supervi.some(sup => (sup || '').toLowerCase().includes(searchSCC));
+            }
+            return false;
+        });
+    }
+    
+    // Filtro por zona
+    if (data.params.search3) {
+        const search3 = data.params.search3;
+        result = result.filter(item => 
+            (item.Zouna || '') === search3 ||
+            (item.zona_id === search3.id)
+        );
+    }
+    
+    // Filtros por columna
+    if (data.params.columnFilters) {
+        Object.entries(data.params.columnFilters).forEach(([key, value]) => {
+            if (value) {
+                const filterValue = value.toLowerCase();
+                result = result.filter(item => {
+                    const itemValue = item[key];
+                    if (typeof itemValue === 'string') {
+                        return itemValue.toLowerCase().includes(filterValue);
+                    }
+                    return String(itemValue).toLowerCase().includes(filterValue);
+                });
+            }
+        });
+    }
+    
+    return result;
+});
+
+// Datos paginados
+const paginatedData = computed(() => {
+    const perPage = data.params.perPage || 10;
+    const start = (currentPage.value - 1) * perPage;
+    const end = start + perPage;
+    return filteredData.value.slice(start, end);
+});
+
+// Total de datos filtrados
+const totalFiltered = computed(() => filteredData.value.length);
+
+// Número total de páginas
+const totalPages = computed(() => {
+    return Math.ceil(totalFiltered.value / (data.params.perPage || 10));
+});
+
+// Resetear a página 1 cuando cambian los filtros (excepto perPage)
+watch(() => data.params, (newVal, oldVal) => {
+    if (oldVal && newVal.perPage !== oldVal.perPage) {
+        return;
+    }
+    currentPage.value = 1;
+}, { deep: true });
+
+// Funciones de paginación
+const nextPage = () => {
+    if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+    }
+};
+
+const prevPage = () => {
+    if (currentPage.value > 1) {
+        currentPage.value--;
+    }
+};
+
+// Recargar datos desde el servidor (solo cuando se necesita)
+const reloadData = () => {
+    let params = pickBy(data.params)
+    params.perPage = 99999;
+    router.get(route("CentroCostos.index"), params, {
+        replace: true,
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: (page) => {
+            allData.value = page.props.fromController.data || [];
+            currentPage.value = 1;
+        }
+    })
+};
+
+// Observar cambios en el perPage para recargar datos
+// watch(() => data.params.perPage, () => {
+//     reloadData();
+// });
 
 const order = (field) => {
     if (field !== undefined) {
@@ -85,10 +199,10 @@ const nombreMes = fechaActual.toLocaleDateString('es-ES', opciones);
             <!-- Breadcrumbs / Header Section -->
             <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                    <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+<h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                         {{ props.title }} <span
                             class="text-amber-500 text-sm font-medium ml-2 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 rounded-full">{{
-                            fromController.total }} Total</span>
+                            totalFiltered }} Total</span>
                     </h1>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         Gestión y control de presupuesto por centros de costo operativos.
@@ -169,8 +283,8 @@ const nombreMes = fechaActual.toLocaleDateString('es-ES', opciones);
                                 </th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
-                            <tr v-for="(clasegenerica, index) in fromController.data" :key="index"
+<tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
+                            <tr v-for="(clasegenerica, index) in paginatedData" :key="index"
                                 class="group hover:bg-amber-50/30 dark:hover:bg-amber-900/5 transition-colors">
 
                                 <!-- Actions Column -->
@@ -199,10 +313,10 @@ const nombreMes = fechaActual.toLocaleDateString('es-ES', opciones);
                                             <TrashIcon class="w-4 h-4" />
                                         </button>
                                     </div>
-                                </td>
+</td>
 
                                 <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 font-medium">#{{
-                                    fromController.from + index }}</td>
+                                    (currentPage - 1) * data.params.perPage + index + 1 }}</td>
 
                                 <td class="px-4 py-4">
                                     <div class="text-sm font-bold text-gray-900 dark:text-white">{{ clasegenerica.nombre
@@ -260,17 +374,47 @@ const nombreMes = fechaActual.toLocaleDateString('es-ES', opciones);
                             </tr>
                         </tbody>
                     </table>
-                </div>
+</div>
 
                 <!-- Pagination Section -->
                 <div
                     class="p-4 bg-gray-50/50 dark:bg-gray-800/80 border-t border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Mostrando registros del <span class="font-semibold">{{ fromController.from }}</span> al <span
-                            class="font-semibold">{{ fromController.to }}</span> de un total de <span
-                            class="font-semibold">{{ fromController.total }}</span>
+                        Mostrando registros del <span class="font-semibold">{{ (currentPage - 1) * data.params.perPage + 1 }}</span> al <span
+                            class="font-semibold">{{ Math.min(currentPage * data.params.perPage, totalFiltered) }}</span> de un total de <span
+                            class="font-semibold">{{ totalFiltered }}</span>
                     </p>
-                    <Pagination :links="props.fromController" :filters="data.params" />
+                    <div class="flex items-center gap-2">
+                        <button 
+                            @click="currentPage = 1" 
+                            :disabled="currentPage === 1"
+                            class="px-2 py-1 text-xs rounded border dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                            ««
+                        </button>
+                        <button 
+                            @click="prevPage" 
+                            :disabled="currentPage === 1"
+                            class="px-2 py-1 text-xs rounded border dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                            «
+                        </button>
+                        
+                        <span class="text-sm px-2">
+                            Página {{ currentPage }} de {{ totalPages }}
+                        </span>
+                        
+                        <button 
+                            @click="nextPage" 
+                            :disabled="currentPage === totalPages"
+                            class="px-2 py-1 text-xs rounded border dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                            »
+                        </button>
+                        <button 
+                            @click="currentPage = totalPages" 
+                            :disabled="currentPage === totalPages"
+                            class="px-2 py-1 text-xs rounded border dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                            »»
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

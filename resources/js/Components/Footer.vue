@@ -1,14 +1,12 @@
 <script setup>
 
-import {useForm} from "@inertiajs/vue3";
-import {onMounted, reactive} from "vue";
+import { useForm } from "@inertiajs/vue3";
+import { onMounted, reactive } from "vue";
 
 const data = reactive({
-    thecity: String,
+    // Ya no necesitamos guardar la ciudad localmente
 })
-const form = useForm({
-    ciudad: String,
-});
+const form = useForm({});
 
 const props = defineProps({
     userid: Number
@@ -16,52 +14,46 @@ const props = defineProps({
 
 
 const enviarCiudad = () => {
-    form.ciudad = data.thecity
-    if (data.thecity) {
-        form.post(route('guardarCiudad'), {
-            preserveScroll: true,
-            onFinish: () => {
-            }
-        })
-    } else {
-        console.error('sin ciudad:');
-    }
+    // El backend ahora detecta la ciudad automáticamente usando geoip
+    form.post(route('guardarCiudad'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Guardar el timestamp del último registro exitoso
+            localStorage.setItem('lastCityCheck', Date.now().toString());
+            console.log('Ubicación actualizada correctamente.');
+        },
+        onError: (err) => console.error('Error al guardar ubicación:', err)
+    })
 };
-onMounted(async () => {
-    data.thecity = ''
-    //aquivieneel nuevo gps
-    const apiKey = '16fa63102b054e11a4554f7c9ab9ab41';
-    const latitude = 6.2442;
-    const longitude = -75.5812;
 
+onMounted(() => {
+    // Solo registrar en el dashboard (opcional, según tu código anterior)
     if (route().current('dashboard')) {
-        fetch(`https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${apiKey}`)
-            .then(response => response.json())
-            .then(datau => {
-                const city = datau.results[0].components.city || datau.results[0].components.town;
-                console.log("City calculated:", city); // Resultado: Medellín
-                data.thecity = city
-                enviarCiudad()
-            }).catch(error => console.error('Errorsini:',
-            error));
+        const lastCheck = localStorage.getItem('lastCityCheck');
+        const twelveHours = 12 * 60 * 60 * 1;
+        const now = Date.now();
+
+        if (!lastCheck || (now - parseInt(lastCheck)) > twelveHours) {
+            enviarCiudad();
+        } else {
+            const hoursLeft = Math.round((twelveHours - (now - parseInt(lastCheck))) / (60 * 60 * 1000));
+            console.log(`Ubicación ya registrada. Próximo intento en aprox. ${hoursLeft}h`);
+        }
     }
 });
 </script>
 <template>
-    <footer
-        class="text-gray-500 dark:text-gray-300 sticky top-full">
+    <footer class="text-gray-500 dark:text-gray-300 sticky top-full">
         <div class="flex items-center justify-center sm:justify-end w-full xs:py-1 sm:py-4 lg:py-12 px-6 sm:px-12">
             <p class="text-center">
-                <a href=""
-                   class="font-bold text-primary">
+                <a href="" class="font-bold text-primary">
                     <!--                    {{ $page.props.app.name }}-->
                 </a> ©️ {{ new Date().getFullYear() }}
-                <a href="" target="_blank"
-                   class="font-bold text-primary">Ec Ingenieria Electrica S.A.S.</a>
+                <a href="" target="_blank" class="font-bold text-primary">Ec Ingenieria Electrica S.A.S.</a>
             </p>
-<!--            <div v-if="route().current('dashboard')">-->
-<!--                <p class="text-center mx-4"> Repontandose desde <b>{{ data?.thecity }}</b></p>-->
-<!--            </div>-->
+            <!--            <div v-if="route().current('dashboard')">-->
+            <!--                <p class="text-center mx-4"> Repontandose desde <b>{{ data?.thecity }}</b></p>-->
+            <!--            </div>-->
         </div>
     </footer>
 </template>

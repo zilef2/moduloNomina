@@ -32,15 +32,7 @@ class DashboardController extends Controller
 
 	public function __construct()
 	{
-
 		$this->middleware(function ($request, $next) {
-
-			
-//			$permissions = Myhelp::AuthU()->roles->pluck('name')[0];
-//			$this->numberPermissions = MyModels::getPermissionToNumber($permissions);
-
-			
-//			$nombre = str_replace('Controller', '', class_basename(static::class)); // Obtener el nombre del controlador sin "Controller"
 			$this->numberPermissions = MyModels::getPermissionToNumber(
 				Myhelp::EscribirEnLog($this, class_basename(static::class))
 			);
@@ -64,7 +56,7 @@ class DashboardController extends Controller
 		else { // si no eres empleado
 			$reportes = Reporte::count();
 
-			
+
 			$centros = $this->numberPermissions === 3
 				? $Authuser->ArrayCentrosID()
 				: null;
@@ -80,7 +72,7 @@ class DashboardController extends Controller
 				'Mes pasado' => (clone $baseQuery)
 				->whereValido(1)
 				->whereBetween('fecha_ini', [$inicioMesPasado, $finMesPasado])
-				->count(),			];
+				->count(), ];
 			// Semana actual + anterior			
 			for ($i = 0; $i <= 1; $i++) {
 				$inicio = $now->copy()->subWeeks($i)->startOfWeek();
@@ -91,7 +83,8 @@ class DashboardController extends Controller
 				$ultimos5dias[$label] = (clone $baseQuery)
 					->whereValido(1)
 					->whereBetween('fecha_ini', [$inicio, $fin])
-					->count();			}
+					->count();
+			}
 			// === NO VALIDOS (5 semanas) ===			
 			$diasNovalidos = [];
 			for ($i = 0; $i < 5; $i++) {
@@ -108,7 +101,8 @@ class DashboardController extends Controller
 				$diasNovalidos[$label] = (clone $baseQuery)
 					->whereIn('valido', [0, 2])
 					->whereBetween('fecha_ini', [$inicio, $fin])
-					->count();			}
+					->count();
+			}
 
 
 			$usuariosConRol = User::whereHas('roles', function ($q) {
@@ -183,8 +177,19 @@ class DashboardController extends Controller
 		$user = Myhelp::AuthU();
 		if (Schema::hasTable('ubicacion')) {
 			$ipAddress = $r->ip();
+
+			try {
+				$location = geoip()->getLocation($ipAddress);
+				$ciudad = $location->city ?? 'Desconocida';
+			}
+			catch (\Exception $e) {
+				$ciudad = 'Error detectando';
+				\Illuminate\Support\Facades\Log::channel('solosuper')
+					->error("Error detectando ciudad (GeoIP) | IP: $ipAddress | Usuario: " . ($user->name ?? 'Desconocido') . " | Error: " . $e->getMessage());
+			}
+
 			DB::table('ubicacion')->insert([
-				'ubicacion' => $r->ciudad,
+				'ubicacion' => $ciudad,
 				'valido' => 1,
 				'userid' => $user->id,
 				'name' => $user->name,

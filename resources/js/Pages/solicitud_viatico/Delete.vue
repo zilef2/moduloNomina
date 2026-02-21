@@ -2,7 +2,7 @@
 import DangerButton from '@/Components/DangerButton.vue';
 import Modal from '@/Components/Modal.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
-import {useForm} from '@inertiajs/vue3';
+import { useForm, router } from '@inertiajs/vue3';
 
 const props = defineProps({
     show: Boolean,
@@ -20,6 +20,7 @@ const destory = () => {
         onSuccess: () => {
             emit("close")
             form.reset()
+            router.reload()
         },
         onError: () => null,
         onFinish: () => null,

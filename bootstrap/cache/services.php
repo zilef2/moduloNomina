@@ -43,10 +43,11 @@
     39 => 'Spatie\\SignalAwareCommand\\SignalAwareCommandServiceProvider',
     40 => 'Stevebauman\\Location\\LocationServiceProvider',
     41 => 'Tightenco\\Ziggy\\ZiggyServiceProvider',
-    42 => 'App\\Providers\\AppServiceProvider',
-    43 => 'App\\Providers\\AuthServiceProvider',
-    44 => 'App\\Providers\\EventServiceProvider',
-    45 => 'App\\Providers\\RouteServiceProvider',
+    42 => 'Torann\\GeoIP\\GeoIPServiceProvider',
+    43 => 'App\\Providers\\AppServiceProvider',
+    44 => 'App\\Providers\\AuthServiceProvider',
+    45 => 'App\\Providers\\EventServiceProvider',
+    46 => 'App\\Providers\\RouteServiceProvider',
   ),
   'eager' => 
   array (
@@ -77,10 +78,11 @@
     24 => 'Spatie\\SignalAwareCommand\\SignalAwareCommandServiceProvider',
     25 => 'Stevebauman\\Location\\LocationServiceProvider',
     26 => 'Tightenco\\Ziggy\\ZiggyServiceProvider',
-    27 => 'App\\Providers\\AppServiceProvider',
-    28 => 'App\\Providers\\AuthServiceProvider',
-    29 => 'App\\Providers\\EventServiceProvider',
-    30 => 'App\\Providers\\RouteServiceProvider',
+    27 => 'Torann\\GeoIP\\GeoIPServiceProvider',
+    28 => 'App\\Providers\\AppServiceProvider',
+    29 => 'App\\Providers\\AuthServiceProvider',
+    30 => 'App\\Providers\\EventServiceProvider',
+    31 => 'App\\Providers\\RouteServiceProvider',
   ),
   'deferred' => 
   array (
