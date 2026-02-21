@@ -56,6 +56,8 @@ return array(
     'Spatie\\Browsershot\\' => array($vendorDir . '/spatie/browsershot/src'),
     'Spatie\\Backup\\' => array($vendorDir . '/spatie/laravel-backup/src'),
     'Spatie\\Backtrace\\' => array($vendorDir . '/spatie/backtrace/src'),
+    'Rappasoft\\LaravelAuthenticationLog\\Database\\Factories\\' => array($vendorDir . '/rappasoft/laravel-authentication-log/database/factories'),
+    'Rappasoft\\LaravelAuthenticationLog\\' => array($vendorDir . '/rappasoft/laravel-authentication-log/src'),
     'Ramsey\\Uuid\\' => array($vendorDir . '/ramsey/uuid/src'),
     'Ramsey\\Collection\\' => array($vendorDir . '/ramsey/collection/src'),
     'Psy\\' => array($vendorDir . '/psy/psysh/src'),

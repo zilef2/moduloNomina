@@ -26,6 +26,7 @@
     "opcodesio/log-viewer": "^3",
     "phpoffice/phpspreadsheet": "^1.30",
     "psr/http-message": "^2.0",
+    "rappasoft/laravel-authentication-log": "^5.0",
     "spatie/laravel-backup": "^8.2",
     "spatie/laravel-ignition": "*",
     "spatie/laravel-pdf": "^1.5",

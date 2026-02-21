@@ -141,8 +141,21 @@ class DashboardController extends Controller
 			$chartValues = $topCentros->pluck('mano_obra_estimada');
 		} //fin, si no eres empleado
 
+
+		$logs = auth()->user()
+			->authenticationLogs()
+			->orderByDesc('login_at')
+			->take(25)
+			->get();
+
+		$activeSessions = auth()->user()
+			->authenticationLogs()->whereNull('logout_at')
+			->where('login_successful', true)
+			->get();
+
 		return Inertia::render('Dashboard', [
-			'versionZilef' => '25.6.2',
+			'logs' => $logs,
+			'activeSessions' => $activeSessions,
 			'users' => User::count(),
 			'roles' => Role::count(),
 			'permissions' => Permission::count(),

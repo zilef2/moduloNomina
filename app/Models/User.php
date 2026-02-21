@@ -14,7 +14,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-
+use Rappasoft\LaravelAuthenticationLog\Traits\AuthenticationLoggable;
+use Rappasoft\LaravelAuthenticationLog\Models\AuthenticationLog;
 /**
  * @method static \Illuminate\Database\Eloquent\Collection all()
  * @method static Model|static find($id)
@@ -49,10 +50,11 @@ use Spatie\Permission\Traits\HasRoles;
  * @property mixed $roles
  * @property mixed $name
  */
-class User extends Authenticatable {
-	
-	use HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes;
-	
+class User extends Authenticatable
+{
+
+	use HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes, AuthenticationLoggable;
+
 	/**
 	 * The attributes that are mass assignable.
 	 *
@@ -74,6 +76,10 @@ class User extends Authenticatable {
 		//12 abril
 		'numero_contrato',
 	];
+	public function authenticationLogs(){
+		 return $this->morphMany(AuthenticationLog::class , 'authenticatable');	
+	}
+
 	/**
 	 * * The attributes that should be hidden for serialization. * *
 	 *
@@ -82,39 +88,45 @@ class User extends Authenticatable {
 	protected $hidden = ['password', 'remember_token'];
 	protected $appends = ['cc'];
 	private mixed $salario;
-	
-	public static function UsersWithRol($rol) {
+
+	public static function UsersWithRol($rol)
+	{
 		return User::whereHas('roles', function ($query) use ($rol) {
 			return $query->where('name', $rol);
 		});
 	}
-	
-	public static function UsersWithManyRols($ArrayRoles) {
+
+	public static function UsersWithManyRols($ArrayRoles)
+	{
 		return User::whereHas('roles', function ($query) use ($ArrayRoles) {
 			return $query->whereIn('name', $ArrayRoles);
 		});
 	}
-	
-	public static function usuariosConCentros(): array {
+
+	public static function usuariosConCentros(): array
+	{
 		return self::with('centros:id')->get()->mapWithKeys(function ($user) {
 			return [$user->id => $user->centros->pluck('id')->toArray()];
 		})->toArray();
 	}
-	
-	public static function jefe() {
+
+	public static function jefe()
+	{
 		return static::where('name', 'Carlos Daniel Anaya Barrios')->first();
 	}
-	
-	public function getccAttribute(): string {
+
+	public function getccAttribute(): string
+	{
 		return is_string($this->ArraycentroName()) ? $this->ArraycentroName() : implode(',', $this->ArraycentroName());
-		
+
 	}
-	
-	public function ArraycentroName($numeroDeCentros = 0): array|string {
+
+	public function ArraycentroName($numeroDeCentros = 0): array |string
+	{
 		if (!$this->centros->isEmpty()) {
 			if ($numeroDeCentros != 0) {
 				$arrayNombres = [];
-				for ($i = 0; $i < $numeroDeCentros; $i ++) {
+				for ($i = 0; $i < $numeroDeCentros; $i++) {
 					$tempCentro = $this->centros->skip($i)->first();
 					if (isset($tempCentro)) {
 						$arrayNombres[] = $this->centros->skip($i)->first()->nombre;
@@ -134,97 +146,112 @@ class User extends Authenticatable {
 		else {
 			$result = 'Sin centros';
 		}
-		
+
 		return $result;
 	}
-	
+
 	//fin permissions
-	
-	public function getFechaIngreso() {
+
+	public function getFechaIngreso()
+	{
 		return date('d-m-Y', strtotime($this->attributes['fecha_ingreso']));
 	}
-	
-	public function getCreatedAtAttribute() {
+
+	public function getCreatedAtAttribute()
+	{
 		return date('d-m-Y H:i', strtotime($this->attributes['created_at']));
 	}
-	
-	public function getUpdatedAtAttribute() {
+
+	public function getUpdatedAtAttribute()
+	{
 		return date('d-m-Y H:i', strtotime($this->attributes['updated_at']));
 	}
-	
-	public function getEmailVerifiedAtAttribute() {
+
+	public function getEmailVerifiedAtAttribute()
+	{
 		return $this->attributes['email_verified_at'] == null ? null : date('d-m-Y H:i', strtotime($this->attributes['email_verified_at']));
 	}
-	
-	public function getPermissionArray() {
+
+	public function getPermissionArray()
+	{
 		return $this->getAllPermissions()->mapWithKeys(function ($pr) {
 			return [$pr['name'] => true];
 		});
 	}
-	
-	public function reportes(): HasMany {
+
+	public function reportes(): HasMany
+	{
 		return $this->hasMany('App\Models\Reporte');
 	}
-	
-	public function cargo(): BelongsTo {
+
+	public function cargo(): BelongsTo
+	{
 		return $this->belongsTo(Cargo::class);
 	}
-	
-	public function ArrayCentrosID(): array {
+
+	public function ArrayCentrosID(): array
+	{
 		$result = [];
 		if (!$this->centros->isEmpty()) {
 			foreach ($this->centros as $centro) {
 				$result[] = $centro->id;
 			}
 		}
-		
+
 		return $result;
 	}
-	
-	public function NotMyCentros(int $numberPermissions): array {
+
+	public function NotMyCentros(int $numberPermissions): array
+	{
 		if ($numberPermissions > 9) {
 			return [];
 		}
 		$misCentrosIDs = $this->centros->pluck('id')->toArray();
-		
+
 		return CentroCosto::whereNotIn('id', $misCentrosIDs)->pluck('id')->toArray();
 	}
-	
-	public function TieneEsteCentro($centroid) {
+
+	public function TieneEsteCentro($centroid)
+	{
 		$susCentros = $this->centros()->pluck('centro_costos.id')->toArray();
 		$result = in_array($centroid, $susCentros);
-		
+
 		return $result;
 	}
-	
-	public function centros(): BelongsToMany {
-		return $this->belongsToMany(CentroCosto::class, 'centro_user');
+
+	public function centros(): BelongsToMany
+	{
+		return $this->belongsToMany(CentroCosto::class , 'centro_user');
 	}
-	
+
 	//        public function resetPassword($id) {
 	//        $user = User::findOrFail($id);
 	//        $user->resetPasswordToCedula();
 	//
 	//        return response()->json(['message' => 'Contraseña de '.$user->name.' restablecida correctamente']);
 	//    }
-	
-	public function resetPasswordToCedula(): void {
+
+	public function resetPasswordToCedula(): void
+	{
 		$this->password = \Illuminate\Support\Facades\Hash::make($this->cedula . '*');
 		$this->save();
 	}
-	
-	public function preferredLocale(): string {
+
+	public function preferredLocale(): string
+	{
 		// Esto forzará que TODAS las notificaciones enviadas a este usuario
 		// se rendericen usando la carpeta de traducción 'es'.
 		return 'es';
 	}
-	
-	public function scopeUsersWithRol($query, $roles) {
+
+	public function scopeUsersWithRol($query, $roles)
+	{
 		$roles = (array)$roles;
-		
+
 		return $query->whereHas('roles', function ($q) use ($roles) {
 			$q->whereIn('name', $roles)->where('guard_name', 'web'); // 👈 clave
 		});
 	}
-	
+
+
 }

@@ -98,6 +98,13 @@
       0 => 'Pest\\Laravel\\PestServiceProvider',
     ),
   ),
+  'rappasoft/laravel-authentication-log' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Rappasoft\\LaravelAuthenticationLog\\LaravelAuthenticationLogServiceProvider',
+    ),
+  ),
   'spatie/laravel-backup' => 
   array (
     'providers' => 

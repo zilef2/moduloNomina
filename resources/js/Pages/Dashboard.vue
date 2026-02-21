@@ -19,13 +19,14 @@ const props = defineProps({
     diasNovalidos: Object,
     trabajadoresHoy: Object,
     centrosHoy: Object,
-    versionZilef: String,
     numberPermissions: Number,
     userid: Number,
     conteoPorRol: Object,
     topCentros: Object,
     chartLabels: Object,
     chartValues: Object,
+    logs: Object,
+    activeSessions: Object,
 })
 let width;
 
@@ -167,6 +168,70 @@ const charityArray = [
             </div>
         </div>
 
+        <div v-if="props.numberPermissions > 9" class="max-w-6xl mx-auto mt-10 px-6">
+            <div
+                class="bg-white dark:bg-slate-900 shadow-xl rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+
+                <!-- Header -->
+                <div
+                    class="px-6 py-5 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">
+                        Registro de Sesiones
+                    </h2>
+
+                    <span
+                        class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
+                        Activas: {{ props.activeSessions?.length ?? 0 }}
+                    </span>
+                </div>
+
+                <div class="p-6 space-y-8">
+
+                    <!-- Historial -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                            Historial
+                        </h3>
+
+                        <div v-if="props.logs?.length"
+                            class="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 overflow-auto max-h-72 text-sm text-slate-700 dark:text-slate-300">
+                            <pre class="whitespace-pre-wrap break-words">
+                            {{ JSON.stringify(props.logs, null, 2) }}
+                    </pre>
+                        </div>
+
+                        <div v-else
+                            class="bg-slate-50 dark:bg-slate-800 rounded-xl p-8 text-center border border-dashed border-slate-300 dark:border-slate-600">
+                            <p class="text-slate-500 dark:text-slate-400 text-sm">
+                                No hay registros de inicio de sesión todavía.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Sesiones activas -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                            Sesiones Activas
+                        </h3>
+
+                        <div v-if="props.activeSessions?.length"
+                            class="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 overflow-auto max-h-72 text-sm text-slate-700 dark:text-slate-300">
+                            <pre class="whitespace-pre-wrap break-words">
+                            {{ JSON.stringify(props.activeSessions, null, 2) }}
+                    </pre>
+                        </div>
+
+                        <div v-else
+                            class="bg-slate-50 dark:bg-slate-800 rounded-xl p-8 text-center border border-dashed border-slate-300 dark:border-slate-600">
+                            <p class="text-slate-500 dark:text-slate-400 text-sm">
+                                No hay sesiones activas en este momento.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
 
     </AuthenticatedLayout>
 </template>

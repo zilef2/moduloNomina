@@ -30,7 +30,7 @@ onMounted(() => {
     // Solo registrar en el dashboard (opcional, según tu código anterior)
     if (route().current('dashboard')) {
         const lastCheck = localStorage.getItem('lastCityCheck');
-        const twelveHours = 12 * 60 * 60 * 1;
+        const twelveHours = 12 * 60 * 60 * 1000; //12 horas
         const now = Date.now();
 
         if (!lastCheck || (now - parseInt(lastCheck)) > twelveHours) {
