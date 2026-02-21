@@ -32,6 +32,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use ZipStream\OperationMode;
+use App\Models\Parametro;
 
 class UserController extends Controller {
 	
@@ -48,6 +49,7 @@ class UserController extends Controller {
 		$this->cacheMapear = 5; //minutos
 		
 		$this->roles = Role::all();
+
 		$this->middleware(function ($request, $next) {
 			$permissions = Myhelp::AuthU()->roles->pluck('name')[0];
 			$this->numberPermissions = MyModels::getPermissionToNumber($permissions);
@@ -580,24 +582,6 @@ class UserController extends Controller {
 		$NumReporteSigo['fin'] = $fin;
 		
 		return $NumReporteSigo;
-	}
-	
-	public function downloadsigo(Request $request): BinaryFileResponse|RedirectResponse {
-		$NumeroDiasFestivos = (int)($request->NumeroDiasFestivos);
-		$NumReporteSigo = $this->SeeNumbersOfReporters($request);
-		
-		$ini = $NumReporteSigo['ini'];
-		$fin = $NumReporteSigo['fin'];
-		
-		if ($NumReporteSigo['NumReportesSigo'] > 0) {
-			$quincena = $NumReporteSigo['quincena'];
-			$year = $NumReporteSigo['year'];
-			$month = $NumReporteSigo['month'];
-			
-			return Excel::download(new SiigoExport($ini, $fin, $NumeroDiasFestivos), 'Siigo ' . $year . 'Quincena' . $quincena . 'DelMes' . $month . '.xlsx');
-		}
-		
-		return redirect()->route('user.uploadexcel')->with('warning', 'El numero de reportes en esa quincena es 0. ' . 'formato de la fecha: Año - Mes - dia. ' . 'fecha inicial: ' . $ini->format('Y-m-d') . ' - ' . 'fecha final: ' . $fin->format('Y-m-d'));
 	}
 	
 	public function showReporte($id) {

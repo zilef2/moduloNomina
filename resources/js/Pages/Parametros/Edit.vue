@@ -17,19 +17,34 @@ import '@vuepic/vue-datepicker/dist/main.css'
 const props = defineProps({
     show: Boolean,
     title: String,
-
     parametros: Object,
+    numberPermissions: Number,
 })
+
 const emit = defineEmits(["close"]);
 const form = useForm({
+    anio: props.parametros?.anio,
     s_Dias_gabela: props.parametros?.s_Dias_gabela,
     subsidio_de_transporte_dia: props.parametros?.subsidio_de_transporte_dia,
     salario_minimo: props.parametros?.salario_minimo,
     HORAS_NECESARIAS_SEMANA: props.parametros?.HORAS_NECESARIAS_SEMANA,
     HORAS_ORDINARIAS: props.parametros?.HORAS_ORDINARIAS,
+    HORAS_DEL_MES_30_DIAS: props.parametros?.HORAS_DEL_MES_30_DIAS,
+    MAXIMO_HORAS_SEMANALES: props.parametros?.MAXIMO_HORAS_SEMANALES,
+    minimo_material: props.parametros?.minimo_material,
+
+    porcentaje_diurno: props.parametros?.porcentaje_diurno,
+    porcentaje_nocturno: props.parametros?.porcentaje_nocturno,
+    porcentaje_extra_diurno: props.parametros?.porcentaje_extra_diurno,
+    porcentaje_extra_nocturno: props.parametros?.porcentaje_extra_nocturno,
+    porcentaje_dominical_diurno: props.parametros?.porcentaje_dominical_diurno,
+    porcentaje_dominical_nocturno: props.parametros?.porcentaje_dominical_nocturno,
+    porcentaje_dominical_extra_diurno: props.parametros?.porcentaje_dominical_extra_diurno,
+    porcentaje_dominical_extra_nocturno: props.parametros?.porcentaje_dominical_extra_nocturno,
 });
 
 const update = () => {
+    if (!form.minimo_material) form.minimo_material = 0
     form.put(route('Parametros.update', props.parametros?.id), {
         preserveScroll: true,
         onSuccess: () => {
@@ -38,24 +53,32 @@ const update = () => {
         },
         onError: () => {
             alert(JSON.stringify(form.errors, null, 4));
-            // null
         },
-        onFinish: () => null,
     })
 }
 
 
 watchEffect(() => {
-
     if (props.show) {
         form.errors = {}
-        // form.fecha_fin = props.Paramatro?.fecha_fin
-        // form.fecha_fin = TransformTdate(props.Paramatro?.fecha_fin)
-        // if(form.fecha_ini == '') form.fecha_ini = TransformTdate(props.Paramatro?.fecha_ini)
-        // if(form.fecha_fin == '') form.fecha_fin = TransformTdate(props.Paramatro?.fecha_fin)
-        // form.centro_costo_id = props.Paramatro?.centro_costo_id
-        // form.observaciones = props.Paramatro?.observaciones
-        // form.horas_trabajadas = props.Paramatro?.horas_trabajadas
+        form.anio = props.parametros?.anio
+        form.s_Dias_gabela = props.parametros?.s_Dias_gabela
+        form.subsidio_de_transporte_dia = props.parametros?.subsidio_de_transporte_dia
+        form.salario_minimo = props.parametros?.salario_minimo
+        form.HORAS_NECESARIAS_SEMANA = props.parametros?.HORAS_NECESARIAS_SEMANA
+        form.HORAS_ORDINARIAS = props.parametros?.HORAS_ORDINARIAS
+        form.HORAS_DEL_MES_30_DIAS = props.parametros?.HORAS_DEL_MES_30_DIAS
+        form.MAXIMO_HORAS_SEMANALES = props.parametros?.MAXIMO_HORAS_SEMANALES
+        form.minimo_material = props.parametros?.minimo_material
+
+        form.porcentaje_diurno = props.parametros?.porcentaje_diurno
+        form.porcentaje_nocturno = props.parametros?.porcentaje_nocturno
+        form.porcentaje_extra_diurno = props.parametros?.porcentaje_extra_diurno
+        form.porcentaje_extra_nocturno = props.parametros?.porcentaje_extra_nocturno
+        form.porcentaje_dominical_diurno = props.parametros?.porcentaje_dominical_diurno
+        form.porcentaje_dominical_nocturno = props.parametros?.porcentaje_dominical_nocturno
+        form.porcentaje_dominical_extra_diurno = props.parametros?.porcentaje_dominical_extra_diurno
+        form.porcentaje_dominical_extra_nocturno = props.parametros?.porcentaje_dominical_extra_nocturno
     }
 })
 </script>
@@ -65,22 +88,25 @@ watchEffect(() => {
         <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl4'">
             <form class="p-6" @submit.prevent="update">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    {{ lang().label.edit }} {{ props.title }}
+                    {{ lang().label.edit }} {{ props.title }} #{{ props.parametros?.id }}
                 </h2>
                 <div class="my-6 grid grid-cols-2 gap-6">
                     <div>
+                        <InputLabel for="anio" value="Año" />
+                        <TextInput id="anio" type="number" class="mt-1 block w-full" v-model="form.anio" required />
+                        <InputError class="mt-2" :message="form.errors.anio" />
+                    </div>
+                    <div>
                         <InputLabel for="s_Dias_gabela" :value="lang().label.s_Dias_gabela" />
                         <TextInput id="s_Dias_gabela" type="number" class="mt-1 block w-full"
-                            v-model="form.s_Dias_gabela" required
-                            :placeholder="lang().placeholder.s_Dias_gabela"
+                            v-model="form.s_Dias_gabela" required :placeholder="lang().placeholder.s_Dias_gabela"
                             :error="form.errors.s_Dias_gabela" />
                         <InputError class="mt-2" :message="form.errors.s_Dias_gabela" />
                     </div>
                     <div>
                         <InputLabel for="HORAS_ORDINARIAS" :value="lang().label.HORAS_ORDINARIAS" />
                         <TextInput id="HORAS_ORDINARIAS" type="number" class="mt-1 block w-full"
-                            v-model="form.HORAS_ORDINARIAS" required
-                            :placeholder="lang().placeholder.HORAS_ORDINARIAS"
+                            v-model="form.HORAS_ORDINARIAS" required :placeholder="lang().placeholder.HORAS_ORDINARIAS"
                             :error="form.errors.HORAS_ORDINARIAS" />
                         <InputError class="mt-2" :message="form.errors.HORAS_ORDINARIAS" />
                     </div>
@@ -94,6 +120,18 @@ watchEffect(() => {
                     </div>
 
                     <div>
+                        <InputLabel for="MAXIMO_HORAS_SEMANALES" value="Máximo Horas Semanales" />
+                        <TextInput id="MAXIMO_HORAS_SEMANALES" type="number" class="mt-1 block w-full"
+                            v-model="form.MAXIMO_HORAS_SEMANALES" required />
+                        <InputError class="mt-2" :message="form.errors.MAXIMO_HORAS_SEMANALES" />
+                    </div>
+                    <div>
+                        <InputLabel for="HORAS_DEL_MES_30_DIAS" value="Horas del Mes (30 días)" />
+                        <TextInput id="HORAS_DEL_MES_30_DIAS" type="number" class="mt-1 block w-full"
+                            v-model="form.HORAS_DEL_MES_30_DIAS" required />
+                        <InputError class="mt-2" :message="form.errors.HORAS_DEL_MES_30_DIAS" />
+                    </div>
+                    <div>
                         <InputLabel for="subsidio_de_transporte_dia" :value="lang().label.subsidio_de_transporte_dia" />
                         <TextInput id="subsidio_de_transporte_dia" type="number" class="mt-1 block w-full"
                             v-model="form.subsidio_de_transporte_dia" required
@@ -103,9 +141,73 @@ watchEffect(() => {
                     </div>
                     <div>
                         <InputLabel for="salario_minimo" :value="lang().label.salario_minimo" />
-                        <TextInput id="salario_minimo" type="number" class="mt-1 block w-full" v-model="form.salario_minimo"
-                            required :placeholder="lang().placeholder.salario_minimo" :error="form.errors.salario_minimo" />
+                        <TextInput id="salario_minimo" type="number" class="mt-1 block w-full"
+                            v-model="form.salario_minimo" required :placeholder="lang().placeholder.salario_minimo"
+                            :error="form.errors.salario_minimo" />
                         <InputError class="mt-2" :message="form.errors.salario_minimo" />
+                    </div>
+                    <div>
+                        <InputLabel for="minimo_material" value="Mínimo Material" />
+                        <TextInput id="minimo_material" type="number" class="mt-1 block w-full"
+                            v-model="form.minimo_material" required />
+                        <InputError class="mt-2" :message="form.errors.minimo_material" />
+                    </div>
+                </div>
+
+                
+                <div v-if="props.numberPermissions > 9" class="my-6">
+                    <h3 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">
+                        Porcentajes de Recargos y Extras
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div>
+                            <InputLabel for="porcentaje_diurno" value="% Diurno" />
+                            <TextInput id="porcentaje_diurno" type="number" step="0.01" class="mt-1 block w-full"
+                                v-model="form.porcentaje_diurno" required />
+                            <InputError class="mt-2" :message="form.errors.porcentaje_diurno" />
+                        </div>
+                        <div>
+                            <InputLabel for="porcentaje_nocturno" value="% Nocturno" />
+                            <TextInput id="porcentaje_nocturno" type="number" step="0.01" class="mt-1 block w-full"
+                                v-model="form.porcentaje_nocturno" required />
+                            <InputError class="mt-2" :message="form.errors.porcentaje_nocturno" />
+                        </div>
+                        <div>
+                            <InputLabel for="porcentaje_extra_diurno" value="% Extra Diurno" />
+                            <TextInput id="porcentaje_extra_diurno" type="number" step="0.01" class="mt-1 block w-full"
+                                v-model="form.porcentaje_extra_diurno" required />
+                            <InputError class="mt-2" :message="form.errors.porcentaje_extra_diurno" />
+                        </div>
+                        <div>
+                            <InputLabel for="porcentaje_extra_nocturno" value="% Extra Nocturno" />
+                            <TextInput id="porcentaje_extra_nocturno" type="number" step="0.01"
+                                class="mt-1 block w-full" v-model="form.porcentaje_extra_nocturno" required />
+                            <InputError class="mt-2" :message="form.errors.porcentaje_extra_nocturno" />
+                        </div>
+                        <div>
+                            <InputLabel for="porcentaje_dominical_diurno" value="% Dom. Diurno" />
+                            <TextInput id="porcentaje_dominical_diurno" type="number" step="0.01"
+                                class="mt-1 block w-full" v-model="form.porcentaje_dominical_diurno" required />
+                            <InputError class="mt-2" :message="form.errors.porcentaje_dominical_diurno" />
+                        </div>
+                        <div>
+                            <InputLabel for="porcentaje_dominical_nocturno" value="% Dom. Nocturno" />
+                            <TextInput id="porcentaje_dominical_nocturno" type="number" step="0.01"
+                                class="mt-1 block w-full" v-model="form.porcentaje_dominical_nocturno" required />
+                            <InputError class="mt-2" :message="form.errors.porcentaje_dominical_nocturno" />
+                        </div>
+                        <div>
+                            <InputLabel for="porcentaje_dominical_extra_diurno" value="% Dom. Extra Diurno" />
+                            <TextInput id="porcentaje_dominical_extra_diurno" type="number" step="0.01"
+                                class="mt-1 block w-full" v-model="form.porcentaje_dominical_extra_diurno" required />
+                            <InputError class="mt-2" :message="form.errors.porcentaje_dominical_extra_diurno" />
+                        </div>
+                        <div>
+                            <InputLabel for="porcentaje_dominical_extra_nocturno" value="% Dom. Extra Nocturno" />
+                            <TextInput id="porcentaje_dominical_extra_nocturno" type="number" step="0.01"
+                                class="mt-1 block w-full" v-model="form.porcentaje_dominical_extra_nocturno" required />
+                            <InputError class="mt-2" :message="form.errors.porcentaje_dominical_extra_nocturno" />
+                        </div>
                     </div>
                 </div>
                 <div class="flex justify-end">
@@ -119,4 +221,5 @@ watchEffect(() => {
             </form>
 
         </Modal>
-</section></template>
+    </section>
+</template>

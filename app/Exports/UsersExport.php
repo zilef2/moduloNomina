@@ -65,46 +65,6 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
         }
     }
 
-    /**/
-    public function CalculoDomingoGanadosTodo($empleado) {
-        $HORAS_NECESARIAS_SEMANA = (int)(Parametro::find(1)->HORAS_NECESARIAS_SEMANA);
-        $HORAS_NECESARIAS_QUINCENA = $HORAS_NECESARIAS_SEMANA * 2;
-
-        $reportes = Reporte::Where('user_id', $empleado->id)
-            ->where('valido', 1)
-            ->whereBetween('fecha_ini', [$this->ini, $this->fin])->orderby('fecha_ini', 'asc');
-
-        if ($reportes->count() == 0) return 0;
-
-        $ElLunes = Carbon::parse($reportes->first()->fecha_ini)->startOfWeek();
-        $esPrimeraQuincena = Carbon::parse($this->ini)->day == 1;
-
-        //ANTES: con el lunes de la quincena, comenzamos a recorrer las semanas contando los domingos validos
-        $domingosGanados = 0;
-        $valido = true;
-
-        $ElSabado = Carbon::parse($ElLunes)->endOfWeek(-1);
-        while($valido){
-            $ValidarReportes = Reporte::Where('user_id', $empleado->id)
-                ->where('valido', 1)
-                ->whereBetween('fecha_ini', [$ElLunes, $ElSabado])
-                ->sum('horas_trabajadas');
-
-            //? NOTE:: values 15-30
-            $HORAS_NECESARIAS_SEMANA -= $this->NumeroDiasFestivos * 8;
-            $domingosGanados += (int)($ValidarReportes) >= ($HORAS_NECESARIAS_SEMANA) ? 1 : 0;
-            $ElLunes->addDays(7);
-            $ElSabado = clone $ElLunes;
-            $ElSabado->endOfWeek(-1);
-
-            if($esPrimeraQuincena){
-                $valido = $ElSabado->day < 16;
-            }else{
-                $valido = $ElSabado->day > 14;
-            }
-        }
-        return $domingosGanados;
-    }
 
     /**
      * @return \Illuminate\Support\Collection
@@ -135,15 +95,7 @@ class UsersExport implements FromCollection, ShouldAutoSize, WithHeadings
 //            }
             $HorasExtrasyDominicales = $this->CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, $H_diurno, $nocturnas, $extra_diurnas, $extra_nocturnas, $dominical_diurno, $dominical_nocturno, $dominical_extra_diurno, $dominical_extra_nocturno);
 
-//            if ($cumplioQuicena) { // cumplio con los dias de la quincena
                 $usersEmpleados[$key]->Salario = $salario_quincena;
-//            } else {
-//                $usersEmpleados[$key]->Salario = $H_diurno;
-//            }
-
-
-//            $domingosGanados = $this->CalculoDomingoGanadosTodo($value);
-//            $DiasTrabajados += $domingosGanados; //se usa para el subsidio de transporte
 
             $usersEmpleados[$key]->SalarioHora = $salario_hora;
             $usersEmpleados[$key]->diurnas = (int)($reportes->sum('diurnas'));$usersEmpleados[$key]->nocturnas = (int)($reportes->sum('nocturnas'));$usersEmpleados[$key]->extra_diurnas = $HorasExtrasyDominicales[1] .' = ' .$extra_diurnas;$usersEmpleados[$key]->extra_nocturnas = $HorasExtrasyDominicales[2].' = ' .$extra_nocturnas;$usersEmpleados[$key]->dominical_diurno = $HorasExtrasyDominicales[3].' = ' .$dominical_diurno;$usersEmpleados[$key]->dominical_nocturno = $HorasExtrasyDominicales[4].' = ' .$dominical_nocturno;$usersEmpleados[$key]->dominical_extra_diurno = $HorasExtrasyDominicales[5].' = ' .$dominical_extra_diurno;$usersEmpleados[$key]->dominical_extra_nocturno = $HorasExtrasyDominicales[6].' = ' .$dominical_extra_nocturno;$usersEmpleados[$key]->extrasYDominicales = $HorasExtrasyDominicales[0];

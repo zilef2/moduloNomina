@@ -32,6 +32,7 @@ const props = defineProps({
     fromController: Object,
     breadcrumbs: Object,
     nombresTabla: Array,
+    numberPermissions: Number,
 })
 
 const PasarDiaAQuincena = (valorDiario) => {
@@ -41,6 +42,7 @@ const PasarDiaAQuincena = (valorDiario) => {
 const data = reactive({
     createOpen: false,
     editOpen: false,
+    deleteOpen: false,
     generico: null,
 })
 
@@ -62,15 +64,27 @@ const form = useForm({
 </script>
 
 <template>
+
     <Head :title="props.title"></Head>
     <AuthenticatedLayout>
         <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />
-        Ultima actualización: {{ formatDate(fromController[0]['updated_at']) }}
+        Ultima actualización: {{ fromController.length > 0 ? formatDate(fromController[0]['updated_at']) : 'N/A' }}
         <section class="space-y-4">
             <div class="px-4 sm:px-0">
-                <div class="rounded-lg overflow-hidden w-fit">
+                <div class="rounded-lg overflow-hidden w-fit flex gap-2">
+                    <PrimaryButton v-if="can(['create parametros'])" @click="data.createOpen = true">
+                        {{ lang().button.add }}
+                    </PrimaryButton>
+
+                    <Create :show="data.createOpen" @close="data.createOpen = false" :title="props.title" />
+
                     <Edit :show="data.editOpen" @close="data.editOpen = false" :title="props.title"
-                        :parametros="props.fromController[0]" />
+                        :parametros="data.generico" 
+                        :numberPermissions="props.numberPermissions" 
+                        />
+
+                    <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :title="props.title"
+                        :parametros="data.generico" />
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
@@ -78,10 +92,6 @@ const form = useForm({
                     <table class="w-full">
                         <thead class="uppercase text-sm border-t border-gray-200 dark:border-gray-700">
                             <tr class="dark:bg-gray-900 text-left">
-                                <!-- <th class="px-2 py-4 text-center">
-                                    <Checkbox v-model:checked="data.multipleSelect" @change="selectAll" />
-                                </th> -->
-                                <!-- <th class="px-2 py-4 text-center"> <td> - </td> </th> -->
                                 <th v-for="(titulos, indiceN) in nombresTabla[0]" :key="indiceN"
                                     class="px-5 py-4 hover:bg-sky-50 dark:hover:bg-sky-800">
                                     <div class="flex justify-between items-center">
@@ -94,35 +104,49 @@ const form = useForm({
                             <!-- por si hay mas filas en la tabla parametros -->
                             <tr v-for="(clasegenerica, index) in fromController" :key="index"
                                 class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
-                                <td v-if="can(['update parametros'])"
-                                    class="whitespace-nowrap py-4 px-2 sm:py-3">
+                                <td v-if="can(['update parametros'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
                                     <div class="flex justify-start items-center">
                                         <div class="flex rounded-md overflow-hidden">
-                                            <InfoButton type="button" @click="(data.editOpen = true)"
+                                            <InfoButton type="button"
+                                                @click="(data.editOpen = true, data.generico = clasegenerica)"
                                                 class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
                                                 <PencilIcon class="w-4 h-4" />
                                             </InfoButton>
+                                            <DangerButton v-if="can(['delete parametros'])" type="button"
+                                                @click="(data.deleteOpen = true, data.generico = clasegenerica)"
+                                                class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.delete">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </DangerButton>
                                         </div>
                                     </div>
                                 </td>
                                 <td v-for="(titulo_slug, indi) in nombresTabla[1]" :key="indi"
-                                    class="whitespace-nowrap py-4 px-5 sm:py-3">
-                                    <div v-if="titulo_slug.substr(0, 1) === 's'">{{ (clasegenerica[titulo_slug.substr(2)]) }}</div>
-                                    <div v-else-if="titulo_slug.substr(0, 1) === 'd'">{{ formatDate(clasegenerica[titulo_slug.substr(2)]) }}</div>
-                                    <div v-else-if="titulo_slug.substr(0, 1) === 't'">{{ formatDate(clasegenerica[titulo_slug.substr(2)], 'conLaHora') }}</div>
-                                    <div v-else-if="titulo_slug.substr(0, 1) === 'o'">{{ number_format(clasegenerica[titulo_slug.substr(2)], 0, 1) }}</div>
-                                    <div v-else-if="titulo_slug.substr(0, 1) === 'p'">{{ (number_format(clasegenerica[titulo_slug.substr(2)], 2, 0)) }} </div>
-                                    <div v-else-if="titulo_slug.substr(0, 1) === 'i'">{{ number_format(clasegenerica[titulo_slug.substr(2)]) }}</div>
-                                    <div v-else-if="titulo_slug.substr(0, 1) === 'm'">{{ number_format(clasegenerica[titulo_slug.substr(2)], 0, 1) }}</div>
+                                    class="whitespace-nowrap py-4 px-5 sm:py-3 font-semibold">
+                                    <div v-if="titulo_slug.substr(0, 1) === 's'">{{
+                                        (clasegenerica[titulo_slug.substr(2)]) }}</div>
+                                    <div v-else-if="titulo_slug.substr(0, 1) === 'd'">{{
+                                        formatDate(clasegenerica[titulo_slug.substr(2)]) }}</div>
+                                    <div v-else-if="titulo_slug.substr(0, 1) === 't'">{{
+                                        formatDate(clasegenerica[titulo_slug.substr(2)], 'conLaHora') }}</div>
+                                    <div v-else-if="titulo_slug.substr(0, 1) === 'o'">{{
+                                        number_format(clasegenerica[titulo_slug.substr(2)], 0, 1) }}</div>
+                                    <div v-else-if="titulo_slug.substr(0, 1) === 'p'">{{
+                                        (number_format(clasegenerica[titulo_slug.substr(2)], 2, 0)) }} </div>
+                                    <div v-else-if="titulo_slug.substr(0, 1) === 'i'">{{
+                                        number_format(clasegenerica[titulo_slug.substr(2)]) }}</div>
+                                    <div v-else-if="titulo_slug.substr(0, 1) === 'm'">{{
+                                        number_format(clasegenerica[titulo_slug.substr(2)], 0, 1) }}</div>
                                 </td>
                             </tr>
-                            <tr
+                            <tr v-if="fromController.length > 0"
                                 class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-200/30 hover:dark:bg-gray-900/20">
                                 <td class="whitespace-nowrap py-4 px-5 sm:py-3"> </td>
                                 <td class="whitespace-nowrap py-4 px-5 sm:py-3"> </td>
                                 <td class="whitespace-nowrap py-4 px-5 sm:py-3"> </td>
-                                <td class="whitespace-nowrap py-4 px-5 sm:py-3">
-                                    {{ PasarDiaAQuincena(fromController[0]['subsidio_de_transporte_dia']) }}
+                                <td class="whitespace-nowrap py-4 px-5 sm:py-3"> </td>
+                                <td class="whitespace-nowrap py-4 px-5 sm:py-3"> </td>
+                                <td class="whitespace-nowrap py-4 px-5 sm:py-3 font-bold text-amber-600">
+                                    Quincenal: {{ PasarDiaAQuincena(fromController[0]['subsidio_de_transporte_dia']) }}
                                 </td>
                             </tr>
                         </tbody>
@@ -130,10 +154,7 @@ const form = useForm({
                 </div>
             </div>
 
-
-<!--            <Condicionales/>-->
-
-            <RequerimientosPendientes/>
+            <RequerimientosPendientes />
         </section>
     </AuthenticatedLayout>
 </template>

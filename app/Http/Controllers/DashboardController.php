@@ -24,104 +24,99 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 
-class DashboardController extends Controller {
-	
+class DashboardController extends Controller
+{
+
 	public int $LimiteDiasSinPagar = 15;
 	public int $numberPermissions = 15;
-	
-	public function __construct() {
-		
+
+	public function __construct()
+	{
+
 		$this->middleware(function ($request, $next) {
-		
+
+			
 //			$permissions = Myhelp::AuthU()->roles->pluck('name')[0];
 //			$this->numberPermissions = MyModels::getPermissionToNumber($permissions);
+
 			
 //			$nombre = str_replace('Controller', '', class_basename(static::class)); // Obtener el nombre del controlador sin "Controller"
 			$this->numberPermissions = MyModels::getPermissionToNumber(
-			    Myhelp::EscribirEnLog($this, class_basename(static::class))
+				Myhelp::EscribirEnLog($this, class_basename(static::class))
 			);
 			return $next($request);
 		});
-		
+
 	}
-	
-	public function Dashboard() {
+
+	public function Dashboard()
+	{
 		$ListaControladoresYnombreClase = (explode('\\', get_class($this)));
 		$nombreC = end($ListaControladoresYnombreClase);
 		$Authuser = Myhelp::AuthU();
 		Myhelp::EscribirEnLog($this, $nombreC, ' U -> ' . $Authuser->name . ' Accedio al dashboard ', false);
-		
+
 		$userid = $Authuser->id;
 		if ($this->numberPermissions === 1) {
 			return redirect()->route('Reportes.index')->with('success', 'Bienvenido');
-			// $reportes = (int) Reporte::Where('user_id', $Authuser->id)->count();
+		// $reportes = (int) Reporte::Where('user_id', $Authuser->id)->count();
 		}
 		else { // si no eres empleado
 			$reportes = Reporte::count();
-			$elmespasado = Carbon::now()->startOfWeek()->addMonth(- 1);
+
 			
-			if ($this->numberPermissions === 3) {
-				$centroMio = $Authuser->ArrayCentrosID();
-				$reportes = Reporte::WhereIn('centro_costo_id', $centroMio)->count();
-				
-				$ultimos5dias = [
-					'Mes pasado' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->where('fecha_ini', '<', Carbon::today()->addMonth(- 1)->endOfMonth())->where('fecha_ini', '>=', Carbon::today()->addMonth(- 1)->firstOfMonth())->get()->count(),
-					
-					'Semana pasada' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->whereBetween('fecha_ini', [
-						Carbon::now()->addDays(- 7)->startOfWeek(),
-						Carbon::now()->addDays(- 7)->endOfWeek()
-					])->get()->count(),
-					
-					'Semana actual' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereValido(1)->whereBetween('fecha_ini', [
-						Carbon::now()->startOfWeek(),
-						Carbon::now()->endOfWeek()
-					])->get()->count(),
-				];
-				
-				$diasNovalidos = [
-					'Mes pasado' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereIn('valido', [
-						0,
-						2
-					])->where('fecha_ini', '>=', $elmespasado)->where('fecha_ini', '<', Carbon::today()->startOfMonth())->get()->count(),
-					'Mes actual' => Reporte::WhereIn('centro_costo_id', $centroMio)->whereIn('valido', [
-						0,
-						2
-					])->where('fecha_ini', '>', Carbon::today()->startOfMonth())->get()->count(),
-				];
-				
-			}
-			else { //si no eres administrativo
-				$ultimos5dias = [
-					'Mes pasado' => Reporte::whereValido(1)->where('fecha_ini', '<', Carbon::today()->addMonth(- 1))->get()->count(),
-					
-					'Semana pasada' => Reporte::whereValido(1)->whereBetween('fecha_ini', [
-						Carbon::now()->addDays(- 7)->startOfWeek(),
-						Carbon::now()->addDays(- 7)->endOfWeek()
-					])->get()->count(),
-					
-					'Semana actual' => Reporte::whereValido(1)->whereBetween('fecha_ini', [
-						Carbon::now()->startOfWeek(),
-						Carbon::now()->endOfWeek()
-					])->get()->count(),
-				];
-				$diasNovalidos = [
-					'Mes pasado' => Reporte::whereIn('valido', [
-						0,
-						2
-					])->where('fecha_ini', '<', Carbon::today()->startOfMonth())->where('fecha_ini', '>=', $elmespasado)->get()->count(),
-					'Mes actual' => Reporte::whereIn('valido', [
-						0,
-						2
-					])->where('fecha_ini', '>', Carbon::today()->startOfMonth())->get()->count(),
-				];
-			}
-			
+			$centros = $this->numberPermissions === 3
+				? $Authuser->ArrayCentrosID()
+				: null;
+			$baseQuery = Reporte::query()
+				->when($centros, fn($q) => $q->whereIn('centro_costo_id', $centros));
+			$reportes = (clone $baseQuery)->count();
+			// === FECHAS BASE ===			
+			$now = Carbon::now();
+			$inicioMesPasado = $now->copy()->subMonth()->startOfMonth();
+			$finMesPasado = $now->copy()->subMonth()->endOfMonth();
+			// === VALIDOS ===			
+			$ultimos5dias = [
+				'Mes pasado' => (clone $baseQuery)
+				->whereValido(1)
+				->whereBetween('fecha_ini', [$inicioMesPasado, $finMesPasado])
+				->count(),			];
+			// Semana actual + anterior			
+			for ($i = 0; $i <= 1; $i++) {
+				$inicio = $now->copy()->subWeeks($i)->startOfWeek();
+				$fin = $now->copy()->subWeeks($i)->endOfWeek();
+
+				$label = $i === 0 ? 'Semana actual' : 'Semana pasada';
+
+				$ultimos5dias[$label] = (clone $baseQuery)
+					->whereValido(1)
+					->whereBetween('fecha_ini', [$inicio, $fin])
+					->count();			}
+			// === NO VALIDOS (5 semanas) ===			
+			$diasNovalidos = [];
+			for ($i = 0; $i < 5; $i++) {
+				$inicio = $now->copy()->subWeeks($i)->startOfWeek();
+				$fin = $now->copy()->subWeeks($i)->endOfWeek();
+
+				$label = match ($i) {
+						0 => 'Semana actual',
+						1 => 'Semana pasada',
+						2 => 'Semana antepasada',
+						default => 'Hace ' . $i . ' semanas',
+					};
+
+				$diasNovalidos[$label] = (clone $baseQuery)
+					->whereIn('valido', [0, 2])
+					->whereBetween('fecha_ini', [$inicio, $fin])
+					->count();			}
+
+
 			$usuariosConRol = User::whereHas('roles', function ($q) {
 				$q->where('name', 'empleado');
 			})->whereHas('reportes')->withSum('reportes as total_horas', 'horas_trabajadas')->orderByDesc('total_horas')->get()->take(5);
 			foreach ($usuariosConRol as $value) {
 				$BooleanreportoHoy = Reporte::where('user_id', $value->id)->whereDate('fecha_fin', Carbon::today())->first();
-				
+
 				if ($BooleanreportoHoy !== null) {
 					$trabajadoresHoy[$value->name] = $BooleanreportoHoy->horas_trabajadas;
 				}
@@ -129,7 +124,7 @@ class DashboardController extends Controller {
 					$trabajadoresHoy[$value->name] = 0;
 				}
 			}
-			
+
 			$centros = CentroCosto::all();
 			foreach ($centros as $value) {
 				$BooleanReporteCentro = Reporte::where('centro_costo_id', $value->id)->whereDate('fecha_fin', Carbon::today())->sum('horas_trabajadas');
@@ -141,69 +136,80 @@ class DashboardController extends Controller {
 				}
 			}
 			$conteoPorRol = User::whereNotIn('cargo_id', [1, 2])
-			                    ->with('roles')->get()->flatMap->roles->groupBy('name')->map->count();
-			
+				->with('roles')->get()->flatMap->roles->groupBy('name')->map->count();
+
 			$topCentros = CentroCosto::select('nombre', 'mano_obra_estimada')
-			                         ->where('mano_obra_estimada', '>', 25000)
-			                         ->orderByDesc('mano_obra_estimada')
-			                         ->limit(10)->get()
-			;
-			
+				->where('mano_obra_estimada', '>', 15000)
+				->orderByDesc('mano_obra_estimada')
+				->limit(10)->get();
+
 			$chartLabels = $topCentros->pluck('nombre');
 			$chartValues = $topCentros->pluck('mano_obra_estimada');
 		} //fin, si no eres empleado
-		
+
 		return Inertia::render('Dashboard', [
-			'versionZilef'      => '25.6.1',
-			'users'             => User::count(),
-			'roles'             => Role::count(),
-			'permissions'       => Permission::count(),
-			'reportes'          => $reportes,
-			'ultimos5dias'      => $ultimos5dias,
-			'diasNovalidos'     => $diasNovalidos,
-			'trabajadoresHoy'   => $trabajadoresHoy ?? [],
-			'centrosHoy'        => $centrosHoy ?? [],
+			'versionZilef' => '25.6.2',
+			'users' => User::count(),
+			'roles' => Role::count(),
+			'permissions' => Permission::count(),
+			'reportes' => $reportes,
+			'ultimos5dias' => $ultimos5dias,
+			'diasNovalidos' => $diasNovalidos,
+			'trabajadoresHoy' => $trabajadoresHoy ?? [],
+			'centrosHoy' => $centrosHoy ?? [],
 			'numberPermissions' => $this->numberPermissions,
-			'userid'            => $userid,
-			'conteoPorRol'      => $conteoPorRol,
-			'topCentros'        => $topCentros,
-			'chartLabels'       => $chartLabels,
-			'chartValues'       => $chartValues,
+			'userid' => $userid,
+			'conteoPorRol' => $conteoPorRol,
+			'topCentros' => $topCentros,
+			'chartLabels' => $chartLabels,
+			'chartValues' => $chartValues,
 		]);
 	}
-	public function Pruebas(): \Inertia\Response {return Inertia::render('Pruebas'); }
-	public function Pruebas0(): \Inertia\Response {return Inertia::render('Pruebas0'); }
-	public function Pruebas1(): \Inertia\Response {return Inertia::render('Pruebas1'); }
-	
-	public function guardarCiudad(Request $r): void {
+	public function Pruebas(): \Inertia\Response
+	{
+		return Inertia::render('Pruebas');
+	}
+	public function Pruebas0(): \Inertia\Response
+	{
+		return Inertia::render('Pruebas0');
+	}
+	public function Pruebas1(): \Inertia\Response
+	{
+		return Inertia::render('Pruebas1');
+	}
+
+	public function guardarCiudad(Request $r): void
+	{
 		$user = Myhelp::AuthU();
 		if (Schema::hasTable('ubicacion')) {
 			$ipAddress = $r->ip();
 			DB::table('ubicacion')->insert([
-				                               'ubicacion'  => $r->ciudad,
-				                               'valido'     => 1,
-				                               'userid'     => $user->id,
-				                               'name'       => $user->name,
-				                               'email'      => $ipAddress ?? 'Sin ip',
-				                               'created_at' => Carbon::now()
-			                               ]);
+				'ubicacion' => $r->ciudad,
+				'valido' => 1,
+				'userid' => $user->id,
+				'name' => $user->name,
+				'email' => $ipAddress ?? 'Sin ip',
+				'created_at' => Carbon::now()
+			]);
 		}
 	}
-	
-	public function ProbarJob() {
+
+	public function ProbarJob()
+	{
 		EnviarViaticoJob::dispatch('ajelof2@gmail.com', [
 			'mensaje' => "Se han generado 0 viáticos por un valor de 0. 
                               El solicitante es yo mismo
                               Haga click aqui:   https://modnom.ecnomina.com/solicitud_viatico  si desea ver los pendientes."
 		])->delay(now()->addSeconds());
-		
+
 		return '<p>Job Enviado a mi mismo</p>';
 	}
-	
-	public function recordarPago() {
-		
+
+	public function recordarPago()
+	{
+
 		$QueryPendiente = Desarrollo::Where('estado', 'Esperando pago parcial')->whereDoesntHave('pagos')->whereNotNull('fecha_cotizacion_aceptada')->whereDate('fecha_cotizacion_aceptada', '<=', Carbon::now()->subDays($this->LimiteDiasSinPagar));
-		
+
 		$dearrollopendiente = clone $QueryPendiente;
 		$dearrollopendiente = $dearrollopendiente->first();
 		$cuantosDesarrollosPendientes = $QueryPendiente->count();
@@ -212,38 +218,39 @@ class DashboardController extends Controller {
 			$diffforhum = MyGlobalHelp::diffCarbonMonthNDays($fechacotiza);
 			//			$diffforhum = Carbon::parse($fechacotiza)->diffForHumans();
 			$desarrollo = Desarrollo::findOrFail($dearrollopendiente->id);
-			
+
 			if (app()->environment('test')) {
 				Mail::to([
-					         'alejofg2@gmail.com',
-					         'docmadridtorres@gmail.com'
-				         ])->send(new AvisoPagoDesarrollo($desarrollo, $cuantosDesarrollosPendientes));
+					'alejofg2@gmail.com',
+					'docmadridtorres@gmail.com'
+				])->send(new AvisoPagoDesarrollo($desarrollo, $cuantosDesarrollosPendientes));
 			}
 			else {
 				if (app()->environment('production')) {
 					$jefe = User::Where('name', 'Carlos Daniel Anaya Barrios')->first();
 					$jefemail = $jefe->email;
 					Mail::to([
-						         $jefemail,
-						         'ajelof2@gmail.com'
-					         ])->send(new AvisoPagoDesarrollo($desarrollo, $cuantosDesarrollosPendientes));
+						$jefemail,
+						'ajelof2@gmail.com'
+					])->send(new AvisoPagoDesarrollo($desarrollo, $cuantosDesarrollosPendientes));
 				}
 			}
-			
+
 			return "Aviso enviado. Fecha en que se acepto la cotizacion $fechacotiza, $diffforhum";
 		}
-		
+
 		return "no hay desarrollos pendientes";
 	}
-	
-	public function logeadoshoy() {
-		
+
+	public function logeadoshoy()
+	{
+
 		$path = storage_path('logs/laravel.log');
 		$usuariosLog = [];
 		$hoy = Carbon::today()->format('Y-m-d'); // Ejemplo: 2025-08-27
 		// $fecha = Carbon::yesterday()->format('Y-m-d');
 		$controller = 'ReportesController';
-		
+
 		if (File::exists($path)) {
 			foreach (File::lines($path) as $line) {
 				// Filtrar por fecha y por controlador
@@ -254,19 +261,19 @@ class DashboardController extends Controller {
 				}
 			}
 		}
-		
+
 		$usuariosLog = array_unique($usuariosLog);
-		
+
 		// Buscar en BD según nombre (ajusta si tu login es por email/username)
 		$usuarios = User::whereIn('name', $usuariosLog)->get();
-		
+
 		// Agrupar
 		$agrupados = [
-			'empleado'       => [],
+			'empleado' => [],
 			'administrativo' => [],
-			'otros'          => [],
+			'otros' => [],
 		];
-		
+
 		foreach ($usuarios as $user) {
 			if ($user->roles->pluck('name')->contains('empleado')) {
 				$agrupados['empleado'][] = $user->name;
@@ -281,17 +288,18 @@ class DashboardController extends Controller {
 			}
 		}
 		Mail::to('ajelof2@gmail.com')->send(new UsuariosLogeadosHoy($agrupados, Carbon::today()->format('d/m/Y')));
-		
+
 		return '<p>Correo enviado correctamente </p>' . '<p>| empleados ' . count($agrupados['empleado']) . '</p><p>' . implode(', ', $agrupados['empleado']) . '</p>' . '<p>| administrativo ' . count($agrupados['administrativo']) . '</p><p>' . implode(', ', $agrupados['administrativo']) . '</p>' . '<p>| otros ' . count($agrupados['otros']) . '</p><p>' . implode(', ', $agrupados['otros']) . '</p>';
 	}
-	
-	public function PersonasExtra() {
-		$param = Parametro::all()->first()->HORAS_NECESARIAS_SEMANA;
+
+	public function PersonasExtra()
+	{
+		$param = Parametro::find(1)->HORAS_NECESARIAS_SEMANA;
 		$now = Carbon::now('America/Bogota');
-		
+
 		if ($now->day <= 15) {
 			// Primera quincena del mes actual
-			$from = $now->copy()->startOfMonth();   
+			$from = $now->copy()->startOfMonth();
 			$to = $now->copy()->day(15)->endOfDay();
 		}
 		else {
@@ -300,41 +308,43 @@ class DashboardController extends Controller {
 			$to = $now->copy()->endOfMonth()->endOfDay();
 		}
 		$fechaLabel = $from->locale('es')->isoFormat('D [de] MMMM [de] YYYY')
-           . ' - '
-           . $to->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
-		
+			. ' - '
+			. $to->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
+
 		$usuarios = Reporte::select([
-			                            'users.name as usuario',
-			                            'reportes.user_id',
-			                            DB::raw('WEEK(reportes.fecha_ini, 1) as semana_iso'),
-			                            DB::raw('SUM(reportes.horas_trabajadas) as total_horas')
-		                            ])->join('users', 'users.id', '=', 'reportes.user_id')->whereBetween('reportes.fecha_ini', [
+			'users.name as usuario',
+			'reportes.user_id',
+			DB::raw('WEEK(reportes.fecha_ini, 1) as semana_iso'),
+			DB::raw('SUM(reportes.horas_trabajadas) as total_horas')
+		])->join('users', 'users.id', '=', 'reportes.user_id')->whereBetween('reportes.fecha_ini', [
 			'2025-10-01 00:00:00',
 			'2025-10-15 23:59:59'
 		])->whereNull('reportes.deleted_at')
-		  ->groupBy('reportes.user_id', 'users.name', DB::raw('WEEK(reportes.fecha_ini, 1)'))
-		  ->having('total_horas', '>', $param)
-		  ->orderBy('total_horas')
-		  ->orderBy('users.name')
-		  ->orderBy(DB::raw('semana_iso'))
-		  ->get();
-		
-        if (app()->environment('test')) {
+			->groupBy('reportes.user_id', 'users.name', DB::raw('WEEK(reportes.fecha_ini, 1)'))
+			->having('total_horas', '>', $param)
+			->orderBy('total_horas')
+			->orderBy('users.name')
+			->orderBy(DB::raw('semana_iso'))
+			->get();
+
+		if (app()->environment('test')) {
 			$destinos = ['alejofg2@gmail.com'];
-        }else{
+		}
+		else {
 			$destinos = [
 				'ajelof2@gmail.com',
 				'perezmezajessica@gmail.com'
 			];
-        }
-		Mail::to($destinos)->send(new UsuariosHorasExtrasMail($usuarios, $fechaLabel,$param));
-		
+		}
+		Mail::to($destinos)->send(new UsuariosHorasExtrasMail($usuarios, $fechaLabel, $param));
+
 		return '
 		<p> Correo enviado a </p>
-		<p> ' . implode(',',$destinos) . '</p>';
-		
+		<p> ' . implode(',', $destinos) . '</p>';
+
 	}
-	
-	
-	
+
+
+
+
 }

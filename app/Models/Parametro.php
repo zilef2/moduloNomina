@@ -40,16 +40,12 @@ class Parametro extends Model
 {
 
     protected $fillable = [
-
-        's_Dias_gabela',
-        'HORAS_ORDINARIAS',
+        'id',
+        'anio',
         'HORAS_NECESARIAS_SEMANA',
-
         'subsidio_de_transporte_dia',
         'salario_minimo',
         'valor_maximo_subsidio_de_transporte',
-
-
         'porcentaje_diurno',
         'porcentaje_nocturno',
         'porcentaje_extra_diurno',
@@ -58,9 +54,34 @@ class Parametro extends Model
         'porcentaje_dominical_nocturno',
         'porcentaje_dominical_extra_diurno',
         'porcentaje_dominical_extra_nocturno',
+        'created_at',
+        'updated_at',
+        'HORAS_ORDINARIAS',
+        'HORAS_DEL_MES_30_DIAS',
+        'MAXIMO_HORAS_SEMANALES',
+        's_Dias_gabela',
+        'minimo_material', //cuando baje de este valor se avisa al usuario
 
         // 'porcentaje_salud_pension', actualmente = 0.04
-        
-        'minimo_material',
     ];
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

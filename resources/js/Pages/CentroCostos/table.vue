@@ -166,14 +166,14 @@ watchEffect(() => {
 
     <Head :title="props.title"></Head>
     <AuthenticatedLayout>
-        <div class="py-4 px-2 sm:px-4 lg:px-6 h-[calc(100vh-64px)] flex flex-col">
+        <div class="py-4 px-2 sm:px-4 lg:px-6 w-full flex flex-col min-h-0 max-h-[calc(100vh-160px)]">
             <!-- Header & Action Bar -->
             <div
                 class="mb-4 flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
                 <div class="flex-1">
                     <div class="flex items-center gap-2 mb-1">
                         <Link :href="route('CentroCostos.index')"
-                            class="text-amber-600 hover:text-amber-700 transition-colors">
+                            class="text-amber-600 hover:text-amber-700 hover:bg-sky-200 transition-all">
                             <span class="text-xs font-bold uppercase tracking-widest flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
@@ -186,8 +186,7 @@ watchEffect(() => {
                     </div>
                     <h1 class="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                         Reporte: <span
-                            class="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">{{
-                                props.title }}</span>
+                            class="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">{{ props.title }}</span>
                     </h1>
                     <p class="text-xs text-gray-500 dark:text-gray-400 font-medium italic mt-0.5">
                         {{ props.UltimoReporteRealizado }}
@@ -259,7 +258,7 @@ watchEffect(() => {
             <div v-else
                 class="flex-1 bg-white dark:bg-gray-800 rounded-2xl shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 flex flex-col overflow-hidden">
                 <div class="flex-1 overflow-auto scrollbar-table relative">
-                    <table class="w-full text-left border-collapse min-w-[1200px]">
+                    <table class="w-full text-left border-collapse min-w-[900px]">
                         <thead class="sticky top-0 z-20 bg-gray-50 dark:bg-gray-900 shadow-sm">
                             <tr
                                 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-gray-700">
@@ -279,11 +278,9 @@ watchEffect(() => {
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                             <tr v-for="(clasegenerica, index) in fromController.data" :key="index"
-                                class="hover:bg-amber-50/20 dark:hover:bg-amber-900/5 transition-colors group">
-                                <td
-                                    class="px-4 py-3 sticky left-0 z-10 bg-white dark:bg-gray-800 border-r border-gray-50 dark:border-gray-700 shadow-[2px_0_5px_rgba(0,0,0,0.02)]">
-                                    <span
-                                        class="text-xs font-bold text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors uppercase">
+                                class="hover:bg-sky-200 dark:hover:bg-amber-900/5 transition-colors group">
+                                <td class="px-4 py-3 sticky left-0 z-10 bg-white dark:bg-gray-800 border-r border-gray-50 dark:border-gray-700 shadow-[2px_0_5px_rgba(0,0,0,0.02)] hover:bg-sky-200">
+                                    <span class="text-xs font-bold text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors uppercase">
                                         {{ clasegenerica.usera }}
                                     </span>
                                 </td>

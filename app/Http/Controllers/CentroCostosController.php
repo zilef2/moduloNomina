@@ -30,7 +30,6 @@ class CentroCostosController extends Controller {
 	private int $segundosActuSupervisores;
 	
 	public function __construct() {
-		session(['parametros' => Parametro::Find(1)]);
 		
 		//        $this->segundosActualiPresupuesto = 1;
 		$this->segundosActualiPresupuesto = 60 * 30;
@@ -40,6 +39,7 @@ class CentroCostosController extends Controller {
 		$this->centroCostosAll = CentroCosto::all();
 		$this->ZonasAll = zona::all();
 		$this->parametros = Parametro::find(1);
+		session(['parametros' => $this->parametros]);
 		
 	}
 	

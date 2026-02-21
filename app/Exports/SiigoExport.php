@@ -9,16 +9,18 @@ use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Carbon\Carbon;
 
 class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
 {
     use Exportable;
 
-    public $ini,$fin, $NumeroDiasFestivos;
-    public function __construct($ini,$fin, $NumeroDiasFestivos) {
+    public $ini,$fin, $NumeroDiasFestivos,$paramBD;
+    public function __construct($ini,$fin, $NumeroDiasFestivos,$paramBD) {
         $this->ini = $ini;
         $this->fin = $fin;
         $this->NumeroDiasFestivos = $NumeroDiasFestivos;
+        $this->paramBD = $paramBD;
     }
 
     public function CalculoHorasExtrasDominicalesTodo($reportes,$cumplioQuicena,$salario_hora,$paramBD, &$H_diurno, &$nocturnas, &$extra_diurnas, &$extra_nocturnas, &$dominical_diurno, &$dominical_nocturno, &$dominical_extra_diurno, &$dominical_extra_nocturno){
@@ -76,7 +78,8 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
             })
         ->get();
 
-        $paramBD = Parametro::find(1);
+        
+        //aqui 19feb
         $mensajeSigo = [
             '', //0
             '10- Horas extras diurnas 125%- Ingreso', //1 extra diurna
@@ -97,14 +100,14 @@ class SiigoExport implements FromCollection,ShouldAutoSize,WithHeadings
         foreach ($users as $key => $empleado) {
             HelpExcel::cumplioQuincena($users,$key,$this->ini,$this->fin,
                 $empleado,$reportes, $salario_hora,
-                $salario_quincena, $cumplioQuicena,$paramBD,
+                $salario_quincena, $cumplioQuicena,$this->paramBD,
                 $this->NumeroDiasFestivos,session('datesFest'),'siigo');
 //            if($empleado->id == 11)dd($reportes->pluck('id')->all());
 
             /*alterados en
             $users $reportes $salario_hora $cumplioQuicena
             */
-            $ArrayExtrasyDominicales = $this->CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $paramBD, $H_diurno, $nocturnas, $extra_diurnas, $extra_nocturnas, $dominical_diurno, $dominical_nocturno, $dominical_extra_diurno, $dominical_extra_nocturno);
+            $ArrayExtrasyDominicales = $this->CalculoHorasExtrasDominicalesTodo($reportes, $cumplioQuicena, $salario_hora, $this->paramBD, $H_diurno, $nocturnas, $extra_diurnas, $extra_nocturnas, $dominical_diurno, $dominical_nocturno, $dominical_extra_diurno, $dominical_extra_nocturno);
             // $Num_extra_diurnas = $ArrayExtrasyDominicales[1]; $Num_extra_nocturnas = $ArrayExtrasyDominicales[2]; $Num_dominical_diurno = $ArrayExtrasyDominicales[3]; $Num_dominical_nocturno = $ArrayExtrasyDominicales[4]; $Num_dominical_extra_diurno = $ArrayExtrasyDominicales[5]; $Num_dominical_extra_nocturno = $ArrayExtrasyDominicales[6];
             $ArrayExtrasyDominicales[7] = intval($reportes->sum('nocturnas'));
             $Novedad = 0;

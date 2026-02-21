@@ -87,7 +87,8 @@ Route::middleware('auth', 'verified')->group(function () {
 
     //# excel
     Route::get('users/export/{NumeroDiasFestivos}/{quincena}/{month}/{year}', [UserController::class, 'export'])->name('reporte1');
-    Route::get('users/downloadsigo/{NumeroDiasFestivos}/{quincena}/{month}/{year}', [UserController::class, 'downloadsigo']);
+    Route::get('users/downloadsigo/{NumeroDiasFestivos}/{quincena}/{month}/{year}', [ServiciosController::class, 'downloadsigo']);
+    // Route::get('users/downloadsigo/{NumeroDiasFestivos}/{quincena}/{month}/{year}', [UserController::class, 'downloadsigo']);
     Route::get('justcc', [ExcelController::class, 'CentroCostos']);
 
     //19abril2024
