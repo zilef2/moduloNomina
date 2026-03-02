@@ -409,7 +409,14 @@ const create = () => {
         form.transform((data) => ({
             ...data,
             // Asegurar que todas las fechas salgan como rango [inicio, fin]
-            fecha_inicial: data.fecha_inicial.map(f => (f && !Array.isArray(f)) ? [f, f] : f)
+            fecha_inicial: data.fecha_inicial.map(f => {
+                if (!f) return null;
+                if (!Array.isArray(f)) {
+                    // Si es una sola fecha, duplicarla para crear un rango de un día
+                    return [f, f];
+                }
+                return f;
+            })
         })).post(route('solicitud_viatico.store'), {
             preserveScroll: true,
             onSuccess: () => {
@@ -434,7 +441,7 @@ const create = () => {
         <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl8'">
             <form class="p-4 mb-36" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    {{ lang().label.add }} {{ props.title }}
+                    Nueva {{ props.title }}
                 </h2>
 
                 <div class="grid xs:grid-cols-1 md:grid-cols-3 2xl:grid-cols-6 gap-4 gap-y-5 mb-8">
@@ -541,7 +548,7 @@ const create = () => {
                             <label
                                 class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Rango
                                 de fechas</label>
-                            <VueDatePicker :enable-time-picker="false" :time-picker="false" :range="{ autoRange: 4 }"
+                            <VueDatePicker :enable-time-picker="false" :range="{ autoRange: 4 }"
                                 auto-apply v-model="form.fecha_inicial[index]" :day-names="daynames" required
                                 :id="'fecha_inicial' + index" class="block w-full border-0" />
                         </div>
@@ -559,7 +566,8 @@ const create = () => {
                                 class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">
                                 Fecha del viaje
                             </label>
-                            <TextInput type="date" v-model="form.fecha_inicial[index]" required
+                            <TextInput type="date" :modelValue="Array.isArray(form.fecha_inicial[index]) ? form.fecha_inicial[index][0] : form.fecha_inicial[index]"
+                                @update:modelValue="(value) => { form.fecha_inicial[index] = [value, value]; }" required
                                 :id="'fecha_inicial' + index" class="py-1.5 w-full" />
                         </div>
 

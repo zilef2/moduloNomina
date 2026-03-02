@@ -225,6 +225,16 @@ class SolicitudViaticoController extends Controller
 
 		$IntCentroid = $request->centro_costo_id['id'];
 		foreach ($request->descripcion as $index => $descrip) {
+			// Validar que fecha_inicial exista y sea un array
+			if (!isset($request->fecha_inicial[$index]) || !is_array($request->fecha_inicial[$index])) {
+				return back()->with('error', 'Formato de fechas inválido en el ítem ' . ($index + 1));
+			}
+			
+			// Validar que el array tenga al menos 2 elementos
+			if (count($request->fecha_inicial[$index]) < 2) {
+				return back()->with('error', 'Se requieren fecha de inicio y fin en el ítem ' . ($index + 1));
+			}
+			
 			$date = new DateTime($request->fecha_inicial[$index][0]);
 			$ini = $date->format('Y-m-d');
 			$date = new DateTime($request->fecha_inicial[$index][1]);

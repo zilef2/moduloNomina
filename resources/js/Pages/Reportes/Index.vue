@@ -171,7 +171,7 @@ watch(() => data.hideColumns, (val) => {
          "dominical diurno",
          "dominical nocturno",
          "dominical extra diurno",
-         "dominical extra nocturno", "observaciones" 
+         "dominical extra nocturno", "observaciones"
         */
         displayTitles.value = props.nombresTabla[0].map(t => compactMap[t] || t);
     } else {
@@ -365,7 +365,9 @@ const handleCheckboxChange = (values) => {
                     <div class="flex flex-wrap items-center gap-2">
                         <TextInput v-model="data.params.search" v-show="props.numberPermissions >= 1" type="text"
                             min="0" max="12" class="w-28 h-10 rounded-lg" placeholder="Mes" />
-
+                            <!-- Día Único -->
+                        <TextInput v-model="data.params.searchDDay" type="number" min="0"
+                            max="31" class="w-24 h-10 rounded-lg" :placeholder="lang().placeholder.searchDDay" />
 
                         <!-- Toggle Compacto -->
                         <div class="flex items-center gap-1 mx-2 bg-gray-100 dark:bg-gray-700 p-1 px-2 rounded-lg h-10">
@@ -378,10 +380,6 @@ const handleCheckboxChange = (values) => {
                             <Checkbox v-model:checked="data.showRangeFilter" id="range-toggle" />
                             <InputLabel for="range-toggle" value="Rango" class="text-xs cursor-pointer" />
                         </div>
-
-                        <!-- Día Único -->
-                        <TextInput v-model="data.params.searchDDay" v-show="!data.showRangeFilter" type="number" min="0"
-                            max="31" class="w-24 h-10 rounded-lg" :placeholder="lang().placeholder.searchDDay" />
 
                         <!-- Rango de Días -->
                         <TextInput v-model="data.params.search1" v-show="data.showRangeFilter" type="number" min="0" max="31"
@@ -500,7 +498,7 @@ const handleCheckboxChange = (values) => {
                                 showSelect[clasegenerica.centro_costo_id]
                                 }}
                             </td>
-                            <td v-show="can(['updateCorregido reporte'])" class="whitespace-nowrap py-4 px-2 sm:py-3">
+                            <td v-show="can(['updateCorregido reporte'])" class="flex-wrap py-4 px-2 sm:py-3">
                                 {{ showUsers[clasegenerica.user_id] }}
                                 <span v-show="clasegenerica.name_aprobo">
                                     - {{ clasegenerica.name_aprobo }}

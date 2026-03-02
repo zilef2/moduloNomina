@@ -12,7 +12,7 @@ import Create from '@/Pages/CentroCostos/Create.vue';
 import Edit from '@/Pages/CentroCostos/Edit.vue';
 import Delete from '@/Pages/CentroCostos/Delete.vue';
 
-import { ChevronUpDownIcon, DocumentIcon, EyeIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/solid';
+import { ChevronUpDownIcon, DocumentIcon, EyeIcon, PencilIcon, TrashIcon, ListBulletIcon } from '@heroicons/vue/24/solid';
 import { formatPesosCol } from '@/global.ts';
 
 import InfoButton from '@/Components/InfoButton.vue';
@@ -37,7 +37,7 @@ const props = defineProps({
 const data = reactive({
     params: {
         search: props.filters?.search, //por nombre o descrip
-        searchSCC: props.filters?.searchSCC, //por supervisor
+        // searchSCC: props.filters?.searchSCC, //por supervisor
         search2: props.filters?.search2, //ver todos (solo super)
         search3: props.filters?.search3, //zona
         field: props.filters?.field,
@@ -52,9 +52,13 @@ const data = reactive({
     deleteOpen: false,
     deleteBulkOpen: false,
     generico: null,
-dataSet: usePage().props.app.perpage,
+    dataSet: usePage().props.app.perpage,
+    filtrosvue:{
+        searchSCC:'',
+    }
 })
 
+// <!--<editor-fold desc="temp">-->
 // Todos los datos cargados del servidor
 const allData = ref(props.fromController.data || [])
 
@@ -64,19 +68,19 @@ const currentPage = ref(1)
 // Datos filtrados localmente
 const filteredData = computed(() => {
     let result = [...allData.value];
-    
+
     // Filtro por nombre o descripción
     if (data.params.search) {
         const search = data.params.search.toLowerCase();
-        result = result.filter(item => 
+        result = result.filter(item =>
             (item.nombre || '').toLowerCase().includes(search) ||
             (item.descripcion || '').toLowerCase().includes(search)
         );
     }
-    
+
     // Filtro por supervisor
-    if (data.params.searchSCC) {
-        const searchSCC = data.params.searchSCC.toLowerCase();
+    if (data.filtrosvue.searchSCC) {
+        const searchSCC = data.filtrosvue.searchSCC.toLowerCase();
         result = result.filter(item => {
             if (item.supervi && item.supervi.length) {
                 return item.supervi.some(sup => (sup || '').toLowerCase().includes(searchSCC));
@@ -84,16 +88,17 @@ const filteredData = computed(() => {
             return false;
         });
     }
-    
+
     // Filtro por zona
     if (data.params.search3) {
         const search3 = data.params.search3;
-        result = result.filter(item => 
-            (item.Zouna || '') === search3 ||
-            (item.zona_id === search3.id)
+        const zonaValue = search3.value || search3;
+        result = result.filter(item =>
+            item.zona_id === zonaValue || 
+            (item.Zouna && item.Zouna.toLowerCase()) === (search3.label || '').toLowerCase()
         );
     }
-    
+
     // Filtros por columna
     if (data.params.columnFilters) {
         Object.entries(data.params.columnFilters).forEach(([key, value]) => {
@@ -109,7 +114,7 @@ const filteredData = computed(() => {
             }
         });
     }
-    
+
     return result;
 });
 
@@ -165,6 +170,21 @@ const reloadData = () => {
     })
 };
 
+// Traer todos los centros de costo
+const loadAll = () => {
+    let params = pickBy(data.params)
+    params.loadAll = true;
+    router.get(route("CentroCostos.index"), params, {
+        replace: true,
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: (page) => {
+            allData.value = page.props.fromController.data || [];
+            currentPage.value = 1;
+        }
+    })
+};
+
 // Observar cambios en el perPage para recargar datos
 // watch(() => data.params.perPage, () => {
 //     reloadData();
@@ -189,6 +209,7 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
 const fechaActual = new Date();
 const opciones = { month: 'long' }; // 'long' para el nombre completo del mes, 'short' para abreviatura
 const nombreMes = fechaActual.toLocaleDateString('es-ES', opciones);
+// <!--</editor-fold>-->
 </script>
 
 <template>
@@ -215,6 +236,13 @@ const nombreMes = fechaActual.toLocaleDateString('es-ES', opciones);
                         @click="data.createOpen = true">
                         <PlusIcon class="w-4 h-4 mr-1" />
                         {{ lang().button.add }} - you are super
+                    </PrimaryButton>
+
+                    <PrimaryButton 
+                        class="shadow-lg shadow-amber-500/20 transition-all hover:scale-105 bg-amber-500 hover:bg-amber-600"
+                        @click="loadAll">
+                        <ListBulletIcon class="w-4 h-4 mr-1" />
+                        Cargar Todos
                     </PrimaryButton>
 
                     <Create :show="data.createOpen" @close="data.createOpen = false"
@@ -259,7 +287,7 @@ const nombreMes = fechaActual.toLocaleDateString('es-ES', opciones);
                             <v-select v-model="data.params.search3" :options="props.losSelect['zona']" label="label"
                                 placeholder="Filtrar por Zona" class="custom-v-select"></v-select>
 
-                            <TextInput v-model="data.params.searchSCC" type="text"
+                            <TextInput v-model="data.filtrosvue.searchSCC" type="text"
                                 class="h-10 rounded-xl border-gray-200 focus:ring-amber-500"
                                 :placeholder="lang().placeholder.searchSupervisorCC" />
                         </div>
@@ -385,31 +413,31 @@ const nombreMes = fechaActual.toLocaleDateString('es-ES', opciones);
                             class="font-semibold">{{ totalFiltered }}</span>
                     </p>
                     <div class="flex items-center gap-2">
-                        <button 
-                            @click="currentPage = 1" 
+                        <button
+                            @click="currentPage = 1"
                             :disabled="currentPage === 1"
                             class="px-2 py-1 text-xs rounded border dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
                             ««
                         </button>
-                        <button 
-                            @click="prevPage" 
+                        <button
+                            @click="prevPage"
                             :disabled="currentPage === 1"
                             class="px-2 py-1 text-xs rounded border dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
                             «
                         </button>
-                        
+
                         <span class="text-sm px-2">
                             Página {{ currentPage }} de {{ totalPages }}
                         </span>
-                        
-                        <button 
-                            @click="nextPage" 
+
+                        <button
+                            @click="nextPage"
                             :disabled="currentPage === totalPages"
                             class="px-2 py-1 text-xs rounded border dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
                             »
                         </button>
-                        <button 
-                            @click="currentPage = totalPages" 
+                        <button
+                            @click="currentPage = totalPages"
                             :disabled="currentPage === totalPages"
                             class="px-2 py-1 text-xs rounded border dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
                             »»
