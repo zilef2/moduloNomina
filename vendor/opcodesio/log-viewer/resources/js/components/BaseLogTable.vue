@@ -87,6 +87,10 @@
               <mail-text-preview :mail="log.extra.mail_preview" />
             </tab-content>
 
+            <tab-content v-if="hasLaravelStackTrace(log)" tab-value="laravel_stack_trace">
+              <LaravelStackTraceDisplay :log="log" />
+            </tab-content>
+
             <tab-content tab-value="raw">
               <pre class="log-stack" v-html="highlightSearchResult(log.full_text, searchStore.query)"></pre>
               <template v-if="hasContext(log)">
@@ -151,6 +155,7 @@ import TabContainer from "./TabContainer.vue";
 import TabContent from "./TabContent.vue";
 import MailHtmlPreview from "./MailHtmlPreview.vue";
 import MailTextPreview from "./MailTextPreview.vue";
+import LaravelStackTraceDisplay from "./LaravelStackTraceDisplay.vue";
 import {computed} from "vue";
 
 const fileStore = useFileStore();
@@ -179,6 +184,10 @@ const hasContext = (log) => {
 const getExtraTabsForLog = (log) => {
   let tabs = [];
 
+  if (hasLaravelStackTrace(log)) {
+    tabs.push({ name: 'Stack Trace', value: 'laravel_stack_trace' });
+  }
+
   if (! log.extra || ! log.extra.mail_preview) {
     return tabs;
   }
@@ -195,10 +204,11 @@ const getExtraTabsForLog = (log) => {
 }
 
 const getTabsForLog = (log) => {
-  return [
-    ...getExtraTabsForLog(log),
-    { name: 'Raw', value: 'raw' },
-  ].filter(Boolean);
+  const tabs = [...getExtraTabsForLog(log)];
+
+  tabs.push({ name: 'Raw', value: 'raw' });
+
+  return tabs.filter(Boolean);
 }
 
 const prepareContextForOutput = (context) => {
@@ -209,6 +219,13 @@ const prepareContextForOutput = (context) => {
 
     return value;
   }, 2);
+}
+
+const hasLaravelStackTrace = (log) => {
+  const exception = Array.isArray(log.context)
+    ? log.context.find(item => item.exception)?.exception
+    : log.context.exception;
+  return exception && typeof exception === 'string' && exception.includes('[stacktrace]');
 }
 
 const tableColumns = computed(() => {

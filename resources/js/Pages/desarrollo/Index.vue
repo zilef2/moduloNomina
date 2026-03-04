@@ -128,7 +128,7 @@ const soloFinalizadas = computed(() => {
 </script>
 
 <template>
-    <Head :title="props.title"/>
+    <Head :title="props.title" />
 
     <AuthenticatedLayout>
         <!-- Header Section -->

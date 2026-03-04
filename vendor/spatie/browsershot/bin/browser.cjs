@@ -2,6 +2,11 @@ const fs = require('fs');
 const URL = require('url').URL;
 const URLParse = require('url').parse;
 
+if (typeof global.ReadableStream === 'undefined') {
+    const {ReadableStream} = require("stream/web");
+    global.ReadableStream = ReadableStream;
+}
+
 const [, , ...args] = process.argv;
 
 /**
@@ -87,7 +92,15 @@ const callChrome = async pup => {
                 browser = await puppet.connect( options );
 
                 remoteInstance = true;
-            } catch (exception) { /** does nothing. fallbacks to launching a chromium instance */}
+            } catch (exception) {
+
+                if (request.options.throwOnRemoteConnectionError) {
+                    console.error(exception.toString());
+                    process.exit(4);
+                }
+
+                /** fallback to launching a chromium instance */
+            }
         }
 
         if (!browser) {
@@ -334,6 +347,21 @@ const callChrome = async pup => {
                     'clickCount': clickOptions.clickCount,
                     'delay': clickOptions.delay,
                 });
+            }
+        }
+
+        if (request.options && request.options.locatorClicks) {
+            for (let i = 0, len = request.options.locatorClicks.length; i < len; i++) {
+                let clickOptions = request.options.locatorClicks[i];
+                try {
+                    await page.locator(clickOptions.selector).click({
+                        'button': clickOptions.button,
+                        'clickCount': clickOptions.clickCount,
+                        'delay': clickOptions.delay,
+                    });
+                } catch (error) {
+                    console.error('Timeout error:', error);
+                }
             }
         }
 

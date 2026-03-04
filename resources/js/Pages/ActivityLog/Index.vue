@@ -98,7 +98,7 @@ const debouncedSearchDate = debounce((newSearchDate) => {
                 const SearchDate = parseLocalDate(newSearchDate);
                 console.log("=>(Index.vue:95) newSearchDate", newSearchDate);
                 console.log("=>(Index.vue:95) SearchDate", SearchDate);
-                
+
                 const activityDate = normalizeDate(activity.date);
                 console.log("=>(Index.vue:96) activityDate", activityDate);
 
@@ -120,10 +120,10 @@ watch(() => data.selectedDate, (newDateselected) => debouncedSearchDate(newDates
 </script>
 
 <template>
-    <Head :title="title"/>
+    <Head :title="title" />
 
     <AuthenticatedLayout>
-        <!--        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" class="capitalize text-xl font-bold"/>-->
+        <!--        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" class="capitalize text-xl font-bold" />-->
 
         <div class="py-6 px-4 sm:px-6 lg:px-8 bg-gray-200">
             <div class="bg-gray-100 dark:bg-gray-800 shadow sm:rounded-lg">
@@ -168,7 +168,7 @@ watch(() => data.selectedDate, (newDateselected) => debouncedSearchDate(newDates
                                 <span class="flex-shrink-0">
                                     <span class="inline-flex items-center justify-center h-8 w-8 rounded-full"
                                           :class="actionColors[activity.action.type]">
-                                        <FunnelIcon :name="activity.action.icon" class="h-5 w-5"/>
+                                        <FunnelIcon :name="activity.action.icon" class="h-5 w-5" />
                                     </span>
                                 </span>
 
@@ -213,8 +213,8 @@ watch(() => data.selectedDate, (newDateselected) => debouncedSearchDate(newDates
                                 </div>
 
                                 <span class="text-gray-400">
-                                    <ChevronDownIcon v-if="!isExpanded(index)" class="h-5 w-5"/>
-                                    <ChevronUpIcon v-else class="h-5 w-5"/>
+                                    <ChevronDownIcon v-if="!isExpanded(index)" class="h-5 w-5" />
+                                    <ChevronUpIcon v-else class="h-5 w-5" />
                                 </span>
                             </div>
                         </div>

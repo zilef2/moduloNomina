@@ -131,21 +131,21 @@ const selectedcc = computed({
 
 
                     <div class="">
-                        <InputLabel for="gastoid" :value="lang().label['gasto']"/>
+                        <InputLabel for="gastoid" :value="lang().label['gasto']" />
                         <TextInput id="gastoid" v-model="form.gasto"
                                    :error="form.errors.gasto"
                                    placeholder="Gasto" type="number"
                                    class="mt-1 block w-full"
-                                   required/>
-                        <InputError :message="form.errors.gasto" class="mt-2"/>
+                                   required />
+                        <InputError :message="form.errors.gasto" class="mt-2" />
                     </div>
                     <div class="">
-                        <InputLabel for="descripcionid" :value="lang().label.descripcion"/>
+                        <InputLabel for="descripcionid" :value="lang().label.descripcion" />
                         <TextInput id="descripcionid" v-model="form.descripcion"
                                    :error="form.errors.descripcion"
                                    placeholder="Descripcion" type="text"
-                                   class="mt-1 block w-full" required/>
-                        <InputError :message="form.errors.descripcion" class="mt-2"/>
+                                   class="mt-1 block w-full" required />
+                        <InputError :message="form.errors.descripcion" class="mt-2" />
                     </div>
 
 
@@ -154,7 +154,7 @@ const selectedcc = computed({
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}</SecondaryButton>
                     <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="ml-3"
                                    @click="update">
-                        {{ form.processing ? 
+                        {{ form.processing ?
                             lang().button.save + '...' : lang().button.save }}
                     </PrimaryButton>
                 </div>

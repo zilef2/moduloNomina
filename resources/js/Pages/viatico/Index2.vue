@@ -168,7 +168,7 @@ let classbotones = "w-6 h-6"
 <!--                               class="block w-4/6 md:w-3/6 lg:w-full mx-1 rounded-lg" placeholder="Persona" />-->
 <!--                      <p class="text-sm -mx-1 px-4">Mostrar todos</p>-->
 <!--                        <checkbox v-if="props.numberPermissions > 8" v-model="data.params.search3"-->
-<!--                                  class="p-2 mx-12 my-3"/>-->
+<!--                                  class="p-2 mx-12 my-3" />-->
                     </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
@@ -181,7 +181,7 @@ let classbotones = "w-6 h-6"
                             <th v-if="numberPermissions > 1" class="px-2 py-4">Accion</th>
 
 <!--                            <th class="px-2 py-4 text-center">#</th>-->
-                            
+
                             <th v-for="titulo in titulos" class="px-2 py-4 cursor-pointer"
                                 v-on:click="order(titulo['order'])">
                                 <div class="flex justify-between items-center">
@@ -189,7 +189,7 @@ let classbotones = "w-6 h-6"
                                     <ChevronUpDownIcon class="w-4 h-4" />
                                 </div>
                             </th>
-                            
+
 
                         </tr>
                         </thead>
@@ -237,13 +237,13 @@ let classbotones = "w-6 h-6"
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['userino'] }}</td>
                             <td class="min-w-[440px] py-2 px-2"> {{ claseFromController['descripcion'] }}</td>
                             <td class="whitespace-nowrap py-2 px-2">
-                                <p v-for="item in claseFromController['Consignaciona']" :key="item.id" 
+                                <p v-for="item in claseFromController['Consignaciona']" :key="item.id"
                                    class="whitespace-nowrap py-2 px-2">
                                     {{ formatPesosCol(item['valor']) }}
                                 </p>
                             </td>
                             <td class="whitespace-nowrap py-2 px-2">
-                                <p v-for="item in claseFromController['Consignaciona']" :key="item.id" 
+                                <p v-for="item in claseFromController['Consignaciona']" :key="item.id"
                                    class="whitespace-nowrap py-2 px-2">
                                     {{ formatDate(item['fecha']) }}
                                 </p>
@@ -252,9 +252,9 @@ let classbotones = "w-6 h-6"
                             <td class="whitespace-nowrap py-2 px-8">{{ formatDate(claseFromController['fecha_inicial']) }}</td>
                             <td class="whitespace-nowrap py-2 px-8">{{ formatDate(claseFromController['fecha_final']) }}</td>
                             <td class="whitespace-nowrap py-2 px-8">{{ (claseFromController['numerodias']) }}</td>
-                            
+
                              <td class="whitespace-nowrap py-2 px-2">
-                                <p v-for="item in claseFromController['Consignaciona']" :key="item.id" 
+                                <p v-for="item in claseFromController['Consignaciona']" :key="item.id"
                                    class="whitespace-nowrap py-2 px-2">
 <!--                                    {{item}}-->
                                     {{ formatPesosCol(item['valor_legalizacion']) }}
@@ -262,28 +262,28 @@ let classbotones = "w-6 h-6"
                                 </p>
                             </td>
                              <td class="whitespace-nowrap py-2 px-2">
-                                <p v-for="item in claseFromController['Consignaciona']" :key="item.id" 
+                                <p v-for="item in claseFromController['Consignaciona']" :key="item.id"
                                    class="whitespace-nowrap py-2 px-2">
                                     {{ (item['descripcion_legalizacion']) }}
                                 </p>
                             </td>
                              <td class="whitespace-nowrap py-2 px-2">
-                                <p v-for="item in claseFromController['Consignaciona']" :key="item.id" 
+                                <p v-for="item in claseFromController['Consignaciona']" :key="item.id"
                                    class="whitespace-nowrap py-2 px-2">
                                     {{ formatDate(item['fecha_legalizacion']) }}
 <!--                                    {{ (item['fecha_legalizacion']) }}-->
 <!--                                    {{ formatDate(item['fecha_legalizado']) }}-->
                                 </p>
                             </td>
-                            
+
 <!--                            <td class="whitespace-nowrap py-2 px-2"> {{ formatPesosCol(claseFromController['valor_legalizacion'])}} {{ claseFromController['legalizacion'] ? '✅': '❌'}}</td>-->
 <!--                            <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['descripcion_legalizacion']}}</td>-->
 <!--                            <td class="whitespace-nowrap py-2 px-2">{{ formatDate(claseFromController['fecha_legalizacion']) }}</td>-->
                             <td class="whitespace-nowrap py-2 px-2"> {{ claseFromController['centrou'] }}</td>
-                            
+
                         </tr>
-                        
-                        
+
+
                         <tr class="border-t border-gray-600">
                             <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>
                             <td class="whitespace-nowrap py-4 w-12 px-2 sm:py-3 text-center"> - </td>

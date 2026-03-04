@@ -79,8 +79,8 @@ const form = useForm({
                     <Create :show="data.createOpen" @close="data.createOpen = false" :title="props.title" />
 
                     <Edit :show="data.editOpen" @close="data.editOpen = false" :title="props.title"
-                        :parametros="data.generico" 
-                        :numberPermissions="props.numberPermissions" 
+                        :parametros="data.generico"
+                        :numberPermissions="props.numberPermissions"
                         />
 
                     <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :title="props.title"
@@ -145,8 +145,11 @@ const form = useForm({
                                 <td class="whitespace-nowrap py-4 px-5 sm:py-3"> </td>
                                 <td class="whitespace-nowrap py-4 px-5 sm:py-3"> </td>
                                 <td class="whitespace-nowrap py-4 px-5 sm:py-3"> </td>
+                                <td class="whitespace-nowrap py-4 px-5 sm:py-3"> </td>
+                                <td class="whitespace-nowrap py-4 px-5 sm:py-3"> </td>
+                                <td class="whitespace-nowrap py-4 px-5 sm:py-3"> </td>
                                 <td class="whitespace-nowrap py-4 px-5 sm:py-3 font-bold text-amber-600">
-                                    Quincenal: {{ PasarDiaAQuincena(fromController[0]['subsidio_de_transporte_dia']) }}
+                                    Subsidio de transporte Quincenal: {{ PasarDiaAQuincena(fromController[0]['subsidio_de_transporte_dia']) }}
                                 </td>
                             </tr>
                         </tbody>

@@ -17,8 +17,8 @@
             stroke-linecap="round"
             stroke-linejoin="round"
         >
-            <Motion is="path" :ref="targetList[0]" d="M18 6 6 18"/>
-            <Motion is="path" :ref="targetList[1]" d="m6 6 12 12"/>
+            <Motion is="path" :ref="targetList[0]" d="M18 6 6 18" />
+            <Motion is="path" :ref="targetList[1]" d="m6 6 12 12" />
         </svg>
     </div>
 </template>

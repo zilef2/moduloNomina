@@ -2,6 +2,7 @@
 
 namespace Opcodes\LogViewer\Http\Controllers;
 
+use Opcodes\LogViewer\Enums\SortingMethod;
 use Opcodes\LogViewer\Facades\LogViewer;
 use Opcodes\LogViewer\LogFolder;
 use Opcodes\LogViewer\Utils\Utils;
@@ -14,15 +15,20 @@ class IndexController
             abort(404);
         }
 
+        $files_sort_by_time = config('log-viewer.defaults.file_sorting_method') === SortingMethod::ModifiedTime;
+        $assetsPublished = LogViewer::assetsArePublished();
+
         return view(LogViewer::getViewLayout(), [
+            'assetsPublished' => $assetsPublished,
             'logViewerScriptVariables' => [
                 'headers' => (object) [],
-                'assets_outdated' => ! LogViewer::assetsAreCurrent(),
+                'assets_outdated' => $assetsPublished && ! LogViewer::assetsAreCurrent(),
                 'version' => LogViewer::version(),
                 'app_name' => config('app.name'),
                 'path' => config('log-viewer.route_path'),
                 'back_to_system_url' => config('log-viewer.back_to_system_url'),
                 'back_to_system_label' => config('log-viewer.back_to_system_label'),
+                'files_sort_by_time' => $files_sort_by_time,
                 'max_log_size_formatted' => Utils::bytesForHumans(LogViewer::maxLogSize()),
                 'show_support_link' => config('log-viewer.show_support_link', true),
 

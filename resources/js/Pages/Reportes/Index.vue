@@ -396,7 +396,7 @@ const handleCheckboxChange = (values) => {
                     <!-- Selector de Centro -->
                     <div v-if="props.numberPermissions > 1" class="flex items-center gap-2">
                         <vSelect v-model="data.params.search5" :options="props.losSelect['centros']" label="name"
-                            :filterable="false" placeholder="Centro" class="min-w-[180px] h-10"></vSelect>
+                            :filterable="true" placeholder="Centro" class="min-w-[180px] h-10"></vSelect>
                     </div>
 
                     <!-- Filtro por trabajador -->
@@ -625,7 +625,7 @@ const handleCheckboxChange = (values) => {
                     <!--                            Reportes de este mes: <b>{{ props.nombrePersona }}</b>-->
                     <!--                        </h2>-->
                     <!--                        <div class="m-1 p-1 w-full">-->
-                    <!--                            <Bar id="my-chart-id" :options="chartOptions" :data="chartData"/>-->
+                    <!--                            <Bar id="my-chart-id" :options="chartOptions" :data="chartData" />-->
                     <!--                        </div>-->
                     <!--                    </div>-->
                     <!-- <div class="p-1 md:w-1/2 flex flex-col items-start">

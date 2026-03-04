@@ -80,6 +80,7 @@ Route::middleware('auth', 'verified')->group(function () {
     //</editor-fold>
 
     Route::resource('/CentroCostos', CentroCostosController::class); //show -> reportes del centro
+    Route::get('/centro-costos/{id}/cost-details', [CentroCostosController::class, 'getCostDetails'])->name('centro-costos.cost-details');
     Route::resource('/Reportes', ReportesController::class);
     Route::post('/Reportes/destroy-bulk', [ReportesController::class, 'destroyBulk'])->name('reporte.destroy-bulk');
     Route::post('/MassiveReportes', [ReportesController::class, 'MassiveReportes'])->name('MassiveReportes');
@@ -111,11 +112,11 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::put('/cotiza3/{id}', [CotizacionController::class, 'update3'])->name('cotizacion.update3');
     Route::get('/deuda', [DeudaSingularController::class, 'index'])->name('deuda.index');
 	Route::resource("/viatico", ViaticoController::class);
-	
-	
+
+
 	Route::resource("/consignarViatico", ConsignarViaticoController::class);
-	
-	
+
+
     Route::put('/viaticoupdate2/{id}', [SolicitudViaticoController::class, 'viaticoupdate2'])->name('viaticoupdate2');
     Route::get('/viatico2', [ViaticoController::class, 'viatico2'])->name('viatico2');
     Route::put('/legalizarviatico/{id}', [SolicitudViaticoController::class, 'legalizarviatico'])->name('legalizarviatico');
@@ -124,16 +125,16 @@ Route::middleware('auth', 'verified')->group(function () {
 	Route::resource("/zona", \App\Http\Controllers\ZonaController::class);
 	Route::resource("/desarrollo", \App\Http\Controllers\DesarrolloController::class);
 	Route::resource("/pagodesarrollo", \App\Http\Controllers\PagodesarrolloController::class);
-    
+
     Route::put('/updatePago/{id}', [\App\Http\Controllers\DesarrolloController::class, 'updatePago'])->name('updatePago');
 	Route::resource("/legalizacionviatico", \App\Http\Controllers\LegalizacionviaticoController::class);
     Route::get('/obtenerCentroCostosUltimaQuincena', [ReportesController::class, 'obtenerCentroCostosUltimaQuincena'])->name('obtenerCentroCostosUltimaQuincena');
-    
+
 	Route::resource("/solicitud_viatico", SolicitudViaticoController::class);
     Route::get('/actyindex', [ActivityLogController::class, 'index'])->name('actyindex');
-	
+
 	Route::resource("/peusuario", \App\Http\Controllers\PeusuarioController::class);
-	//para mi 
+	//para mi
 	Route::get('/FuncionPruebas', [ReportesController::class, 'FuncionPruebas'])->name('FuncionPruebas');
 	Route::get('/FuncionPruebas2', [ReportesController::class, 'FuncionPruebas2'])->name('FuncionPruebas2');
 	Route::get('/CreateTest', [ReportesController::class, 'CreateTest'])->name('CreateTest');

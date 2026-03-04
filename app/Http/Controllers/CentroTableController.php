@@ -17,40 +17,11 @@ use Inertia\Response;
 
 class CentroTableController extends Controller
 {
-    private function noumbresTabla($numberPermissions): array
+    private function TheQuery(int $centrocostoid, Request $request, bool $acumulado = false): array
     {
-        if ($numberPermissions < 2) { //admin | administrativo
-            $nombresTabla = [//[0]: como se ven //[1] como es la BD
-                ['#', 'nombre'],
-                [null, 'nombre'],
-            ];
-        } else {
-            $nombresTabla = [//[0]: como se ven //[1] como es la BD
-                ['Acciones', '#', 'nombre', 'Mano obra estimada', 'usuarios', 'Supervisor', 'activo', 'descripcion', 'clasificacion'],
-                [null, null, 'nombre', 'mano_obra_estimada', null, null, 'activo', 'descripcion', 'clasificacion'],
-            ];
-        }
-        return $nombresTabla;
-    }
+        $fecha = $request->input('fecha_ini', ['month' => now()->month, 'year' => now()->year]);
+        $opcionQuincena = $request->input('quincena.value', $request->input('quincena', 3));
 
-
-    private function TheQuery(int $centrocostoid, $request, ?bool $plata = false): array
-    {
-        if ($request->fecha_ini && $request->quincena) {
-            $esteMes = $request->fecha_ini;
-            $opcionQuincena = $request->quincena;
-            if (!is_string($opcionQuincena)) {
-                $opcionQuincena = $request->quincena['value'];
-            }
-            $esteMes['month'] = intval($esteMes['month']) + 1;
-
-        } else {
-            $esteMes = [
-                'month' => date('m'),
-                'year' => date('Y'),
-            ];
-            $opcionQuincena = 3; //el mes completo
-        }
         $elSelect = [
             'user_id',
             DB::raw('COUNT(*) as total'),
@@ -66,153 +37,237 @@ class CentroTableController extends Controller
             DB::raw('SUM(dominical_extra_nocturno) as dominical_extra_nocturno'),
         ];
 
-        $Reportes = Reporte::Select($elSelect)
-            ->WhereYear('fecha_ini', $esteMes['year'])
-            ->WhereMonth('fecha_ini', $esteMes['month'])
-            ->Where('valido', 1)
-            ->where('centro_costo_id', $centrocostoid);
+        $query = Reporte::select($elSelect)
+            ->where('valido', 1)
+            ->where('centro_costo_id', $centrocostoid)
+            ->groupBy('user_id');
 
-        if ($opcionQuincena == 1) {
-            $Reportes = $Reportes->whereDay('fecha_ini', '<=', 15);
-        } else {
-            if ($opcionQuincena == 2) {
-                $Reportes = $Reportes->whereDay('fecha_ini', '>', 15);
+        if (!$acumulado) {
+            $query->whereYear('fecha_ini', $fecha['year'])->whereMonth('fecha_ini', $fecha['month'] + 1);
+            if ($opcionQuincena == 1) $query->whereDay('fecha_ini', '<=', 15);
+            if ($opcionQuincena == 2) $query->whereDay('fecha_ini', '>', 15);
+        }
+
+        $reportes = $query->get();
+
+        $reportes->each(function($r){
+            if($r->user) $r->usera = $r->user->name;
+            else $r->usera = 'Usuario no encontrado';
+        });
+
+        return [$reportes, $reportes->sum('horas_trabajadas')];
+    }
+
+    private function getMoneyModeReportsAndTotal($reportsCollection) {
+        $parametros = Parametro::find(1);
+        $totalManoObra = 0;
+
+        $reportsMoneyMode = $reportsCollection->map(function ($reporteu) use ($parametros, &$totalManoObra) {
+            $user = User::find($reporteu->user_id);
+            if ($user && $user->salario > 0) {
+                $salHora = $user->salario / 235;
+                $reporteClonado = clone $reporteu;
+
+                $reporteClonado->diurnas = $reporteu->diurnas * ($salHora * $parametros->porcentaje_diurno);
+                $reporteClonado->nocturnas = $reporteu->nocturnas * ($salHora * $parametros->porcentaje_nocturno);
+                $reporteClonado->extra_diurnas = $reporteu->extra_diurnas * ($salHora * $parametros->porcentaje_extra_diurno);
+                $reporteClonado->extra_nocturnas = $reporteu->extra_nocturnas * ($salHora * $parametros->porcentaje_extra_nocturno);
+                $reporteClonado->dominical_diurno = $reporteu->dominical_diurno * ($salHora * $parametros->porcentaje_dominical_diurno);
+                $reporteClonado->dominical_nocturno = $reporteu->dominical_nocturno * ($salHora * $parametros->porcentaje_dominical_nocturno);
+                $reporteClonado->dominical_extra_diurno = $reporteu->dominical_extra_diurno * ($salHora * $parametros->porcentaje_dominical_extra_diurno);
+                $reporteClonado->dominical_extra_nocturno = $reporteu->dominical_extra_nocturno * ($salHora * $parametros->porcentaje_dominical_extra_nocturno);
+
+                $costoReporte = $reporteClonado->diurnas + $reporteClonado->nocturnas + $reporteClonado->extra_diurnas + $reporteClonado->extra_nocturnas + $reporteClonado->dominical_diurno + $reporteClonado->dominical_nocturno + $reporteClonado->dominical_extra_diurno + $reporteClonado->dominical_extra_nocturno;
+
+                $reporteClonado->horas_trabajadas = $costoReporte;
+                $totalManoObra += $costoReporte;
+                $reporteClonado->usera = $user->name;
+                return $reporteClonado;
             }
-        }
-        $Reportes = $Reportes->groupBy('user_id')->get();
-        if ($plata) {
-            [$Reportes,$mano_obra_estimada] = $this->MultiplicarPorSalario($Reportes,$centrocostoid);
-        } else {
-            $Reportes->map(function ($reporteu) {
-                $reporteu->usera = $reporteu->user->name;
-                return $reporteu;
-            })->filter();
-        }
+            return $reporteu;
+        });
 
-        $page = request('page', 1); // Current page number
-        //        $perPage = $request->has('perPage') ? $request->perPage : 10;
-        $perPage = 1000;
-        $total = $Reportes->count();
-        $paginated = new LengthAwarePaginator(
-            $Reportes->forPage($page, $perPage),
-            $total,
-            $perPage,
-            $page,
-            ['path' => request()->url()]
-        );
-
-        return [$perPage, $paginated];
+        return [$reportsMoneyMode, $totalManoObra];
     }
 
     public function table(Request $request, $id): Response
     {
         $permissions = Myhelp::EscribirEnLog($this, ' |reportes table| ');
         $numberPermissions = MyModels::getPermissionToNumber($permissions);
-        $Authuser = Myhelp::AuthU();
-        $titulo = __('app.label.Reportes');
 
-        $nombresTabla = $this->noumbresTabla($numberPermissions);
-        $UltimoReporteRealizado = $this->UltimoReporteRealizadx($id); //return _ when no last report found
+        [$fromControllerHorasCollection, $totalMesHoras] = $this->TheQuery($id, $request, false);
+        [$fromControllerPlataCollection, $totalMesPlata] = $this->getMoneyModeReportsAndTotal(clone $fromControllerHorasCollection);
 
-        [$perPage, $paginated] = $this->TheQuery($id, $request, $request->plata);
+        [$fromControllerAcumuladoCollection, ] = $this->TheQuery($id, $request, true);
+        [$fromControllerAcumuladoPlataCollection, $totalAcumulado] = $this->getMoneyModeReportsAndTotal(clone $fromControllerAcumuladoCollection);
 
-        return Inertia::render('CentroCostos/table', [ //carpeta
+        $acumuladoTotals = $this->calculateColumnTotals($fromControllerAcumuladoPlataCollection);
+        $chartData = $this->prepareChartData($acumuladoTotals, $totalAcumulado);
+        $firstReportDate = Reporte::where('centro_costo_id', $id)->min('fecha_ini');
+        $monthlyTrendData = $this->getMonthlyTrendData($id);
+        $yearOptions = $firstReportDate ? range(Carbon::parse($firstReportDate)->year, now()->year) : [now()->year];
+
+        // Paginate the collections
+        $perPage = 200;
+        $page = request('page', 1);
+
+        $fromControllerHoras = new LengthAwarePaginator(
+            $fromControllerHorasCollection->forPage($page, $perPage),
+            $fromControllerHorasCollection->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url()]
+        );
+        $fromControllerPlata = new LengthAwarePaginator(
+            $fromControllerPlataCollection->forPage($page, $perPage),
+            $fromControllerPlataCollection->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url()]
+        );
+        $fromControllerAcumulado = new LengthAwarePaginator(
+            $fromControllerAcumuladoPlataCollection->forPage($page, $perPage),
+            $fromControllerAcumuladoPlataCollection->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url()]
+        );
+
+
+        return Inertia::render('CentroCostos/table', [
             'elIDD' => $id,
             'title' => CentroCosto::find($id)->nombre,
             'filters' => $request->all(['fecha_ini', 'quincena', 'plata']),
-            'perPage' => (int)$perPage,
-            'fromController' => $paginated,
-            'nombresTabla' => $nombresTabla,
-            'UltimoReporteRealizado' => $UltimoReporteRealizado,
+            'fromControllerHoras' => $fromControllerHoras,
+            'fromControllerPlata' => $fromControllerPlata,
+            'fromControllerAcumulado' => $fromControllerAcumulado,
+            'totalMesHoras' => $totalMesHoras,
+            'totalMesPlata' => $totalMesPlata,
+            'totalAcumulado' => $totalAcumulado,
+            'acumuladoTotals' => $acumuladoTotals,
+            'chartData' => $chartData,
+            'monthlyTrendData' => $monthlyTrendData,
+            'nombresTabla' => $this->noumbresTabla($numberPermissions),
+            'UltimoReporteRealizado' => $this->UltimoReporteRealizadx($id),
+            'firstReportDate' => $firstReportDate ? Carbon::parse($firstReportDate)->format('F Y') : null,
+            'yearOptions' => $yearOptions,
         ]);
     }
 
-    //CentroCosto->actualizarEstimado
-    public function MultiplicarPorSalario($Reportes,$id)
-    {
-        $vectorPruebasuser = [];
-        $vectorPruebas=[];
-        $parametros = Parametro::find(1);
-        $Acum_diurnas = 0;$Acum_nocturnas = 0;$Acum_extra_diurnas = 0;$Acum_extra_nocturnas = 0;$Acum_dominical_diurno = 0;$Acum_dominical_nocturno = 0;$Acum_dominical_extra_diurno = 0;$Acum_dominical_extra_nocturno = 0;
-          
-//        $Reportes->map(function ($reporteu) use ($parametros,&$vectorPruebasuser) {
-        foreach ($Reportes as $index => $reporteu) {
-            
-            $user = User::find($reporteu->user_id);
-            $vectorPruebasuser[] = $user->name;
-            if ($user) {
-                $sal = $user->salario / 235;
-                $porcentaje_diurno = $parametros->porcentaje_diurno * $sal;
-                $porcentaje_nocturno = $parametros->porcentaje_nocturno * $sal;
-                $porcentaje_extra_diurno = $parametros->porcentaje_extra_diurno * $sal;
-                $porcentaje_extra_nocturno = $parametros->porcentaje_extra_nocturno * $sal;
-                $porcentaje_dominical_diurno = $parametros->porcentaje_dominical_diurno * $sal;
-                $porcentaje_dominical_nocturno = $parametros->porcentaje_dominical_nocturno * $sal;
-                $porcentaje_dominical_extra_diurno = $parametros->porcentaje_dominical_extra_diurno * $sal;
-                $porcentaje_dominical_extra_nocturno = $parametros->porcentaje_dominical_extra_nocturno * $sal;
-
-                $vardiurnas = ((float)$reporteu->diurnas) * $porcentaje_diurno;
-                $varnocturnas = ((float)$reporteu->nocturnas) * $porcentaje_nocturno;
-                $varextra_diurnas = ((float)$reporteu->extra_diurnas) * $porcentaje_extra_diurno;
-                $varextra_nocturnas = ((float)$reporteu->extra_nocturnas) * $porcentaje_extra_nocturno;
-                $vardominical_diurno = ((float)$reporteu->dominical_diurno) * $porcentaje_dominical_diurno;
-                $vardominical_nocturno = ((float)$reporteu->dominical_nocturno) * $porcentaje_dominical_nocturno;
-                $vardominical_extra_diurno = ((float)$reporteu->dominical_extra_diurno) * $porcentaje_dominical_extra_diurno;
-                $vardominical_extra_nocturno = ((float)$reporteu->dominical_extra_nocturno) * $porcentaje_dominical_extra_nocturno;
-
-                $decoratotal = ($vardiurnas + $varnocturnas + $varextra_diurnas + $varextra_nocturnas + $vardominical_diurno + $vardominical_nocturno + $vardominical_extra_diurno + $vardominical_extra_nocturno);
-
-                $reporteu->horas_trabajadas = $decoratotal;
-                $reporteu->diurnas = $vardiurnas;
-                $reporteu->nocturnas = $varnocturnas;
-                $reporteu->extra_diurnas = $varextra_diurnas;
-                $reporteu->extra_nocturnas = $varextra_nocturnas;
-                $reporteu->dominical_diurno = $vardominical_diurno;
-                $reporteu->dominical_nocturno = $vardominical_nocturno;
-                $reporteu->dominical_extra_diurno = $vardominical_extra_diurno;
-                $reporteu->dominical_extra_nocturno = $vardominical_extra_nocturno;
-
-
-                $vectorPruebas[] = $vardiurnas;
-                $Acum_diurnas += $vardiurnas;
-                $Acum_nocturnas += $varnocturnas;
-                $Acum_extra_diurnas += $varextra_diurnas;
-                $Acum_extra_nocturnas += $varextra_nocturnas;
-                $Acum_dominical_diurno += $vardominical_diurno;
-                $Acum_dominical_nocturno += $vardominical_nocturno;
-                $Acum_dominical_extra_diurno += $vardominical_extra_diurno;
-                $Acum_dominical_extra_nocturno += $vardominical_extra_nocturno;
-                
-                $reporteu->usera = $reporteu->user->name;
+    private function calculateColumnTotals($data) {
+        $totals = [
+            'diurnas' => 0, 'nocturnas' => 0, 'extra_diurnas' => 0, 'extra_nocturnas' => 0,
+            'dominical_diurno' => 0, 'dominical_nocturno' => 0, 'dominical_extra_diurno' => 0, 'dominical_extra_nocturno' => 0,
+        ];
+        foreach ($data as $report) {
+            foreach ($totals as $key => &$value) {
+                $value += $report->$key;
             }
-//            return $reporteu;
         }
-        $mano_obra_estimada = (int) ($Acum_diurnas + $Acum_nocturnas + $Acum_extra_diurnas + $Acum_extra_nocturnas 
-            + $Acum_dominical_diurno + $Acum_dominical_nocturno + $Acum_dominical_extra_diurno 
-            + $Acum_dominical_extra_nocturno);
-        
-//        });
-//        if($id == 78)dd($mano_obra_estimada,
-//            $Acum_diurnas , $Acum_nocturnas , $Acum_extra_diurnas , $Acum_extra_nocturnas 
-//            , $Acum_dominical_diurno , $Acum_dominical_nocturno , $Acum_dominical_extra_diurno 
-//            , $Acum_dominical_extra_nocturno, $vectorPruebas
-//        );
-        
-        return [$Reportes,$mano_obra_estimada];
+        return $totals;
+    }
+
+    private function getMonthlyTrendData($centroCostoId) {
+        $monthlyCosts = Reporte::where('centro_costo_id', $centroCostoId)
+            ->select(
+                DB::raw('YEAR(fecha_ini) as year'),
+                DB::raw('MONTH(fecha_ini) as month')
+            )
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->orderBy('month', 'asc')
+            ->get();
+
+        $labels = [];
+        $data = [];
+
+        foreach ($monthlyCosts as $cost) {
+            $labels[] = Carbon::createFromDate($cost->year, $cost->month, 1)->format('M Y');
+            $reportesDelMes = Reporte::where('centro_costo_id', $centroCostoId)
+                ->whereYear('fecha_ini', $cost->year)
+                ->whereMonth('fecha_ini', $cost->month)
+                ->get();
+            [, $costoMensual] = $this->getMoneyModeReportsAndTotal(clone $reportesDelMes);
+            $data[] = $costoMensual;
+        }
+
+        return [
+            'labels' => $labels,
+            'datasets' => [[
+                'label' => 'Costo Mensual',
+                'backgroundColor' => '#34d399',
+                'borderColor' => '#34d399',
+                'data' => $data,
+                'tension' => 0.1,
+            ]],
+        ];
+    }
+
+
+    private function prepareChartData($totals, $grandTotal) {
+        $labels = array_keys($totals);
+        $data = array_values($totals);
+
+        array_unshift($labels, 'Total');
+        array_unshift($data, $grandTotal);
+
+        $backgroundColors = array_map(fn($label) => $label === 'Total' ? '#ef4444' : '#f59e0b', $labels);
+
+        return [
+            'labels' => $labels,
+            'datasets' => [[
+                'label' => 'Costo Acumulado',
+                'backgroundColor' => $backgroundColors,
+                'data' => $data,
+            ]],
+        ];
+    }
+
+    public function MultiplicarPorSalario($Reportes)
+    {
+        $parametros = Parametro::find(1);
+        $totalManoObra = 0;
+
+        $reportesCalculados = $Reportes->map(function ($reporteu) use ($parametros, &$totalManoObra) {
+            $user = User::find($reporteu->user_id);
+            if ($user && $user->salario > 0) {
+                $salHora = $user->salario / 235;
+                $reporteClonado = clone $reporteu;
+
+                $reporteClonado->diurnas = $reporteu->diurnas * ($salHora * $parametros->porcentaje_diurno);
+                $reporteClonado->nocturnas = $reporteu->nocturnas * ($salHora * $parametros->porcentaje_nocturno);
+                $reporteClonado->extra_diurnas = $reporteu->extra_diurnas * ($salHora * $parametros->porcentaje_extra_diurno);
+                $reporteClonado->extra_nocturnas = $reporteu->extra_nocturnas * ($salHora * $parametros->porcentaje_extra_nocturno);
+                $reporteClonado->dominical_diurno = $reporteu->dominical_diurno * ($salHora * $parametros->porcentaje_dominical_diurno);
+                $reporteClonado->dominical_nocturno = $reporteu->dominical_nocturno * ($salHora * $parametros->porcentaje_dominical_nocturno);
+                $reporteClonado->dominical_extra_diurno = $reporteu->dominical_extra_diurno * ($salHora * $parametros->porcentaje_dominical_extra_diurno);
+                $reporteClonado->dominical_extra_nocturno = $reporteu->dominical_extra_nocturno * ($salHora * $parametros->porcentaje_dominical_extra_nocturno);
+
+                $costoReporte = $reporteClonado->diurnas + $reporteClonado->nocturnas + $reporteClonado->extra_diurnas + $reporteClonado->extra_nocturnas + $reporteClonado->dominical_diurno + $reporteClonado->dominical_nocturno + $reporteClonado->dominical_extra_diurno + $reporteClonado->dominical_extra_nocturno;
+
+                $reporteClonado->horas_trabajadas = $costoReporte;
+                $totalManoObra += $costoReporte;
+                $reporteClonado->usera = $user->name;
+                return $reporteClonado;
+            }
+            return $reporteu;
+        });
+
+        return [$reportesCalculados, $totalManoObra];
+    }
+
+
+    private function noumbresTabla($numberPermissions): array
+    {
+        return [
+            ['Acciones', '#', 'nombre', 'Mano obra estimada', 'usuarios', 'Supervisor', 'activo', 'descripcion', 'clasificacion'],
+            [null, null, 'nombre', 'mano_obra_estimada', null, null, 'activo', 'descripcion', 'clasificacion'],
+        ];
     }
 
     private function UltimoReporteRealizadx($idcentrocosto): string
     {
-        $ultimorepo = Reporte::Where('centro_costo_id', $idcentrocosto)
-            ->latest()
-            ->first();
-		if($ultimorepo && $ultimorepo->fecha_ini){
-			
-            $returning = Carbon::parse($ultimorepo->fecha_ini)->diffForHumans();
-		}else{
-			return '_';
-		}
-
-        return 'La ultima modificación de este centro de costos fue: ' . $returning;
+        $ultimorepo = Reporte::where('centro_costo_id', $idcentrocosto)->latest('fecha_ini')->first();
+        return $ultimorepo ? 'La ultima modificación de este centro de costos fue: ' . Carbon::parse($ultimorepo->fecha_ini)->diffForHumans() : '_';
     }
 }

@@ -11,7 +11,7 @@ const props = defineProps({
     search: String,
     perPage: Number,
     numberPermissions: Number,
-    
+
 })
 const data = reactive({
     params: {
@@ -45,7 +45,7 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
 <template>
     <div class="flex justify-between p-2">
         <div class="flex space-x-2">
-            <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet"/>
+            <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet" />
             <!-- <DangerButton @click="data.deleteBulkOpen = true"
                 v-show="data.selectedId.length != 0 && can(['delete viatico'])" class="px-3 py-1.5"
                 v-tooltip="lang().tooltip.delete_selected">
@@ -53,6 +53,6 @@ watch(() => _.cloneDeep(data.params), debounce(() => {
             </DangerButton> -->
         </div>
         <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search" type="text"
-                   class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg" placeholder="Nombre, codigo"/>
+                   class="block w-4/6 md:w-3/6 lg:w-2/6 rounded-lg" placeholder="Nombre, codigo" />
     </div>
 </template>

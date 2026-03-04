@@ -65,21 +65,21 @@ const update = () => {
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
                     <div class="">
-                        <InputLabel for="valor" :value="lang().label.valor"/>
+                        <InputLabel for="valor" :value="lang().label.valor" />
                         <TextInput id="valor" type="number" class="mt-1 block w-full"
                                    v-model="form.valor" placeholder="valor"
-                                   :error="form.errors.valor"/>
-                        <InputError class="mt-2" :message="form.errors.valor"/> 
+                                   :error="form.errors.valor" />
+                        <InputError class="mt-2" :message="form.errors.valor" />
                     </div>
                     <div class="">
-                        <InputLabel for="fecha" :value="lang().label.fecha"/>
+                        <InputLabel for="fecha" :value="lang().label.fecha" />
                         <TextInput id="fecha" type="date" class="mt-1 block w-full"
                                    v-model="form.fecha" placeholder="fecha"
-                                   :error="form.errors.fecha"/>
-                        <InputError class="mt-2" :message="form.errors.fecha"/> 
+                                   :error="form.errors.fecha" />
+                        <InputError class="mt-2" :message="form.errors.fecha" />
                     </div>
                     <div class="">
-                        <InputLabel for="cuota" :value="lang().label.cuota"/>
+                        <InputLabel for="cuota" :value="lang().label.cuota" />
                         <TextInput id="cuota" type="number" class="mt-1 block w-full bg-gray-400"
                                    v-model="data.numCoutasaNow" disabled
                         />

@@ -119,30 +119,30 @@ const sexos = [{label: 'Masculino', value: 0}, {label: 'Femenino', value: 1}];
                                       v-model="form[atributosform.idd]"
                                       :reduce="element => element.value" label="name"
                             ></v-select>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
 
 
                         <!-- tiempo -->
                         <div v-else-if="atributosform.type === 'time'" id="SelectVue">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
                             <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
                                        v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                       :error="form.errors[atributosform.idd]" step="3600"/>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
+                                       :error="form.errors[atributosform.idd]" step="3600" />
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
 
 
                         <!-- normal -->
                         <div v-else class="">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
                             <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
                                        v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                       :error="form.errors[atributosform.idd]"/>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
+                                       :error="form.errors[atributosform.idd]" />
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
                     </div>
-                    
+
                 </div>
                 <div class=" my-8 flex justify-end">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}

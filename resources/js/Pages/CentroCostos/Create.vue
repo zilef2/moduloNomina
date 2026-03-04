@@ -80,22 +80,22 @@ const create = () => {
                 </h2>
                 <div class="my-6 grid grid-cols-2 gap-6">
                     <div>
-                        <InputLabel ref="nombre" for="nombre" :value="lang().label.name"/>
+                        <InputLabel ref="nombre" for="nombre" :value="lang().label.name" />
                         <TextInput id="nombre" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                    v-model="form.nombre"
-                                   :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas"/>
+                                   :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas" />
                     </div>
                     <div>
-                        <InputLabel ref="descripcion" for="descripcion" :value="lang().label.descripcion"/>
+                        <InputLabel ref="descripcion" for="descripcion" :value="lang().label.descripcion" />
                         <TextInput id="descripcion" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                    v-model="form.descripcion"
-                                   :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas"/>
+                                   :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas" />
                     </div>
                     <div>
-                        <InputLabel ref="clasificacion" for="clasificacion" :value="lang().label.clasificacion"/>
+                        <InputLabel ref="clasificacion" for="clasificacion" :value="lang().label.clasificacion" />
                         <TextInput id="clasificacion" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                    v-model="form.clasificacion"
-                                   :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas"/>
+                                   :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas" />
                     </div>
                     <div class="inline-flex mt-6">
                         <input
@@ -104,10 +104,10 @@ const create = () => {
                             type="checkbox" id="activo"
                             class="bg-gray-50 dark:bg-gray-600 mt-1 w-8 h-8 p-2 my-auto"
                         />
-                        <InputLabel ref="activo" for="activo" :value="lang().label.activo" class="mx-3 my-auto"/>
+                        <InputLabel ref="activo" for="activo" :value="lang().label.activo" class="mx-3 my-auto" />
                     </div>
                     <div>
-                        <InputLabel for="users" :value="lang().label.supervisores"/>
+                        <InputLabel for="users" :value="lang().label.supervisores" />
                         <div v-for="(user, index) in SelecSupervisores" :key="index" class="mt-1 block w-full">
                             <label :for="'user' + index">
                                 <input
@@ -119,7 +119,7 @@ const create = () => {
                                 {{ user.label }}
                             </label>
                         </div>
-                        <InputError class="mt-2" :message="form.errors.users"/>
+                        <InputError class="mt-2" :message="form.errors.users" />
                     </div>
                 </div>
 

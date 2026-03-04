@@ -96,16 +96,16 @@ watch(() => form.fecha_ini, (newX) => {
         // Avanzamos al día siguiente
         fechaActual.setDate(fechaActual.getDate() + 1);
     }
-    
+
     form.horas_validas = true
     let horaini, horafin
     newX.forEach((fecha, indice) => {
         console.log("🚀🚀 ~ fecha: ", fecha);
         if (!(fecha instanceof Date)){
           console.log("🚀🚀 ~ no es DAte!!!!!: ", fecha);
-            
+
             return;
-        } 
+        }
 
         // Si los minutos no son 0, los llevamos a 0
         if (fecha.getMinutes() !== 0) {
@@ -115,7 +115,7 @@ watch(() => form.fecha_ini, (newX) => {
 
             form.fecha_ini[indice] = fechaCorregida;
         }
-        
+
     });
     horaini = newX[0].getHours();
     horafin = newX[1].getHours();
@@ -129,7 +129,7 @@ watch(() => form.fecha_ini, (newX) => {
     }else{
         form.almuerzo = 0
     }
-    
+
 }, { deep: true })
 const daynames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
 const minTime = { hours: 6, minutes: 0 }   // 06:00 AM
@@ -185,7 +185,7 @@ const create = () => {
                 </div>
                 <div class="my-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="col-span-2">
-                        <InputLabel for="fecha_ini" :value="lang().label.fecha_ini"/>
+                        <InputLabel for="fecha_ini" :value="lang().label.fecha_ini" />
                         <VueDatePicker
                             :utc="false"
                             :disabled-dates="deshabilitarFinesDeSemana"
@@ -198,35 +198,35 @@ const create = () => {
                             v-model="form.fecha_ini"
                             class="mt-1 block w-full"
                         />
-                        <InputError class="mt-2" :message="form.errors.fecha_ini"/>
+                        <InputError class="mt-2" :message="form.errors.fecha_ini" />
                     </div>
                     <div class="mt-4">
-                        <InputLabel for="horas_trabajadas" :value="lang().label.horas_trabajadas"/>
+                        <InputLabel for="horas_trabajadas" :value="lang().label.horas_trabajadas" />
                         <TextInput id="horas_trabajadas" type="number"
                                    class="bg-gray-100 dark:bg-gray-700 mt-1 block w-full"
                                    v-model="form.horas_trabajadas" disabled
                                    :placeholder="lang().placeholder.horas_trabajadas"
-                                   :error="form.errors.horas_trabajadas"/>
-                        <InputError class="bg-gray-100 dark:bg-gray-700 mt-2" :message="form.errors.horas_trabajadas"/>
+                                   :error="form.errors.horas_trabajadas" />
+                        <InputError class="bg-gray-100 dark:bg-gray-700 mt-2" :message="form.errors.horas_trabajadas" />
                     </div>
 
                     <div class="mt-4">
-                        <InputLabel for="almuerzo" :value="lang().label.horacomida + ' (+9 horas)'"/>
+                        <InputLabel for="almuerzo" :value="lang().label.horacomida + ' (+9 horas)'" />
                         <TextInput id="almuerzo" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                    v-model="form.almuerzo" disabled
-                                   :placeholder="lang().placeholder.almuerzo" :error="form.errors.almuerzo"/>
+                                   :placeholder="lang().placeholder.almuerzo" :error="form.errors.almuerzo" />
                     </div>
 
                     <div class="mt-4 col-span-2">
-                        <InputLabel for="centro _costo_id" :value="lang().label.centro_costo_id"/>
+                        <InputLabel for="centro _costo_id" :value="lang().label.centro_costo_id" />
                         <SelectInput v-model="form.centro_costo_id" :dataSet="props.valoresSelect"
-                                     class="mt-1 block w-full"/>
-                        <InputError class="mt-2" :message="form.errors.centro_costo_id"/>
+                                     class="mt-1 block w-full" />
+                        <InputError class="mt-2" :message="form.errors.centro_costo_id" />
                     </div>
 <!--                    <div class="mt-4">-->
 <!--                        <label class="dark:text-white">Userid</label>-->
 <!--                        <TextInput id="user_id" type="number" class="bg-gray-100 dark:bg-gray-700 block w-full"-->
-<!--                                   v-model="form.user_id" required/>-->
+<!--                                   v-model="form.user_id" required />-->
 <!--                    </div>-->
                 </div>
                 <!-- <div class="my-6 ">
@@ -256,7 +256,7 @@ const create = () => {
                     <p class="m-2">Muchas Horas</p>
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}</SecondaryButton>
                 </div>
-                
+
             </form>
         </Modal>
     </section>

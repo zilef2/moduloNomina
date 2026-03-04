@@ -116,7 +116,7 @@ const recuperarHoras = (ReporteRecuperado) => {
     form.dominical_nocturnas = ReporteRecuperado.dominical_nocturnas
     form.dominical_extra_diurnas = ReporteRecuperado.dominical_extra_diurnas
     form.dominical_extra_nocturnas = ReporteRecuperado.dominical_extra_nocturnas
-    
+
     if (form.fecha_ini === '') form.fecha_ini = TransformTdate(ReporteRecuperado.fecha_ini)
     if (form.fecha_fin === '') form.fecha_fin = TransformTdate(ReporteRecuperado.fecha_fin)
     form.centro_costo_id = ReporteRecuperado.centro_costo_id
@@ -151,51 +151,51 @@ const daynames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
                 </h2>
                 <div class="my-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <InputLabel for="fecha_ini" :value="lang().label.fecha_ini"/>
+                        <InputLabel for="fecha_ini" :value="lang().label.fecha_ini" />
                         <VueDatePicker :is-24="false" :day-names="daynames" auto-apply :flow="['calendar', 'time']"
                                        :enable-time-picker="true" :teleport="true"
                                        id="fecha_ini" type="date" class="mt-1 block w-full" v-model="form.fecha_ini"
                                        disabled
-                                       :placeholder="lang().placeholder.fecha_ini" :error="form.errors.fecha_ini"/>
-                        <InputError class="mt-2" :message="form.errors.fecha_ini"/>
+                                       :placeholder="lang().placeholder.fecha_ini" :error="form.errors.fecha_ini" />
+                        <InputError class="mt-2" :message="form.errors.fecha_ini" />
                     </div>
                     <div>
-                        <InputLabel for="fecha_fin" :value="lang().label.fecha_fin"/>
+                        <InputLabel for="fecha_fin" :value="lang().label.fecha_fin" />
                         <VueDatePicker :is-24="false" :day-names="daynames" auto-apply :flow="['calendar', 'time']"
                                        :enable-time-picker="true" :teleport="true"
                                        id="fecha_fin" type="date" class="mt-1 block w-full" v-model="form.fecha_fin"
                                        disabled
-                                       :placeholder="lang().placeholder.fecha_fin" :error="form.errors.fecha_fin"/>
-                        <InputError class="mt-2" :message="form.errors.fecha_fin"/>
+                                       :placeholder="lang().placeholder.fecha_fin" :error="form.errors.fecha_fin" />
+                        <InputError class="mt-2" :message="form.errors.fecha_fin" />
                     </div>
                     <div>
-                        <InputLabel for="horas_trabajadas" :value="lang().label.horas_trabajadas"/>
+                        <InputLabel for="horas_trabajadas" :value="lang().label.horas_trabajadas" />
                         <TextInput id="horas_trabajadas" type="number"
                                    class="mt-1 block w-full bg-gray-100 dark:bg-gray-700"
                                    v-model="form.horas_trabajadas" disabled
                                    :placeholder="lang().placeholder.horas_trabajadas"
-                                   :error="form.errors.horas_trabajadas"/>
-                        <InputError class="mt-2" :message="form.errors.horas_trabajadas"/>
+                                   :error="form.errors.horas_trabajadas" />
+                        <InputError class="mt-2" :message="form.errors.horas_trabajadas" />
                     </div>
                     <div>
-                        <InputLabel for="almuerzo" :value="lang().label.horacomida + ' (+9 horas)'"/>
+                        <InputLabel for="almuerzo" :value="lang().label.horacomida + ' (+9 horas)'" />
                         <TextInput id="almuerzo" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                    v-model="form.almuerzo" disabled
-                                   :placeholder="lang().placeholder.almuerzo" :error="form.errors.almuerzo"/>
+                                   :placeholder="lang().placeholder.almuerzo" :error="form.errors.almuerzo" />
                     </div>
                     <!-- mt-80 -->
                     <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <InputLabel ref="label_diurnas" for="diurnas" :value="lang().label.diurnas"/>
+                            <InputLabel ref="label_diurnas" for="diurnas" :value="lang().label.diurnas" />
                             <TextInput id="diurnas" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                        v-model="form.diurnas" disabled
-                                       :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas"/>
+                                       :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas" />
                         </div>
                         <div>
-                            <InputLabel ref="label_nocturnas" for="nocturnas" :value="lang().label.nocturnas"/>
+                            <InputLabel ref="label_nocturnas" for="nocturnas" :value="lang().label.nocturnas" />
                             <TextInput id="nocturnas" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                        v-model="form.nocturnas" disabled
-                                       :placeholder="lang().placeholder.nocturnas" :error="form.errors.nocturnas"/>
+                                       :placeholder="lang().placeholder.nocturnas" :error="form.errors.nocturnas" />
                         </div>
                     </div>
                     <!-- mt-80 -->
@@ -203,86 +203,86 @@ const daynames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
                          class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <InputLabel ref="label_extra_diurnas" for="extra_diurnas"
-                                        :value="lang().label.extra_diurnas"/>
+                                        :value="lang().label.extra_diurnas" />
                             <TextInput id="extra_diurnas" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                        v-model="form.extra_diurnas" disabled
                                        :placeholder="lang().placeholder.extra_diurnas"
-                                       :error="form.errors.extra_diurnas"/>
+                                       :error="form.errors.extra_diurnas" />
                         </div>
                         <div>
                             <InputLabel ref="label_extra_nocturnas" for="extra_nocturnas"
-                                        :value="lang().label.extra_nocturnas"/>
+                                        :value="lang().label.extra_nocturnas" />
                             <TextInput id="extra_nocturnas" type="number"
                                        class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.extra_nocturnas"
                                        disabled
                                        :placeholder="lang().placeholder.extra_nocturnas"
-                                       :error="form.errors.extra_nocturnas"/>
+                                       :error="form.errors.extra_nocturnas" />
                         </div>
                     </div>
                     <!-- dominicales -->
                     <div v-if="form.dominicales == 'si'" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <InputLabel ref="label_diurnas" for="dominical_diurnas"
-                                        :value="lang().label.dominical_diurnas"/>
+                                        :value="lang().label.dominical_diurnas" />
                             <TextInput id="dominical_diurnas" type="number"
                                        class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.dominical_diurnas"
                                        disabled
                                        :placeholder="lang().placeholder.dominical_diurnas"
-                                       :error="form.errors.dominical_diurnas"/>
+                                       :error="form.errors.dominical_diurnas" />
                         </div>
                         <div>
                             <InputLabel ref="label_nocturnas" for="dominical_nocturnas"
-                                        :value="lang().label.dominical_nocturnas"/>
+                                        :value="lang().label.dominical_nocturnas" />
                             <TextInput id="dominical_nocturnas" type="number"
                                        class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                        v-model="form.dominical_nocturnas" disabled
                                        :placeholder="lang().placeholder.dominical_nocturnas"
-                                       :error="form.errors.dominical_nocturnas"/>
+                                       :error="form.errors.dominical_nocturnas" />
                         </div>
                     </div>
                     <div v-if="form.dominicales == 'si'" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <InputLabel ref="label_extra_diurnas" for="dominical_extra_diurnas"
-                                        :value="lang().label.dominical_extra_diurnas"/>
+                                        :value="lang().label.dominical_extra_diurnas" />
                             <TextInput id="dominical_extra_diurnas" type="number"
                                        class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                        v-model="form.dominical_extra_diurnas" disabled
                                        :placeholder="lang().placeholder.dominical_extra_diurnas"
-                                       :error="form.errors.dominical_extra_diurnas"/>
+                                       :error="form.errors.dominical_extra_diurnas" />
                         </div>
                         <div>
                             <InputLabel ref="label_extra_nocturnas" for="dominical_extra_nocturnas"
-                                        :value="lang().label.dominical_extra_nocturnas"/>
+                                        :value="lang().label.dominical_extra_nocturnas" />
                             <TextInput id="dominical_extra_nocturnas" type="number"
                                        class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                        v-model="form.dominical_extra_nocturnas" disabled
                                        :placeholder="lang().placeholder.dominical_extra_nocturnas"
-                                       :error="form.errors.dominical_extra_nocturnas"/>
+                                       :error="form.errors.dominical_extra_nocturnas" />
                         </div>
                     </div>
 
                     <div class="mt-4">
-                        <InputLabel for="centro_costo_id" :value="lang().label.centro_costo_id"/>
+                        <InputLabel for="centro_costo_id" :value="lang().label.centro_costo_id" />
                         <SelectInput v-model="form.centro_costo_id" :dataSet="props.valoresSelect" disabled
-                                     class="mt-1 block w-full"/>
-                        <InputError class="mt-2" :message="form.errors.centro_costo_id"/>
+                                     class="mt-1 block w-full" />
+                        <InputError class="mt-2" :message="form.errors.centro_costo_id" />
                     </div>
 
                     <div v-if="form.dominicales == 'si'" class="">
                         <label class="dark:text-white">Horario</label>
                         <TextInput id="dominicales" type="text" class="bg-gray-100 dark:bg-gray-700 block w-full"
-                                   v-model="TextFestivo" disabled/>
+                                   v-model="TextFestivo" disabled />
                     </div>
                 </div>
                 <div class="my-6 ">
                     <InputLabel for="observaciones"
-                                :value="lang().label.observaciones + ' (Porque se esta rechazando)'"/>
+                                :value="lang().label.observaciones + ' (Porque se esta rechazando)'" />
                     <textarea :disabled="(correccionUsuario)"
                               id="observaciones" type="text" v-model="form.observaciones"
                               class="mt-1 block w-full rounded-md shadow-sm dark:bg-black dark:text-white placeholder:text-gray-400 placeholder:dark:text-gray-400/50"
                               cols="30" rows="3" :error="form.errors.observaciones">
                         </textarea>
-                    <InputError class="mt-2" :message="form.errors.observaciones"/>
+                    <InputError class="mt-2" :message="form.errors.observaciones" />
                 </div>
                 <div class="flex justify-end">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}

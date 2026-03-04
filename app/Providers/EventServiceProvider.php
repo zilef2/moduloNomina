@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Listeners\LoginListener;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -17,6 +19,11 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+        // Sobreescribe el LoginListener de rappasoft para deshabilitar GeoIP
+        // (CACHE_DRIVER=database no soporta cache tags que usa torann/geoip)
+        Login::class => [
+            LoginListener::class,
         ],
     ];
 

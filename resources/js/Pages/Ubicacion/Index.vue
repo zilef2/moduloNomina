@@ -114,10 +114,10 @@ const ubicacionesName = [...new Set(clonedData.map(item => item.name))] // Elimi
 </script>
 
 <template>
-    <Head :title="props.title"/>
+    <Head :title="props.title" />
 
     <AuthenticatedLayout>
-        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs"/>
+        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />
         <div class="space-y-1">
 
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg my-2">
@@ -125,7 +125,7 @@ const ubicacionesName = [...new Set(clonedData.map(item => item.name))] // Elimi
                     <div class="flex lg:hidden xl:flex space-x-2 gap-1">
                         <TextInput v-model="data.params.search" v-tooltip="'Personas: '+ ubicacionesName + ' y otros...'"
                                    type="text" min="0" class="block w-2/3 md:w-full rounded-lg"
-                                   placeholder="Persona o ciudad"/>
+                                   placeholder="Persona o ciudad" />
                     </div>
                     <div class="flex lg:hidden xl:flex space-x-2 gap-1">
                         <TextInput v-model="data.params.search2"
@@ -135,10 +135,10 @@ const ubicacionesName = [...new Set(clonedData.map(item => item.name))] // Elimi
                                     />
                     </div>
                 </div>
-                
+
 <!--                fin de los filtros-->
                 <div class="flex justify-betwween items-center p-2 border-t border-gray-200 dark:border-gray-700">
-                    <SelectInput v-if="filters !== null" v-model="data.params.perPage" :dataSet="data.dataSet"/>
+                    <SelectInput v-if="filters !== null" v-model="data.params.perPage" :dataSet="data.dataSet" />
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
@@ -148,17 +148,17 @@ const ubicacionesName = [...new Set(clonedData.map(item => item.name))] // Elimi
                         <tr class="dark:bg-gray-900/50 text-left">
                             <th class="px-6 py-4 cursor-pointer" v-on:click="order('ubicacion')">
                                 <div class="flex justify-between items-center"><span>Ciudad</span>
-                                    <ChevronUpDownIcon class="w-4 h-4"/>
+                                    <ChevronUpDownIcon class="w-4 h-4" />
                                 </div>
                             </th>
                             <th class="px-2 py-4 cursor-pointer" v-on:click="order('name')">
                                 <div class="flex justify-between items-center"><span>Persona</span>
-                                    <ChevronUpDownIcon class="w-4 h-4"/>
+                                    <ChevronUpDownIcon class="w-4 h-4" />
                                 </div>
                             </th>
                             <th class="px-2 py-4 cursor-pointer" v-on:click="order('created_at')">
                                 <div class="flex justify-between items-center"><span>Registro</span>
-                                    <ChevronUpDownIcon class="w-4 h-4"/>
+                                    <ChevronUpDownIcon class="w-4 h-4" />
                                 </div>
                             </th>
                         </tr>
@@ -176,27 +176,27 @@ const ubicacionesName = [...new Set(clonedData.map(item => item.name))] // Elimi
                             <!--                                          class="inline-flex  items-center p-1.5 bg-gray-600 border border-transparent rounded-l-lg font-semibold text-xs text-white uppercase tracking-widest-->
                             <!--                                             hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-250"-->
                             <!--                                          v-tooltip="lang().tooltip.seeReport">-->
-                            <!--                                        <EyeIcon class="w-4 h-4"/>-->
+                            <!--                                        <EyeIcon class="w-4 h-4" />-->
                             <!--                                    </Link>-->
                             <!--                                    <div class="rounded-md overflow-hidden">-->
                             <!--                                        <InfoButton v-show="can(['update ubicacion'])" type="button"-->
                             <!--                                                    @click="(data.editOpen = true), (data.ubicacion = ubicacion)"-->
                             <!--                                                    class="px-2 py-1.5 rounded-sm mx-0.5"-->
                             <!--                                                    v-tooltip="lang().tooltip.edit">-->
-                            <!--                                            <PencilIcon class="w-4 h-4"/>-->
+                            <!--                                            <PencilIcon class="w-4 h-4" />-->
                             <!--                                        </InfoButton>-->
                             <!--                                        <InfoButton v-if="ubicacion.roles[0]"-->
                             <!--                                                    v-show="can(['update ubicacion']) && ubicacion.roles[0]?.name === 'supervisor'"-->
                             <!--                                                    type="button"-->
                             <!--                                                    @click="(data.EdiCentroOpen = true), (data.ubicacion = ubicacion)"-->
                             <!--                                                    class="px-2 py-1.5 rounded-sm mx-0.5" v-tooltip="'Asignar'">-->
-                            <!--                                            <LinkIcon class="w-4 h-4"/>-->
+                            <!--                                            <LinkIcon class="w-4 h-4" />-->
                             <!--                                        </InfoButton>-->
                             <!--                                        <DangerButton v-show="can(['delete ubicacion'])" type="button"-->
                             <!--                                                      @click="(data.deleteOpen = true), (data.ubicacion = ubicacion)"-->
                             <!--                                                      class="px-2 py-1.5 rounded-none"-->
                             <!--                                                      v-tooltip="lang().tooltip.delete">-->
-                            <!--                                            <TrashIcon class="w-4 h-4"/>-->
+                            <!--                                            <TrashIcon class="w-4 h-4" />-->
                             <!--                                        </DangerButton>-->
                             <!--                                    </div>-->
                             <!--                                </div>-->
@@ -206,7 +206,7 @@ const ubicacionesName = [...new Set(clonedData.map(item => item.name))] // Elimi
                     </table>
                 </div>
                 <div class="flex justify-between items-center p-2 border-t border-gray-200 dark:border-gray-700">
-                    <Pagination :links="props.ubicacions" :filters="data.params"/>
+                    <Pagination :links="props.ubicacions" :filters="data.params" />
                 </div>
             </div>
         </div>

@@ -111,7 +111,7 @@ const select = () => data.multipleSelect = props.fromController?.data.length ===
 // text // number - porcentaje - dinero // date // datetime // foreign //list?
 let titulos = [
     // { order: 'codigo', label: 'codigo', type: 'text' },
-    
+
     {order: 'numero_cot', label: 'numero_cot', type: 'text'},
     {order: 'centro_costo_id', label: 'centro_costo', type: 'id', nameid: 'nombre'},
     {order: 'Zouna', label: 'zona', type: 'text'},
@@ -126,7 +126,7 @@ let titulos = [
     {order: 'descripcion_cot', label: 'descripcion_cot', type: 'text'},
     {order: 'tipo', label: 'tipo', type: 'text'},
     // {order: 'tipo_de_mantenimiento', label: 'tipo_de_mantenimiento', type: 'text'},
-    
+
     {order: 'precio_cot', label: 'precio_cot', type: 'number'},
     {order: 'por_a', label: 'por_a', type: 'porcentaje'},
     {order: 'por_i', label: 'por_i', type: 'porcentaje'},
@@ -236,9 +236,9 @@ const tipoSelectable = [
 </script>
 
 <template>
-    <Head :title="props.title"/>
+    <Head :title="props.title" />
     <AuthenticatedLayout>
-        <!-- <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" class="capitalize text-xl font-bold"/> -->
+        <!-- <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" class="capitalize text-xl font-bold" /> -->
         <div class="space-y-2 my-2">
             <!-- {{ props.fromController.data[2] }} -->
             <div class="px-4 sm:px-0">
@@ -291,14 +291,14 @@ const tipoSelectable = [
                     />
                   <DeleteBulk :show="data.deleteBulkOpen"
                                 @close="data.deleteBulkOpen = false, data.multipleSelect = false, data.selectedId = []"
-                                :selectedId="data.selectedId" :title="props.title"/>
+                                :selectedId="data.selectedId" :title="props.title" />
 
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="flex justify-between py-2 xs:px-1 2xl:pr-12 pl-3">
                     <div class="flex space-x-2">
-                        <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet"/>
+                        <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet" />
                         <DangerButton @click="data.deleteBulkOpen = true"
                             v-show="data.selectedId.length !== 0 && can(['delete cotizacion'])" class="px-3 py-1.5"
                             v-tooltip="lang().tooltip.delete_selected">
@@ -308,19 +308,19 @@ const tipoSelectable = [
                     <div class="flex">
                         <p class="hidden 2xl:flex text-xs 2xl:text-sm mt-1 px-1 w-48">Solo Números</p>
                         <checkbox v-if="props.numberPermissions > 1" v-model="data.params.search4"
-                                  class="hidden 2xl:flex p-2 mr-6 ml-2 mt-3"/>
+                                  class="hidden 2xl:flex p-2 mr-6 ml-2 mt-3" />
                         <p class="hidden 2xl:flex text-sm mt-1 ml-6 px-1">Ocultar porcentajes</p>
                         <checkbox v-model="data.ocultar1"
-                                  class="hidden 2xl:flex p-2 mr-4 ml-6 mt-3"/>
+                                  class="hidden 2xl:flex p-2 mr-4 ml-6 mt-3" />
                         <p class="text-sm mt-3 ml-5 mr-0 px-2">Tipo</p>
                         <v-select v-model="data.params.search6" :options="tipoSelectable" label="label"
                                   class="min-w-44 mt-1 h-8">
                         </v-select>
                         <!--                        <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search2" type="text"-->
-                        <!--                                   class="block w-full lg:w-5/6 rounded-xl mx-2" placeholder="Descripción"/>-->
+                        <!--                                   class="block w-full lg:w-5/6 rounded-xl mx-2" placeholder="Descripción" />-->
                         <p class="text-sm mt-3 ml-5 mr-0 px-2">Aprobación</p>
                         <TextInput v-if="props.numberPermissions > 1" v-model="data.params.search3" type="date"
-                                   class="block w-full lg:w-5/6 rounded-xl mx-4 h-9 mt-1" placeholder=""/>
+                                   class="block w-full lg:w-5/6 rounded-xl mx-4 h-9 mt-1" placeholder="" />
                     </div>
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
@@ -328,7 +328,7 @@ const tipoSelectable = [
                         <thead class="uppercase text-[14px] border-t border-gray-200 dark:border-gray-700 sticky top-0 z-10 bg-white dark:bg-gray-800">
                         <tr class="dark:bg-gray-900/50 text-left">
                             <th class="px-2 py-4 text-center bg-white dark:bg-gray-800">
-                                <Checkbox v-model:checked="data.multipleSelect" @change="selectAll"/>
+                                <Checkbox v-model:checked="data.multipleSelect" @change="selectAll" />
                             </th>
                             <th v-if="numberPermissions > 1" class="px-2 py-4 bg-white dark:bg-gray-800">Accion</th>
 
@@ -337,7 +337,7 @@ const tipoSelectable = [
                                 v-on:click="order(titulo['order'])">
                                 <div class="flex justify-between items-center">
                                     <span>{{ lang().label[titulo['label']] }}</span>
-                                    <ChevronUpDownIcon class="w-4 h-4"/>
+                                    <ChevronUpDownIcon class="w-4 h-4" />
                                 </div>
                             </th>
                             <th
@@ -346,7 +346,7 @@ const tipoSelectable = [
                             >
                                 <div class="flex justify-between items-center">
                                     <span>Tiene Centro de costo</span>
-                                    <ChevronUpDownIcon class="w-4 h-4"/>
+                                    <ChevronUpDownIcon class="w-4 h-4" />
                                 </div>
                             </th>
                             <!-- <th class="px-2 py-4 cursor-pointer" v-on:click="order('fecha_nacimiento')">
@@ -362,7 +362,7 @@ const tipoSelectable = [
                             <th v-if="numberPermissions > 1" class="px-2 py-2 bg-gray-50 dark:bg-gray-900/30"></th> <!-- action column -->
                             <th class="px-2 py-2 bg-gray-50 dark:bg-gray-900/30"></th> <!-- # column -->
                             <th v-for="titulo in titulos" :key="'filter-' + titulo.order" class="px-2 py-2 bg-gray-50 dark:bg-gray-900/30">
-                                <TextInput 
+                                <TextInput
                                     v-model="data.params.columnFilters[titulo.order]"
                                     type="text"
                                     class="w-full text-xs h-8"
@@ -370,7 +370,7 @@ const tipoSelectable = [
                                 />
                             </th>
                             <th class="px-2 py-2 bg-gray-50 dark:bg-gray-900/30">
-                                <!-- <TextInput 
+                                <!-- <TextInput
                                     v-model="data.params.columnFilters['centro_costo_id']"
                                     type="text"
                                     class="w-full text-xs h-8"
@@ -386,7 +386,7 @@ const tipoSelectable = [
                                 <input
                                     class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-primary dark:text-primary shadow-sm focus:ring-primary/80 dark:focus:ring-primary dark:focus:ring-offset-gray-800 dark:checked:bg-primary dark:checked:border-primary"
                                     type="checkbox" @change="select" :value="claseFromController.id"
-                                    v-model="data.selectedId"/>
+                                    v-model="data.selectedId" />
                             </td>
                             <td v-if="numberPermissions > 1" class="whitespace-nowrap py-4 w-12 px-2 sm:py-3">
                                 <div class="flex justify-center items-center">
@@ -394,35 +394,35 @@ const tipoSelectable = [
                                         <InfoButton v-show="can(['update cotizacion']) && !claseFromController.factura" type="button"
                                                     @click="(data.editOpen = true), (data.cotizaciono = claseFromController)"
                                                     class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
-                                            <PencilIcon class="w-4 h-4"/>
+                                            <PencilIcon class="w-4 h-4" />
                                         </InfoButton>
                                         <DangerButton v-show="can(['update2 cotizacion']) && !claseFromController.centro_costo_id" type="button"
                                                       @click="(data.generarOpen = true), (data.cotizaciono = claseFromController)"
                                                       class="px-2 py-1.5 rounded-none"
                                                       v-tooltip="lang().permissions['update2 cotizacion']">
-                                            <RocketLaunchIcon class="w-4 h-4"/>
+                                            <RocketLaunchIcon class="w-4 h-4" />
                                         </DangerButton>
                                         <InfoButton v-show="can(['update3 cotizacion']) && claseFromController.centro_costo_id && !claseFromController.factura" type="button"
                                                     @click="(data.edit3Open = true), (data.cotizaciono = claseFromController)"
                                                     class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.update2_cotizacion">
-                                            <LockClosedIcon class="w-4 h-4"/>
+                                            <LockClosedIcon class="w-4 h-4" />
                                         </InfoButton>
                                         <DangerButton v-show="can(['delete cotizacion','issuper'])" type="button"
                                                       @click="(data.deleteOpen = true), (data.cotizaciono = claseFromController)"
                                                       class="px-2 py-1.5 rounded-none"
                                                       v-tooltip="lang().tooltip.delete">
-                                            <TrashIcon class="w-4 h-4"/>
+                                            <TrashIcon class="w-4 h-4" />
                                         </DangerButton>
                                     </div>
                                 </div>
                             </td>
                             <td class="whitespace-nowrap py-4 px-2 sm:py-3 text-center">{{ ++indexu }}</td>
                             <td v-for="titulo in titulos" class="py-4 px-2 sm:py-3">
-                                <span v-if="titulo['type'] === 'text123'" class=""> 
-                                    {{ claseFromController['tipo'] }} 
-                                    {{ claseFromController['tipo_de_mantenimiento'] }} 
+                                <span v-if="titulo['type'] === 'text123'" class="">
+                                    {{ claseFromController['tipo'] }}
+                                    {{ claseFromController['tipo_de_mantenimiento'] }}
                                 </span>
-                                <span v-if="titulo['type'] === 'text' && titulo['order'] === 'descripcion_cot'" 
+                                <span v-if="titulo['type'] === 'text' && titulo['order'] === 'descripcion_cot'"
                                       class="text-xs max-w-sm bg-gray-200 block break-words whitespace-normal leading-tight">
                                     {{ claseFromController[titulo['order']] }}
                                 </span>
@@ -468,11 +468,11 @@ const tipoSelectable = [
                             <h2 class="text-2xl pl-20 my-8">Sin Registros</h2>
                         </div>
                     </table>
-                    
+
                 </div>
                 <div v-if="props.total > 0"
                      class="flex justify-between items-center p-2 border-t border-gray-200 dark:border-gray-700">
-                    <Pagination :links="props.fromController" :filters="data.params"/>
+                    <Pagination :links="props.fromController" :filters="data.params" />
                 </div>
             </div>
         </div>

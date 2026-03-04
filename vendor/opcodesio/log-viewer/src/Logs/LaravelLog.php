@@ -60,27 +60,16 @@ class LaravelLog extends Log
         $this->message = trim($firstLineText);
         $text = $firstLineText.($matches[8] ?? '').implode('', $firstLineSplit)."\n".$theRestOfIt;
 
-        if (session()->get('log-viewer:shorter-stack-traces', false)) {
-            $excludes = config('log-viewer.shorter_stack_trace_excludes', []);
-            $emptyLineCharacter = '    ...';
-            $lines = explode("\n", $text);
-            $filteredLines = [];
-            foreach ($lines as $line) {
-                $shouldExclude = false;
-                foreach ($excludes as $excludePattern) {
-                    if (str_starts_with($line, '#') && str_contains($line, $excludePattern)) {
-                        $shouldExclude = true;
-                        break;
-                    }
-                }
+        $contentBeforeFiltering = trim($text);
 
-                if ($shouldExclude && end($filteredLines) !== $emptyLineCharacter) {
-                    $filteredLines[] = $emptyLineCharacter;
-                } elseif (! $shouldExclude) {
-                    $filteredLines[] = $line;
+        if (session()->get('log-viewer:shorter-stack-traces', false)) {
+            // Filter stack traces in text and context.
+            $text = $this->filterStackTrace($text);
+            foreach ($this->context as $key => $value) {
+                if (is_string($value)) {
+                    $this->context[$key] = $this->filterStackTrace($value);
                 }
             }
-            $text = implode("\n", $filteredLines);
         }
 
         if (strlen($text) > LogViewer::maxLogSize()) {
@@ -89,7 +78,7 @@ class LaravelLog extends Log
         }
 
         $this->text = trim($text);
-        $this->extractMailPreview();
+        $this->extractMailPreview($contentBeforeFiltering);
     }
 
     protected function fillMatches(array $matches = []): void
@@ -121,8 +110,8 @@ class LaravelLog extends Log
             $json_data = json_decode(trim($json_string), true);
 
             if (json_last_error() == JSON_ERROR_CTRL_CHAR) {
-                // might need to escape new lines
-                $json_data = json_decode(str_replace("\n", '\\n', $json_string), true);
+                // might need to escape new lines and carriage returns
+                $json_data = json_decode(str_replace(["\r\n", "\r", "\n"], ['\\n', '\\n', '\\n'], $json_string), true);
             }
 
             if (json_last_error() == JSON_ERROR_NONE) {
@@ -141,16 +130,16 @@ class LaravelLog extends Log
         }
     }
 
-    protected function extractMailPreview(): void
+    protected function extractMailPreview(string $originalText): void
     {
-        $possibleParts = preg_split('/[^\r]\n/', $this->text);
+        $possibleParts = preg_split('/[^\r]\n/', $originalText);
         $part = null;
 
         foreach ($possibleParts as $possiblePart) {
             if (
-                Str::contains($this->text, 'To:')
-                && Str::contains($this->text, 'From:')
-                && Str::contains($this->text, 'MIME-Version: 1.0')
+                Str::contains($possiblePart, 'To:')
+                && Str::contains($possiblePart, 'From:')
+                && Str::contains($possiblePart, 'MIME-Version: 1.0')
             ) {
                 $part = $possiblePart;
                 break;
@@ -160,6 +149,14 @@ class LaravelLog extends Log
         if (! $part) {
             return;
         }
+
+        // Normalise line endings to \r\n (RFC 5322) before parsing.
+        // On Windows, the log text may pass through heredoc/file reads that
+        // produce \r\n, and subsequent str_replace("\n","\r\n") can double
+        // them into \r\r\n which the mail parser cannot handle.
+        $part = str_replace("\r\n", "\n", $part);
+        $part = str_replace("\r", "\n", $part);
+        $part = str_replace("\n", "\r\n", $part);
 
         $message = Message::fromString($part);
 
@@ -172,11 +169,11 @@ class LaravelLog extends Log
                 'content' => base64_encode($attachment->getContent()),
                 'content_type' => $attachment->getContentType(),
                 'filename' => $attachment->getFilename(),
-                'size_formatted' => Utils::bytesForHumans($attachment->getSize()),
+                'size_formatted' => Utils::bytesForHumans(strlen($attachment->getContent())),
             ], $message->getAttachments()),
             'html' => $message->getHtmlPart()?->getContent(),
             'text' => $message->getTextPart()?->getContent(),
-            'size_formatted' => Utils::bytesForHumans($message->getSize()),
+            'size_formatted' => Utils::bytesForHumans(strlen($part)),
         ];
     }
 
@@ -202,5 +199,34 @@ class LaravelLog extends Log
         }
 
         return $json_strings;
+    }
+
+    protected function filterStackTrace(string $text): string
+    {
+        // Normalize line endings for cross-platform compatibility
+        $text = str_replace("\r\n", "\n", $text);
+        $text = str_replace("\r", "\n", $text);
+
+        $lines = explode("\n", $text);
+        $filteredLines = [];
+        $emptyLineCharacter = '    ...';
+        $excludes = config('log-viewer.shorter_stack_trace_excludes', []);
+        foreach ($lines as $line) {
+            $shouldExclude = false;
+            foreach ($excludes as $excludePattern) {
+                if (str_starts_with($line, '#') && str_contains($line, $excludePattern)) {
+                    $shouldExclude = true;
+                    break;
+                }
+            }
+
+            if ($shouldExclude && end($filteredLines) !== $emptyLineCharacter) {
+                $filteredLines[] = $emptyLineCharacter;
+            } elseif (! $shouldExclude) {
+                $filteredLines[] = $line;
+            }
+        }
+
+        return implode("\n", $filteredLines);
     }
 }

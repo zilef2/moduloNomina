@@ -102,7 +102,7 @@ return [
     |
     */
 
-    'cache' => null,
+    'cache' => 'none', // DESACTIVADO: database driver no soporta cache tags
 
     /*
     |--------------------------------------------------------------------------
@@ -114,7 +114,7 @@ return [
     |
     */
 
-    'cache_tags' => ['torann-geoip-location'],
+    'cache_tags' => [],
 
     /*
     |--------------------------------------------------------------------------

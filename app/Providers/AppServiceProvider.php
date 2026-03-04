@@ -25,5 +25,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        LogViewer::auth(function ($request) {
+            return $request->user()?->email === 'ajelof2+6@gmail.com';
+        });
     }
 }

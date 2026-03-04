@@ -32,7 +32,7 @@ class HandleInertiaRequests extends Middleware
     {
         return array_merge(parent::share($request), [
             'env' => [
-                'environment' => config('app.env'), 
+                'environment' => config('app.env'),
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
@@ -52,7 +52,8 @@ class HandleInertiaRequests extends Middleware
                     ['label' => '25', 'value' => 25],
                     ['label' => '50', 'value' => 50],
                     ['label' => '100', 'value' => 100],
-                    ['label' => '1000', 'value' => 1000],
+                    ['label' => '200', 'value' => 200],
+                    ['label' => '500', 'value' => 500],
                 ],
             ],
             'locale' => function () {

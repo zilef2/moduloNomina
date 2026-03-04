@@ -141,7 +141,7 @@ class MaxMind extends Driver implements Updatable
     protected function fetchLocation(string $ip): City|Country
     {
         $maxmind = $this->isWebServiceEnabled()
-            ? $this->newClient($this->getUserId(), $this->getLicenseKey(), $this->getOptions())
+            ? $this->newClient($this->getUserId(), $this->getLicenseKey(), $this->getLocales(), $this->getOptions())
             : $this->newReader($this->getDatabasePath());
 
         if ($this->isWebServiceEnabled() || $this->getLocationType() === 'city') {
@@ -154,9 +154,9 @@ class MaxMind extends Driver implements Updatable
     /**
      * Get a new MaxMind web service client.
      */
-    protected function newClient(string $userId, string $licenseKey, array $options = []): Client
+    protected function newClient(string|int $userId, string $licenseKey, array $locales, array $options = []): Client
     {
-        return new Client($userId, $licenseKey, $options);
+        return new Client((int) $userId, $licenseKey, $locales, $options);
     }
 
     /**
@@ -168,7 +168,7 @@ class MaxMind extends Driver implements Updatable
     }
 
     /**
-     * Returns true / false if the MaxMind web service is enabled.
+     * Determine if the MaxMind web service is enabled.
      */
     protected function isWebServiceEnabled(): bool
     {
@@ -176,15 +176,15 @@ class MaxMind extends Driver implements Updatable
     }
 
     /**
-     * Returns the configured MaxMind web user ID.
+     * Get the configured MaxMind web user ID.
      */
-    protected function getUserId(): string
+    protected function getUserId(): string|int
     {
         return config('location.maxmind.web.user_id');
     }
 
     /**
-     * Returns the configured MaxMind web license key.
+     * Get the configured MaxMind web license key.
      */
     protected function getLicenseKey(): string
     {
@@ -192,7 +192,7 @@ class MaxMind extends Driver implements Updatable
     }
 
     /**
-     * Returns the configured MaxMind web option array.
+     * Get the configured MaxMind web option array.
      */
     protected function getOptions(): array
     {
@@ -200,7 +200,15 @@ class MaxMind extends Driver implements Updatable
     }
 
     /**
-     * Returns the MaxMind database file path.
+     * Get the configured MaxMind web locales array.
+     */
+    protected function getLocales(): array
+    {
+        return config('location.maxmind.web.locales', ['en']);
+    }
+
+    /**
+     * Get the MaxMind database file path.
      */
     protected function getDatabasePath(): string
     {
@@ -219,7 +227,7 @@ class MaxMind extends Driver implements Updatable
     }
 
     /**
-     * Returns the MaxMind location type.
+     * Get the MaxMind location type.
      */
     protected function getLocationType(): string
     {

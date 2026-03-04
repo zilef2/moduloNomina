@@ -64,7 +64,7 @@ const update3 = () => {
         <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl2'">
             <form class="p-6" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    Facturar {{ props.title }} : 
+                    Facturar {{ props.title }} :
                     <span class="text-blue-600 text-lg">{{cotizaciona.numero_cot}}</span>
                 </h2>
                 <h3 class="text my-4 font-medium text-gray-900 dark:text-gray-100">
@@ -73,14 +73,14 @@ const update3 = () => {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="rounded-xl"><label name="factura"> {{ lang().label.factura }} </label>
                         <TextInput v-model="form.factura" :error="form.errors.factura" :placeholder="lang().label.factura" class="mt-1 block w-full"
-                                   required type="text"/>
+                                   required type="text" />
                     </div>
                     <div class="rounded-xl"><label name="fecha_factura"> {{ lang().label.fecha_factura }} </label>
                         <TextInput v-model="form.fecha_factura" :error="form.errors.fecha_factura" :placeholder="lang().label.fecha_factura" class="mt-1 block w-full"
-                                   required type="date"/>
+                                   required type="date" />
                     </div>
                 </div>
-                
+
                 <div class=" my-8 flex justify-end">
                     <SecondaryButton :disabled="form.processing" @click="emit('close')"> {{ lang().button.close }}</SecondaryButton>
                     <PrimaryButton class="ml-3" :class="{ 'opacity-25': form.processing }"

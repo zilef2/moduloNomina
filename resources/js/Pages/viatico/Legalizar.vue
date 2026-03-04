@@ -188,11 +188,11 @@ const ensureArraySize = () => {
         if (val.valor_legalizacion) {
             console.log("=>(Legalizar.vue:192) form.valor_legalizacion", form.valor_legalizacion);
             form.valor_legalizacion[inde] = val.valor_legalizacion
-            setFecha(inde,DateTime_to_html(val.fecha_legalizacion))  
-            // setFecha(inde,'2025-01-01T08:00')  
+            setFecha(inde,DateTime_to_html(val.fecha_legalizacion))
+            // setFecha(inde,'2025-01-01T08:00')
             // console.log("=>(Legalizar.vue:190) DateTime_to_html(val.fecha_legalizacion)",
             //     DateTime_to_html(val.fecha_legalizacion));
-            
+
             // form.fecha_legalizacion[inde] = '2025-02-08T07:00'
 
             form.descripcion_legalizacion[inde] = val.descripcion_legalizacion
@@ -200,7 +200,7 @@ const ensureArraySize = () => {
             //     form.valor_legalizacion[inde] = ''
             //     form.fecha_legalizacion[inde] = ''
             //     form.descripcion_legalizacion[inde] = ''
-            //    
+            //
         }
 
         // form.consignacion_id[i] = props.viaticoa.Consignaciona[i].consignacion_id
@@ -268,11 +268,11 @@ const update = () => {
                                    class="my-2 block w-full"
                         />
 
-                        <InputError :message="form.errors.valor_legalizacion" class="mt-2"/>
+                        <InputError :message="form.errors.valor_legalizacion" class="mt-2" />
                     </div>
                     <div class="lg:col-span-2 mt-2">
                         <InputLabel for="descripcion_legalizacionid"
-                                    :value="lang().label['descripcion_legalizacion'] + ' (opcional)'"/>
+                                    :value="lang().label['descripcion_legalizacion'] + ' (opcional)'" />
                         <!--                        <TextInput -->
                         <!--                                :id="`descripcion_legalizacionid_${index}`"-->
                         <!--                            v-model="form.descripcion_legalizacion['index']"-->
@@ -289,7 +289,7 @@ const update = () => {
                     </div>
                     <div class="lg:col-span-2 mt-2">
                         <InputLabel for="fecha_legalizacion"
-                                    :value="lang().label['fecha_legalizacion']"/>
+                                    :value="lang().label['fecha_legalizacion']" />
 
                         <input
                             type="datetime-local"

@@ -65,9 +65,9 @@ const data = reactive({
     diaini: 1,
     MensajeError: '',
     const: {
-        // 44(max semanal) - 8 (idealDiario) = 36  
+        // 44(max semanal) - 8 (idealDiario) = 36
         //props.ArrayHorasSemanales.HORAS_ORDINARIAS no se puede usar porque es para calcular extras
-        HORAS_SEMANALES_MENOS_ESTANDAR: props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - idealDiario 
+        HORAS_SEMANALES_MENOS_ESTANDAR: props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - idealDiario
     },
     Horas1159: props.ArrayOrdinarias.length > 1,
     diaSelected: 0,
@@ -85,7 +85,7 @@ const message = reactive({
 
 onMounted(() => {
 
-    //explaining: data.CuantoFaltaParaExtraSemana solo se usa cuando se pasa de las horas que debe trabajar por semana 
+    //explaining: data.CuantoFaltaParaExtraSemana solo se usa cuando se pasa de las horas que debe trabajar por semana
     data.CuantoFaltaParaExtraSemana = props.HorasDeCadaSemana[data.WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
         props.HorasDeCadaSemana[data.WeekN] - HORAS_SEMANALES_MENOS_ESTANDAR : 0
 
@@ -138,12 +138,12 @@ if (props.numberPermissions > 9) {
     // form.fecha_fin = '2024-11-15T23:58'
     // form.fecha_ini = '2025-10-24T07:00'
     // form.fecha_fin = '2025-10-24T15:00'
-    
-    
+
+
     // (2) LAS NOCTURNAS COICIDEN CON EL ALMUERZO
     // form.fecha_ini = '2026-02-03T15:00'
     // form.fecha_fin = '2026-02-03T21:00'
-    
+
     // (2) SE ESTA SUMANDO 2 HORAS DIRUNAS (NO DEBERIA PASAR DE 1)
     form.fecha_ini = '2026-02-03T10:00'
     form.fecha_fin = '2026-02-03T15:00'
@@ -172,7 +172,7 @@ watchEffect(() => {
         }
 
 
-        // explaining: El dia anterior trabajo? 
+        // explaining: El dia anterior trabajo?
         if (data.diaSelected) {
             data.HorasDelDiaAnterior59 = props.ArrayOrdinarias[data.diaSelected];
 
@@ -193,15 +193,15 @@ watchEffect(() => {
                 console.log("=>(data.TrabajadasHooy", data.TrabajadasHooy);
             }
 
-            //data.CuantoFaltaParaExtraSemana = 44 - 39 
+            //data.CuantoFaltaParaExtraSemana = 44 - 39
             //explaining: data.CuantoFaltaParaExtraSemana solo se usa cuando se pasa de las horas que debe trabajar por semana
             data.CuantoFaltaParaExtraSemana = props.HorasDeCadaSemana[data.WeekN] > HORAS_SEMANALES_MENOS_ESTANDAR ?
             props.ArrayHorasSemanales.MAXIMO_HORAS_SEMANALES - props.HorasDeCadaSemana[data.WeekN] : 9
-            
+
 
             //no puede ser negativo
             data.CuantoFaltaParaExtraSemana = data.CuantoFaltaParaExtraSemana < 0 ? 0 : data.CuantoFaltaParaExtraSemana
-            
+
             //el maximo valor de data.CuantoFaltaParaExtraSemana = 8 (HORAS_PARA_EXTRAS_DIA)
             data.CuantoFaltaParaExtraSemana = data.CuantoFaltaParaExtraSemana > HORAS_PARA_EXTRAS_DIA ? HORAS_PARA_EXTRAS_DIA : data.CuantoFaltaParaExtraSemana
 
@@ -217,7 +217,7 @@ watchEffect(() => {
             form.dominical_extra_diurnas = 0
             form.dominical_extra_nocturnas = 0
             form.horas_trabajadas = parseInt((fin - ini) / (3600 * 1000));
-            
+
 
 
             //si es 11:59 minutos -> agrega una hora
@@ -482,57 +482,57 @@ const fechafinBackend = () => {
                 </div>
                 <div class="my-6 grid grid-cols-1 md:grid-cols-2 gap-6 animate-slide-up">
                     <div class="">
-                        <InputLabel for="fecha_ini" :value="lang().label.fecha_ini" class=""/>
+                        <InputLabel for="fecha_ini" :value="lang().label.fecha_ini" class="" />
                         <VueDatePicker :format="formatini" :start-time="data.startTime" :is-24="false"
                                        :day-names="daynames" auto-apply :enable-time-picker="true"
                                        id="fecha_ini" type="date" class="mt-1 block w-full transition-all duration-200 hover:shadow-lg" v-model="form.fecha_ini"
                                        required
-                                       :placeholder="lang().placeholder.fecha_ini" :error="form.errors.fecha_ini"/>
-                        <InputError class="mt-2 animate-shake" :message="form.errors.fecha_ini"/>
+                                       :placeholder="lang().placeholder.fecha_ini" :error="form.errors.fecha_ini" />
+                        <InputError class="mt-2 animate-shake" :message="form.errors.fecha_ini" />
                     </div>
                     <div class="">
-                        <InputLabel for="fecha_fin" :value="lang().label.fecha_fin" class=""/>
+                        <InputLabel for="fecha_fin" :value="lang().label.fecha_fin" class="" />
                         <VueDatePicker :format="formatfin" :is-24="false"
                                        :day-names="daynames" auto-apply :flow="['time']" :enable-time-picker="true"
                                        :teleport="true"
                                        id="fecha_fin" type="date" class="mt-1 block w-full transition-all duration-200 hover:shadow-lg" v-model="form.fecha_fin"
                                        required
-                                       :placeholder="lang().placeholder.fecha_fin" :error="form.errors.fecha_fin"/>
-                        <InputError class="mt-2 animate-shake" :message="form.errors.fecha_fin"/>
+                                       :placeholder="lang().placeholder.fecha_fin" :error="form.errors.fecha_fin" />
+                        <InputError class="mt-2 animate-shake" :message="form.errors.fecha_fin" />
                     </div>
                     <div class="group relative">
-                        <InputLabel for="horas_trabajadas" :value="lang().label.horas_trabajadas" class="group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-200"/>
+                        <InputLabel for="horas_trabajadas" :value="lang().label.horas_trabajadas" class="group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-200" />
                         <TextInput id="horas_trabajadas" type="number"
                                    class="bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 mt-1 block w-full transition-all duration-300 hover:shadow-md"
                                    :class="form.horas_trabajadas > 0 ? 'ring-2 ring-green-500 dark:ring-green-400 animate-pulse-slow' : ''"
                                    v-model="form.horas_trabajadas" disabled
                                    :placeholder="lang().placeholder.horas_trabajadas"
-                                   :error="form.errors.horas_trabajadas"/>
-                        <InputError class="bg-gray-100 dark:bg-gray-700 mt-2 animate-shake" :message="form.errors.horas_trabajadas"/>
+                                   :error="form.errors.horas_trabajadas" />
+                        <InputError class="bg-gray-100 dark:bg-gray-700 mt-2 animate-shake" :message="form.errors.horas_trabajadas" />
                     </div>
 
                     <div class="group">
-                        <InputLabel for="almuerzo" :value="lang().label.horacomida + ' (+9 horas)'" class="group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-200"/>
+                        <InputLabel for="almuerzo" :value="lang().label.horacomida + ' (+9 horas)'" class="group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-200" />
                         <TextInput id="almuerzo" type="text" class="bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-700 dark:to-gray-800 mt-1 w-full transition-all duration-300 hover:shadow-md"
                                    :class="form.almuerzo > 0 ? 'ring-2 ring-orange-500 dark:ring-orange-400' : ''"
                                    v-model="form.almuerzo" disabled
-                                   :placeholder="lang().placeholder.almuerzo" :error="form.errors.almuerzo"/>
+                                   :placeholder="lang().placeholder.almuerzo" :error="form.errors.almuerzo" />
                     </div>
                     <!-- mt-80 -->
                     <div class="mt-4 grid grid-cols-2 gap-6 animate-slide-in-left">
                         <div class="group transform transition-all duration-300 hover:scale-105">
-                            <InputLabel ref="label_diurnas" for="diurnas" :value="lang().label.diurnas" class="group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors duration-200"/>
+                            <InputLabel ref="label_diurnas" for="diurnas" :value="lang().label.diurnas" class="group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors duration-200" />
                             <TextInput id="diurnas" type="number" class="bg-gradient-to-br from-yellow-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 mt-1 w-full transition-all duration-300 hover:shadow-lg"
                                        :class="form.diurnas > 0 ? 'ring-2 ring-yellow-500 dark:ring-yellow-400 animate-pulse-slow' : ''"
                                        v-model="form.diurnas" disabled
-                                       :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas"/>
+                                       :placeholder="lang().placeholder.diurnas" :error="form.errors.diurnas" />
                         </div>
                         <div class="group transform transition-all duration-300 hover:scale-105">
-                            <InputLabel ref="label_nocturnas" for="nocturnas" :value="lang().label.nocturnas" class="group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200"/>
+                            <InputLabel ref="label_nocturnas" for="nocturnas" :value="lang().label.nocturnas" class="group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200" />
                             <TextInput id="nocturnas" type="number" class="bg-gradient-to-br from-indigo-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 mt-1 w-full transition-all duration-300 hover:shadow-lg"
                                        :class="form.nocturnas > 0 ? 'ring-2 ring-indigo-500 dark:ring-indigo-400 animate-pulse-slow' : ''"
                                        v-model="form.nocturnas" disabled
-                                       :placeholder="lang().placeholder.nocturnas" :error="form.errors.nocturnas"/>
+                                       :placeholder="lang().placeholder.nocturnas" :error="form.errors.nocturnas" />
                         </div>
                     </div>
                     <!-- mt-80 -->
@@ -540,61 +540,61 @@ const fechafinBackend = () => {
                          class="mt-4 grid grid-cols-2 gap-6">
                         <div>
                             <InputLabel ref="label_extra_diurnas" for="extra_diurnas"
-                                        :value="lang().label.extra_diurnas"/>
+                                        :value="lang().label.extra_diurnas" />
                             <TextInput id="extra_diurnas" type="number" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                        v-model="form.extra_diurnas" disabled
                                        :placeholder="lang().placeholder.extra_diurnas"
-                                       :error="form.errors.extra_diurnas"/>
+                                       :error="form.errors.extra_diurnas" />
                         </div>
                         <div>
                             <InputLabel ref="label_extra_nocturnas" for="extra_nocturnas"
-                                        :value="lang().label.extra_nocturnas"/>
+                                        :value="lang().label.extra_nocturnas" />
                             <TextInput id="extra_nocturnas" type="number"
                                        class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.extra_nocturnas"
                                        disabled
                                        :placeholder="lang().placeholder.extra_nocturnas"
-                                       :error="form.errors.extra_nocturnas"/>
+                                       :error="form.errors.extra_nocturnas" />
                         </div>
                     </div>
                     <!-- dominicales -->
                     <div v-if="form.dominicales === 'si'" class="grid grid-cols-2 gap-6">
                         <div>
                             <InputLabel ref="label_diurnas" for="dominical_diurnas"
-                                        :value="lang().label.dominical_diurnas"/>
+                                        :value="lang().label.dominical_diurnas" />
                             <TextInput id="dominical_diurnas" type="number"
                                        class="bg-gray-100 dark:bg-gray-700 mt-1 w-full" v-model="form.dominical_diurnas"
                                        disabled
                                        :placeholder="lang().placeholder.dominical_diurnas"
-                                       :error="form.errors.dominical_diurnas"/>
+                                       :error="form.errors.dominical_diurnas" />
                         </div>
                         <div>
                             <InputLabel ref="label_nocturnas" for="dominical_nocturnas"
-                                        :value="lang().label.dominical_nocturnas"/>
+                                        :value="lang().label.dominical_nocturnas" />
                             <TextInput id="dominical_nocturnas" type="number"
                                        class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                        v-model="form.dominical_nocturnas" disabled
                                        :placeholder="lang().placeholder.dominical_nocturnas"
-                                       :error="form.errors.dominical_nocturnas"/>
+                                       :error="form.errors.dominical_nocturnas" />
                         </div>
                     </div>
                     <div v-if="form.dominicales === 'si'" class="grid grid-cols-2 gap-6">
                         <div>
                             <InputLabel ref="label_extra_diurnas" for="dominical_extra_diurnas"
-                                        :value="lang().label.dominical_extra_diurnas"/>
+                                        :value="lang().label.dominical_extra_diurnas" />
                             <TextInput id="dominical_extra_diurnas" type="number"
                                        class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                        v-model="form.dominical_extra_diurnas" disabled
                                        :placeholder="lang().placeholder.dominical_extra_diurnas"
-                                       :error="form.errors.dominical_extra_diurnas"/>
+                                       :error="form.errors.dominical_extra_diurnas" />
                         </div>
                         <div>
                             <InputLabel ref="label_extra_nocturnas" for="dominical_extra_nocturnas"
-                                        :value="lang().label.dominical_extra_nocturnas"/>
+                                        :value="lang().label.dominical_extra_nocturnas" />
                             <TextInput id="dominical_extra_nocturnas" type="number"
                                        class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                        v-model="form.dominical_extra_nocturnas" disabled
                                        :placeholder="lang().placeholder.dominical_extra_nocturnas"
-                                       :error="form.errors.dominical_extra_nocturnas"/>
+                                       :error="form.errors.dominical_extra_nocturnas" />
                         </div>
                     </div>
 
@@ -603,19 +603,19 @@ const fechafinBackend = () => {
                               class="mx-2 px-1 text-sky-700 bg-sky-400/10 dark:text-white">
                             {{ data.mensajeCentroNoFactura }}
                         </span>
-                        <InputLabel v-else for="centro_costo_id" :value="lang().label.centro_costo_id"/>
+                        <InputLabel v-else for="centro_costo_id" :value="lang().label.centro_costo_id" />
 
                         <!--                        <SelectInput v-model="form.centro_costo_id" :dataSet="props.valoresSelect"-->
-                        <!--                                     class="mt-1 block w-full"/>-->
+                        <!--                                     class="mt-1 block w-full" />-->
                         <vSelect v-model="form.centro_costo_id" :options="props.valoresSelect" append-to-body
                                  label="label" class="mt-2"></vSelect>
-                        <InputError class="mt-2" :message="form.errors.centro_costo_id"/>
+                        <InputError class="mt-2" :message="form.errors.centro_costo_id" />
                     </div>
 
                     <div v-if="form.dominicales === 'si'" class="mt-4">
                         <label class="dark:text-white">Horario</label>
                         <TextInput id="dominicales" type="text" class="bg-gray-100 dark:bg-gray-700 block w-full"
-                                   v-model="message.TextFestivo" disabled/>
+                                   v-model="message.TextFestivo" disabled />
                     </div>
                 </div>
                 <!-- <div class="my-6 ">

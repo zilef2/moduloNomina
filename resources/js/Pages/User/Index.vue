@@ -166,12 +166,12 @@ data.params.onlySupervis = data.params.onlySupervis === null ? false : data.para
                 <div class="rounded-lg overflow-hidden w-fit gap-8 my-2">
                     <div class="mx-4 pt-1 pb-3 inline-flex">‎
                         <input id="onlySupervis" type="checkbox" v-model="data.params.onlySupervis"
-                               class="inline-flex items-center p-3  border-2 border-sky-500 rounded-md font-semibold hover:bg-primary/80 dark:hover:bg-primary/90 focus:bg-primary/80 dark:focus:bg-primary/80 active:bg-primary dark:active:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-primary transition ease-in-out duration-150 disabled:bg-primary/80"/>
+                               class="inline-flex items-center p-3  border-2 border-sky-500 rounded-md font-semibold hover:bg-primary/80 dark:hover:bg-primary/90 focus:bg-primary/80 dark:focus:bg-primary/80 active:bg-primary dark:active:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-primary transition ease-in-out duration-150 disabled:bg-primary/80" />
                         <label for="onlySupervis" class="mx-2">Mostrar solo supervisores</label>
                     </div>
                     <div v-if="can(['isSuper'])" class="mx-4 pt-1 pb-3 inline-flex">‎
                         <input id="search1" type="checkbox" v-model="data.params.search1"
-                               class="inline-flex items-center p-3  border-2 border-sky-500 rounded-md font-semibold hover:bg-primary/80 dark:hover:bg-primary/90 focus:bg-primary/80 dark:focus:bg-primary/80 active:bg-primary dark:active:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-primary transition ease-in-out duration-150 disabled:bg-primary/80"/>
+                               class="inline-flex items-center p-3  border-2 border-sky-500 rounded-md font-semibold hover:bg-primary/80 dark:hover:bg-primary/90 focus:bg-primary/80 dark:focus:bg-primary/80 active:bg-primary dark:active:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-primary transition ease-in-out duration-150 disabled:bg-primary/80" />
                         <label for="search1" class="mx-2">Mostrar solo personas sin rol</label>
                     </div>
                 </div>
@@ -325,7 +325,7 @@ data.params.onlySupervis = data.params.onlySupervis === null ? false : data.para
                                                 class="px-2 py-1.5 rounded-none" v-tooltip="lang().tooltip.edit">
                                                 <PencilIcon class="w-4 h-4" />
                                             </InfoButton>
-                                            <InfoButton v-if="user.roles[0]" v-show="can(['update user']) 
+                                            <InfoButton v-if="user.roles[0]" v-show="can(['update user'])
                                                 && (user.roles[0]?.name === 'supervisor')" type="button"
                                                 @click="(data.EdiCentroOpen = true), (data.user = user)"
                                                 class="px-2 py-1.5 rounded-none text-amber-500" v-tooltip="'Asignar'">

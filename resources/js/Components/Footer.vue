@@ -14,16 +14,15 @@ const props = defineProps({
 
 
 const enviarCiudad = () => {
-    // El backend ahora detecta la ciudad automáticamente usando geoip
-    form.post(route('guardarCiudad'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            // Guardar el timestamp del último registro exitoso
-            localStorage.setItem('lastCityCheck', Date.now().toString());
-            console.log('Ubicación actualizada correctamente.');
-        },
-        onError: (err) => console.error('Error al guardar ubicación:', err)
-    })
+    // form.post(route('guardarCiudad'), {
+    //     preserveScroll: true,
+    //     onSuccess: () => {
+    //         // Guardar el timestamp del último registro exitoso
+    //         localStorage.setItem('lastCityCheck', Date.now().toString());
+    //         console.log('Ubicación actualizada correctamente.');
+    //     },
+    //     onError: (err) => console.error('Error al guardar ubicación:', err)
+    // })
 };
 
 onMounted(() => {

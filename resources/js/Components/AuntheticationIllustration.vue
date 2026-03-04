@@ -9,15 +9,15 @@ defineProps({
   <defs>
     <!-- Gradiente principal -->
     <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#3da0d8"/>
-      <stop offset="50%" stop-color="#1565c0"/>
-      <stop offset="100%" stop-color="#0d47a1"/>
+      <stop offset="0%" stop-color="#3da0d8" />
+      <stop offset="50%" stop-color="#1565c0" />
+      <stop offset="100%" stop-color="#0d47a1" />
     </linearGradient>
 
     <!-- Curva decorativa -->
     <linearGradient id="waveGradient" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#1e88e5" stop-opacity="0.4"/>
-      <stop offset="100%" stop-color="#42a5f5" stop-opacity="0.2"/>
+      <stop offset="0%" stop-color="#1e88e5" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#42a5f5" stop-opacity="0.2" />
     </linearGradient>
   </defs>
 

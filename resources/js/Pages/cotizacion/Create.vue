@@ -89,7 +89,7 @@ let CamposExcluidos = [ //excluidos del form
     'fecha_factura',
     'Zouna',
     'Prealiza',
-    
+
     // 'Psolicita',
 ]
 let noValidarAIU = [
@@ -134,7 +134,7 @@ let noValidarNormal = [
     'impr',
     'por_u',
     'util',
-    
+
     'persona_que_solicita_la_propuesta_economica',
     'persona_que_realiza_la_pe',
 
@@ -411,7 +411,7 @@ const create = () => {
                         <TextInput v-model="form.numero_cot" :error="form.errors.numero_cot"
                                    :placeholder="lang().label.numero_cot"
                                    class="mt-1 block w-full"
-                                   required type="text"/>
+                                   required type="text" />
                     </div>
                     <!--                    <div class="rounded-xl">-->
                     <!--                        <label name="centro_costo_id">{{ lang().label.centro_costo_id }}</label>-->
@@ -442,7 +442,7 @@ const create = () => {
                         <label name="fecha_solicitud"> {{ lang().label.fecha_solicitud }} </label>
                         <TextInput v-model="form.fecha_solicitud" :error="form.errors.fecha_solicitud"
                                    class="mt-1 block w-full"
-                                   required type="date"/>
+                                   required type="date" />
                     </div>
                     <div class="rounded-xl">
                         <label name="mes_pedido">{{ lang().label.mes_pedido }}</label>
@@ -453,7 +453,7 @@ const create = () => {
                     <div class="rounded-xl"><label name="lugar"> {{ lang().label.lugar }} </label>
                         <TextInput v-model="form.lugar" :error="form.errors.lugar" :placeholder="lang().label.lugar"
                                    class="mt-1 block w-full"
-                                   required type="text"/>
+                                   required type="text" />
                     </div>
                     <div class="rounded-xl">
                         <label name="centro_costo_id">{{ lang().label.zona }}</label>
@@ -466,7 +466,7 @@ const create = () => {
                         <label name="descripcion_cot"> {{ lang().label.descripcion_cot }} </label>
                         <TextInput v-model="form.descripcion_cot" :error="form.errors.descripcion_cot"
                                    :placeholder="lang().label.descripcion_cot" class="mt-1 block w-full"
-                                   required type="text"/>
+                                   required type="text" />
                     </div>
                     <div class="rounded-xl"><label name="tipo">
                         {{ lang().label.tipo }}
@@ -501,7 +501,7 @@ const create = () => {
                         <TextInput v-model="formattedPrice" :error="form.errors.precio_cot"
                                    :placeholder="lang().label.precio_cot"
                                    class="mt-1 block w-full"
-                                   type="text"/>
+                                   type="text" />
                     </div>
                     <div v-if="form.modoaiu" class="col-span-full"></div>
 
@@ -509,45 +509,45 @@ const create = () => {
                     <div v-if="form.modoaiu" class="rounded-xl"><label name="por_a"> {{ lang().label.por_a }} </label>
                         <TextInput v-model="form.por_a" :error="form.errors.por_a" :placeholder="lang().label.por_a"
                                    class="mt-1 block w-full"
-                                   type="number"/>
+                                   type="number" />
                     </div>
                     <div v-if="form.modoaiu" class="rounded-xl"><label name="admi"> {{ lang().label.admi }} </label>
                         <TextInput v-model="form.admi" disabled :error="form.errors.admi"
                                    :placeholder="lang().label.admi"
                                    class="mt-1 block w-full bg-gray-300"
-                                   type="number"/>
+                                   type="number" />
                     </div>
 
 
                     <div v-if="form.modoaiu" class="rounded-xl"><label name="por_i"> {{ lang().label.por_i }} </label>
                         <TextInput v-model="form.por_i" :error="form.errors.por_i" :placeholder="lang().label.por_i"
                                    class="mt-1 block w-full"
-                                   type="number"/>
+                                   type="number" />
                     </div>
                     <div v-if="form.modoaiu" class="rounded-xl"><label name="impr"> {{ lang().label.impr }} </label>
                         <TextInput v-model="form.impr" disabled :error="form.errors.impr"
                                    :placeholder="lang().label.impr"
                                    class="mt-1 block w-full bg-gray-300"
-                                   type="number"/>
+                                   type="number" />
                     </div>
 
 
                     <div v-if="form.modoaiu" class="rounded-xl"><label name="por_u"> {{ lang().label.por_u }} </label>
                         <TextInput v-model="form.por_u" :error="form.errors.por_u" :placeholder="lang().label.por_u"
                                    class="mt-1 block w-full"
-                                   type="number"/>
+                                   type="number" />
                     </div>
                     <div v-if="form.modoaiu" class="rounded-xl"><label name="util"> {{ lang().label.util }} </label>
                         <TextInput v-model="form.util" disabled :error="form.errors.util"
                                    :placeholder="lang().label.util"
                                    class="mt-1 block w-full bg-gray-300"
-                                   type="number"/>
+                                   type="number" />
                     </div>
                     <div v-if="form.modoaiu" class="rounded-xl">
                         <label name="subtotal"> {{ lang().label.subtotal }} </label>
                         <TextInput v-model="formattedSubtotal" disabled :placeholder="lang().label.subtotal"
                                    class="mt-1 block w-full bg-gray-300"
-                                   type="text"/>
+                                   type="text" />
                     </div>
                     <div v-else class="rounded-xl">
                         <label name="subtotal">
@@ -585,13 +585,13 @@ const create = () => {
                         <v-select v-model="form.persona_que_realiza_la_pe" :options="props.losSelect['listausers']"
                                   label="label" class="mt-2"></v-select>
                     </div>
-                  
+
 
 <!--                    <div class="rounded-xl"><label name="cliente"> {{ lang().label.cliente }} </label>-->
 <!--                        <TextInput v-model="form.cliente" :error="form.errors.cliente"-->
 <!--                                   :placeholder="lang().label.cliente"-->
 <!--                                   class="mt-1 block w-full"-->
-<!--                                   type="text"/>-->
+<!--                                   type="text" />-->
 <!--                    </div>-->
                       <div class="rounded-xl xs:col-span-2 sm:col-span-1 lg:col-span-1 2xl:col-span-2">
                         <label name="cliente">
@@ -611,7 +611,7 @@ const create = () => {
 <!--                                   :error="form.errors.persona_que_solicita_la_propuesta_economica"-->
 <!--                                   :placeholder="lang().label.persona_que_solicita_la_propuesta_economica"-->
 <!--                                   class="mt-1 block w-full"-->
-<!--                                   type="text"/>-->
+<!--                                   type="text" />-->
 <!--                    </div>-->
                     <!--                    <div class="rounded-xl col-span-2">-->
                     <!--                        <label name="persona_que_solicita_la_propuesta_economica">-->
@@ -621,17 +621,17 @@ const create = () => {
                     <div class="rounded-xl"><label name="orden_de_compra"> {{ lang().label.orden_de_compra }} </label>
                         <TextInput v-model="form.orden_de_compra" :error="form.errors.orden_de_compra"
                                    :placeholder="lang().label.orden_de_compra" class="mt-1 block w-full"
-                                   type="text"/>
+                                   type="text" />
                     </div>
                     <div class="rounded-xl"><label name="hes"> {{ lang().label.hes }} </label>
                         <TextInput v-model="form.hes" :error="form.errors.hes" :placeholder="lang().label.hes"
                                    class="mt-1 block w-full"
-                                   type="text"/>
+                                   type="text" />
                     </div>
                     <div class="rounded-xl col-span-2"><label name="observaciones"> {{ lang().label.observaciones }} </label>
                         <TextInput v-model="form.observaciones" :error="form.errors.observaciones"
                                    :placeholder="lang().label.observaciones" class="mt-1 block w-full"
-                                   type="text"/>
+                                   type="text" />
                     </div>
 
                 </div>

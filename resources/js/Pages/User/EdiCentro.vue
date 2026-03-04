@@ -37,7 +37,7 @@ watchEffect(() => {
             onStart: () => data.isLoading = true,
             onFinish: () => data.isLoading = false,
         });
-        
+
         data.numberCentro = props.user?.centros?.length ?? 0
     }
 });
@@ -102,15 +102,15 @@ const getCentroLabel = (id) => {
                 <div class="my-6 space-y-4">
                     <div class="grid grid-cols-4 gap-2 2xl:gap-8">
                         <div>
-                            <InputLabel for="numberCentro" :value="'Número de centros'"/>
+                            <InputLabel for="numberCentro" :value="'Número de centros'" />
                             <TextInput autocomplete="off" id="numberCentro" type="number" class="mt-1 block w-full"
                                        v-model="data.numberCentro" required
-                                       placeholder="Número de centros" min="0" :max="centros.length"/>
+                                       placeholder="Número de centros" min="0" :max="centros.length" />
                         </div>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 4xl:grid-cols-5 6xl:grid-cols-6 gap-2 2xl:gap-8">
                         <div v-for="index in parseInt(data.numberCentro)" :key="index">
-                            <InputLabel :for="'centro_' + index" :value="'Centro ' + index + ' (' + getCentroLabel(form.centroids[index-1]) + ')'"/>
+                            <InputLabel :for="'centro_' + index" :value="'Centro ' + index + ' (' + getCentroLabel(form.centroids[index-1]) + ')'" />
                             <SelectInput :id="'centro_' + index" class="mt-1 block w-full" v-model="form.centroids[index-1]"
                                          :dataSet="centrosOptions">
                             </SelectInput>

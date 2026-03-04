@@ -6,559 +6,267 @@ use AllowDynamicProperties;
 use App\helpers\Myhelp;
 use App\helpers\MyhelpQuincena;
 use App\helpers\MyModels;
-use App\helpers\zzloggingcrud;
 use App\Http\Requests\CentroCostoRequest;
 use App\Models\CentroCosto;
 use App\Models\Parametro;
 use App\Models\Reporte;
+use App\Models\solicitud_viatico;
 use App\Models\User;
-use App\Models\zona;
+use App\Models\Viatico;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
 #[AllowDynamicProperties]
-class CentroCostosController extends Controller {
-
-	private int $segundosActualiPresupuesto;
-
-	public function __construct() {
-
-		//        $this->segundosActualiPresupuesto = 1;
-		$this->segundosActualiPresupuesto = 60 * 30; //30 mins
-
-		$this->centroCostosAll = CentroCosto::all();
-		$this->ZonasAll = zona::all();
-		$this->parametros = Parametro::find(1);
-		session(['parametros' => $this->parametros]);
-
-	}
-
-	public function index(Request $request): Response {
-		// Forzar recarga limpia - comentar esta linea despues de verificar que funciona
-		Cache::forget('centro_costos_datos');
-
-		$helperSelect = new HelperControllerSelect();
-		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
-		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, $trace[0]['function']));
-
-        $this->ActualizarPresupuesto();
-
-		$listaSupervisores = User::whereHas('roles', function ($q) {
-			$q->where('name', 'supervisor');
-		})->get();
-
-		$perPage = $request->has('perPage') ? $request->perPage : 100;
-
-		$centroCostos = $this->MapearClasePP($numberPermissions, $request);
-
-		return Inertia::render('CentroCostos/Index', [ //carpeta
-			'fromController'    => [
-				'data' => $centroCostos,
-				'total' => $centroCostos->count()
-			],
-			'perPage'           => (int)$perPage,
-			'breadcrumbs'       => [['label' => __('app.label.CentroCostos'), 'href'  => route('CentroCostos.index')]],
-			'title'             => __('app.label.CentroCostos'),
-			'filters'           => $request->all([
-				                                     'search',
-				                                     'field',
-				                                     'order',
-				                                     'search2',
-				                                     'searchSCC',
-				                                     'columnFilters'
-			                                     ]),
-			'nombresTabla'      => $this->getNombresTabla(),
-			'listaSupervisores' => $listaSupervisores,
-			'numberPermissions' => $numberPermissions,
-			'losSelect'         => $helperSelect->DependenciasCentro('zona'),
-
-		]);
-	}
-
-	private function ActualizarPresupuesto(): void {
-		$cacheKey = 'ultima_llamada_cc_index';
-		$ultimaLlamada = Cache::get($cacheKey);
-		$tiempoActual = now();
-
-		// Solo actualizar presupuesto si ha pasado el tiempo definido Y no hay datos cacheados recientes
-		if ($tiempoActual->diffInSeconds($ultimaLlamada) >= ($this->segundosActualiPresupuesto) || !Cache::has('centro_costos_datos')) {
-			$anio = date('Y');
-			$mes = date('m');
-			foreach ($this->centroCostosAll as $item) {
-				/** @var CentroCosto $item */
-				$item->actualizarEstimado($anio, $mes, $this->parametros);
-			}
-			// Actualizar el tiempo de la última llamada en caché
-		}
-		Cache::put($cacheKey, $tiempoActual);
-	}
-
-	public function MapearClasePP($numberPermissions, $request) {
-		$centroCostos = centroCosto::query();
-		$this->limitadorCentrosParaVer = 500;
-		$busqueda = false;
-		$searchSCC = $request->has('searchSCC');
-
-		// Verificar si hay datos cacheados y no requiere actualización
-		$datosCacheados = Cache::get('centro_costos_datos');
-		$requiereActualizacion = Cache::get('centro_costos_requiere_actualizacion', false);
-
-		if ($request->search //nombre o descrip
-			|| $searchSCC //nombre supervisor
-			|| $request->search2  //ver_todos
-			|| $request->search3  //zona
-			|| $requiereActualizacion
-			|| !$datosCacheados
-		) {
-
-			$busqueda = true;
-			$this->limitadorCentrosParaVer = 600;
-			$this->actualizarcache();
-			$centroCostos->orderBy('created_at', 'DESC');
-		}
-		else {
-			// Usar datos cacheados si no hay búsqueda y no requiere actualización
-			if ($datosCacheados && !$requiereActualizacion) {
-				return $datosCacheados;
-			}
-
-			if ($request->has([ 'field', 'order' ]) ) {
-				$this->limitadorCentrosParaVer = 500;
-
-				if ($request->field === 'Zouna') {
-					$centroCostos = $centroCostos->leftJoin('zonas', 'centro_costos.zona_id', '=', 'zonas.id')->orderByRaw('CASE WHEN zonas.nombre IS NULL THEN 1 ELSE 0 END, zonas.nombre ' . $request->order)->select('centro_costos.*');
-				}
-				else {
-					if ($request->field === 'nombre') {
-						$centroCostos = $centroCostos->orderByRaw('CAST(nombre AS UNSIGNED) ' . $request->order);
-					}
-					else {
-						$centroCostos->orderBy($request->field, $request->order);
-					}
-				}
-			}
-			else {
-				$centroCostos->orderBy('activo', 'DESC')->orderBy('mano_obra_estimada', 'DESC');
-			}
-		}
-
-		if ($request->has(['searchSCC']) || $request->has(['search2']) || $request->has(['search'])) {
-			$this->actualizarcache();
-		}
-
-		if ($busqueda) {
-			$centroCostos = $this->getFilter($searchSCC, $request, $centroCostos);
-		}
-
-		// Cachear los resultados para futuras consultas
-		$resultado = $centroCostos->get(); // Devolver QueryBuilder, no Collection
-		Cache::put('centro_costos_datos', $resultado, now()->addHours(2));
-		Cache::forget('centro_costos_requiere_actualizacion');
-		Cache::put('centro_costos_ultima_actualizacion', now(), now()->addHours(2));
-
-		return $resultado;
-	}
-
-	//deep1
-
-	/**
-	 * Remove the specified resource from storage.
-	 *
-	 * @param int $id
-	 */
-	public function actualizarcache() {
-		// Limpiar cache de datos de centros
-		Cache::forget('centro_costos_datos');
-		Cache::forget('centro_costos_ultima_actualizacion');
-
-		// Marcar que se necesita una actualización completa
-		Cache::put('centro_costos_requiere_actualizacion', true, now()->addMinutes(30));
-
-		// Forzar actualización de presupuesto en la próxima carga
-		$this->segundosActualiPresupuesto = 0;
-	}
-
-	/**
-	 * @param $searchSCC
-	 * @param $request
-	 * @param mixed $centroCostos
-	 * @return mixed
-	 */
-	public function getFilter($searchSCC, $request, mixed $centroCostos): mixed {
-		if ($searchSCC) {
-//			$PosiblesSupervisores = User::UsersWithRol('supervisor')->Where('name', 'like', '%' . $request->searchSCC . '%')->get();
-
-			//se filtra los cc asociados el authUser
-			$centroCostos = $centroCostos->whereHas('supervisores', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->searchSCC . '%');
-            });
-		}
-
-		if ($request->search) {
-			$centroCostos = $centroCostos->Where('nombre', 'like', '%' . $request->search . '%');
-		}
-
-		if ($request->search3 && $request->search3['value']) {
-			$centroCostos = $centroCostos->where('zona_id', $request->search3['value']);
-		}
-
-
-		return $centroCostos;
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getNombresTabla(): array {
-		$permissions = Auth()->user()->roles->pluck('name')[0];
-		if ($permissions === 'empleado') { //admin | administrativo
-			$nombresTabla = [//[0]: como se ven //[1] como es la BD
-				[
-					'#',
-					'nombre'
-				],
-				[
-					null,
-					'nombre'
-				],
-			];
-		}
-		else {
-			$nombresTabla = [//[0]: como se ven //[1] como es la BD
-				[
-					'Acciones',
-					'#',
-					'nombre',
-					'Mano obra estimada',
-					'zona',
-					'Supervisores',
-					'activo',
-					'Facturar',
-					'descripcion',
-					'clasificacion',
-					'# usuarios'
-				],
-				[
-					null,
-					null,
-					'nombre',
-					'mano_obra_estimada',
-					'Zouna',
-					null,
-					'activo',
-					'ValidoParaFacturar',
-					'descripcion',
-					'clasificacion',
-					null
-				],
-			];
-		}
-
-
-		return $nombresTabla;
-	}
-
-	public function create() {}
-
-	public function store(CentroCostoRequest $request) {
-		\App\helpers\zzloggingcrud::zilefLogTrace();
-
-		DB::beginTransaction();
-		try {
-			$centroCostos = new centroCosto;
-			$request->merge(['ValidoParaFacturar' => 1]);
-
-			$centroCostos->fill($request->all());
-
-			$centroCostos->save();
-			if ($request->selectedUsers) {
-				$centroCostos->users()->sync($request->selectedUsers);
-			}
-
-			DB::commit();
-			$this->actualizarcache();
-			Myhelp::EscribirEnLog($this, ' |store end| ');
-
-
-			return back()->with('success', __('app.label.created_successfully', ['name' => $centroCostos->nombre]));
-		} catch (\Throwable $th) {
-			Myhelp::EscribirEnLog($this, ' |store end wrong| ');
-			DB::rollback();
-
-
-			return back()->with('error', __('app.label.created_error', ['name' => __('app.label.centroCostos')]) . $th->getMessage());
-		}
-	}
-
-	public function show($id) {
-		$helperSelect = new HelperControllerSelect();
-		$numberPermissions = \App\helpers\zzloggingcrud::zilefLogTrace();
-		$Reportes = Reporte::query();
-
-		$titulo = __('app.label.Reportes');
-		$permissions = Auth()->user()->roles->pluck('name')[0];
-		$Reportes->Where('centro_costo_id', $id);
-		$valoresSelectConsulta = CentroCosto::orderBy('nombre')->get();
-		$IntegerDefectoSelect = $valoresSelectConsulta->first()->id;
-		foreach ($valoresSelectConsulta as $value) {
-			$valoresSelect[] = [
-				'label' => $value->nombre,
-				//centro de costos
-				'value' => (int)($value->id),
-			];
-			$showSelect[(int)($value->id)] = $value->nombre;
-		}
-		$usuariosSelectConsulta = User::orderBy('name')->get();
-		foreach ($usuariosSelectConsulta as $value) {
-			$showUsers[(int)($value->id)] = $value->name;
-		}
-
-		if ($numberPermissions === 1) { //1 : empleado | 2 : administrativo | 3 :supervisor
-
-		}
-		else { // not empleado
-			$titulo = MyhelpQuincena::CalcularTituloQuincena($permissions);
-			$Reportes->orderBy('fecha_ini');
-			$perPage = 100;
-
-			$nombresTabla = [//0: como se ven //1 como es la BD
-
-				[
-					'Acciones',
-					'#',
-					'Centro costo',
-					'Trabajador',
-					'valido',
-					'inicio',
-					'fin',
-					'horas trabajadas',
-					'diurnas',
-					'nocturnas',
-					'extra diurnas',
-					'extra nocturnas',
-					'dominical diurno',
-					'dominical nocturno',
-					'dominical extra diurno',
-					'dominical extra nocturno',
-					'observaciones'
-				],
-				[
-					'b_valido',
-					't_fecha_ini',
-					't_fecha_fin',
-					'i_horas_trabajadas',
-					'i_diurnas',
-					'i_nocturnas',
-					'i_extra_diurnas',
-					'i_extra_nocturnas',
-					'i_dominical_diurno',
-					'i_dominical_nocturno',
-					'i_dominical_extra_diurno',
-					'i_dominical_extra_nocturno',
-					's_observaciones'
-				],
-				//m for money || t for datetime || d date || i for integer || s string || b boolean
-				[
-					null,
-					null,
-					null,
-					null,
-					'b_valido',
-					't_fecha_ini',
-					't_fecha_fin',
-					'i_horas_trabajadas',
-					'i_diurnas',
-					'i_nocturnas',
-					'i_extra_diurnas',
-					'i_extra_nocturnas',
-					'i_dominical_diurno',
-					'i_dominical_nocturno',
-					'i_dominical_extra_diurno',
-					'i_dominical_extra_nocturno',
-					's_observaciones'
-				],
-				//m for money || t for datetime || d date || i for integer || s string || b boolean
-			];
-		}
-		$sumhoras_trabajadas = $Reportes->sum('horas_trabajadas');
-
-
-		return Inertia::render('Reportes/Index', [ //carpeta
-			'title'                       => $titulo,
-			'filters'                     => null,
-			'perPage'                     => (int)$perPage,
-			'fromController'              => $Reportes->paginate($perPage),
-			'breadcrumbs'                 => [
-				[
-					'label' => __('app.label.Reportes'),
-					'href'  => route('Reportes.index')
-				]
-			],
-			'nombresTabla'                => $nombresTabla,
-			'valoresSelect'               => $valoresSelect,
-			'showSelect'                  => $showSelect,
-			'IntegerDefectoSelect'        => $IntegerDefectoSelect,
-			'showUsers'                   => $showUsers,
-			'sumhoras_trabajadas'         => $sumhoras_trabajadas,
-			'userFiltro'                  => - 1,
-			'quincena'                    => 0,
-			'horasemana'                  => 0,
-			'horasPersonal'               => 0,
-			'startDateMostrar'            => 0,
-			'endDateMostrar'              => 0,
-			'numberPermissions'           => $numberPermissions,
-			'ArrayOrdinarias'             => 0,
-			'sumdiurnas'                  => 0,
-			'sumnocturnas'                => 0,
-			'sumextra_diurnas'            => 0,
-			'sumextra_nocturnas'          => 0,
-			'sumdominical_diurno'         => 0,
-			'sumdominical_nocturno'       => 0,
-			'sumdominical_extra_diurno'   => 0,
-			'sumdominical_extra_nocturno' => 0,
-			'horasTrabajadasHoy'          => $horasTrabajadasHoy2 ?? [],
-			'HorasDeCadaSemana'           => 0,
-			'ArrayHorasSemanales'         => 0,
-			'losSelect'                   => $helperSelect->DependenciasCentro('zona'),
-		]);
-	}
-
-	public function edit($id) {
-		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
-		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, $trace[0]['function']));
-		$centroCostos = centroCosto::findOrFail($id);
-
-
-		return Inertia::render('centroCostos.edit', ['centroCostos' => $centroCostos]);
-	}
-
-	public function destroy($id): RedirectResponse {
-		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
-		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, $trace[0]['function']));
-		DB::beginTransaction();
-		try {
-			if ($numberPermissions > 8) {
-
-				$centroCostos = CentroCosto::findOrFail($id);
-				$centroCostos->delete();
-
-				$this->actualizarcache(); // Invalidar cache al eliminar centro
-				DB::commit();
-
-				$seborro = 'centro nombre: ' . $centroCostos->nombre . 'centro ValidoParaFacturar: ' . $centroCostos->ValidoParaFacturar;
-				Myhelp::EscribirEnLog($this, ' success destroy ' . $seborro);
-
-
-				return back()->with('success', __('app.label.deleted_successfully', ['name' => $centroCostos->nombre]));
-			}
-			else {
-				Myhelp::EscribirEnLog($this, ' end destroy NO PERMISOS');
-
-
-				return back()->with('error', 'No tiene permisos para borrar un centro de costos');
-			}
-		} catch (\Throwable $th) {
-			DB::rollback();
-			Myhelp::EscribirEnLog($this, 'Salio mal. Al borrar el cc con id: ' . ($id ?? ''), $th->getMessage(), false, 1);
-
-
-			return back()->with('error', __('app.label.deleted_error', ['name' => __('app.label.centroCostos')]) . $th->getMessage());
-		}
-	}
-
-	public function AproxDestroy() {
-		$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
-		$numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, $trace[0]['function']));
-
-		DB::beginTransaction();
-		try {
-			if ($numberPermissions > 8) {
-
-				$centroCostos = CentroCosto::all();
-				foreach ($centroCostos as $index => $centroCosto) {
-					$centroCosto->update([
-						                     'mano_obra_estimada' => 0
-					                     ]);
-				}
-
-				DB::commit();
-				$contar = $centroCostos->count();
-				echo "modificamos $contar centros";
-			}
-			else {
-				echo "modificamos nada";
-			}
-		} catch (\Throwable $th) {
-			DB::rollback();
-			$thmessa = $th->getMessage();
-			Myhelp::EscribirEnLog($this, $trace[0]['function'] . ' centro costos, Salio mal: ', $thmessa, false, 1);
-			echo "catch:  $thmessa";
-		}
-	}
-
-	public function update(Request $request, $id) {
-		zzloggingcrud::zilefLogTrace();
-		$request->validate([
-			                   'nombre' => [
-				                   'required',
-				                   Rule::unique('centro_costos', 'nombre')->ignore((int)$id),
-			                   ],
-		                   ], [
-			                   'nombre.unique' => 'El nombre ya está en uso.',
-		                   ]);
-
-		DB::beginTransaction();
-
-		try {
-			$centroCosto = centroCosto::findOrFail($id);
-			$original = $centroCosto->getOriginal(); // Valores antes de la actualización
-
-			$this->SonSelect($request, ['zona_id']);
-			$centroCosto->nombre = $request->nombre;
-			$centroCosto->activo = $request->activo;
-			$centroCosto->descripcion = $request->descripcion;
-			$centroCosto->clasificacion = $request->clasificacion;
-			$centroCosto->ValidoParaFacturar = $request->ValidoParaFacturar;
-			$centroCosto->zona_id = $request->zona_id;
-			$centroCosto->save();
-
-			$centroCosto->save();
-			zzloggingcrud::zilefLogUpdate($this, $centroCosto, $original);
-
-			$IDsSeleccionados = [];
-			foreach ($request->listaSupervisores as $index => $supervisor) {
-				if (isset($request->selectedUsers[$index]) && $request->selectedUsers[$index]) {
-					$IDsSeleccionados[] = $supervisor['id'];
-				}
-			}
-			$centroCosto->users()->sync($IDsSeleccionados);
-
-			$this->actualizarcache();
-
-			DB::commit();
-
-
-			return back()->with('success', __('app.label.updated_successfully', ['name' => $centroCosto->nombre]));
-		} catch (\Throwable $th) {
-			DB::rollback();
-			zzloggingcrud::zilefLogUpdate($this, null, null, 'nombre', $th);
-
-
-			return back()->with('error', __('app.label.created_error', ['name' => __('app.label.centroCostos')]));
-		}
-	}
-
-	private function SonSelect(Request $request, array $selectinput) {
-		foreach ($selectinput as $index => $item) {
-			$valor = $request->{$item}['value'] ?? null;
-			$request->merge([$item => $valor]);
-		}
-	}
+class CentroCostosController extends Controller
+{
+
+    public function __construct()
+    {
+        // Constructor is now clean.
+    }
+
+    public function index(Request $request): Response
+    {
+        $helperSelect = new HelperControllerSelect();
+        $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'CentroCostosController.index'));
+
+        // Cache supervisors (1 hour)
+        $listaSupervisores = Cache::remember('centro_costos_supervisores', 3600, function () {
+            return User::whereHas('roles', function ($q) {
+                $q->where('name', 'supervisor');
+            })->get();
+        });
+
+        // Cache zonas select (1 hour)
+        $losSelect = Cache::remember('centro_costos_zonas_select', 3600, function () use ($helperSelect) {
+            return $helperSelect->DependenciasCentro('zona');
+        });
+
+        // Generate cache key for the main query
+        $page = $request->input('page', 1);
+        $queryParams = $request->all();
+        ksort($queryParams); // Ensure consistent order
+        $version = Cache::get('centro_costos_version', 1);
+        $cacheKey = 'centro_costos_index_' . $version . '_' . md5(json_encode($queryParams));
+
+        // Cache the main result (10 minutes)
+        $centroCostos = Cache::remember($cacheKey, 600, function () use ($request) {
+            $query = CentroCosto::with(['users', 'zona']);
+
+            // Server-side filtering
+            if ($request->has('columnFilters')) {
+                $filters = $request->input('columnFilters');
+                foreach ($filters as $field => $value) {
+                    if ($value) {
+                        switch ($field) {
+                            case 'Zouna':
+                                $query->whereHas('zona', function ($q) use ($value) {
+                                    $q->where('nombre', 'like', '%' . $value . '%');
+                                });
+                                break;
+                            case 'supervisores':
+                                $query->whereHas('users', function ($q) use ($value) {
+                                    $q->where('name', 'like', '%' . $value . '%');
+                                });
+                                break;
+                            case 'activo':
+                            case 'ValidoParaFacturar':
+                                $query->where($field, strtolower($value) === 'si');
+                                break;
+                            default:
+                                $query->where($field, 'like', '%' . $value . '%');
+                                break;
+                        }
+                    }
+                }
+            }
+
+
+            if ($request->has('field') && $request->has('order')) {
+                if ($request->field === 'Zouna') {
+                    $query->leftJoin('zonas', 'centro_costos.zona_id', '=', 'zonas.id')
+                        ->orderByRaw('CASE WHEN zonas.nombre IS NULL THEN 1 ELSE 0 END, zonas.nombre ' . $request->order)
+                        ->select('centro_costos.*');
+                } else {
+                    $query->orderBy($request->field, $request->order);
+                }
+            } else {
+                $query->orderBy('activo', 'desc')->orderBy('mano_obra_estimada', 'desc');
+            }
+
+            $perPage = 50;
+            return $query->paginate($perPage);
+        });
+
+        return Inertia::render('CentroCostos/Index', [
+            'fromController' => $centroCostos,
+            'breadcrumbs' => [['label' => __('app.label.CentroCostos'), 'href' => route('CentroCostos.index')]],
+            'title' => __('app.label.CentroCostos'),
+            'filters' => $request->all(['field', 'order', 'columnFilters']),
+            'nombresTabla' => $this->getNombresTabla(),
+            'listaSupervisores' => $listaSupervisores,
+            'numberPermissions' => $numberPermissions,
+            'losSelect' => $losSelect,
+        ]);
+    }
+
+    public function getNombresTabla(): array
+    {
+        $permissions = Auth()->user()->roles->pluck('name')[0];
+        if ($permissions === 'empleado') {
+            return [
+                ['#', 'nombre'],
+                [null, 'nombre'],
+            ];
+        } else {
+            return [
+                ['Acciones', '#', 'nombre', 'Mano obra estimada', 'zona', 'Supervisores', 'activo', 'Facturar', 'descripcion', 'clasificacion', '# usuarios'],
+                [null, null, 'nombre', 'mano_obra_estimada', 'Zouna', 'supervisores', 'activo', 'ValidoParaFacturar', 'descripcion', 'clasificacion', null],
+            ];
+        }
+    }
+
+    public function getCostDetails($id): JsonResponse
+    {
+        $reportes = Reporte::where('centro_costo_id', $id)->get();
+        $viaticos = Viatico::where('centro_costo_id', $id)->sum('saldo');
+
+        $ctc = new CentroTableController();
+        [, $manoDeObra] = $ctc->MultiplicarPorSalario($reportes, $id);
+
+        return response()->json([
+            'mano_de_obra' => $manoDeObra,
+            'viaticos' => $viaticos,
+            'total' => $manoDeObra + $viaticos,
+        ]);
+    }
+
+    public function store(CentroCostoRequest $request)
+    {
+        DB::beginTransaction();
+        try {
+            $centroCostos = new centroCosto;
+            $request->merge(['ValidoParaFacturar' => 1]);
+            $centroCostos->fill($request->all());
+            $centroCostos->save();
+            if ($request->selectedUsers) {
+                $centroCostos->users()->sync($request->selectedUsers);
+            }
+            DB::commit();
+            Cache::forever('centro_costos_version', time());
+            Cache::forget('centro_costos_supervisores');
+            Cache::forget('centro_costos_zonas_select');
+            return back()->with('success', __('app.label.created_successfully', ['name' => $centroCostos->nombre]));
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.centroCostos')]) . $th->getMessage());
+        }
+    }
+
+    public function show($id)
+    {
+        $helperSelect = new HelperControllerSelect();
+        $numberPermissions = \App\helpers\zzloggingcrud::zilefLogTrace();
+        $Reportes = Reporte::query();
+
+        $titulo = __('app.label.Reportes');
+        $permissions = Auth()->user()->roles->pluck('name')[0];
+        $Reportes->Where('centro_costo_id', $id);
+        $valoresSelectConsulta = CentroCosto::orderBy('nombre')->get();
+        $IntegerDefectoSelect = $valoresSelectConsulta->first()->id;
+        foreach ($valoresSelectConsulta as $value) {
+            $valoresSelect[] = [
+                'label' => $value->nombre,
+                'value' => (int)($value->id),
+            ];
+            $showSelect[(int)($value->id)] = $value->nombre;
+        }
+        $usuariosSelectConsulta = User::orderBy('name')->get();
+        foreach ($usuariosSelectConsulta as $value) {
+            $showUsers[(int)($value->id)] = $value->name;
+        }
+
+        if ($numberPermissions !== 1) {
+            $titulo = MyhelpQuincena::CalcularTituloQuincena($permissions);
+            $Reportes->orderBy('fecha_ini');
+        }
+        $perPage = 100;
+
+        return Inertia::render('Reportes/Index', [
+            'title' => $titulo,
+            'filters' => null,
+            'perPage' => (int)$perPage,
+            'fromController' => $Reportes->paginate($perPage),
+            'breadcrumbs' => [['label' => __('app.label.Reportes'), 'href' => route('Reportes.index')]],
+            'nombresTabla' => $this->getNombresTabla(),
+            'valoresSelect' => $valoresSelect,
+            'showSelect' => $showSelect,
+            'IntegerDefectoSelect' => $IntegerDefectoSelect,
+            'showUsers' => $showUsers,
+            'sumhoras_trabajadas' => $Reportes->sum('horas_trabajadas'),
+            'numberPermissions' => $numberPermissions,
+            'losSelect' => $helperSelect->DependenciasCentro('zona'),
+        ]);
+    }
+
+    public function destroy($id): RedirectResponse
+    {
+        DB::beginTransaction();
+        try {
+            $centroCostos = CentroCosto::findOrFail($id);
+            $centroCostos->delete();
+            DB::commit();
+            Cache::forever('centro_costos_version', time());
+            Cache::forget('centro_costos_supervisores');
+            Cache::forget('centro_costos_zonas_select');
+            return back()->with('success', __('app.label.deleted_successfully', ['name' => $centroCostos->nombre]));
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return back()->with('error', __('app.label.deleted_error', ['name' => __('app.label.centroCostos')]) . $th->getMessage());
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'nombre' => ['required', Rule::unique('centro_costos', 'nombre')->ignore((int)$id)],
+        ], ['nombre.unique' => 'El nombre ya está en uso.']);
+
+        DB::beginTransaction();
+        try {
+            $centroCosto = centroCosto::findOrFail($id);
+            $this->SonSelect($request, ['zona_id']);
+            $centroCosto->update($request->all());
+
+            $IDsSeleccionados = [];
+            foreach ($request->listaSupervisores as $supervisor) {
+                if (isset($request->selectedUsers[$supervisor['id']]) && $request->selectedUsers[$supervisor['id']]) {
+                    $IDsSeleccionados[] = $supervisor['id'];
+                }
+            }
+            $centroCosto->users()->sync($IDsSeleccionados);
+            DB::commit();
+            Cache::forever('centro_costos_version', time());
+            Cache::forget('centro_costos_supervisores');
+            Cache::forget('centro_costos_zonas_select');
+            return back()->with('success', __('app.label.updated_successfully', ['name' => $centroCosto->nombre]));
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.centroCostos')]));
+        }
+    }
+
+    private function SonSelect(Request $request, array $selectinput)
+    {
+        foreach ($selectinput as $item) {
+            $valor = $request->{$item}['value'] ?? null;
+            $request->merge([$item => $valor]);
+        }
+    }
 }

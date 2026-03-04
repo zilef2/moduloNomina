@@ -133,10 +133,10 @@ const update = () => {
                 </h2>
                 <div class="my-6 grid grid-cols-2 gap-6">
                     <div>
-                        <InputLabel ref="nombre" for="nombre" :value="lang().label.name"/>
+                        <InputLabel ref="nombre" for="nombre" :value="lang().label.name" />
                         <TextInput id="nombre" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                    v-model="form.nombre"
-                                   :placeholder="lang().placeholder.nombre" :error="form.errors.nombre"/>
+                                   :placeholder="lang().placeholder.nombre" :error="form.errors.nombre" />
                     </div>
                     <div class="rounded-xl">
                         <label name="zona">
@@ -145,20 +145,20 @@ const update = () => {
                         <vSelect v-model="form.zona_id" :options="losSelect['zona']" label="label"></vSelect>
                     </div>
                     <div>
-                        <InputLabel ref="descripcion" for="descripcion" :value="lang().label.descripcion"/>
+                        <InputLabel ref="descripcion" for="descripcion" :value="lang().label.descripcion" />
                         <TextInput id="descripcion" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                    v-model="form.descripcion"
-                                   :placeholder="lang().placeholder.descripcion" :error="form.errors.descripcion"/>
+                                   :placeholder="lang().placeholder.descripcion" :error="form.errors.descripcion" />
                     </div>
                     <div>
-                        <InputLabel ref="clasificacion" for="clasificacion" :value="lang().label.clasificacion"/>
+                        <InputLabel ref="clasificacion" for="clasificacion" :value="lang().label.clasificacion" />
                         <TextInput id="clasificacion" type="text" class="bg-gray-100 dark:bg-gray-700 mt-1 w-full"
                                    v-model="form.clasificacion"
-                                   :placeholder="lang().placeholder.clasificacion" :error="form.errors.clasificacion"/>
+                                   :placeholder="lang().placeholder.clasificacion" :error="form.errors.clasificacion" />
                     </div>
 
                     <div class="col-span-2 w-full">
-                        <InputLabel for="users" :value="lang().label.supervisores"/>
+                        <InputLabel for="users" :value="lang().label.supervisores" />
                         <div v-for="(user, index) in data.SelecSupervisores" :key="index" class="mt-1 block w-full">
                             <label :for="'user' + index">
                                 <input
@@ -171,7 +171,7 @@ const update = () => {
                                 {{ user.label }}
                             </label>
                         </div>
-                        <InputError class="mt-2" :message="form.errors.users"/>
+                        <InputError class="mt-2" :message="form.errors.users" />
                     </div>
 
 
@@ -182,7 +182,7 @@ const update = () => {
                             type="checkbox" id="activo"
                             class="bg-gray-50 dark:bg-gray-600 mt-1 w-7 h-7 p-2 my-auto rounded-xl"
                         />
-                        <InputLabel ref="activo" for="activo" :value="lang().label.activo" class="mx-3 my-auto"/>
+                        <InputLabel ref="activo" for="activo" :value="lang().label.activo" class="mx-3 my-auto" />
                     </div>
                     <div class="inline-flex col-span-1 mt-6">
                         <input
@@ -192,7 +192,7 @@ const update = () => {
                             class="bg-gray-50 dark:bg-gray-600 mt-1 w-7 h-7 p-2 my-auto rounded-xl"
                         />
                         <InputLabel ref="ValidoParaFacturar" for="ValidoParaFacturar"
-                                    :value="lang().label.ValidoParaFacturar" class="mx-3 my-auto"/>
+                                    :value="lang().label.ValidoParaFacturar" class="mx-3 my-auto" />
                     </div>
 
 

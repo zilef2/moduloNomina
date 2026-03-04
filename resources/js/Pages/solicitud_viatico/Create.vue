@@ -139,7 +139,7 @@ const colorByTipo = (tipo) => {
         'Transporte (ida y regreso)': { border: 'border-blue-500', badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
         'Transporte (ida)': { border: 'border-sky-400', badge: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300' },
         'Transporte (regreso)': { border: 'border-cyan-400', badge: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300' },
-        'Alimentación': { border: 'border-amber-500', badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
+        'Alimentacion': { border: 'border-amber-500', badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
         'Estadia': { border: 'border-purple-500', badge: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' },
         'Caja menor': { border: 'border-emerald-500', badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' },
     };
@@ -157,7 +157,7 @@ const tipoViaticos = [
     'Transporte (ida y regreso)',
     'Transporte (ida)',
     'Transporte (regreso)',
-    'Alimentación',
+    'Alimentacion',
     'Estadia',
     'Caja menor',
 ]
@@ -422,11 +422,9 @@ const create = () => {
             onSuccess: () => {
                 emit("close")
                 form.reset()
-                router.reload()
-                window.location.reload()
             },
             onError: () => null,
-            onFinish: () => null,
+            onFinish: () => window.location.reload()
         })
     }
 }
@@ -441,7 +439,7 @@ const create = () => {
         <Modal :show="props.show" @close="emit('close')" :maxWidth="'xl8'">
             <form class="p-4 mb-36" @submit.prevent="create">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    Nueva {{ props.title }}
+                    {{ props.title }}
                 </h2>
 
                 <div class="grid xs:grid-cols-1 md:grid-cols-3 2xl:grid-cols-6 gap-4 gap-y-5 mb-8">

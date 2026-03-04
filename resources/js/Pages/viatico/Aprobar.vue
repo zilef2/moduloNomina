@@ -147,7 +147,7 @@ const valorConsigInput = ref(null);
                 </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="">
-                        <InputLabel for="valor_consigid" :value="lang().label['valor_consig']"/>
+                        <InputLabel for="valor_consigid" :value="lang().label['valor_consig']" />
                         <TextInput id="valor_consigid" v-model="form.valor_consig"
                                    :error="form.errors.valor_consig"
                                    placeholder="valor_consig" type="number"
@@ -155,8 +155,8 @@ const valorConsigInput = ref(null);
                                    required
                                    ref="valorConsigInput"
                         />
-                        <InputError :message="form.errors.valor_consig" class="mt-2"/>
-                        <InputError :message="data.mensajeError_saldo" class="mt-2"/>
+                        <InputError :message="form.errors.valor_consig" class="mt-2" />
+                        <InputError :message="data.mensajeError_saldo" class="mt-2" />
                         <label class="my-2 py-4 text-black dark:text-white text-lg"> {{ data.valorConsig }} Pesos
                             colombianos</label>
                     </div>

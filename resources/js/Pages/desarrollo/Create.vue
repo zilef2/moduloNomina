@@ -32,7 +32,7 @@ const data = reactive({
 
 //very usefull
 let justNames = props.titulos.map(names =>{
-    if(names['order'] !== 'fecha_cotizacion' 
+    if(names['order'] !== 'fecha_cotizacion'
         && names['order'] !== 'fecha_cotizacion_aceptada'
         && names['order'] !== 'estado'
         )
@@ -60,7 +60,7 @@ props.titulos.forEach(names =>{
  if(names['order'] !== 'fecha_cotizacion'
      && names['order'] !== 'fecha_cotizacion_aceptada'
      && names['order'] !== 'estado'
- )   
+ )
     printForm.push ({
         idd: names['order'], label: names['label'], type: names['type']
     })
@@ -129,7 +129,7 @@ const estados = [
                                       v-model="form[atributosform.idd]"
                                       :reduce="element => element.value" label="name"
                             ></v-select>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
 
 
@@ -153,11 +153,11 @@ const estados = [
                         </div>
                     </div>
 <!--                    <div class="">-->
-<!--                        <InputLabel for="valor" :value="lang().label.valor"/>-->
+<!--                        <InputLabel for="valor" :value="lang().label.valor" />-->
 <!--                        <TextInput id="atributosform.idd" type="number" class="mt-1 block w-full"-->
 <!--                                   v-model="form.valor" required placeholder="valor de la cotizacion"-->
-<!--                                   :error="form.errors.valor"/>-->
-<!--                        <InputError class="mt-2" :message="form.errors.valor"/>-->
+<!--                                   :error="form.errors.valor" />-->
+<!--                        <InputError class="mt-2" :message="form.errors.valor" />-->
 <!--                    </div>-->
                 </div>
                 <div class=" my-8 flex justify-end">

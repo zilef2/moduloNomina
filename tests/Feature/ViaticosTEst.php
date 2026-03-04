@@ -7,12 +7,12 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\solicitud_viatico;
-use App\Models\viatico;
+use App\Models\Viatico;
 use Illuminate\Http\Request;
 
 class ViaticosTEst extends TestCase {
 	use RefreshDatabase;
-	
+
 	public function test_store_creates_solicitud_and_viaticos() {
 		// 1. Preparar datos de prueba
 //		$this->seed(); // Ejecuta todos los seeders
@@ -22,9 +22,9 @@ class ViaticosTEst extends TestCase {
 //        dd($cargo);
 		$user = User::factory()->create();
         $user->assignRole('empleado');
-		
+
 		$this->actingAs($user);
-		
+
 		$requestData = [
 			'centro_costo_id' => [['id' => 1]],
 			'user_id'         => [['id' => $user->id]],
@@ -38,24 +38,24 @@ class ViaticosTEst extends TestCase {
 			'Ciudad'          => 'Ciudad Prueba',
 			'ObraServicio'    => 'Obra Prueba'
 		];
-		
+
 		// 2. Crear request simulada
 		$request = new Request($requestData);
-		
+
 		// 3. Ejecutar el métdo
 		$response = $this->post(route('solicitud_viatico.store'), $requestData);
-		
+
 		// 4. Verificaciones
 		$this->assertDatabaseHas('solicitud_viaticos', [
 			'user_id'   => $user->id,
 			'saldo_sol' => 1000
 		]);
-		
+
 		$this->assertDatabaseHas('viaticos', [
 			'gasto'   => 1000,
 			'user_id' => $user->id
 		]);
-		
+
 		$response->assertRedirect()->assertSessionHas('success');
 	}
 }

@@ -16,7 +16,7 @@ use App\Mail\MailViaticoGenerado;
 use App\Models\CentroCosto;
 use App\Models\consignarViatico;
 use App\Models\User;
-use App\Models\viatico;
+use App\Models\Viatico;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Database\Eloquent\Builder;
@@ -229,12 +229,12 @@ class SolicitudViaticoController extends Controller
 			if (!isset($request->fecha_inicial[$index]) || !is_array($request->fecha_inicial[$index])) {
 				return back()->with('error', 'Formato de fechas inválido en el ítem ' . ($index + 1));
 			}
-			
+
 			// Validar que el array tenga al menos 2 elementos
 			if (count($request->fecha_inicial[$index]) < 2) {
 				return back()->with('error', 'Se requieren fecha de inicio y fin en el ítem ' . ($index + 1));
 			}
-			
+
 			$date = new DateTime($request->fecha_inicial[$index][0]);
 			$ini = $date->format('Y-m-d');
 			$date = new DateTime($request->fecha_inicial[$index][1]);
@@ -309,7 +309,7 @@ class SolicitudViaticoController extends Controller
 		$jefe = User::Where('name', 'Carlos Daniel Anaya Barrios')->first();
 		if ($jefe) {
 			$detalle = [
-				'mensaje' => "Se han generado $cuantosViaticos viáticos por un valor de $total. 
+				'mensaje' => "Se han generado $cuantosViaticos viáticos por un valor de $total.
                               El solicitante es $myuser->name.
                               Haga click aqui:   https://modnom.ecnomina.com/solicitud_viatico  si desea ver los pendientes."
 			];

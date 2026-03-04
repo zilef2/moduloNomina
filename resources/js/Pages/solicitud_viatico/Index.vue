@@ -418,7 +418,7 @@ let classbotones = "w-6 h-6"
 
                     <!--                    <Delete v-if="can(['delete viatico'])" :numberPermissions="props.numberPermissions"-->
                     <!--                            :show="data.deleteOpen" @close="data.deleteOpen = false" :solicitud_viaticoa="data.sol_viatico"-->
-                    <!--                            :title="props.title"/>-->
+                    <!--                            :title="props.title" />-->
                     <DeleteBulk v-if="can(['delete viatico'])" :show="data.deleteBulkOpen"
                         @close="data.deleteBulkOpen = false, data.multipleSelect = false, data.selectedId = []"
                         :selectedId="data.selectedId" :title="props.title" />
@@ -603,7 +603,7 @@ let classbotones = "w-6 h-6"
                                             <!--                                                      @click="(data.deleteOpen = true), (data.sol_viatico = claseFromController)"-->
                                             <!--                                                      class="px-2 py-1.5 rounded-none"-->
                                             <!--                                                      v-tooltip="lang().tooltip.delete">-->
-                                            <!--                                            <TrashIcon :class="classbotones"/>-->
+                                            <!--                                            <TrashIcon :class="classbotones" />-->
                                             <!--                                        </DangerButton>-->
                                         </div>
                                     </div>
@@ -750,7 +750,7 @@ let classbotones = "w-6 h-6"
                                     <tr>
                                         <th class="px-6 py-3">Nombre</th>
                                         <th class="px-6 py-3 text-right">Legalizado</th>
-                                        <th class="px-6 py-3 text-right text-[9px]">%</th>
+                                        <th class="px-6 py-3 text-right text-[9px]">Legalizado %</th>
                                         <th class="px-6 py-3 text-right">Consignado</th>
                                     </tr>
                                 </thead>
@@ -764,7 +764,7 @@ let classbotones = "w-6 h-6"
                                             {{ formatPesosCol(res.legalizado) }}
                                         </td>
                                         <td
-                                            class="px-6 py-3 text-right tabular-nums text-[10px] font-bold text-green-500/60">
+                                            class="px-6 py-3 text-right tabular-nums text-[16px] font-bold text-green-500">
                                             {{ res.porcentaje }}%
                                         </td>
                                         <td
@@ -804,7 +804,7 @@ let classbotones = "w-6 h-6"
                                             {{ formatPesosCol(res.legalizado) }}
                                         </td>
                                         <td
-                                            class="px-6 py-3 text-right tabular-nums text-[10px] font-bold text-green-500/60">
+                                            class="px-6 py-3 text-right tabular-nums text-[16px] font-bold text-green-500">
                                             {{ res.porcentaje }}%
                                         </td>
                                         <td

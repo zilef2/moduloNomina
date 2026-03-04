@@ -30,7 +30,7 @@ const data = reactive({
 
 //very usefull
 let justNames = props.titulos.map(names =>{
-    if(names['order'] !== 'noquiero' 
+    if(names['order'] !== 'noquiero'
         // &&
         // names['order'] !== 'noquiero1'
         )
@@ -53,7 +53,7 @@ const printForm =[];
 props.titulos.forEach(names =>{
  if(names['order'] !== 'noquiero'
      // && names['order'] !== 'noquiero1'
- )   
+ )
     printForm.push ({
         idd: names['order'], label: names['label'], type: names['type']
     })
@@ -115,7 +115,7 @@ const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }
                                       v-model="form[atributosform.idd]"
                                       :reduce="element => element.value" label="name"
                             ></v-select>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
 
 

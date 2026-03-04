@@ -26,7 +26,7 @@ const data = reactive({
 
 //very usefull
 let justNames = props.titulos.map(names =>{
-    if(names['order'] !== 'estado' 
+    if(names['order'] !== 'estado'
         // && names['order'] !== 'noquiero1'
         )
         return names['order']
@@ -49,7 +49,7 @@ const printForm =[];
 props.titulos.forEach(names =>{
  if(names['order'] !== 'estado'
      // && names['order'] !== 'noquiero1'
- )   
+ )
     printForm.push ({
         idd: names['order'], label: names['label'], type: names['type']
     })
@@ -110,33 +110,33 @@ const update = () => {
                                       v-model="form[atributosform.idd]"
                                       :reduce="element => element.value" label="label"
                             ></v-select>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
 
                         <div v-else-if="atributosform.type === 'time'" id="SelectVue">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
                             <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
                                        v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                       :error="form.errors[atributosform.idd]" step="3600"/>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
+                                       :error="form.errors[atributosform.idd]" step="3600" />
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
                         <div v-else-if="atributosform.type === 'date'" class="">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
-                            <TextInput 
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
+                            <TextInput
                                 :disabled="props.desarrolloa[atributosform.idd]"
                                 :class="{ 'opacity-75 bg-gray-500': props.desarrolloa[atributosform.idd] }"
                                 :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
                                        v-model="form[atributosform.idd]" :placeholder="atributosform.label"
                                        :error="form.errors[atributosform.idd]"
                             />
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
                         <div v-else class="">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
                             <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
                                        v-model="form[atributosform.idd]" :placeholder="atributosform.label"
-                                       :error="form.errors[atributosform.idd]"/>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
+                                       :error="form.errors[atributosform.idd]" />
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
                     </div>
                     <div class="rounded-xl">
@@ -153,8 +153,8 @@ const update = () => {
                                  label="label"
                         ></vSelect>
                     </div>
-                    
-                    
+
+
 
 
                 </div>

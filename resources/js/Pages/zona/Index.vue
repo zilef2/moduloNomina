@@ -99,7 +99,7 @@ const titulos = [
     <Head :title="props.title" />
 
     <AuthenticatedLayout>
-        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" class="capitalize text-xl font-bold"/>
+        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" class="capitalize text-xl font-bold" />
         <div class="space-y-4">
             <!-- {{ props.fromController.data[2] }} -->
             <div class="px-4 sm:px-0">

@@ -30,7 +30,7 @@ const data = reactive({
 
 //very usefull
 let justNames = props.titulos.map(names =>{
-    if(names['order'] !== 'noquieroome' 
+    if(names['order'] !== 'noquieroome'
         // &&
         // names['order'] !== 'noquiero1'
         )
@@ -53,7 +53,7 @@ const printForm =[];
 props.titulos.forEach(names =>{
  if(names['order'] !== 'clasificacion'
      // && names['order'] !== 'noquiero1'
- )   
+ )
     printForm.push ({
         idd: names['order'], label: names['label'], type: names['type']
     })
@@ -114,7 +114,7 @@ const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }
                                       v-model="form[atributosform.idd]"
                                       :reduce="element => element.value" label="name"
                             ></v-select>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
 
                         <!-- normal -->
@@ -129,9 +129,9 @@ const sexos = [{ label: 'Masculino', value: 0 }, { label: 'Femenino', value: 1 }
                      <div id="SelectVue2" class="">
                             <label name="labelSelectVue2"> Persona o Empresa </label>
                             <vSelect :options="[{label: 'Persona', id: 'persona'},{label: 'Empresa', id: 'empresa'}]"
-                                      v-model="form['clasificacion']" 
+                                      v-model="form['clasificacion']"
                             ></vSelect>
-                            <InputError class="mt-2" :message="form.errors.clasificacion"/>
+                            <InputError class="mt-2" :message="form.errors.clasificacion" />
                         </div>
                 </div>
                 <div class=" my-8 flex justify-end">

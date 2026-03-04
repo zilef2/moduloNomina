@@ -134,10 +134,10 @@ const handleCheckboxChange = (values) => {
 </script>
 
 <template>
-    <Head :title="props.title"/>
+    <Head :title="props.title" />
 
     <AuthenticatedLayout>
-        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs"/>
+        <Breadcrumb :title="title" :breadcrumbs="breadcrumbs" />
         <p v-if="!props.superviNullCentro" class="text-lg mt-2 mb-5 text-red-600"> Hay supervisores sin centro</p>
         <div class="space-y-4">
             <div class="px-4 sm:px-0">
@@ -157,34 +157,34 @@ const handleCheckboxChange = (values) => {
 <!--                        <PrimaryButton v-show="can(['update user']) && props.superviNullCentro"-->
 <!--                                       class="flex items-center px-4">-->
 <!--                            Exportar e Importar-->
-<!--                            <ShieldCheckIcon class="w-3 h-3 ml-2 mb-1"/>-->
+<!--                            <ShieldCheckIcon class="w-3 h-3 ml-2 mb-1" />-->
 <!--                            &lt;!&ndash; <span class="ml-3">{{ lang().button.importUser }}</span> &ndash;&gt;-->
 <!--                        </PrimaryButton>-->
 
 <!--                    </Link>-->
                     <Create :show="data.createOpen" @close="data.createOpen = false" :roles="props.roles"
                             :cargos="props.cargos" :centros="props.centros" :sexoSelect="props.sexoSelect"
-                            :title="props.title"/>
+                            :title="props.title" />
                     <Edit :show="data.editOpen" @close="data.editOpen = false" :user="data.user" :roles="props.roles"
                           :cargos="props.cargos" :centros="props.centros" :sexoSelect="props.sexoSelect"
-                          :title="props.title"/>
+                          :title="props.title" />
                     <EdiCentro :show="data.EdiCentroOpen" @close="data.EdiCentroOpen = false" :user="data.user"
-                               :centros="props.centros" :title="props.title"/>
+                               :centros="props.centros" :title="props.title" />
                     <Delete :show="data.deleteOpen" @close="data.deleteOpen = false" :user="data.user"
-                            :title="props.title"/>
+                            :title="props.title" />
                     <DeleteBulk :show="data.deleteBulkOpen"
                                 @close="data.deleteBulkOpen = false, data.multipleSelect = false, data.selectedId = []"
-                                :selectedId="data.selectedId" :title="props.title"/>
+                                :selectedId="data.selectedId" :title="props.title" />
                 </div>
             </div>
             <div class="relative bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="flex justify-between p-2">
                     <div class="flex space-x-2">
-<!--                        <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet"/>-->
+<!--                        <SelectInput v-model="data.params.perPage" :dataSet="data.dataSet" />-->
                         <DangerButton @click="data.deleteBulkOpen = true"
                                       v-show="data.selectedId.length != 0 && can(['delete user'])" class="px-3 py-1.5"
                                       v-tooltip="lang().tooltip.delete_selected">
-                            <TrashIcon class="w-5 h-5"/>
+                            <TrashIcon class="w-5 h-5" />
                         </DangerButton>
                     </div>
 <!--                                   @change="selectAll"-->
@@ -194,7 +194,7 @@ const handleCheckboxChange = (values) => {
                     <div>Estado de los checkboxes: {{ checkedValues }}</div>
 
                     <TextInput v-model="data.params.search" type="text" class="block w-3/6 md:w-2/6 lg:w-1/6 rounded-lg"
-                               placeholder="Buscar seguimiento"/>
+                               placeholder="Buscar seguimiento" />
                 </div>
                 <div class="overflow-x-auto scrollbar-table">
                     <div class="container mx-auto py-8">
@@ -248,7 +248,7 @@ const handleCheckboxChange = (values) => {
                     </div>
                 </div>
                 <div class="flex justify-between items-center p-2 border-t border-gray-200 dark:border-gray-700">
-                    <Pagination :links="props.users" :filters="data.params"/>
+                    <Pagination :links="props.users" :filters="data.params" />
                 </div>
             </div>
         </div>

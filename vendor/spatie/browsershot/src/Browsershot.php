@@ -8,6 +8,7 @@ use Spatie\Browsershot\Exceptions\ElementNotFound;
 use Spatie\Browsershot\Exceptions\FileDoesNotExistException;
 use Spatie\Browsershot\Exceptions\FileUrlNotAllowed;
 use Spatie\Browsershot\Exceptions\HtmlIsNotAllowedToContainFile;
+use Spatie\Browsershot\Exceptions\RemoteConnectionException;
 use Spatie\Browsershot\Exceptions\UnsuccessfulResponse;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -76,6 +77,9 @@ class Browsershot
         'file:\\\\',
         'view-source',
     ];
+
+    /** @var array<string,string> */
+    protected array $nodeEnvVars = [];
 
     public static function url(string $url): static
     {
@@ -196,6 +200,13 @@ class Browsershot
         return $this;
     }
 
+    public function setNodeEnv(array $envVars): static
+    {
+        $this->nodeEnvVars = $envVars;
+
+        return $this;
+    }
+
     public function authenticate(string $username, string $password): static
     {
         $this->setOption('authentication', compact('username', 'password'));
@@ -210,6 +221,17 @@ class Browsershot
         $clicks[] = compact('selector', 'button', 'clickCount', 'delay');
 
         $this->setOption('clicks', $clicks);
+
+        return $this;
+    }
+
+    public function locatorClick(string $selector, string $button = 'left', int $clickCount = 1, int $delay = 0): static
+    {
+        $locatorClicks = $this->additionalOptions['locatorClicks'] ?? [];
+
+        $locatorClicks[] = compact('selector', 'button', 'clickCount', 'delay');
+
+        $this->setOption('locatorClicks', $locatorClicks);
 
         return $this;
     }
@@ -317,6 +339,14 @@ class Browsershot
                 if (str_contains(strtolower($content), $protocol)) {
                     throw HtmlIsNotAllowedToContainFile::make();
                 }
+            }
+
+            if (preg_match('#(?<!:)//\s*(localhost[/:\s]|127\.|0\.0\.0\.0[/:\s]|\[::1][/:\s]|::1[/:\s])#i', $content)) {
+                throw HtmlIsNotAllowedToContainFile::make();
+            }
+
+            if (preg_match('#\\\\\\\\\s*(localhost[/\\\\\s]|127\.|0\.0\.0\.0[/\\\\\s]|\[::1][/\\\\\s]|::1[/\\\\\s])#i', $content)) {
+                throw HtmlIsNotAllowedToContainFile::make();
             }
         }
 
@@ -993,6 +1023,13 @@ class Browsershot
         return $this;
     }
 
+    public function throwOnRemoteConnectionError(bool $throw = true): self
+    {
+        $this->setOption('throwOnRemoteConnectionError', $throw);
+
+        return $this;
+    }
+
     public function usePipe(): self
     {
         $this->setOption('pipe', true);
@@ -1104,6 +1141,10 @@ class Browsershot
         $exitCode = $process->getExitCode();
         $errorOutput = $process->getErrorOutput();
 
+        if ($exitCode === 4) {
+            throw RemoteConnectionException::make(rtrim($errorOutput));
+        }
+
         if ($exitCode === 3) {
             throw UnsuccessfulResponse::make($this->url, $errorOutput ?? '');
         }
@@ -1147,10 +1188,13 @@ class Browsershot
 
         $setNodePathCommand = $this->getNodePathCommand($nodeBinary);
 
+        $envVarsCommand = $this->buildEnvVarsCommand();
+
         return
             $setIncludePathCommand.' '
             .$setNodePathCommand.' '
-            .$nodeBinary.' '
+            .$envVarsCommand.' '
+            .'"'.$nodeBinary.'" '
             .escapeshellarg($binPath).' '
             .$optionsCommand;
     }
@@ -1158,10 +1202,10 @@ class Browsershot
     protected function getNodePathCommand(string $nodeBinary): string
     {
         if ($this->nodeModulePath) {
-            return "NODE_PATH='{$this->nodeModulePath}'";
+            return "NODE_PATH=\"{$this->nodeModulePath}\"";
         }
         if ($this->npmBinary) {
-            return "NODE_PATH=`{$nodeBinary} {$this->npmBinary} root -g`";
+            return "NODE_PATH=$(\"{$nodeBinary}\" \"{$this->npmBinary}\" root -g)";
         }
 
         return 'NODE_PATH=`npm root -g`';
@@ -1205,6 +1249,20 @@ class Browsershot
         $array[array_shift($keys)] = $value;
 
         return $array;
+    }
+
+    protected function buildEnvVarsCommand(): string
+    {
+        if (empty($this->nodeEnvVars)) {
+            return '';
+        }
+
+        $parts = [];
+        foreach ($this->nodeEnvVars as $key => $value) {
+            $parts[] = $key.'='.escapeshellarg($value);
+        }
+
+        return implode(' ', $parts);
     }
 
     public function initialPageNumber(int $initialPage = 1): static

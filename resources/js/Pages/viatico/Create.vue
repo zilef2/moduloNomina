@@ -232,7 +232,7 @@ const create = () => {
                         <TextInput v-model="form.descripcion[index]" class="py-1 mx-1 w-full"></TextInput>
                     </div>
                     <div class="w-6/12 mt-5">
-                        <InputLabel :for="'fecha_ini'+index" value="Rango de Fechas"/>
+                        <InputLabel :for="'fecha_ini'+index" value="Rango de Fechas" />
                         <VueDatePicker
                             :enable-time-picker="false" :time-picker="false"
                             :range="{ autoRange: 4 }" auto-apply
@@ -243,7 +243,7 @@ const create = () => {
                     </div>
                     <div class="w-2/12 ml-4 mt-4">
                         <label class="ml-2 dark:text-gray-50">Numero de días</label>
-                        <TextInput disabled type="number" v-model="form.numerodias[index]" 
+                        <TextInput disabled type="number" v-model="form.numerodias[index]"
                                    class="py-1 mx-1 w-full bg-gray-400"></TextInput>
                     </div>
 

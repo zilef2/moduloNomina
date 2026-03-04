@@ -83,7 +83,7 @@ const update = () => {
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    
+
 <!--                    <div id="SelectVue" class="">-->
 <!--                        <label name="labelSelectVue2"> Centro de costo </label>-->
 <!--                        <v-select :options="props.losSelect[0]"-->
@@ -91,9 +91,9 @@ const update = () => {
 <!--                                  label="name"-->
 <!--                        ></v-select>-->
 <!--                    </div>-->
-                    
-                    
-                    
+
+
+
                     <div v-for="(atributosform, indice) in data.printForm" :key="indice">
                         <div v-if="atributosform.type === 'foreign'" id="SelectVue" class="">
                             <label name="labelSelectVue"> {{ atributosform.label }} </label>
@@ -101,22 +101,22 @@ const update = () => {
                                       v-model="form[atributosform.idd]"
                                       :reduce="element => element.value" label="label"
                             ></v-select>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
 
                         <div v-else-if="atributosform.type === 'time'" id="SelectVue">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
                             <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
                                        v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                       :error="form.errors[atributosform.idd]" step="3600"/>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
+                                       :error="form.errors[atributosform.idd]" step="3600" />
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
                         <div v-else class="">
-                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]"/>
+                            <InputLabel :for="atributosform.label" :value="lang().label[atributosform.label]" />
                             <TextInput :id="atributosform.idd" :type="atributosform.type" class="mt-1 block w-full"
                                        v-model="form[atributosform.idd]" required :placeholder="atributosform.label"
-                                       :error="form.errors[atributosform.idd]"/>
-                            <InputError class="mt-2" :message="form.errors[atributosform.idd]"/>
+                                       :error="form.errors[atributosform.idd]" />
+                            <InputError class="mt-2" :message="form.errors[atributosform.idd]" />
                         </div>
                     </div>
 

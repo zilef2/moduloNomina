@@ -5,22 +5,32 @@ import { CalendarIcon, ChatBubbleBottomCenterTextIcon, ClockIcon, InformationCir
 const requirements = [
   {
     date: "10",
+    month: "Marzo",
+    year: "2026",
+    title: "En desarrollo y pruebas",
+    description: "El formulario de viaticos cambió, se espera que en marzo se aclaren los inconvenientes",
+    status: "Pendiente",
+    priority: "Media",
+    color: "blue"
+  },
+  {
+    date: "10",
     month: "Febrero",
     year: "2026",
-    title: "Proxima reunión",
+    title: "En desarrollo y pruebas",
     description: "Informe de centro de costos, ahora debe ser acumulativo.",
     status: "Pendiente",
-    priority: "Alta",
+    priority: "Media",
     color: "amber"
   },
   {
-    date: "??",
+    date: "10",
     month: "Junio",
     year: "2025",
     title: "Pendiente de Pruebas",
     description: "Solicitud de viáticos: el módulo aún no ha sido probado. Pendiente requisitos para añadir los nuevos cambios solicitados en 2025.",
     status: "En espera",
-    priority: "Media",
+    priority: "Alta",
     color: "sky"
   }
 ];

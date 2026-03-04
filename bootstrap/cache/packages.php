@@ -91,13 +91,6 @@
       0 => 'Opcodes\\LogViewer\\LogViewerServiceProvider',
     ),
   ),
-  'pestphp/pest' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Pest\\Laravel\\PestServiceProvider',
-    ),
-  ),
   'rappasoft/laravel-authentication-log' => 
   array (
     'providers' => 

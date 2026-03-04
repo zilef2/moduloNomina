@@ -1,6 +1,6 @@
 <?php
 
-use Opcodes\LogViewer\Enums\FolderSortingMethod;
+use Opcodes\LogViewer\Enums\SortingMethod;
 use Opcodes\LogViewer\Enums\SortingOrder;
 use Opcodes\LogViewer\Enums\Theme;
 
@@ -43,9 +43,14 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Log Viewer Assets Path
+    | Log Viewer Assets Path (Deprecated)
     |--------------------------------------------------------------------------
-    | The path to the Log Viewer assets.
+    | The path to the published Log Viewer assets.
+    |
+    | Note: Publishing assets is no longer required. Assets are now served
+    | directly from the vendor directory. This option only applies if you
+    | have published assets using `php artisan log-viewer:publish`.
+    | This option will be removed in the next major version.
     |
     */
 
@@ -283,10 +288,13 @@ return [
         'use_local_storage' => true,
 
         // Method to sort the folders. Other options: `Alphabetical`, `ModifiedTime`
-        'folder_sorting_method' => FolderSortingMethod::ModifiedTime,
+        'folder_sorting_method' => SortingMethod::ModifiedTime,
 
         // Order to sort the folders. Other options: `Ascending`, `Descending`
         'folder_sorting_order' => SortingOrder::Descending,
+
+        // Method for sorting log-files into directories. Other options: `Alphabetical`, `ModifiedTime`
+        'file_sorting_method' => SortingMethod::ModifiedTime,
 
         // Order to sort the logs. Other options: `Ascending`, `Descending`
         'log_sorting_order' => SortingOrder::Descending,

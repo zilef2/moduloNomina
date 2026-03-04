@@ -299,7 +299,7 @@ data.tiposSiigo = [
                                                                type="date" v-model="form2.fecha_ini_sigo"
                                                                required :placeholder="lang().placeholder.fecha_ini_sigo"
                                                                :error="form2.errors.fecha_ini_sigo"
-                                                               class="mt-1 w-1/3"/>
+                                                               class="mt-1 w-1/3" />
                                             </div>
 
                                             <PrimaryButton v-if="form2.fecha_ini_sigo.year"
