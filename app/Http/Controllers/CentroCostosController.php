@@ -55,8 +55,8 @@ class CentroCostosController extends Controller
         $version = Cache::get('centro_costos_version', 1);
         $cacheKey = 'centro_costos_index_' . $version . '_' . md5(json_encode($queryParams));
 
-        // Cache the main result (10 minutes)
-        $centroCostos = Cache::remember($cacheKey, 600, function () use ($request) {
+        // Cache the main result (100 minutes - hora y 40)
+        $centroCostos = Cache::remember($cacheKey, 6000, function () use ($request) {
             $query = CentroCosto::with(['users', 'zona']);
 
             // Server-side filtering
@@ -103,6 +103,11 @@ class CentroCostosController extends Controller
             $perPage = 50;
             return $query->paginate($perPage);
         });
+        $popularCenters = CentroCosto::where('mano_obra_estimada', '>', 100)
+            ->orderByDesc('mano_obra_estimada')
+            ->take(5)
+            ->get(['id', 'nombre', 'descripcion'])
+            ->map(fn($c) => ['id' => $c->id, 'nombre' => "{$c->nombre} - {$c->descripcion}"]);
 
         return Inertia::render('CentroCostos/Index', [
             'fromController' => $centroCostos,
@@ -113,6 +118,7 @@ class CentroCostosController extends Controller
             'listaSupervisores' => $listaSupervisores,
             'numberPermissions' => $numberPermissions,
             'losSelect' => $losSelect,
+            'popularCenters' => $popularCenters,
         ]);
     }
 
@@ -232,33 +238,41 @@ class CentroCostosController extends Controller
         }
     }
 
+    /**
+     * @throws \Throwable
+     */
     public function update(Request $request, $id)
     {
         $request->validate([
             'nombre' => ['required', Rule::unique('centro_costos', 'nombre')->ignore((int)$id)],
-        ], ['nombre.unique' => 'El nombre ya está en uso.']);
+        ], [
+            'nombre.unique' => 'El nombre ya está en uso.'
+        ]);
 
         DB::beginTransaction();
         try {
             $centroCosto = centroCosto::findOrFail($id);
             $this->SonSelect($request, ['zona_id']);
+
             $centroCosto->update($request->all());
 
-            $IDsSeleccionados = [];
-            foreach ($request->listaSupervisores as $supervisor) {
-                if (isset($request->selectedUsers[$supervisor['id']]) && $request->selectedUsers[$supervisor['id']]) {
-                    $IDsSeleccionados[] = $supervisor['id'];
-                }
-            }
-            $centroCosto->users()->sync($IDsSeleccionados);
+            $IDsSeleccionados = array_column(
+                array_intersect_key($request->listaSupervisores, array_filter($request->selectedUsers)),
+                'id'
+            );
+
+            $supervisoresActuales = $centroCosto->supervisores()->pluck('users.id')->toArray();
+
+            $centroCosto->users()->detach($supervisoresActuales);
+            $centroCosto->users()->attach($IDsSeleccionados);
             DB::commit();
             Cache::forever('centro_costos_version', time());
             Cache::forget('centro_costos_supervisores');
             Cache::forget('centro_costos_zonas_select');
-            return back()->with('success', __('app.label.updated_successfully', ['name' => $centroCosto->nombre]));
+            return redirect()->route('centro-costos.index')->with('success', __('app.label.updated_successfully', ['name' => $centroCosto->nombre]));
         } catch (\Throwable $th) {
             DB::rollback();
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.centroCostos')]));
+            return back()->with('error', __('app.label.updated_error', ['name' => __('app.label.centro')]));
         }
     }
 

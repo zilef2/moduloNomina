@@ -11,7 +11,8 @@ import Edit from '@/Pages/CentroCostos/Edit.vue';
 import Delete from '@/Pages/CentroCostos/Delete.vue';
 import CostDetailsModal from '@/Pages/CentroCostos/CostDetailsModal.vue';
 
-import { ChevronUpDownIcon, DocumentIcon, EyeIcon, PencilIcon, TrashIcon, PlusIcon, CurrencyDollarIcon } from '@heroicons/vue/24/solid';
+import { ChevronUpDownIcon, DocumentIcon, EyeIcon, PencilIcon, TrashIcon, PlusIcon, CurrencyDollarIcon, StarIcon, ChevronDownIcon } from '@heroicons/vue/24/solid';
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { formatPesosCol } from '@/global.ts';
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
@@ -25,6 +26,7 @@ const props = defineProps({
     listaSupervisores: Object,
     losSelect: Array,
     filters: Object,
+    popularCenters:Object,
 });
 
 const data = reactive({
@@ -156,6 +158,8 @@ watch(() => data.params, () => {
     });
 }, { deep: true });
 
+// Hardcoded popular centers (You might want to fetch this from API later)
+
 </script>
 
 <template>
@@ -164,9 +168,55 @@ watch(() => data.params, () => {
         <div class="py-6 px-4 sm:px-6 lg:px-8">
             <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                    <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-                        {{ props.title }} <span class="text-amber-500 text-sm font-medium ml-2 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 rounded-full">{{ totalReal }} Total</span>
-                    </h1>
+                    <div class="flex items-center gap-4">
+                        <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+                            {{ props.title }} <span class="text-amber-500 text-sm font-medium ml-2 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 rounded-full">{{ totalReal }} Total</span>
+                        </h1>
+                        <Menu as="div" class="relative inline-block text-left z-30">
+                            <div>
+                                <MenuButton
+                                    class="inline-flex w-full justify-center rounded-md bg-white/20 px-3 py-1.5 text-sm font-medium text-amber-600 hover:bg-amber-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 border border-amber-200 shadow-sm"
+                                >
+                                    Mayor mano de obra
+                                    <ChevronDownIcon
+                                        class="-mr-1 ml-2 h-5 w-5 text-amber-400 hover:text-amber-500"
+                                        aria-hidden="true"
+                                    />
+                                </MenuButton>
+                            </div>
+
+                            <transition
+                                enter-active-class="transition duration-100 ease-out"
+                                enter-from-class="transform scale-95 opacity-0"
+                                enter-to-class="transform scale-100 opacity-100"
+                                leave-active-class="transition duration-75 ease-in"
+                                leave-from-class="transform scale-100 opacity-100"
+                                leave-to-class="transform scale-95 opacity-0"
+                            >
+                                <MenuItems
+                                    class="absolute left-0 mt-2 w-56 origin-top-left divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
+                                >
+                                    <div class="px-1 py-1">
+                                        <MenuItem v-for="center in props.popularCenters" :key="center.id" v-slot="{ active }">
+                                            <Link
+                                                :href="route('CentroCostos.table', center.id)"
+                                                :class="[
+                                                  active ? 'bg-amber-500 text-white' : 'text-gray-900',
+                                                  'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                                                ]"
+                                            >
+                                                <DocumentIcon
+                                                    :class="[active ? 'text-white' : 'text-amber-500', 'mr-2 h-5 w-5']"
+                                                    aria-hidden="true"
+                                                />
+                                                {{ center.nombre }}
+                                            </Link>
+                                        </MenuItem>
+                                    </div>
+                                </MenuItems>
+                            </transition>
+                        </Menu>
+                    </div>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         Gestión y control de presupuesto por centros de costo operativos.
                     </p>
