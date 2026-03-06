@@ -71,6 +71,14 @@ const initialLoading = ref(true); // Para el skeleton inicial
 const scrollContainer = ref(null);
 
 // Simular carga progresiva inicial
+const progressiveLoad = () => {
+    if (nextPageUrl.value && !loading.value) {
+        loadMore();
+        // Seguir cargando progresivamente cada 3-5 segundos para no saturar
+        setTimeout(progressiveLoad, 3500);
+    }
+};
+
 onMounted(() => {
     // Si hay datos iniciales, desactivamos el loading inicial
     if (allData.value.length > 0) {
@@ -79,6 +87,9 @@ onMounted(() => {
 
     scrollContainer.value = document.querySelector('.scrollbar-table');
     if (scrollContainer.value) scrollContainer.value.addEventListener('scroll', handleScroll);
+
+    // Iniciar carga en segundo plano después de 1 segundo
+    setTimeout(progressiveLoad, 1000);
 });
 
 const clientSideFilteredData = computed(() => {
@@ -189,7 +200,7 @@ watch(() => data.params, () => {
                         <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                             {{ props.title }} <span
                                 class="text-amber-500 text-sm font-medium ml-2 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 rounded-full">{{
-                                totalReal }} Total</span>
+                                    totalReal }} Total</span>
                         </h1>
                         <Menu as="div" class="relative inline-block text-left z-30">
                             <div>
@@ -350,10 +361,10 @@ watch(() => data.params, () => {
                                     </div>
                                 </td>
                                 <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 font-medium">#{{ index + 1
-                                    }}</td>
+                                }}</td>
                                 <td class="px-4 py-4">
                                     <div class="text-sm font-bold text-gray-900 dark:text-white">{{ clasegenerica.nombre
-                                        }}</div>
+                                    }}</div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400 max-w-[200px] truncate"
                                         :title="clasegenerica.descripcion">{{ clasegenerica.descripcion }}</div>
                                 </td>
@@ -363,14 +374,14 @@ watch(() => data.params, () => {
                                 <td v-show="can(['update centroCostos'])" class="px-4 py-4 whitespace-nowrap">
                                     <span
                                         class="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-md">{{
-                                            clasegenerica.zona ?clasegenerica.zona.nombre : 'N/A' }}</span>
+                                            clasegenerica.zona ? clasegenerica.zona.nombre : 'N/A' }}</span>
                                 </td>
                                 <td v-show="can(['update centroCostos'])" class="px-4 py-4">
                                     <div v-if="clasegenerica.users && clasegenerica.users.length"
                                         class="flex flex-wrap gap-1">
                                         <span v-for="user in clasegenerica.users" :key="user.id"
                                             class="text-[10px] px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg border border-blue-100 dark:border-blue-800">{{
-                                            user.name.trim() }}</span>
+                                                user.name.trim() }}</span>
                                     </div>
                                     <span v-else class="text-[10px] text-gray-400 italic">Sin supervisor</span>
                                 </td>
@@ -379,7 +390,7 @@ watch(() => data.params, () => {
                                     <span
                                         :class="clasegenerica.activo ? 'text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10' : 'text-red-500 bg-red-50 dark:bg-red-500/10'"
                                         class="p-1 px-2 rounded-full text-lg leading-none inline-block">{{
-                                        clasegenerica.activo ? '●' : '○' }}</span>
+                                            clasegenerica.activo ? '●' : '○' }}</span>
                                 </td>
                                 <td v-show="can(['update centroCostos'])"
                                     class="px-4 py-4 whitespace-nowrap text-center">
@@ -389,7 +400,7 @@ watch(() => data.params, () => {
                                 </td>
                                 <td v-show="can(['update centroCostos'])"
                                     class="px-4 py-4 whitespace-nowrap text-xs font-mono text-gray-400">{{
-                                    clasegenerica.clasificacion }}</td>
+                                        clasegenerica.clasificacion }}</td>
                             </tr>
                         </tbody>
                     </table>

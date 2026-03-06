@@ -84,7 +84,7 @@ class CentroCostosController extends Controller
             $query->orderBy('activo', 'desc')->orderBy('mano_obra_estimada', 'desc');
         }
 
-        $perPage = 20;
+        $perPage = 5;
         $centroCostos = $query->paginate($perPage);
 
         $popularCenters = CentroCosto::where('mano_obra_estimada', '>', 100)
@@ -152,7 +152,7 @@ class CentroCostosController extends Controller
             return back()->with('success', __('app.label.created_successfully', ['name' => $centroCostos->nombre]));
         } catch (\Throwable $th) {
             DB::rollback();
-            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.centroCostos')]) . $th->getMessage());
+            return back()->with('error', __('app.label.created_error', ['name' => __('app.label.CentroCostos')]) . $th->getMessage());
         }
     }
 
@@ -212,7 +212,7 @@ class CentroCostosController extends Controller
             return back()->with('success', __('app.label.deleted_successfully', ['name' => $centroCostos->nombre]));
         } catch (\Throwable $th) {
             DB::rollback();
-            return back()->with('error', __('app.label.deleted_error', ['name' => __('app.label.centroCostos')]) . $th->getMessage());
+            return back()->with('error', __('app.label.deleted_error', ['name' => __('app.label.CentroCostos')]) . $th->getMessage());
         }
     }
 

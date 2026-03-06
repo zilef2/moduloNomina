@@ -134,6 +134,26 @@ const charityArray = [
 // # fin chartts
 // <!--</editor-fold>-->
 
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString('es-CO', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
+
+const getBrowser = (userAgent) => {
+    if (!userAgent) return 'Desconocido';
+    if (userAgent.includes('Chrome')) return 'Chrome';
+    if (userAgent.includes('Firefox')) return 'Firefox';
+    if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) return 'Safari';
+    if (userAgent.includes('Edge')) return 'Edge';
+    return 'Otro';
+};
+
 </script>
 
 <template>
@@ -176,7 +196,7 @@ const charityArray = [
                 <div
                     class="px-6 py-5 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">
-                        Registro de Sesiones
+                        Registro de Sesiones (mas de 9 permisos)
                     </h2>
 
                     <span
@@ -193,11 +213,39 @@ const charityArray = [
                             Historial
                         </h3>
 
-                        <div v-if="props.logs?.length"
-                            class="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 overflow-auto max-h-72 text-sm text-slate-700 dark:text-slate-300">
-                            <pre class="whitespace-pre-wrap break-words">
-                            {{ JSON.stringify(props.logs, null, 2) }}
-                    </pre>
+                        <div v-if="props.logs?.length" class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead
+                                    class="bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-500 uppercase">
+                                    <tr>
+                                        <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">User ID
+                                        </th>
+                                        <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">IP</th>
+                                        <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">Navegador
+                                        </th>
+                                        <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">Fecha/Hora
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-xs text-slate-700 dark:text-slate-300">
+                                    <tr v-for="log in props.logs" :key="log.id"
+                                        class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                        <td class="px-4 py-2 border-b border-slate-100 dark:border-slate-800 font-mono">
+                                            #{{ log.authenticatable_id }}</td>
+                                        <td class="px-4 py-2 border-b border-slate-100 dark:border-slate-800">{{
+                                            log.ip_address }}</td>
+                                        <td class="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
+                                            <span
+                                                class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-[10px] font-bold">
+                                                {{ getBrowser(log.user_agent) }}
+                                            </span>
+                                        </td>
+                                        <td
+                                            class="px-4 py-2 border-b border-slate-100 dark:border-slate-800 text-slate-500">
+                                            {{ formatDate(log.login_at) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
 
                         <div v-else
@@ -214,11 +262,39 @@ const charityArray = [
                             Sesiones Activas
                         </h3>
 
-                        <div v-if="props.activeSessions?.length"
-                            class="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 overflow-auto max-h-72 text-sm text-slate-700 dark:text-slate-300">
-                            <pre class="whitespace-pre-wrap break-words">
-                            {{ JSON.stringify(props.activeSessions, null, 2) }}
-                    </pre>
+                        <div v-if="props.activeSessions?.length" class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead
+                                    class="bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-500 uppercase">
+                                    <tr>
+                                        <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">User ID
+                                        </th>
+                                        <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">IP</th>
+                                        <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">Navegador
+                                        </th>
+                                        <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">Fecha/Hora
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-xs text-slate-700 dark:text-slate-300">
+                                    <tr v-for="session in props.activeSessions" :key="session.id"
+                                        class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                        <td class="px-4 py-2 border-b border-slate-100 dark:border-slate-800 font-mono">
+                                            #{{ session.authenticatable_id }}</td>
+                                        <td class="px-4 py-2 border-b border-slate-100 dark:border-slate-800">{{
+                                            session.ip_address }}</td>
+                                        <td class="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
+                                            <span
+                                                class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded text-[10px] font-bold">
+                                                {{ getBrowser(session.user_agent) }}
+                                            </span>
+                                        </td>
+                                        <td
+                                            class="px-4 py-2 border-b border-slate-100 dark:border-slate-800 text-slate-500">
+                                            {{ formatDate(session.login_at) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
 
                         <div v-else
