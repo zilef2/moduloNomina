@@ -19,8 +19,35 @@ class CentroTableController extends Controller
 {
     private function TheQuery(int $centrocostoid, Request $request, bool $acumulado = false): array
     {
-        $fecha = $request->input('fecha_ini', ['month' => now()->month, 'year' => now()->year]);
-        $opcionQuincena = $request->input('quincena.value', $request->input('quincena', 3));
+        $fecha = $request->input('fecha_ini', ['month' => now()->subMonth()->month, 'year' => now()->year]);
+        if ($request->input('fecha_ini.month') == 0) {
+        }
+
+        $defaultMonth = now()->subMonth()->month - 1; // 0-based index for frontend compatibility if needed, but wait, the controller logic uses month+1 later?
+
+        $defaultDate = now()->subMonth();
+        $defaultMonthIndex = $defaultDate->month - 1; // 0-indexed
+        $defaultYear = $defaultDate->year;
+
+        $fecha = $request->input('fecha_ini');
+        if(!$fecha){
+            $fecha = ['month' => now()->month - 1, 'year' => now()->year]; // month is 0-indexed in frontend, 1-indexed in backend usually but here we use month+1.
+        }
+
+        $fecha = $request->input('fecha_ini');
+        if(!$fecha){
+             $fecha = ['month' => now()->month - 1, 'year' => now()->year]; // month is 0-indexed for frontend so current month is now()->month - 1.
+        }
+
+        $opcionQuincena = 3;
+        if ($request->has('quincena')) {
+            $quincenaInput = $request->input('quincena');
+            if (is_array($quincenaInput) && isset($quincenaInput['value'])) {
+                $opcionQuincena = $quincenaInput['value'];
+            } elseif (is_numeric($quincenaInput)) {
+                $opcionQuincena = $quincenaInput;
+            }
+        }
 
         $elSelect = [
             'user_id',

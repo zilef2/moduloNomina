@@ -438,7 +438,8 @@ const handleCheckboxChange = (values) => {
                                 class="px-2 py-4 cursor-pointer hover:bg-sky-50 dark:hover:bg-gray-800">
                                 <div class="flex justify-between items-center">
                                     <span>{{ titulos }}</span>
-                                    <ChevronUpDownIcon v-if="nombresTabla[2][indiceN] !== null" class="w-4 h-4" />
+<!--                                    <ChevronUpDownIcon v-if="nombresTabla[2][indiceN] !== null" class="w-4 h-4" />-->
+                                    <ChevronUpDownIcon v-if="nombresTabla[2]?.[indiceN] !== null" class="w-4 h-4" />
                                 </div>
                             </th>
                         </tr>

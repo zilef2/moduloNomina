@@ -62,10 +62,10 @@ class CentroCosto extends Model
 		'ListaSupervisores',
 	];
 
-	
+
 //	public static function boot() {
 //		parent::boot();
-//		
+//
 //		static::retrieved(function ($model) {
 //			dump('CentroCosto cargado: ' . $model->id);
 //		});
@@ -74,9 +74,7 @@ class CentroCosto extends Model
 	public function getSuperviAttribute(): array
 	{
 		// No llamar a $this->supervisores->... porque puede crear recursión.
-		return $this
-			->supervisores()->pluck('users.name')->unique()->values()->toArray()
-			;
+		return $this->supervisores()->pluck('users.name')->unique()->values()->toArray();
 	}
 
 	public function supervisores()
@@ -169,7 +167,7 @@ class CentroCosto extends Model
 		$Reportes = Reporte::Select($elSelect)->Where('centro_costo_id', $this->id)->WhereYear('fecha_ini', $anio)->WhereMonth('fecha_ini', $mes)->Where('valido', 1)->groupBy('user_id')->get();
 
 		$CTC = new CentroTableController();
-		[$Reportes, $mano_obra_estimada] = $CTC->MultiplicarPorSalario($Reportes, $this->id);
+		[$Reportes, $mano_obra_estimada] = $CTC->MultiplicarPorSalario($Reportes);
 
 		$this->update(['mano_obra_estimada' => $mano_obra_estimada, ]);
 	}

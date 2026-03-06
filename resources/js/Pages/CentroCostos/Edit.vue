@@ -62,7 +62,6 @@ watchEffect(() => {
         form.selectedUsers = {};
 
         // Marcar los supervisores actuales
-        // Asumimos que CentroCosto.users contiene la relación cargada
         if (props.CentroCosto?.users) {
             props.CentroCosto.users.forEach(user => {
                 form.selectedUsers[user.id] = true;
@@ -87,6 +86,8 @@ const update = () => {
         onSuccess: () => {
             emit("close")
             form.reset()
+            window.location.reload()
+
         },
         onError: () => {
             // Opcional: Vibrar o feedback visual extra
@@ -197,7 +198,7 @@ const update = () => {
                                 </label>
                             </div>
                         </div>
-                        <p class="text-xs text-gray-400 mt-1 text-right">{{ Object.keys(form.selectedUsers).filter(k => form.selectedUsers[k]).length }} seleccionados</p>
+                        <p class="text-sm text-gray-500 mt-1 text-right">{{ Object.keys(form.selectedUsers).filter(k => form.selectedUsers[k]).length }} seleccionados</p>
                     </div>
 
                     <!-- Toggles (Headless UI) -->

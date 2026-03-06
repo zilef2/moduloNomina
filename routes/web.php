@@ -49,7 +49,6 @@ Route::get('/dashboard', [DashboardController::class, 'Dashboard'])->middleware(
 
 Route::get('/setLang/{locale}', function ($locale) {
     Session::put('locale', $locale);
-
     return back();
 })->name('setlang');
 

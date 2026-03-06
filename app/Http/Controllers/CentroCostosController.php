@@ -16,7 +16,6 @@ use App\Models\Viatico;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -36,73 +35,58 @@ class CentroCostosController extends Controller
         $helperSelect = new HelperControllerSelect();
         $numberPermissions = MyModels::getPermissionToNumber(Myhelp::EscribirEnLog($this, 'CentroCostosController.index'));
 
-        // Cache supervisors (1 hour)
-        $listaSupervisores = Cache::remember('centro_costos_supervisores', 3600, function () {
-            return User::whereHas('roles', function ($q) {
-                $q->where('name', 'supervisor');
-            })->get();
-        });
+        $listaSupervisores = User::whereHas('roles', function ($q) {
+            $q->where('name', 'supervisor');
+        })->get();
 
-        // Cache zonas select (1 hour)
-        $losSelect = Cache::remember('centro_costos_zonas_select', 3600, function () use ($helperSelect) {
-            return $helperSelect->DependenciasCentro('zona');
-        });
+        $losSelect = $helperSelect->DependenciasCentro('zona');
 
-        // Generate cache key for the main query
-        $page = $request->input('page', 1);
-        $queryParams = $request->all();
-        ksort($queryParams); // Ensure consistent order
-        $version = Cache::get('centro_costos_version', 1);
-        $cacheKey = 'centro_costos_index_' . $version . '_' . md5(json_encode($queryParams));
+        $query = CentroCosto::with(['users', 'zona']);
 
-        // Cache the main result (100 minutes - hora y 40)
-        $centroCostos = Cache::remember($cacheKey, 6000, function () use ($request) {
-            $query = CentroCosto::with(['users', 'zona']);
-
-            // Server-side filtering
-            if ($request->has('columnFilters')) {
-                $filters = $request->input('columnFilters');
-                foreach ($filters as $field => $value) {
-                    if ($value) {
-                        switch ($field) {
-                            case 'Zouna':
-                                $query->whereHas('zona', function ($q) use ($value) {
-                                    $q->where('nombre', 'like', '%' . $value . '%');
-                                });
-                                break;
-                            case 'supervisores':
-                                $query->whereHas('users', function ($q) use ($value) {
-                                    $q->where('name', 'like', '%' . $value . '%');
-                                });
-                                break;
-                            case 'activo':
-                            case 'ValidoParaFacturar':
-                                $query->where($field, strtolower($value) === 'si');
-                                break;
-                            default:
-                                $query->where($field, 'like', '%' . $value . '%');
-                                break;
-                        }
+        // Server-side filtering
+        if ($request->has('columnFilters')) {
+            $filters = $request->input('columnFilters');
+            foreach ($filters as $field => $value) {
+                if ($value && strpos(strtolower($value), 'seleccione') === false) {
+                    switch ($field) {
+                        case 'Zouna':
+                            $query->whereHas('zona', function ($q) use ($value) {
+                                $q->where('nombre', 'like', '%' . $value . '%');
+                            });
+                            break;
+                        case 'supervisores':
+                            $query->whereHas('users', function ($q) use ($value) {
+                                $q->where('name', 'like', '%' . $value . '%');
+                            });
+                            break;
+                        case 'activo':
+                        case 'ValidoParaFacturar':
+                            $query->where($field, strtolower($value) === 'si');
+                            break;
+                        default:
+                            $query->where($field, 'like', '%' . $value . '%');
+                            break;
                     }
                 }
             }
+        }
 
 
-            if ($request->has('field') && $request->has('order')) {
-                if ($request->field === 'Zouna') {
-                    $query->leftJoin('zonas', 'centro_costos.zona_id', '=', 'zonas.id')
-                        ->orderByRaw('CASE WHEN zonas.nombre IS NULL THEN 1 ELSE 0 END, zonas.nombre ' . $request->order)
-                        ->select('centro_costos.*');
-                } else {
-                    $query->orderBy($request->field, $request->order);
-                }
+        if ($request->has('field') && $request->has('order')) {
+            if ($request->field === 'Zouna') {
+                $query->leftJoin('zonas', 'centro_costos.zona_id', '=', 'zonas.id')
+                    ->orderByRaw('CASE WHEN zonas.nombre IS NULL THEN 1 ELSE 0 END, zonas.nombre ' . $request->order)
+                    ->select('centro_costos.*');
             } else {
-                $query->orderBy('activo', 'desc')->orderBy('mano_obra_estimada', 'desc');
+                $query->orderBy($request->field, $request->order);
             }
+        } else {
+            $query->orderBy('activo', 'desc')->orderBy('mano_obra_estimada', 'desc');
+        }
 
-            $perPage = 50;
-            return $query->paginate($perPage);
-        });
+        $perPage = 20;
+        $centroCostos = $query->paginate($perPage);
+
         $popularCenters = CentroCosto::where('mano_obra_estimada', '>', 100)
             ->orderByDesc('mano_obra_estimada')
             ->take(5)
@@ -144,12 +128,12 @@ class CentroCostosController extends Controller
         $viaticos = Viatico::where('centro_costo_id', $id)->sum('saldo');
 
         $ctc = new CentroTableController();
-        [, $manoDeObra] = $ctc->MultiplicarPorSalario($reportes, $id);
+        [$reportsResult, $mano_obra_estimada] = $ctc->MultiplicarPorSalario($reportes);
 
         return response()->json([
-            'mano_de_obra' => $manoDeObra,
+            'mano_de_obra' => $mano_obra_estimada,
             'viaticos' => $viaticos,
-            'total' => $manoDeObra + $viaticos,
+            'total' => $mano_obra_estimada + $viaticos,
         ]);
     }
 
@@ -165,9 +149,6 @@ class CentroCostosController extends Controller
                 $centroCostos->users()->sync($request->selectedUsers);
             }
             DB::commit();
-            Cache::forever('centro_costos_version', time());
-            Cache::forget('centro_costos_supervisores');
-            Cache::forget('centro_costos_zonas_select');
             return back()->with('success', __('app.label.created_successfully', ['name' => $centroCostos->nombre]));
         } catch (\Throwable $th) {
             DB::rollback();
@@ -228,9 +209,6 @@ class CentroCostosController extends Controller
             $centroCostos = CentroCosto::findOrFail($id);
             $centroCostos->delete();
             DB::commit();
-            Cache::forever('centro_costos_version', time());
-            Cache::forget('centro_costos_supervisores');
-            Cache::forget('centro_costos_zonas_select');
             return back()->with('success', __('app.label.deleted_successfully', ['name' => $centroCostos->nombre]));
         } catch (\Throwable $th) {
             DB::rollback();
@@ -248,7 +226,6 @@ class CentroCostosController extends Controller
         ], [
             'nombre.unique' => 'El nombre ya está en uso.'
         ]);
-
         DB::beginTransaction();
         try {
             $centroCosto = centroCosto::findOrFail($id);
@@ -256,22 +233,31 @@ class CentroCostosController extends Controller
 
             $centroCosto->update($request->all());
 
-            $IDsSeleccionados = array_column(
-                array_intersect_key($request->listaSupervisores, array_filter($request->selectedUsers)),
-                'id'
-            );
+            $rawSelected = $request->input('selectedUsers', []);
+            $CheckedIDs = [];
+            foreach ($rawSelected as $key => $val) {
+                if ($val === true || $val === 'true' || $val === 1 || $val === "1") {
+                    $CheckedIDs[] = $key; // Case: { "ID": true }
+                } elseif (is_numeric($val) && is_int($key)) {
+                    $CheckedIDs[] = $val; // Case: [ID, ID]
+                }
+            }
+
+            $listaSupervisores = $request->input('listaSupervisores', []);
+            $IDsValidos = array_column($listaSupervisores, 'id');
+            $IDsFinales = array_intersect($CheckedIDs, $IDsValidos);
 
             $supervisoresActuales = $centroCosto->supervisores()->pluck('users.id')->toArray();
-
             $centroCosto->users()->detach($supervisoresActuales);
-            $centroCosto->users()->attach($IDsSeleccionados);
+            $centroCosto->users()->attach($IDsFinales);
             DB::commit();
-            Cache::forever('centro_costos_version', time());
-            Cache::forget('centro_costos_supervisores');
-            Cache::forget('centro_costos_zonas_select');
-            return redirect()->route('centro-costos.index')->with('success', __('app.label.updated_successfully', ['name' => $centroCosto->nombre]));
+
+            return redirect()->route('CentroCostos.index')->with('success', __('app.label.updated_successfully', ['name' => $centroCosto->nombre]) . ' Espere que la página se refresque');
+//            return back()->with('success', __('app.label.updated_successfully', ['name' => $centroCosto->nombre]));
         } catch (\Throwable $th) {
             DB::rollback();
+            $mensajeError = $th->getMessage() . ' L:' . $th->getLine() . ' Ubi:' . $th->getFile();
+            dd($mensajeError);
             return back()->with('error', __('app.label.updated_error', ['name' => __('app.label.centro')]));
         }
     }
